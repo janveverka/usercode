@@ -113,26 +113,27 @@
  YFS_IR_CUTOFF  = 1E-3
 }(fragmentation)
 (processes){
- Process : 93 93 -> 11 -12 22
+ Process : 93 93 -> 11 -12 22 93{0}
  Order electroweak : 3
  Print_Graphs :
  End process
- Process : 93 93 -> -11 12 22
+ Process : 93 93 -> -11 12 22 93{0}
  Order electroweak : 3
  Print_Graphs :
  End process
- Process : 93 93 -> 13 -14 22
+ Process : 93 93 -> 13 -14 22 93{0}
  Order electroweak : 3
  Print_Graphs :
  End process
- Process : 93 93 -> -13 14 22
+ Process : 93 93 -> -13 14 22 93{0}
  Order electroweak : 3
  Print_Graphs :
  End process
 }(processes)
 (selector){
  JetFinder   sqr(20/E_CMS) 1.
- ET  22 5. 7000.
- PT  90 5. 7000.
+ ET  22  5. 1e5
+ PT  90  5. 1e5
+ PT  93 10. 1e5
  !DeltaR 22 90 0.3 100
 }(selector)
