@@ -132,6 +132,7 @@
 }(processes)
 (selector){
  JetFinder   sqr(20/E_CMS) 1.
- ET  22 5. 10000000.
+ ET  22 5. 7000.
+ ET  90 5. 7000.
  !DeltaR 22 90 0.3 100
 }(selector)
