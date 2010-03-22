@@ -6,9 +6,9 @@ cd CMSSW_3_5_4/src
 eval `scramv1 ru -sh`
 
 ## get the code
-cvs co -d Sherpa/Template UserCode/JanVeverka/Sherpa/Template
-cvs co -d Sherpa/$job UserCode/JanVeverka/Sherpa/$job
-cp Sherpa/Template/test/{MakeSherpaLibs,PrepareSherpaLibs}.sh Sherpa/$job/test
+cvs co -r V01-00-00 -d Sherpa/Common UserCode/JanVeverka/Sherpa/Common
+cvs co -r V01-00-00 -d Sherpa/$job UserCode/JanVeverka/Sherpa/$job
+cp Sherpa/Common/test/{MakeSherpaLibs,PrepareSherpaLibs}.sh Sherpa/$job/test
 
 ## prepare data card
 cd Sherpa/$job/test
@@ -33,6 +33,7 @@ EOF
 ## get unique output name
 i=0
 name=${job}_res${i}.tgz
+# destination=$CASTOR_HOME/mc/Spring10/Sherpa
 destination=$CASTOR_HOME/mc/Spring10/Sherpa
 while nsls $destination | grep -q $name; do
 	((i++))
