@@ -4,7 +4,7 @@
 ##  Jan Veverka, Caltech
 ##  veverka@caltech.edu
 ##  22 March 2010
-##  
+##
 ##  Here is some information collected during the preparation of datacards
 ##  for Monte Carlo production of V+gamma Task Force samples with Sherpa
 ##  for Spring10. First part describes how to generate samples, the second
@@ -37,9 +37,9 @@ ssh lxplus5.cern.ch
 cd /tmp/`whoami`
 cmsrel CMSSW_3_5_4
 cd CMSSW_3_5_4/src
-cvs co -r V01-00-01 -d Sherpa/Common/test UserCode/JanVeverka/Sherpa/Common/test/batchJob.sh
+cvs co -r V01-00-02 -d Sherpa/Common/test UserCode/JanVeverka/Sherpa/Common/test/batchJob.sh
 
-##  Edit ./Sherpa/Common/test/batchJob.sh to suit your needs e.g. change the 
+##  Edit ./Sherpa/Common/test/batchJob.sh to suit your needs e.g. change the
 ##  destination where the results are stored (last line.)
 
 ##  Choose an appropriate queue for n jets:
