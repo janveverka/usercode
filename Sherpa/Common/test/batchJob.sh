@@ -34,7 +34,7 @@ EOF
 i=0
 name=${job}_res${i}.tgz
 # destination=$CASTOR_HOME/mc/Spring10/Sherpa
-destination=$CASTOR_HOME/mc/Spring10/Sherpa
+destination=$CASTOR_HOME
 while nsls $destination | grep -q $name; do
 	((i++))
 	name=${job}_res${i}.tgz
