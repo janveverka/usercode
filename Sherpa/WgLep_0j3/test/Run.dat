@@ -119,7 +119,7 @@
  End process
 }(processes)
 (selector){
- JetFinder   sqr(20/E_CMS) 1.
+ JetFinder   sqr(10/E_CMS) 1.
  ET  22  5. 1e5
  PT  90  5. 1e5
  PT  93 10. 1e5
