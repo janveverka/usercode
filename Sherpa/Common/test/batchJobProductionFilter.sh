@@ -2,12 +2,12 @@
 ## usage: bsub < batchJobProductionFilter.sh JOB_NAME=ZgEleMu_0j2 JOB_NUMBER=0 MAX_EVENTS=42
 
 # set default values for parameters
-if [[ -z $JOB_NAME   ]]; then JOB_NAME=WgLep_0j; fi
+if [[ -z $JOB_NAME   ]]; then JOB_NAME=WgMu_0j2; fi
 if [[ -z $JOB_NUMBER ]]; then JOB_NUMBER=0;       fi
 if [[ -z $MAX_EVENTS ]]; then MAX_EVENTS=100;     fi
 
 SOURCE=$CASTOR_HOME/mc/Spring10/Sherpa
-OUTPUT=$CASTOR_HOME/mc/Spring10/Sherpa/$JOB_NAME/GEN/test
+OUTPUT=$CASTOR_HOME/mc/Spring10/Sherpa/$JOB_NAME/GEN/filter
 
 ## setup CMSSW release area
 scramv1 project CMSSW CMSSW_3_5_4
@@ -18,7 +18,7 @@ eval `scramv1 ru -sh`
 cvs co -r HEAD -d Sherpa/Analysis/python UserCode/JanVeverka/Sherpa/Analysis/python/genFilter_cfi.py
 
 ## get the code
-mkdir Sherpa && cd Sherpa
+cd Sherpa
 rfcp $SOURCE/${JOB_NAME}_res0.tgz .
 tar xzf ${JOB_NAME}_res0.tgz
 cd $JOB_NAME/test
