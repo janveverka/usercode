@@ -84,7 +84,10 @@ LOG_FILE=log_${OUTPUT_FILE%*.root}.tgz
 ## store output
 
 tar czf $LOG_FILE sherpa_cfg.out
-rfcp $LOG_FILE $OUTPUT
+rfcp $LOG_FILE $OUTPUT 
+echo "Log saved in $OUTPUT/$LOG_FILE"
+
 rfcp sherpa_out.root $OUTPUT/$OUTPUT_FILE
+echo "Output saved in $OUTPUT/$OUTPUT_FILE"
 
 echo "Exiting $0 for MAX_EVENTS, JOB_NAME, JOB_NUMBER: $MAX_EVENTS $JOB_NAME $JOB_NUMBER"
