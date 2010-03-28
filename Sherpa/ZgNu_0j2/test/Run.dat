@@ -121,6 +121,6 @@
 (selector){
  JetFinder   sqr(10/E_CMS) 1.
  ET  22 5. 7000.
- PT  93 10. 7000.
+ !PT  93 10. 7000.
  !DeltaR 22 11 0.3 100
 }(selector)
