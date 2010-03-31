@@ -1,6 +1,7 @@
 <export></export>
 <library name=SherpaAnalysis_plugins file=*.cc>
   <use name=CommonTools/UtilAlgos>
+  <use name=CommonTools/CandUtils>
   <use name=DataFormats/HepMCCandidate>
   <use name=FWCore/Framework>
   <use name=FWCore/ParameterSet>
