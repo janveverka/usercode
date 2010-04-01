@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("DrawMC")
 
 process.source = cms.Source("PoolSource",
-   skipEvents = cms.untracked.uint32(1),
+   skipEvents = cms.untracked.uint32(0),
    fileNames = cms.untracked.vstring('file:sherpa_out.root')
 )
 
@@ -16,7 +16,7 @@ process.genParticles.abortOnUnknownPDGCode = False
 process.printTree = cms.EDAnalyzer("ParticleTreeDrawer",
    src = cms.InputTag("genParticles"),
    printP4 = cms.untracked.bool(False),
-   printPtEtaPhi = cms.untracked.bool(False),
+   printPtEtaPhi = cms.untracked.bool(True),
    printVertex = cms.untracked.bool(False),
    printStatus = cms.untracked.bool(True),
    printIndex = cms.untracked.bool(True)

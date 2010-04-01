@@ -1,67 +1,208 @@
-###############################################################################
-##                        SHEPRA FOR V+GAMMA SPRING10                        ##
-###############################################################################
-##  Jan Veverka, Caltech
-##  veverka@caltech.edu
-##  22 March 2010
-##
-##  Here is some information collected during the preparation of datacards
-##  for Monte Carlo production of V+gamma Task Force samples with Sherpa
-##  for Spring10. First part describes how to generate samples, the second
-##  how to make some plots.
+Sherpa location
+/afs/cern.ch/cms/sw/slc5_ia32_gcc434/external/sherpa/1.2.0-cms2
+
+===================================================================
+====================== STATUS =====================================
+===================================================================
+lxb8840
+Wg_0j    step1 in 19m, step2 in 5s, step3 in 6m*
+Wg_0j1   step1 in 18m, step2 in 5s, step3 in 6m*
+Wg_0j2   step1 in 3h32m, step2 in 20s, step3 in 8m**
+Wg_0j3   step1 killed
+Wg_0j4   step1 killed
+
+lxb8860
+ZgNoTau_0j  step1 in 9m, step2 in 4s, step3 in 18s
+ZgNoTau_0j1 step1 in 2h40m, step2 in 6s, step3 crashed after 22m (event 16)
+            w/ mass(ll)=10..50, ee only: step1 in 12m22, step3 in 6m/20s
+            w/ mass(ll)=1..7000: step1 in 22m but running again, step3 in 7m
+ZgNoTau_0j2 step1 killed
+ZgNoTau_0j3 step1 killed
+ZgNoTau_0j4 step1 killed
+ZgMu_0j2    step1 in 24h
+ZgMu_0j3    step1 killed
+ZgMu_0j4    step1 killed
 
 
-###############################################################################
-##  Part I. Production
-##
-##  This is how to submit a batch job that
-##    o creates Sherpa libraries (step 1)
-##    o calculates cross section (step 2)
-##    o generates 100 events (step 3)
-##    o stores the output to CASTOR
-##  Process
-##    pp -> Vgamma -> l(l/nu)gamma + n jets
-##    V is W or Z
-##    n = 0, .., 4 (3 an 4 takes unknown long time, perhaps impossible)
-##    Decays available are:
-##      Ele .. to electrons
-##      Mu  .. to muons
-##      NoTau .. to electrons and muons, and to neutrinos (Z only)
-##      Lep   .. to all leptons
-##      Nu    .. to neutrinos (Z only)
-##  Process is defined by a label, e.g. WgNoTau_0j2, ZgNoTau_0j2.
-##  The example below is about WgNoTau_0j2.
+*100 evts, it can be repeated in 23s(!)
+**100 evts, repeated runs in 126s
 
-ssh lxplus5.cern.ch
-
-cd /tmp/`whoami`
-cmsrel CMSSW_3_5_4
-cd CMSSW_3_5_4/src
-cvs co -r V01-00-02 -d Sherpa/Common/test UserCode/JanVeverka/Sherpa/Common/test/batchJob.sh
-
-##  Edit ./Sherpa/Common/test/batchJob.sh to suit your needs e.g. change the
-##  destination where the results are stored (last line.)
-
-##  Choose an appropriate queue for n jets:
-##    n=0,1 .. 1nh
-##    n=2   .. 1nw (1nd for some decays with less diagrams)
-##    n=3,4 .. 2nw
-bsub -q 1nh ./Sherpa/Common/test/batchJob.sh WgNoTau_0j
+Running on the batch
+lxplus313: /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test [614]$ python launchBatchJobs.sh
+bsub -q 1nh80 /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgEle_0j
+bsub -q 1nh80 /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgMu_0j
+lxplus313: /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test [615]$ python launchBatchJobs.sh | sh
+Job <64747003> is submitted to queue <1nh80>.
+Job <64747004> is submitted to queue <1nh80>.
 
 
-###############################################################################
-##  Part II. Plots
-##
-##  To produce the plots of deltaR(lepton, photon) do
+===================================================================
+====================== SHERPA 1.2.1 ===============================
+===================================================================
+ME+PS merging for prompt photon production
+Merging of photons produced in real emission matrix elements with photons produced in the interleaved QCD+QED shower cascade has been implemented. Further details and a comparison to LEP and Tevatron data has been published in Phys. Rev. D 81, 034026 (2010).
 
-##  Get the code.
-cvs co -r V01-00-00 -d Sherpa/Analysis UserCode/JanVeverka/Sherpa/Analysis
+ME+PS backward clustering improved
+In the backward clustering step of the ME+PS merging algorithm we now take into account the shower weight for each potential branching history instead of simply choosing the most probable history.
 
-##  Build the module
-cmsenv
-scram b
 
-## Edit Sherpa/Analysis/test/testFilter_cfg.py to your liking, e.g.
-## point to your own input files, and run the analysis.
-cmsRun Sherpa/Analysis/test/testFilter_cfg.py
+Interface
+https://twiki.cern.ch/twiki/bin/view/CMS/SherpaInterface
+updated to 35X
 
+After Sherpa has run, there will be a .tex-file located in the diagram information directory with the name <process>.tex. This has to be compiled by using latex <process>.tex, which produces a .mp-file. Enter mpost *.mp and again latex <process>.tex in order to produce the .dvi-file <process>.dvi containing the Feynman diagrams.
+
+
+==============================================================
+============= MINUTES FROM THE MEETING =======================
+==============================================================
+
+Minutes / Decisions
+====================
+
+Decided to request following samples:
+
+1) Sherpa:
+      - 1 M Wgamma (no ATGC)
+      - 1M Zgamma  (no ATGC)
+
+      This requires a patched release to include either:
+       i) Use version 1.1.2 (currently in 35X) and additional EDFilter
+          for DR Cut
+          (note: this version has no aTGC and the ability for DR cut is switched off), or
+
+            --> OK, we will not need a patch release on this. If you get it ready
+            before early next week, we'll make it into 355, otherwise later into
+            356. (Fabian Stoeckli)
+
+      ii) Use version 1.2.1: means adding a different version of sherpa as external CMSSW
+          library
+
+     TODO: implement first i) (easier) but also ii) (want it on the long term)
+     Timescale: ~ 1 week
+
+     WHO:
+        - Jan V. prepares the filter and config files for both Wgamma and Zgamma
+        - Giulio: makes the request and get the config into a new patch release
+
+    Number of events: 1M  (NO ATGC)
+
+            --> It will not be a patch release. Please make sure you
+                  - provide the EDFilter to us in time, so we can put it into CMSSW355
+                  - the cfg does not need to be in a release at all (as any other cfg
+            file), you'll need to commit it to Configuartion/GenProduction/python,
+            as usual.
+
+
+Kinematic cuts to be used:
+================
+- Et(Photon) > 5 GeV
+- DR(Photon,Lepton)>0.3 (ONLY FOR Wgamma!)
+- no eta cut!
+- W decay channels: enu and munu
+- Z decay channel: electrons, muons and neutrinos
+
+QUESTIONS:
+- Include W->tau (through tau -> e/mu, it will contribute slightly to the signal, it would
+   be good to know how much)
+- For Zgamma: split into 2 samples: one with Z->ee/mumu and the other Z->invisible?
+   Otherwise, the sample will be dominated by neutrinos.
+
+
+
+=====================================================================
+======================== MADGRAPH CUTS ==============================
+=====================================================================
+So Zong-Kai and me will try to produce the LHE files using Madgraph v4.4.32.
+
+The kinematic cuts are list as follow:
+
+1) photon/lepton Pt > 5 GeV
+2) jet Pt > 10 GeV
+3) Mass(lepton+, lepton-) > 10 GeV
+4) deltaR(photon, lepton) > 0.3 for "Wgamma and Zgamma"
+5) deltaR(photon, jet) > 0.3
+6) no eta cut on photon and lepton
+7) the number of jets is 0~2 (mixing)
+8) PDF is "cteq6l1"
+9) decay channel: electron and muon for Wgamma; electron, muon, and neutrino for Zgamma
+
+You can find the detail information in /afs/cern.ch/user/p/poter/public/Madgraph_Wgamma/run_card.dat.
+
+Please check asap.
+
+=====================================================================
+============================ BAUR CUTS ==============================
+=====================================================================
+Hi All
+Just to do a summary about the LO Zgamma Baur production:
+
+1) 500k with SM couplings and Z->e,mu
+  Kinematical cuts:
+   --  Et(Photon) > 5 GeV
+   --  Et(lepton) > 5 GeV
+   --  no eta cut
+   --  DR(Photon,Lepton)>0.3
+   --  lepton+lepton_photon Invariant mass > 100 GeV
+   --  Which PDF?
+
+2) 500K with SM couplings and Z->invisible
+   Kinematical cuts:
+   --  Et(Photon) > 5 GeV
+
+
+===================================================================
+=================== BATCH JOBS STATUS =============================
+===================================================================
+Sun Mar 21 15:16:12 CET 2010
+lxplus313: /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test [692]$ python launchBatchJobs.sh
+bsub -q 1nh80 /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgEle_0j
+...
+bsub -q 2nw /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh ZgNoTau_0j4
+lxplus313: /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test [693]$ python launchBatchJobs.sh | sh
+Job <64749822> is submitted to queue <1nh80>.
+...
+Job <64749864> is submitted to queue <2nw>.
+
+Summary (40 jobs):
+jobid    queue  job
+64749822 1nh80  WgEle_0j
+64749823 1nh80  WgEle_0j1
+64749824 1nw80  WgEle_0j2
+64749825   2nw  WgEle_0j3
+64749826   2nw  WgEle_0j4
+64749827 1nh80  WgMu_0j
+64749828 1nh80  WgMu_0j1
+64749829 1nw80  WgMu_0j2
+64749830   2nw  WgMu_0j3
+64749831   2nw  WgMu_0j4
+64749832 1nh80  WgLep_0j
+64749833 1nh80  WgLep_0j1
+64749834 1nw80  WgLep_0j2
+64749835   2nw  WgLep_0j3
+64749836   2nw  WgLep_0j4
+64749837 1nh80  ZgEle_0j
+64749838 1nh80  ZgEle_0j1
+64749839 1nw80  ZgEle_0j2
+64749840   2nw  ZgEle_0j3
+64749841   2nw  ZgEle_0j4
+64749842 1nh80  ZgMu_0j
+64749843 1nh80  ZgMu_0j1
+64749844 1nw80  ZgMu_0j2
+64749845   2nw  ZgMu_0j3
+64749846   2nw  ZgMu_0j4
+64749847 1nh80  ZgEleMu_0j
+64749848 1nh80  ZgEleMu_0j1
+64749849 1nw80  ZgEleMu_0j2
+64749850   2nw  ZgEleMu_0j3
+64749851   2nw  ZgEleMu_0j4
+64749852 1nh80  ZgNu_0j
+64749853 1nh80  ZgNu_0j1
+64749854 1nw80  ZgNu_0j2
+64749855   2nw  ZgNu_0j3
+64749857   2nw  ZgNu_0j4
+64749858 1nh80  ZgNoTau_0j
+64749859 1nh80  ZgNoTau_0j1
+64749860 1nw80  ZgNoTau_0j2
+64749862   2nw  ZgNoTau_0j3
+64749864   2nw  ZgNoTau_0j4
