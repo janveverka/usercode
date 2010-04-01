@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("DrawMC")
 
 process.source = cms.Source("PoolSource",
-#    skipEvents = cms.untracked.uint32(5),
+   skipEvents = cms.untracked.uint32(1),
    fileNames = cms.untracked.vstring('file:sherpa_out.root')
 )
 

@@ -4,19 +4,22 @@ process = cms.Process("FILTER")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
-from Sherpa.Analysis.srcFileNames_cfi import *
+from Sherpa.Analysis.srcFileNames_cfi import files as srcFileNames
 process.source = cms.Source("PoolSource",
 #    fileNames = cms.untracked.vstring(srcFileNames["castorZgNoTau_0j2"]),
-   fileNames = cms.untracked.vstring(srcFileNames["castorWgLep_0j1"]),
+   fileNames = cms.untracked.vstring(
+      srcFileNames["castorWgLep_0j1"]
+      + ["file:sherpa_out_1k.root"] # this one is WgLep_0j1
+    ),
    duplicateCheckMode = cms.untracked.string("checkEachRealDataFile"),
 )
 
 process.TFileService = cms.Service(
   "TFileService",
 #   fileName = cms.string("plotsNoFilterZgNoTau_0j2.root")
-#   fileName = cms.string("plotsNoFilterWgLep_0j1.root")
+  fileName = cms.string("plotsNoFilterWgLep_0j1.root")
 #   fileName = cms.string("plotsWithFilterZgNoTau_0j2.root")
-  fileName = cms.string("plotsWithFilterWgLep_0j1.root")
+#   fileName = cms.string("plotsWithFilterWgLep_0j1.root")
 )
 
 # from Sherpa.Analysis.genFilter_cfi import *
@@ -29,7 +32,7 @@ process.load("Sherpa.Analysis.drPlots_cfi")
 
 # process.p = cms.Path(genFilter + genParticles * drPlots)
 process.p = cms.Path(
-  process.genFilter +
+#   process.genFilter +
   process.genParticles *
   process.drPlots
 )

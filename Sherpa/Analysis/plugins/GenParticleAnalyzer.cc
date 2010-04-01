@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Veverka,32 3-A13,+41227677936,
 //         Created:  Mon Mar 22 05:44:30 CET 2010
-// $Id$
+// $Id: GenParticleAnalyzer.cc,v 1.1 2010/03/22 21:53:54 veverka Exp $
 //
 //
 
@@ -22,6 +22,8 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include "TH1.h"
 #include "TH2.h"
@@ -108,6 +110,8 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   Handle<View<GenParticle> > genParticles;
   iEvent.getByLabel(genSrc_, genParticles);
 
+  std::vector<float> deltaRCollection;
+  deltaRCollection.reserve(2);
   // loop over all pairs (a,b)
   for (View<GenParticle>::const_iterator a = genParticles->begin();
        a != genParticles->end()-1; ++a){
@@ -126,23 +130,21 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
       histContainer_["deltaRLeptonPhotonStatus3"]->Fill( genPartDeltaR(*a, *b) );
       histContainer_["deltaRLeptonPhotonStatus3Zoom"]->Fill( genPartDeltaR(*a, *b) );
+      deltaRCollection.push_back( genPartDeltaR(*a, *b) );
       histContainer_["statusA"]->Fill(a->status() );
       histContainer_["pdgIdA"]->Fill(a->pdgId() );
       histContainer_["statusB"]->Fill(b->status() );
       histContainer_["pdgIdB"]->Fill(b->pdgId() );
       pdgIdAB_->Fill(a->pdgId(), b->pdgId() );
-    }
+    } // inner loop over b
+  } // outer loop over a; loop over all pairs (a,b)
+  
+  sort( deltaRCollection.begin(), deltaRCollection.end() );
+  if (deltaRCollection.size() == 2) {
+    histContainer_["deltaRLeptonPhotonStatus3Min"]->Fill( deltaRCollection[0] );
+    histContainer_["deltaRLeptonPhotonStatus3Max"]->Fill( deltaRCollection[1] );
   }
-
-#ifdef THIS_IS_AN_EVENT_EXAMPLE
-   Handle<ExampleData> pIn;
-   iEvent.getByLabel("example",pIn);
-#endif
-
-#ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
-   ESHandle<SetupData> pSetup;
-   iSetup.get<SetupRecord>().get(pSetup);
-#endif
+  
 }
 
 
@@ -157,8 +159,10 @@ GenParticleAnalyzer::beginJob()
 
   // book histograms:
   histContainer_["deltaR"]=fs->make<TH1F>("deltaR", "deltaR",   100, 0,  20);
-  histContainer_["deltaRLeptonPhotonStatus3"]=fs->make<TH1F>("deltaRLeptonPhotonStatus3", "deltaR lepton photon status 3",   100, 0,  10);
-  histContainer_["deltaRLeptonPhotonStatus3Zoom"]=fs->make<TH1F>("deltaRLeptonPhotonStatus3Zoom", "deltaR lepton photon status 3",   100, 0,  1);
+  histContainer_["deltaRLeptonPhotonStatus3"]=fs->make<TH1F>("deltaRLeptonPhotonStatus3", "#DeltaR(l,#gamma) status 3",   100, 0,  10);
+  histContainer_["deltaRLeptonPhotonStatus3Zoom"]=fs->make<TH1F>("deltaRLeptonPhotonStatus3Zoom", "#DeltaR(l,#gamma) status 3",   100, 0,  1);
+  histContainer_["deltaRLeptonPhotonStatus3Min"]=fs->make<TH1F>("deltaRLeptonPhotonStatus3Min", "min#DeltaR(l,#gamma) status 3",   100, 0,  10);
+  histContainer_["deltaRLeptonPhotonStatus3Mmax"]=fs->make<TH1F>("deltaRLeptonPhotonStatus3Max", "max#DeltaR(l,#gamma) status 3",   100, 0,  10);
   histContainer_["statusA"]=fs->make<TH1F>("statusA", "statusA",   10, -.5,  9.5);
   histContainer_["statusB"]=fs->make<TH1F>("statusB", "statusB",   10, -.5,  9.5);
   histContainer_["pdgIdA"]=fs->make<TH1F>("pdgIdA", "pdgIdA",   51, -25.5, 25.5);
