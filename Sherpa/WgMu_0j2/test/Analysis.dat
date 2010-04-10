@@ -1,0 +1,5 @@
+BEGIN_ANALYSIS {
+  LEVEL Hadron;
+  PATH_PIECE Norm/;
+  Statistics FinalState;
+} END_ANALYSIS;
