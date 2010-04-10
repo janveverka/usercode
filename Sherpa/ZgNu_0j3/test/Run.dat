@@ -2,7 +2,7 @@
  EVENTS          = 100
  NUM_ACCURACY    = 1.e-10
  OUTPUT          = 2
- ANALYSIS        = 0
+ ANALYSIS        = 1
  EVENT_MODE      = HepMC
  RANDOM_SEED     = 15732 27621
 }(run)
@@ -119,8 +119,8 @@
  End process
 }(processes)
 (selector){
- JetFinder   sqr(10/E_CMS) 1.
+ JetFinder   sqr(20/E_CMS) 1.
  ET  22 5. 7000.
- PT  93 10. 7000.
+ !PT  93 10. 7000.
  !DeltaR 22 11 0.3 100
 }(selector)
