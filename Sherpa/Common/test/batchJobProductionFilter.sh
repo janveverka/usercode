@@ -1,12 +1,14 @@
-## this file script is meant to be redirected in the bsub command
-## usage: bsub < batchJobProductionFilter.sh JOB_NAME=ZgEleMu_0j2 JOB_NUMBER=0 MAX_EVENTS=42
+#!/bin/bash
 
 # set default values for parameters
-if [[ -z $JOB_NAME   ]]; then JOB_NAME=WgMu_0j2; fi
-if [[ -z $JOB_NUMBER ]]; then JOB_NUMBER=0;       fi
-if [[ -z $MAX_EVENTS ]]; then MAX_EVENTS=100;     fi
+JOB_NAME=${1:-ZgNu_0j2}
+JOB_NUMBER=${2:-0}
+MAX_EVENTS=${3:-42}
 
 SOURCE=$CASTOR_HOME/mc/Spring10/Sherpa
+
+## CUSTOMIZE HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+# OUTPUT=$CASTOR_HOME/mc/Spring10/Sherpa/$JOB_NAME/GEN/filterJet10
 OUTPUT=$CASTOR_HOME/mc/Spring10/Sherpa/$JOB_NAME/GEN/filter
 
 ## setup CMSSW release area
@@ -19,8 +21,14 @@ cvs co -r HEAD -d Sherpa/Analysis/python UserCode/JanVeverka/Sherpa/Analysis/pyt
 
 ## get the code
 cd Sherpa
+
+## CUSTOMIZE HERE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+# res0 : jet pt > 20 GeV, parton pt > 10 GeV
+# res1 : jet pt > 10 GeV, parton pt > 10 GeV (doesn't work)
+# res2 : jet pt > 10 GeV, no parton pt cut
 rfcp $SOURCE/${JOB_NAME}_res0.tgz .
 tar xzf ${JOB_NAME}_res0.tgz
+
 cd $JOB_NAME/test
 rm -r SHERPATMP
 scram b Sherpa

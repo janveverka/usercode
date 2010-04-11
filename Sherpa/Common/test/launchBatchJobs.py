@@ -1,10 +1,10 @@
 ## Customize this part
-maxJets = 4
-vbosons = ["W", "Z"]
-vdecays = {"W" : ["Ele", "Mu", "Lep"],
-          "Z" : ["Ele", "Mu", "EleMu", "Nu", "NoTau"] }
-# vbosons = ["W"]
-# vdecays = {"W": ["Ele", "Mu"]}
+maxJets = 3
+# vbosons = ["W", "Z"]
+vdecays = {"W" : ["Ele", "Mu", "Tau", "Lep"],
+           "Z" : ["Ele", "Mu", "EleMu", "Nu"] }
+#vbosons = ["W"]
+#vdecays = {"W": ["Lep", "Tau"]}
 queueForNJets = {0:"1nh80", 1:"1nh80", 2:"1nw80", 3:"2nw", 4:"2nw"}
 jobFile = "batchJob.sh"
 
@@ -14,7 +14,7 @@ import os
 jobFile = os.getcwd() + "/" + jobFile
 
 ## produce the submission commands for Vgamma
-for vboson in vbosons:
+for vboson in vdecays.keys():
 	for decay in vdecays[vboson]:
 		for njets in range(maxJets+1):
 			if not njets:

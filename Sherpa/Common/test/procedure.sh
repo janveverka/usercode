@@ -1,5 +1,5 @@
 # init
-name=Zg
+name=Irakli
 
 # cleanup
 todelete=`ls -d *.tgz *.log *.dat *.sh *.py *.root SHERPATMP SherpaRun MIG* 2>/dev/null`
@@ -11,17 +11,17 @@ for i in $todelete; do
 done
 
 # step 1
-base=$CMSSW_BASE/src/Sherpa/Template/test
-cp $base/Run_${name}.dat Run.dat
+base=$CMSSW_BASE/src/Sherpa
+cp $base/Template/test/Run_${name}.dat Run.dat
 tar -czf sherpa_${name}_cards.tgz Run.dat
-cp $base/MakeSherpaLibs.sh .
+cp $base/Common/test/MakeSherpaLibs.sh .
 (time nohup ./MakeSherpaLibs.sh  -i ./ -p $name) >& run1.log &
 tail -f run1.log
 
 # step 2
-base=$CMSSW_BASE/src/Sherpa/Template/test
+base=$CMSSW_BASE/src/Sherpa
 name=$(ls sherpa*cards.tgz | awk -F_ '{print $2}')
-cp $base/PrepareSherpaLibs.sh .
+cp $base/Common/test/PrepareSherpaLibs.sh .
 path=$(pwd | tr '/' '\n' | tail -3 | head -2 | tr '\n' ' ' | awk '{print $1 "/" $2}')
 (time ./PrepareSherpaLibs.sh -d $CMSSW_BASE -i ./ -p $name -a $path -m LOCAL) >& run2.log &
 tail -f run2.log
