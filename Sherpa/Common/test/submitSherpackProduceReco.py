@@ -1,13 +1,13 @@
 ## Customize this part
-maxJets = 0
-minJets = 0
-#vdecays = {"W" : ["Ele", "Mu", "Tau"],
-           #"Z" : ["Ele", "Mu", "Tau", "Nu"] }
-vdecays = {"W": ["Ele"], "Z": ["Ele", "Nu"]}
-queueForNJets = {0:"1nh80", 1:"1nh80", 2:"1nd80", 3:"2nw", 4:"2nw"}
+maxJets = 2
+minJets = 2
+vdecays = {"W" : ["Ele", "Mu", "Tau"],
+           "Z" : ["Ele", "Mu", "Tau", "Nu"] }
+#vdecays = {"W": ["Ele"], "Z": ["Ele", "Nu"]}
+queueForNJets = {0:"1nd80", 1:"1nd80", 2:"1nd80", 3:"2nw", 4:"2nw"}
 #queueForNJets = {0:"cmscaf1nh", 1:"cmscaf1nh", 2:"cmscaf1nw", 3:"cmscaf1nw", 4:"2nw"}
 jobFile = "sherpackProduceReco.sh"
-nJobs=1
+nJobs=10
 
 ## Some initialization
 import os
