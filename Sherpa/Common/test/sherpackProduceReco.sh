@@ -1,7 +1,7 @@
 job=${1:-WgEle_0j}
 CMSSW_RELEASE=CMSSW_3_5_6
 LIB_VERSION=3
-NUM_EVENTS=1
+NUM_EVENTS=100
 
 #### setup CMSSW release area
 scramv1 project CMSSW $CMSSW_RELEASE
@@ -58,15 +58,24 @@ cd test
 ###############################################################################
 
 #### Run!
+## Make the config file
 cmsDriver.py  $PROJECT/$PACKAGE/sherpa_${PROCESS_NAME}_cff.py \
   -s GEN,SIM,DIGI,L1,DIGI2RAW,HLT --conditions START3X_V25::All \
   --datatier GEN-SIM-RAW --eventcontent RAWSIM  \
-  --customise $PROJECT/$PACKAGE/sherpa_custom.py -n $NUM_EVENTS \
   --customise=Validation/Performance/TimeMemoryInfo.py \
-  --no_exec \
+  -n $NUM_EVENTS --no_exec \
   --fileout outputGENDIGIHLT.root
-cmsRun sherpa_${PROCESS_NAME}_cff_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT.py \
-  2>&1 | tee -a step1.log
+
+## Some extra gymnastics to workaround not being able to use
+## +two customization files
+#   --customise=$PROJECT/$PACKAGE/sherpa_custom.py \
+STEP1_CFG=sherpa_${PROCESS_NAME}_cff_py_GEN_SIM_DIGI_L1_DIGI2RAW_HLT.py
+cat >> $STEP1_CFG << END_HERE
+process.genParticles.abortOnUnknownPDGCode = False
+END_HERE
+
+## Here we go!
+cmsRun  $STEP1_CFG 2>&1 | tee -a step1.log
 
 #### Store the step1 output on the T3, AFS and CASTOR
 OUTPUT_DIR=$job/RAWSIM/sherpack_lib${LIB_VERSION}
@@ -107,8 +116,8 @@ rfcp outputGENDIGIHLT.root $CASTOR_OUTPUT_PATH/$OUTPUT_NAME
 # echo "Storing $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME"
 # scp outputGEN.root $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME
 
-echo "Storing $AFS_OUTPUT_PATH/$OUTPUT_NAME"
-cp outputGENDIGIHLT.root $AFS_OUTPUT_PATH/$OUTPUT_NAME
+# echo "Storing $AFS_OUTPUT_PATH/$OUTPUT_NAME"
+# cp outputGENDIGIHLT.root $AFS_OUTPUT_PATH/$OUTPUT_NAME
 
 ## Store the log.
 tar czf log.tgz step1.log
@@ -131,10 +140,7 @@ cp log.tgz $AFS_OUTPUT_PATH/$LOG_NAME
 cmsDriver.py step2 -s RAW2DIGI,RECO --conditions START3X_V25::All \
   --datatier GEN-SIM-RECO --eventcontent RECOSIM -n $NUM_EVENTS --no_exec \
   --filein file:outputGENDIGIHLT.root
-cmsRun step2_RAW2DIGI_RECO.py \
-  2>&1 | tee -a step2.log
-
-## TODO(veverka@caltech.edu) Store ouptut when you know the name
+cmsRun step2_RAW2DIGI_RECO.py 2>&1 | tee -a step2.log
 
 #### Store the step2 output on the T3, AFS and CASTOR
 OUTPUT_DIR=$job/RECO/sherpack_lib${LIB_VERSION}
@@ -168,8 +174,8 @@ rfcp step2_RAW2DIGI_RECO.root $CASTOR_OUTPUT_PATH/$OUTPUT_NAME
 # echo "Storing $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME"
 # scp step2_RAW2DIGI_RECO.root $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME
 
-echo "Storing $AFS_OUTPUT_PATH/$OUTPUT_NAME"
-cp step2_RAW2DIGI_RECO.root $AFS_OUTPUT_PATH/$OUTPUT_NAME
+# echo "Storing $AFS_OUTPUT_PATH/$OUTPUT_NAME"
+# cp step2_RAW2DIGI_RECO.root $AFS_OUTPUT_PATH/$OUTPUT_NAME
 
 #### Done!
 echo "Exiting $0 with great success"'!'
