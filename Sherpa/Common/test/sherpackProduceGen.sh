@@ -100,8 +100,8 @@ rfcp outputGEN.root $CASTOR_OUTPUT_PATH/$OUTPUT_NAME
 # echo "Storing $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME"
 # scp outputGEN.root $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME
 
-echo "Storing $AFS_OUTPUT_PATH/$OUTPUT_NAME"
-cp outputGEN.root $AFS_OUTPUT_PATH/$OUTPUT_NAME
+# echo "Storing $AFS_OUTPUT_PATH/$OUTPUT_NAME"
+# cp outputGEN.root $AFS_OUTPUT_PATH/$OUTPUT_NAME
 
 ## Prepare the log.
 mkdir log_${OUTPUT_VERSION}
@@ -116,8 +116,8 @@ rfcp log.tgz $CASTOR_OUTPUT_PATH/$LOG_NAME
 # echo "Storing $T3_URL:$T3_OUTPUT_PATH/$LOG_NAME"
 # scp log.tgz $T3_URL:$T3_OUTPUT_PATH/$LOG_NAME
 
-echo "Storing $AFS_OUTPUT_PATH/$LOG_NAME"
-rfcp log.tgz $AFS_OUTPUT_PATH/$LOG_NAME
+# echo "Storing $AFS_OUTPUT_PATH/$LOG_NAME"
+# rfcp log.tgz $AFS_OUTPUT_PATH/$LOG_NAME
 
 #### Done!
 echo "Exiting $0 with great success"'!'
