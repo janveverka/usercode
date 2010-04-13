@@ -1,7 +1,7 @@
 ## Customize this part
 SAMPLE=${1:-WgEle_0j}
 VERSION=3
-CMSSW_RELEASE=CMSSW_3_5_6_patch1
+CMSSW_RELEASE=CMSSW_3_5_6
 
 # create working area
 WORK_BASE=/wntmp/veverka/`basename $0`/$RANDOM
