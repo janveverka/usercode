@@ -40,8 +40,9 @@ BEGIN_ANALYSIS {
 } END_ANALYSIS;
 EOF
 ln -s ../MIG*
-$SHERPA_EXE ANALYSIS=1 ANALYSIS_OUTPUT=Analysis_1/ EVENTS=1000 "RANDOM_SEED=$RANDOM $RANDOM"
-tail Analysis_*/Norm/Stat*
+$SHERPA_EXE ANALYSIS=1 ANALYSIS_OUTPUT=Analysis/ EVENTS=1000 "RANDOM_SEED=$RANDOM $RANDOM"
+echo && echo "======= RESULTS "
+cat Analysis/Norm/Statistics_Observable_FinalState
 
 ## Store output.
 OUTPUT_PATH=$SHERPA_T3_PATH/xsections
@@ -51,4 +52,4 @@ while ls $OUTPUT_PATH/$OUTPUT_NAME >& /dev/null; do
   ((OUTPUT_VERSION++))
   OUTPUT_NAME=xsec_${SAMPLE}_lib${VERSION}_${OUTPUT_VERSION}.dat
 done
-cp Analysis_*/Norm/Stat* $OUTPUT_PATH/$OUTPUT_NAME
+cp Analysis/Norm/Statistics_Observable_FinalState $OUTPUT_PATH/$OUTPUT_NAME
