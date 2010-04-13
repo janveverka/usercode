@@ -1,6 +1,6 @@
 ## Customize this part
 SAMPLE=${1:-WgEle_0j}
-VERSION=2
+VERSION=3
 CMSSW_RELEASE=CMSSW_3_5_6_patch1
 
 # create working area
@@ -9,7 +9,7 @@ mkdir -p $WORK_BASE
 cd $WORK_BASE
 
 # create a new release
-source $HOME/bat/setup-afs-cmssw-slc5.sh
+source $HOME/bin/setup-afs-cmssw-slc5.sh
 scramv1 project CMSSW $CMSSW_RELEASE
 cd $CMSSW_RELEASE/src/
 eval `scramv1 runtime -sh`
@@ -22,13 +22,13 @@ cp $SHERPA_T3_PATH/libs/${SAMPLE}_res${VERSION}.tgz .
 tar xzf ${SAMPLE}_res${VERSION}.tgz
 cd ${SAMPLE}/test/SherpaRun
 SHERPA_BASE_PATH=`scramv1 tool info sherpa | grep BASE | cut -f 2 -d "="`
-if [ "${SHERPA_SHARE_PATH=$}"   = "" ]; then 
+if [ "${SHERPA_SHARE_PATH=$}"   = "" ]; then
   export SHERPA_SHARE_PATH=${SHERPA_BASE_PATH}/share/SHERPA-MC;
 fi
-if [ "${SHERPA_INCLUDE_PATH=$}" = "" ]; then 
+if [ "${SHERPA_INCLUDE_PATH=$}" = "" ]; then
   export SHERPA_INCLUDE_PATH=${SHERPA_BASE_PATH}/include/SHERPA-MC;
 fi
-if [ "${SHERPA_LIBRARY_PATH=$}" = "" ]; then 
+if [ "${SHERPA_LIBRARY_PATH=$}" = "" ]; then
   export SHERPA_LIBRARY_PATH=${SHERPA_BASE_PATH}/lib/SHERPA-MC;
 fi
 SHERPA_EXE=`find ${SHERPA_BASE_PATH} -type f -name Sherpa`
