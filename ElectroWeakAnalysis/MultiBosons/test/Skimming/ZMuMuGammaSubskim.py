@@ -21,7 +21,7 @@ process.p = cms.Path(
   )
 )
 
-process.schedule = cms.Shedule(
+process.schedule = cms.Schedule(
   process.dimuonsPath,
   process.p
 )
