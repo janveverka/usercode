@@ -12,19 +12,17 @@ removeAllPATObjectsBut(process, ['Photons'])
 removeCleaning(process)
 
 ## Define the PAT default path
-process.p = cms.Path(
-  # process.dimuonOneTrackSequence +
-  (
-#     process.dimuonSequence *
+process.p = process.dimuonsPath.copy()
+process.p *= (
     process.patDefaultSequence *
     process.mumuGammaSequence
-  )
 )
 
-process.schedule = cms.Schedule(
-  process.dimuonsPath,
-  process.p
-)
+
+# process.schedule = cms.Schedule(
+#   process.dimuonsPath,
+#   process.p
+# )
 
 ## Manipulate the output commands
 ## Add the zMuMuSubskim output commands (they may have been deleted by
