@@ -15,10 +15,15 @@ removeCleaning(process)
 process.p = cms.Path(
   # process.dimuonOneTrackSequence +
   (
-    process.dimuonSequence * 
+#     process.dimuonSequence *
     process.patDefaultSequence *
     process.mumuGammaSequence
   )
+)
+
+process.schedule = cms.Shedule(
+  process.dimuonsPath,
+  process.p
 )
 
 ## Manipulate the output commands

@@ -24,7 +24,8 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = 'START3X_V26::All'
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.load("ElectroWeakAnalysis.MultiBosons.Skimming.zMuMu_SubskimSequences_cff")
+# process.load("ElectroWeakAnalysis.MultiBosons.Skimming.zMuMu_SubskimSequences_cff")
+process.load("ElectroWeakAnalysis.Skimming.zMuMu_SubskimPaths_cff")
 
 ## Add the PAT stuff here
 ## This is kind of ugly since we first load all the PAT
