@@ -12,5 +12,6 @@ vgExtraPhotonEventContent = [
 ]
 
 vgMuMuGammaEventContent = [
-  'keep *_mumuGammas_*_*'
+  'keep *_mumuGammas_*_*',
+  'keep *_mumuGammasOneTrack_*_*',
 ]
