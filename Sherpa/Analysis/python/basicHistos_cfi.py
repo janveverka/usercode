@@ -150,6 +150,36 @@ sisterPdgIdHisto = cms.PSet(
   plotquantity = cms.untracked.string("mother(0).daughter(0).pdgId")
 )
 
+daughterCountHisto = cms.PSet(
+  itemsToPlot = cms.untracked.int32(-1),
+  min = cms.untracked.double(-0.5),
+  max = cms.untracked.double(50.5),
+  nbins = cms.untracked.int32(51),
+  name = cms.untracked.string("DaughterCount"),
+  description = cms.untracked.string("number of daughters"),
+  plotquantity = cms.untracked.string("numberOfDaughters")
+)
+
+daughter0PdgIdHisto = cms.PSet(
+  itemsToPlot = cms.untracked.int32(-1),
+  min = cms.untracked.double(-100.5),
+  max = cms.untracked.double(100.5),
+  nbins = cms.untracked.int32(201),
+  name = cms.untracked.string("Daughter0PdgId"),
+  description = cms.untracked.string("daughter 0 PDG id"),
+  plotquantity = cms.untracked.string("daughter(0).pdgId")
+)
+
+daughter0StatusHisto = cms.PSet(
+  itemsToPlot = cms.untracked.int32(-1),
+  min = cms.untracked.double(0.5),
+  max = cms.untracked.double(10.5),
+  nbins = cms.untracked.int32(10),
+  name = cms.untracked.string("Daughter0Status"),
+  description = cms.untracked.string("Daughter 0 Status"),
+  plotquantity = cms.untracked.string("daughter(0).status")
+)
+
 simpleKineGenHistos = cms.PSet(
   histograms = cms.VPSet(
     ptHisto, etaHisto, phiHisto, pdgIdHisto, statusHisto
@@ -162,7 +192,8 @@ simpleKineGenDebugHistos = cms.PSet(
     pdgIdHisto, statusHisto,
     motherCountHisto, motherPdgIdHisto, motherStatusHisto,
     grandmotherCountHisto, grandmotherPdgIdHisto, grandmotherStatusHisto,
-    sisterCountHisto, sisterPdgIdHisto
+    sisterCountHisto, sisterPdgIdHisto,
+    daughterCountHisto, daughter0PdgIdHisto, daughter0StatusHisto
   )
 )
 
