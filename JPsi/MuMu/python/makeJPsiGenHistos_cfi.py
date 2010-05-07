@@ -6,23 +6,44 @@ genJPsis = cms.EDFilter("GenParticleSelector",
   cut = cms.string("pdgId=443 & status=2")
 )
 
-genJPsiDaughters = cms.EDFilter("GenParticleSelector",
-  filter = cms.bool(False),
-  src = cms.InputTag("genParticles"),
-  cut = cms.string("numberOfMothers>0 & mother(0).pdgId=443 & mother(0).status=2")
+genJPsiDaughters = genJPsis.clone(
+  cut = "numberOfMothers>0 & mother(0).pdgId=443 & mother(0).status=2"
 )
 
-genJPsiGrandDaughters = cms.EDFilter("GenParticleSelector",
-  filter = cms.bool(False),
-  src = cms.InputTag("genParticles"),
-  cut = cms.string("numberOfMothers>0 & mother(0).numberOfMothers>0 & mother(0).mother(0).pdgId=443 & mother(0).mother(0).status=2")
+genJPsiGrandDaughters = genJPsis.clone(
+  cut = "numberOfMothers>0 & mother(0).numberOfMothers>0 &" +
+        "mother(0).mother(0).pdgId=443 &" +
+        "mother(0).mother(0).status=2"
 )
 
-genPhotons = cms.EDFilter("GenParticleSelector",
-  filter = cms.bool(False),
-  src = cms.InputTag("genParticles"),
-  cut = cms.string("pdgId=22 & status=1")
+genPhotons = genJPsis.clone(cut = "pdgId=22 & status=1")
+
+jpsiMuons = genJPsis.clone(
+  cut = "status=1 & abs(pdgId)=13 & mother(0).pdgId=443"
 )
+
+jpsiPhotons = genJPsis.clone(
+  cut = "status=1 & pdgId=22 & mother(0).pdgId=443"
+)
+
+jpsiDimuons = cms.EDProducer("CandViewShallowCloneCombiner",
+    checkCharge = cms.bool(True),
+    cut = cms.string('mass > 0'),
+    decay = cms.string('jpsiMuons@+ jpsiMuons@-')
+)
+
+jpsiMmgs = jpsiDimuons.clone(decay = "jpsiDimuons jpsiPhotons")
+
+goodMuons = genJPsis.clone(cut = "status=1 & abs(pdgId)=13 & pt>1 & p>2.5")
+goodPhotons = genJPsis.clone(cut = "status=1 & pdgId=22 & pt>1")
+goodDimuons = jpsiDimuons.clone(decay = "goodMuons@+ goodMuons@-")
+goodMmgs = jpsiMmgs.clone(decay = "goodDimuons goodPhotons")
+
+# jpsiMuMuDimuons = cms.EDProducer("CandViewShallowCloneCombiner",
+#     checkCharge = cms.bool(True),
+#     cut = cms.string('mass > 0'),
+#     decay = cms.string('jpsiMuons@+ jpsiMuons@-')
+# )
 
 from Sherpa.Analysis.basicHistos_cfi import *
 def histos(srcName, n=-1):
@@ -87,14 +108,69 @@ genJPsiDaughterHistos = cms.EDAnalyzer("CandViewHistoAnalyzer",
   src = cms.InputTag("genJPsiDaughters")
 )
 
+jpsiPhotonHistos = genPhotonHistos.clone(src = "jpsiPhotons")
+jpsiMuonHistos = genPhotonHistos.clone(src = "jpsiMuons")
+
+from ElectroWeakAnalysis.MultiBosons.Histogramming.compositeKineHistos_cff import *
+
+jpsiDimuonHistos = cms.EDAnalyzer("CandViewHistoAnalyzer",
+  histograms = compositeKineHistos.copy() +
+    [massHisto.clone(min=0, max=10, name="massJPsi")],
+  src = cms.InputTag("jpsiDimuons"),
+)
+
+jpsiMmgHistos = jpsiDimuonHistos.clone(src = "jpsiMmgs")
+
+goodPhotonHistos = genPhotonHistos.clone(src = "goodPhotons")
+goodMuonHistos = genPhotonHistos.clone(src = "goodMuons")
+goodDimuonHistos = jpsiDimuonHistos.clone(src = "goodDimuons")
+goodMmgHistos = jpsiMmgHistos.clone(src = "goodMmgs")
+
+jpsiDrHistos  = cms.EDAnalyzer("DeltaRAnalyzer",
+  srcA = cms.untracked.InputTag("jpsiPhotons"),
+  srcB = cms.untracked.InputTag("jpsiMuons"),
+  histoCount = cms.untracked.uint32(4),
+  max = cms.untracked.double(10),
+  nbins = cms.untracked.int32(400),
+)
+
+goodDrHistos = jpsiDrHistos.clone(
+  srcA = "goodPhotons",
+  srcB = "goodMuons"
+)
+
+jpsiLlgHistos = cms.EDAnalyzer("LLGammaAnalyzer",
+  srcLeptons = cms.untracked.InputTag("jpsiMuons"),
+  srcPhotons = cms.untracked.InputTag("jpsiPhotons")
+)
+
+goodLlgHistos = jpsiLlgHistos.clone(
+  srcLeptons = "goodMuons",
+  srcPhotons = "goodPhotons"
+)
+
 genProducers = cms.Sequence(genJPsis +
   genJPsiDaughters +
-  genPhotons
+  genPhotons +
+  (jpsiMuons + jpsiPhotons) * jpsiDimuons * jpsiMmgs +
+  (goodMuons + goodPhotons) * goodDimuons * goodMmgs
 )
 
 genHistos = cms.Sequence(genJPsiHistos +
   genJPsiDaughterHistos +
-  genPhotonHistos
+  genPhotonHistos +
+  jpsiPhotonHistos +
+  jpsiMuonHistos +
+  jpsiDimuonHistos +
+  jpsiMmgHistos +
+  goodPhotonHistos +
+  goodMuonHistos +
+  goodDimuonHistos +
+  goodMmgHistos +
+  jpsiDrHistos +
+  goodDrHistos +
+  jpsiLlgHistos +
+  goodLlgHistos
 )
 
 makeGenJPsiHistos = cms.Sequence(genProducers * genHistos)
