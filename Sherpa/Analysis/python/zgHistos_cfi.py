@@ -39,10 +39,15 @@ promptParticles = cms.EDFilter("GenParticleSelector",
   cut = cms.string(isPrompt)
 )
 
+promptParticlesPtSorted = cms.EDProducer("GenParticlePtSlicer",
+  src = cms.InputTag("promptParticles")
+)
+
+
 
 promptLeptons = cms.EDFilter("GenParticleSelector",
   filter = cms.bool(False),
-  src = cms.InputTag("promptParticles"),
+  src = cms.InputTag("promptParticlesPtSorted"),
   cut = cms.string(isLepton)
 )
 
@@ -152,6 +157,14 @@ jetCountHisto = cms.EDAnalyzer("CandViewCountAnalyzer",
   src = cms.untracked.InputTag("meOutPartons")
 )
 
+drPromptPhotonLeptonHistos = cms.EDAnalyzer("DeltaRAnalyzer",
+  srcA = cms.untracked.InputTag("promptPhotons"),
+  srcB = cms.untracked.InputTag("promptLeptons"),
+  histoCount = cms.untracked.uint32(2),
+  max = cms.untracked.double(10),
+  nbins = cms.untracked.int32(400),
+)
+
 
 
 
@@ -167,14 +180,14 @@ allPromptPhotons = cms.Sequence(promptPhotons*
       (promptMePhotons+promptFsrPhotons+promptIsrPhotons)
 )
 
-allPromptParticles = cms.Sequence(promptParticles *
+allPromptParticles = cms.Sequence(promptParticles * promptParticlesPtSorted *
     (promptLeptons+promptMePartons+allPromptPhotons)
 )
 
 
 allHistoSources = cms.Sequence(
   allMeParticles
-#   +allPromptParticles
+  +allPromptParticles
 #   +allPhotons
 )
 
