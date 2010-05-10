@@ -113,7 +113,7 @@
  YFS_IR_CUTOFF  = 1E-3
 }(fragmentation)
 (processes){
- Process : 93 93 -> -11 11 22 93{0} 
+ Process : 93 93 -> -15 15 22 93{0}
  Order electroweak : 3
  Print_Graphs :
  End process
