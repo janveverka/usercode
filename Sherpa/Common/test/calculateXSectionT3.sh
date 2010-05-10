@@ -53,3 +53,5 @@ while ls $OUTPUT_PATH/$OUTPUT_NAME >& /dev/null; do
   OUTPUT_NAME=xsec_${SAMPLE}_lib${VERSION}_${OUTPUT_VERSION}.dat
 done
 cp Analysis/Norm/Statistics_Observable_FinalState $OUTPUT_PATH/$OUTPUT_NAME
+
+## TODO clean up working area after checked that everything works

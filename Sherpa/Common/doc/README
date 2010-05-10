@@ -37,7 +37,7 @@ ssh lxplus5.cern.ch
 cd /tmp/`whoami`
 cmsrel CMSSW_3_5_4
 cd CMSSW_3_5_4/src
-cvs co -r V01-00-02 -d Sherpa/Common/test UserCode/JanVeverka/Sherpa/Common/test/batchJob.sh
+cvs co -r HEAD -d Sherpa/Common/test UserCode/JanVeverka/Sherpa/Common/test/batchJob.sh
 
 ##  Edit ./Sherpa/Common/test/batchJob.sh to suit your needs e.g. change the
 ##  destination where the results are stored (last line.)

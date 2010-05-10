@@ -513,4 +513,4 @@ mv *.tgz ${fin}/
 
 # go back to original directory
 cd ${HDIR}
-rm -rf ./SHERPATMP
+# rm -rf ./SHERPATMP

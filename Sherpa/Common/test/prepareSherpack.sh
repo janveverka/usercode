@@ -1,6 +1,6 @@
-job=${1:-ZgMu_0j}
-version=0
-CMSSW_RELEASE=CMSSW_3_5_6_patch1
+PROCESS_NAME=${1:-WgEle_0j2}
+LIB_VERSION=3
+CMSSW_RELEASE=CMSSW_3_5_6
 
 ## setup CMSSW release area
 scramv1 project CMSSW $CMSSW_RELEASE
@@ -13,20 +13,35 @@ cvs co -r V00-03-04 GeneratorInterface/SherpaInterface
 scramv1 build
 
 mkdir Sherpa
-SHERPA_T3_PATH=/mnt/hadoop/user/veverka/mc/Spring10/Sherpa
+T3_PATH=/mnt/hadoop/user/veverka/mc/Spring10/Sherpa
 
 ## start here if you already have CMSSW realease area
 # get the libraries
 cd $CMSSW_BASE/src/Sherpa
-scp t3-susy.ultralight.org:$SHERPA_T3_PATH/libs/${job}_res${version}.tgz .
-tar xzf ${job}_res${version}.tgz
-cd $job/test
+# scp t3-susy.ultralight.org:$T3_PATH/libs/${PROCESS_NAME}_res${LIB_VERSION}.tgz .
+CASTOR_PATH=$CASTOR_HOME/mc/Spring10/Sherpa
+rfcp $CASTOR_PATH/libs/${PROCESS_NAME}_res${LIB_VERSION}.tgz .
+tar xzf ${PROCESS_NAME}_res${LIB_VERSION}.tgz
+cd $PROCESS_NAME/test
 
-# do the actual job - prepare the sherpack!
-./PrepareSherpaLibs.sh -i ./ -p $job -a Sherpa/$job -m PROD 2>1 | tee step2b.out
+# do the actual PROCESS_NAME - prepare the sherpack!
+./PrepareSherpaLibs.sh -i ./ -p $PROCESS_NAME -a Sherpa/$PROCESS_NAME -m PROD 2>&1 \
+  | tee step2b.out
 
-## store the output
-scp sherpa*MASTER*.tgz t3-susy.ultralight.org:$SHERPA_T3_PATH/sherpacks/test
+## store the output on the T3
+T3_OUTPUT_PATH=$T3_PATH/sherpacks/test_lib${LIB_VERSION}
+T3_URL=t3-susy.ultralight.org
+if ! ssh $T3_URL ls $T3_OUTPUT_PATH >& /dev/null; then
+  ssh $T3_URL mkdir -p $T3_OUTPUT_PATH
+fi
+scp sherpa_${PROCESS_NAME}_MASTER.tgz $T3_URL:$T3_OUTPUT_PATH
+
+## Store the ouptut on CASTOR
+CASTOR_OUTPUT_PATH=$CASTOR_PATH/sherpacks/test_lib${LIB_VERSION}
+if ! nsls $CASTOR_OUTPUT_PATH >& /dev/null; then
+  rfmkdir -p $CASTOR_OUTPUT_PATH
+fi
+rfcp sherpa_${PROCESS_NAME}_MASTER.tgz $CASTOR_OUTPUT_PATH
 
 ## clean up
 cd $CMSSW_BASE/..

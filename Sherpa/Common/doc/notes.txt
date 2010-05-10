@@ -242,6 +242,7 @@ jobid    queue  job
 (time cmsRun testFilter_cfg.py)>&noFilterZ.out &
 (time cmsRun testFilter_cfg.py)>&withFilterZ.out &
 
+Mon Mar 22 20:01:33 CET 2010
 bsub -q 1nh80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgNoTau_0j
 bsub -q 1nh80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgNoTau_0j1
 bsub -q 1nw80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgNoTau_0j2
@@ -252,14 +253,6 @@ bsub -q 1nh80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgLep_
 bsub -q 1nw80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgLep_0j2
 bsub -q   2nw /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgLep_0j3
 bsub -q   2nw /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgLep_0j4
-lxplus305: /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test [378]$ ls -l
-total 88
-drwxr-xr-x 2 veverka zh  4096 Mar 22 19:55 CVS/
--rwxr-xr-x 1 veverka zh 17814 Mar 21 15:40 MakeSherpaLibs.sh*
--rwxr-xr-x 1 veverka zh 26296 Mar 21 15:40 PrepareSherpaLibs.sh*
--rwxr-xr-x 1 veverka zh  1267 Mar 21 15:40 batchJob.sh*
--rw-r--r-- 1 veverka zh   768 Mar 22 20:00 launchBatchJobs.py
--rw-r--r-- 1 veverka zh  1125 Mar 21 15:40 procedure.sh
 lxplus305: /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test [379]$ python launchBatchJobs.py | sh
 Job <64962103> is submitted to queue <1nh80>.
 Job <64962104> is submitted to queue <1nh80>.
@@ -272,6 +265,6 @@ Job <64962110> is submitted to queue <1nw80>.
 Job <64962111> is submitted to queue <2nw>.
 Job <64962112> is submitted to queue <2nw>.
 lxplus305: /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test [380]$ date
-Mon Mar 22 20:01:33 CET 2010
 
-
+for i in `seq 1 10`; do bsub -q 1nd80 /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJobProduction.sh WgTau_0j2 $i 10000; done
+for i in `seq 1 10`; do bsub -q 1nd80 /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJobProduction.sh WgLep_0j2 $i 10000; done
