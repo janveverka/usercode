@@ -184,90 +184,6 @@ process.generator.SherpaParameters.Run[6] = ' RANDOM_SEED     = ${RUNNUMBER}1573
 ===================================================================
 =================== BATCH JOBS STATUS =============================
 ===================================================================
-Sun Mar 21 15:16:12 CET 2010
-lxplus313: /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test [692]$ python launchBatchJobs.sh
-bsub -q 1nh80 /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgEle_0j
-...
-bsub -q 2nw /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh ZgNoTau_0j4
-lxplus313: /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test [693]$ python launchBatchJobs.sh | sh
-Job <64749822> is submitted to queue <1nh80>.
-...
-Job <64749864> is submitted to queue <2nw>.
-
-Summary (40 jobs):
-jobid    queue  job
-64749822 1nh80  WgEle_0j
-64749823 1nh80  WgEle_0j1
-64749824 1nw80  WgEle_0j2
-64749825   2nw  WgEle_0j3
-64749826   2nw  WgEle_0j4
-64749827 1nh80  WgMu_0j
-64749828 1nh80  WgMu_0j1
-64749829 1nw80  WgMu_0j2
-64749830   2nw  WgMu_0j3
-64749831   2nw  WgMu_0j4
-64749832 1nh80  WgLep_0j
-64749833 1nh80  WgLep_0j1
-64749834 1nw80  WgLep_0j2
-64749835   2nw  WgLep_0j3
-64749836   2nw  WgLep_0j4
-64749837 1nh80  ZgEle_0j
-64749838 1nh80  ZgEle_0j1
-64749839 1nw80  ZgEle_0j2
-64749840   2nw  ZgEle_0j3
-64749841   2nw  ZgEle_0j4
-64749842 1nh80  ZgMu_0j
-64749843 1nh80  ZgMu_0j1
-64749844 1nw80  ZgMu_0j2
-64749845   2nw  ZgMu_0j3
-64749846   2nw  ZgMu_0j4
-64749847 1nh80  ZgEleMu_0j
-64749848 1nh80  ZgEleMu_0j1
-64749849 1nw80  ZgEleMu_0j2
-64749850   2nw  ZgEleMu_0j3
-64749851   2nw  ZgEleMu_0j4
-64749852 1nh80  ZgNu_0j
-64749853 1nh80  ZgNu_0j1
-64749854 1nw80  ZgNu_0j2
-64749855   2nw  ZgNu_0j3
-64749857   2nw  ZgNu_0j4
-64749858 1nh80  ZgNoTau_0j
-64749859 1nh80  ZgNoTau_0j1
-64749860 1nw80  ZgNoTau_0j2
-64749862   2nw  ZgNoTau_0j3
-64749864   2nw  ZgNoTau_0j4
-
-
-(time cmsRun testFilter_cfg.py)>&noFilterW.out &
-(time cmsRun testFilter_cfg.py)>&noFilterZ.out &
-(time cmsRun testFilter_cfg.py)>&withFilterZ.out &
-
-Mon Mar 22 20:01:33 CET 2010
-bsub -q 1nh80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgNoTau_0j
-bsub -q 1nh80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgNoTau_0j1
-bsub -q 1nw80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgNoTau_0j2
-bsub -q   2nw /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgNoTau_0j3
-bsub -q   2nw /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgNoTau_0j4
-bsub -q 1nh80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgLep_0j
-bsub -q 1nh80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgLep_0j1
-bsub -q 1nw80 /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgLep_0j2
-bsub -q   2nw /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgLep_0j3
-bsub -q   2nw /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test/batchJob.sh WgLep_0j4
-lxplus305: /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test [379]$ python launchBatchJobs.py | sh
-Job <64962103> is submitted to queue <1nh80>.
-Job <64962104> is submitted to queue <1nh80>.
-Job <64962105> is submitted to queue <1nw80>.
-Job <64962106> is submitted to queue <2nw>.
-Job <64962107> is submitted to queue <2nw>.
-Job <64962108> is submitted to queue <1nh80>.
-Job <64962109> is submitted to queue <1nh80>.
-Job <64962110> is submitted to queue <1nw80>.
-Job <64962111> is submitted to queue <2nw>.
-Job <64962112> is submitted to queue <2nw>.
-lxplus305: /tmp/veverka/CMSSW_3_5_4/src/Sherpa/Common/test [380]$ date
-
-for i in `seq 1 10`; do bsub -q 1nd80 /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJobProduction.sh WgTau_0j2 $i 10000; done
-for i in `seq 1 10`; do bsub -q 1nd80 /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Common/test/batchJobProduction.sh WgLep_0j2 $i 10000; done
 
 
 =====================================================================
@@ -312,35 +228,8 @@ ME+PS merging
  ME_QED = Off
 }(me)
 
-The full chat on Skype:
-[5/10/2010 3:40:49 PM] jan.veverka: Hi Frank
-[5/10/2010 3:40:54 PM] jan.veverka: How are you?
-[5/10/2010 3:41:03 PM] Frank Siegert: hi jan, good thanks.
-[5/10/2010 3:41:23 PM] Frank Siegert: i've been playing around with
-Z[ll] gamma, and found quite a few interesting things.
-[5/10/2010 3:41:43 PM] Frank Siegert: how are you?
-[5/10/2010 3:41:47 PM] jan.veverka: oh great
-[5/10/2010 3:41:53 PM] jan.veverka: i'm fine, thanks!
-[5/10/2010 3:42:03 PM] jan.veverka: thanks for the nice talk on friday!
-[5/10/2010 3:42:16 PM] Frank Siegert: thanks for having me, and being
-so patient with the long talk
-[5/10/2010 3:42:25 PM] jan.veverka: i have actually some questions
-about sherpa data cards ...
-[5/10/2010 3:42:43 PM] jan.veverka: i think that people really appreciated
-[5/10/2010 3:43:13 PM] jan.veverka: people are now much more aware of
-sherpa and will take it more seriously...
-[5/10/2010 3:43:58 PM] Frank Siegert: ok, cool. so which run card
-questions do you have?
-[5/10/2010 3:45:24 PM] jan.veverka: it's for V+gamma (V=W,Z) where
-gamma is a hard photon, e.g. cross-section and AGC ...
-[5/10/2010 3:46:16 PM] jan.veverka: here is an example:
-http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/JanVeverka/Sherpa/WgEle_0j/test/Run.dat?revision=1.5&view=markup
-[5/10/2010 3:47:15 PM] jan.veverka: i want to achieve the ME+PS
-merging for the photons
-[5/10/2010 3:47:42 PM] jan.veverka: the PS photon get's fragmented off
-of the lepton
-[5/10/2010 3:47:53 PM] jan.veverka: you mentioned that this should
-work out of the box
+From chat on Skype:
+...
 [5/10/2010 3:48:33 PM] jan.veverka: i was wondering if i can specify
 the process with the 22{1} instead of 99{1} to increase the efficiency
 [5/10/2010 3:49:15 PM] jan.veverka: of photon production ...
@@ -352,15 +241,12 @@ amegic/agc yet, so you might still run into problems that i haven't
 seen. but one thing that you will definitely need, is to enable photon
 emissions in the parton shower by setting "CSS_EW_SCHEME = 1" in the
 (shower){ section
-[5/10/2010 3:51:42 PM] jan.veverka: also, i would like to thouw away
-all event that have collinear a prompt photon collinear with the
-lepton
-[5/10/2010 3:51:47 PM] jan.veverka: oh, thanks a lot!
+...
 [5/10/2010 3:52:38 PM] Frank Siegert: as soon as you enable merging
 (i.e. the 22{1} and the CKKW line) in the processes *and* have QED
 splittings active in the shower, it will automatically cut on the
 collinear divergences and let them be generated by the shower.
-[5/10/2010 3:53:58 PM] jan.veverka: i see
+...
 [5/10/2010 3:54:39 PM] Frank Siegert: just as a non-AGC example, here
 is what i did for Zgamma:
 (run){
@@ -400,30 +286,16 @@ is what i did for Zgamma:
 }(me)
 [5/10/2010 3:55:01 PM] Frank Siegert: note that this generates
 weighted/enhanced events though, don't know if that's what you want
-[5/10/2010 3:56:22 PM] Frank Siegert: i am currently running some more
-validation runs to confirm the interesting things i saw already. when
-i'm done with that, i'll send an email where i summarise them.
-[5/10/2010 3:57:11 PM] jan.veverka: ok thanks!
-[5/10/2010 3:57:51 PM] Frank Siegert: so are you actually interested
-in AGC after all? because from what suzanne wrote, it didn't sound
-like it.
+...
 [5/10/2010 3:58:24 PM] jan.veverka: so the "CKKW sqr(QCUT/E_CMS)"
 regularizes the collinear divergence?
-[5/10/2010 3:58:38 PM] jan.veverka: she is not
-[5/10/2010 3:58:45 PM] jan.veverka: but i am
-[5/10/2010 3:59:02 PM] jan.veverka: i am interested in both agc and
-the fsr for calibration
+...
 [5/10/2010 3:59:05 PM] Frank Siegert: yes. in my run card i used the
 tag declaration QCUT:=20, but you can write it directly as CKKW
 sqr(20/E_CMS)
-[5/10/2010 3:59:11 PM] Frank Siegert: ok
-[5/10/2010 3:59:16 PM] jan.veverka: she is more into h->yy
-[5/10/2010 4:00:02 PM] Frank Siegert: ok. let me actually test my
-stuff with AGC as well, just such that i can help you out in case
-there are problems.
+...
 [5/10/2010 4:00:22 PM] jan.veverka: does "CKKW sqrt(20/E_CMS)" roughly
 correspond to "ET 22 20 9999"?
-[5/10/2010 4:00:43 PM] jan.veverka: thanks! :)
 [5/10/2010 4:01:02 PM] Frank Siegert: roughly, yes. but in addition to
 that it will correctly take care of the double counting with the
 shower.
@@ -435,8 +307,6 @@ process doesn't have a photon
 [5/10/2010 4:03:11 PM] jan.veverka: ok
 [5/10/2010 4:03:14 PM] Frank Siegert: actually, one second, i think i
 said something wrong.
-[5/10/2010 4:03:19 PM] jan.veverka: aha/
-[5/10/2010 4:03:21 PM] jan.veverka: ?
 [5/10/2010 4:03:59 PM] Frank Siegert: i think you can't do 22{1}
 instead of 99{1} if you still want the shower to do qcd.
 [5/10/2010 4:04:26 PM] Frank Siegert: i used this for testing pure QED
@@ -457,24 +327,11 @@ where 22 is the leading prompt photon (both ME and PS origin)
 [5/10/2010 4:08:24 PM] Frank Siegert: the solution (not in 1.2.1)
 would be to treat the qed and qcd merging more separate than we
 currently do. i think this is possible, we'll have to think about it.
-[5/10/2010 4:08:49 PM] jan.veverka: i see
 [5/10/2010 4:08:56 PM] Frank Siegert: about your filter:
-[5/10/2010 4:09:35 PM] jan.veverka: thanks
 [5/10/2010 4:09:54 PM] Frank Siegert: of course you can filter
 afterwards. the 99 sample is completely inclusive. the reason above is
 really purely technical.
-[5/10/2010 4:10:36 PM] Frank Siegert: can you handle weighted events?
-then it would be possible to enhance the processes which include a
-photon.
-[5/10/2010 4:10:40 PM] jan.veverka: so i should do
-93 93 -> -11 11 99{3}
-+ filter
-to get Z gamma + n jets with n = 0..2
-[5/10/2010 4:11:07 PM] jan.veverka: possibly
-[5/10/2010 4:11:32 PM] jan.veverka: i have never done cms full sim
-with weighted event myself ...
-[5/10/2010 4:11:49 PM] jan.veverka: i will test that ...
-[5/10/2010 4:12:03 PM] jan.veverka: and / or ask around :)
+...
 [5/10/2010 4:16:09 PM] Frank Siegert: btw... there is a lot of
 obsolete stuff that you can remove from your run card. e.g. you should
 definitely remove everything in (mi) except for MI_HANDLER=Amisic,
@@ -492,7 +349,6 @@ as far as i can see
 
  BEAM_2          = 2212
  BEAM_ENERGY_2   = 3500.
-[5/10/2010 4:19:38 PM] jan.veverka: wow!
 [5/10/2010 4:19:41 PM] Frank Siegert: let me know if any of that
 causes problems. but it's usually a good idea to only change the
 relevant things in the run card, such that you don't overwrite any
@@ -518,14 +374,7 @@ tuned with cteq66m and will be out-of-tune if you use cteq6ll). it's
 not so much about "upgrading", it's more a choice. for pythia for
 example you probably don't want to use cteq66m, at least the authors
 dont recommend it i think.
-[5/10/2010 4:23:55 PM] Frank Siegert: which AGC settings have you been testing?
-[5/10/2010 4:25:13 PM] jan.veverka: i haven't tested AGC much yet
-[5/10/2010 4:26:09 PM] Frank Siegert: ok, i'll simply use the setup
-from our AGC example in 1.2.1
-[5/10/2010 4:26:23 PM] jan.veverka: i first want to get a working SM
-run card ...
-[5/10/2010 4:27:06 PM] jan.veverka: an example of AGC from my collegue:
-[5/10/2010 4:28:14 PM] jan.veverka: http://home.fnal.gov/~iraklis/Run_Latest.dat
+..
 [5/10/2010 4:30:21 PM] jan.veverka: one more question: how exactly do
 i toggle between the YFS and PS?
 is it
@@ -546,15 +395,9 @@ CSS_EW_SCHEME = 0
 ME_QED = On
 ?
 [5/10/2010 4:33:13 PM] Frank Siegert: yep
-[5/10/2010 4:34:15 PM] jan.veverka: btw, i didn't find CSS_EW_SCHEME at
-http://projects.hepforge.org/sherpa/doc/SHERPA-MC-1.2.1.html
-[5/10/2010 4:34:36 PM] jan.veverka: OK, thanks a million Frank!
-[5/10/2010 4:34:45 PM] jan.veverka: I have to go now ....
+...
 [5/10/2010 4:34:51 PM] Frank Siegert: sorry
 [5/10/2010 4:34:57 PM] Frank Siegert: this has to be CSS_EW_MODE
 [5/10/2010 4:35:30 PM] Frank Siegert: (like in my run card above)
-[5/10/2010 4:35:44 PM] Frank Siegert: but still, it's not documented
-in the manual, you are right
-[5/10/2010 4:36:15 PM] Frank Siegert: see you later
-[5/10/2010 4:38:06 PM] jan.veverka: bye
+..
 
