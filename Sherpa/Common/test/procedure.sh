@@ -1,30 +1,30 @@
 # init
-name=Irakli
+name=Wenu
 
 # cleanup
 todelete=`ls -d *.tgz *.log *.dat *.sh *.py *.root SHERPATMP SherpaRun MIG* 2>/dev/null`
 echo "deleting `echo $todelete| tr '\n' ' '`"
 for i in $todelete; do
-	# echo deleting $i
-	if [ -d $i ]; then rm -r $i
-	else rm $i;	fi
+  # echo deleting $i
+  if [ -d $i ]; then rm -r $i
+  else rm $i;   fi
 done
 
 # step 1
 base=$CMSSW_BASE/src/Sherpa
 cp $base/Template/test/Run_${name}.dat Run.dat
-tar -czf sherpa_${name}_cards.tgz Run.dat
+cp Run.dat Run.bak.${RANDOM}
+cp $base/Template/test/Analysis.dat .
+tar -czf sherpa_${name}_cards.tgz Run.dat Analysis.dat
 cp $base/Common/test/MakeSherpaLibs.sh .
-(time nohup ./MakeSherpaLibs.sh  -i ./ -p $name) >& run1.log &
-tail -f run1.log
+(time nohup ./MakeSherpaLibs.sh  -i ./ -p $name -c) 2>&1 | tee run1.log
 
 # step 2
 base=$CMSSW_BASE/src/Sherpa
 name=$(ls sherpa*cards.tgz | awk -F_ '{print $2}')
 cp $base/Common/test/PrepareSherpaLibs.sh .
 path=$(pwd | tr '/' '\n' | tail -3 | head -2 | tr '\n' ' ' | awk '{print $1 "/" $2}')
-(time ./PrepareSherpaLibs.sh -d $CMSSW_BASE -i ./ -p $name -a $path -m LOCAL) >& run2.log &
-tail -f run2.log
+(time ./PrepareSherpaLibs.sh -d $CMSSW_BASE -i ./ -p $name -a $path -m LOCAL) 2>&1 | tee run2.log
 
 # step 3
 cat >> sherpa_cfg.py <<EOF
@@ -33,5 +33,4 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
     sourceSeed = cms.untracked.uint32(123456)
 )
 EOF
-(time nohup cmsRun sherpa_cfg.py) >& run3.log &
-tail -f run3.log
+(time nohup cmsRun sherpa_cfg.py) 2>&1 | tee run3.log
