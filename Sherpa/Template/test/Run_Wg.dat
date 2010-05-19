@@ -5,12 +5,12 @@
   LEPTON_PID:=11
   NEUTRINO_PID:=12
 
-  EVENTS       = 100
+  EVENTS       = 1000
   NUM_ACCURACY = 1.e-10
   OUTPUT       = 2
   ANALYSIS     = 1
   EVENT_MODE   = HepMC
-  RANDOM_SEED  = 15732 27621
+  RANDOM_SEED  = 15532 27624
 }(run)
 
 (beam){
@@ -23,7 +23,7 @@
 (me){
   ME_SIGNAL_GENERATOR   = Comix
   EVENT_GENERATION_MODE = Unweighted
-  ME_QED                = Off        ! Use "On" for YFS
+  ME_QED                = On        ! Use "On" for YFS
 }(me)
 
 (mi){
@@ -31,7 +31,7 @@
 }(mi)
 
 (shower){
-  CSS_EW_MODE = 1  ! 0/1 turns the EW PS off/on
+  CSS_EW_MODE = 0  ! 0/1 turns the EW PS off/on
 }(shower)
 
 (processes){
