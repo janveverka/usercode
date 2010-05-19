@@ -1,5 +1,5 @@
 # init
-name=Wenu
+name=Wg
 
 # cleanup
 todelete=`ls -d *.tgz *.log *.dat *.sh *.py *.root SHERPATMP SherpaRun MIG* 2>/dev/null`

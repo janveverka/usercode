@@ -5,7 +5,7 @@
   LEPTON_PID:=11
   NEUTRINO_PID:=12
 
-  EVENTS       = 1000
+  EVENTS       = 100
   NUM_ACCURACY = 1.e-10
   OUTPUT       = 2
   ANALYSIS     = 1

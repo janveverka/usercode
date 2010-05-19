@@ -1,5 +1,9 @@
-job=${1:-WgMu_0j}
-CMSSW_RELEASE=CMSSW_3_5_6
+JOB=${1:-WgEle_0j}
+CMSSW_RELEASE=CMSSW_3_5_8
+## Sherpa production version
+##+ none - Sherpa 1.1.2 with CMSSW_3_5_6 in March 2010
+##+ 2 - Sherpa 1.2.1 with CMSSW_3_5_8 in May 2010
+VERSION=2
 
 ## setup CMSSW release area
 scramv1 project CMSSW $CMSSW_RELEASE
@@ -8,23 +12,24 @@ eval `scramv1 ru -sh`
 
 ## get the code
 # cvs co -d Sherpa/Common UserCode/JanVeverka/Sherpa/Common
-cvs co -r V00-03-04 GeneratorInterface/SherpaInterface
-cvs co -d Sherpa/$job UserCode/JanVeverka/Sherpa/$job
-scramv1 build
+cvs co -d Sherpa/$JOB UserCode/JanVeverka/Sherpa/$JOB
+cvs co -r V00-03-10 GeneratorInterface/SherpaInterface
+cp GeneratorInterface/SherpaInterface/data/*SherpaLibs.sh Sherpa/$JOB/test
+rm -rf GeneratorInterface/SherpaInterface
 
-cp GeneratorInterface/SherpaInterface/data/*SherpaLibs.sh Sherpa/$job/test
 ## keep the temporary directory for debugging
-sed -i 's:rm -rf ./SHERPATMP:# rm -rf ./SHERPATMP:' Sherpa/$job/test/MakeSherpaLibs.sh
+sed -i 's:rm -rf ./SHERPATMP:# rm -rf ./SHERPATMP:' Sherpa/$JOB/test/MakeSherpaLibs.sh
 
 ## prepare data card
-cd Sherpa/$job/test
-tar -czf sherpa_${job}_cards.tgz Run.dat Analysis.dat
+cd Sherpa/$JOB/test
+tar -czf sherpa_${JOB}_cards.tgz Run.dat Analysis.dat
 
 ## run step 1
-(time ./MakeSherpaLibs.sh -i ./ -p $job) >& step1.out
+##+ `-c' option is for Comix only
+(time ./MakeSherpaLibs.sh -i ./ -p $JOB -c) >& step1.out
 
 ## run step 2
-(time ./PrepareSherpaLibs.sh -i ./ -p $job -a Sherpa/$job -m LOCAL) >& step2.out
+(time ./PrepareSherpaLibs.sh -i ./ -p $JOB -a Sherpa/$JOB -m LOCAL) >& step2.out
 
 ## run step 3
 cat >> sherpa_cfg.py <<EOF
@@ -37,19 +42,19 @@ EOF
 (time cmsRun sherpa_cfg.py) >& step3.out
 
 ## get unique output name
-i=0
-name=${job}_res${i}.tgz
-destination=$CASTOR_HOME/mc/Spring10/Sherpa/libs
-# destination=$CASTOR_HOME
-while nsls $destination | grep -q $name; do
-	((i++))
-	name=${job}_res${i}.tgz
+I=0
+NAME=${JOB}_res${I}.tgz
+DESTINATION=$CASTOR_HOME/mc/Spring10/Sherpa_v${VERSION}/libs
+# DESTINATION=$CASTOR_HOME
+while nsls $DESTINATION | grep -q $NAME; do
+	((I++))
+	NAME=${JOB}_res${I}.tgz
 done
 
 ## store output
 cd ../..
-tar czf res.tgz $job
-rfcp res.tgz $destination/$name
+tar czf res.tgz $JOB
+rfcp res.tgz $DESTINATION/$NAME
 cd ../..
 
 ## done!
