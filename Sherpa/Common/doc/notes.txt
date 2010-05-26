@@ -35,6 +35,55 @@ lxplus313: /afs/cern.ch/cms/cit/veverka/zgamma/Sherpa/CMSSW_3_5_4/src/Sherpa/Com
 Job <64747003> is submitted to queue <1nh80>.
 Job <64747004> is submitted to queue <1nh80>.
 
+Wgamma Sherpacks v2
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1061]$ python submitBuildSherpack.py
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j1
+bsub -q 1nw80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j2
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j3
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j4
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j5
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j6
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j1
+bsub -q 1nw80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j2
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j3
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j4
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j5
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j6
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j1
+bsub -q 1nw80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j2
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j3
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j4
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j5
+bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j6
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1062]$ python submitBuildSherpack.py | sh
+Job <76159915> is submitted to queue <1nh80>.
+Job <76159918> is submitted to queue <1nh80>.
+Job <76159920> is submitted to queue <1nw80>.
+Job <76159922> is submitted to queue <2nw>.
+Job <76159924> is submitted to queue <2nw>.
+Job <76159925> is submitted to queue <2nw>.
+Job <76159930> is submitted to queue <2nw>.
+Job <76159931> is submitted to queue <1nh80>.
+Job <76159932> is submitted to queue <1nh80>.
+Job <76159935> is submitted to queue <1nw80>.
+Job <76159936> is submitted to queue <2nw>.
+Job <76159938> is submitted to queue <2nw>.
+Job <76159941> is submitted to queue <2nw>.
+Job <76159945> is submitted to queue <2nw>.
+Job <76159947> is submitted to queue <1nh80>.
+Job <76159950> is submitted to queue <1nh80>.
+Job <76159954> is submitted to queue <1nw80>.
+Job <76159955> is submitted to queue <2nw>.
+Job <76159959> is submitted to queue <2nw>.
+Job <76159960> is submitted to queue <2nw>.
+Job <76159961> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1063]$ date
+Tue May 25 17:39:31 CEST 2010
+
+
 
 ===================================================================
 ====================== SHERPA 1.2.1 ===============================

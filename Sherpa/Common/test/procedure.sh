@@ -1,5 +1,5 @@
 # init
-name=Wg
+name=ZgTarget
 
 # cleanup
 todelete=`ls -d *.tgz *.log *.dat *.sh *.py *.root SHERPATMP SherpaRun MIG* 2>/dev/null`

@@ -1,5 +1,11 @@
-job=${1:-WgMu_0j}
-CMSSW_RELEASE=CMSSW_3_5_6_patch1
+PROCESS_NAME=${1:-WgEle_0j}
+CMSSW_RELEASE=CMSSW_3_5_8
+## Sherpa production version
+##+ none - Sherpa 1.1.2 with CMSSW_3_5_6 in March 2010
+##+ 2 - Sherpa 1.2.1 with CMSSW_3_5_8 in May 2010
+PROJECT_VERSION=2
+## UserCode/JanVeverka/Sherpa release tag
+TAG=V01-01-00
 
 ## setup CMSSW release area
 scramv1 project CMSSW $CMSSW_RELEASE
@@ -8,47 +14,43 @@ eval `scramv1 ru -sh`
 
 ## get the code
 # cvs co -d Sherpa/Common UserCode/JanVeverka/Sherpa/Common
-cvs co -r V00-03-04 GeneratorInterface/SherpaInterface
-cvs co -d Sherpa/$job UserCode/JanVeverka/Sherpa/$job
+cvs co -r $TAG -d Sherpa/$PROCESS_NAME UserCode/JanVeverka/Sherpa/$PROCESS_NAME
+cvs co -r $TAG -d Sherpa/Common UserCode/JanVeverka/Sherpa/Common
+cp Sherpa/Common/test/*SherpaLibs.sh Sherpa/$PROCESS_NAME/test
+rm -rf Sherpa/Common
 scramv1 build
 
-cp GeneratorInterface/SherpaInterface/data/*SherpaLibs.sh Sherpa/$job/test
 ## keep the temporary directory for debugging
-sed -i 's:rm -rf ./SHERPATMP:# rm -rf ./SHERPATMP:' Sherpa/$job/test/MakeSherpaLibs.sh
+sed -i 's:rm -rf ./SHERPATMP:# rm -rf ./SHERPATMP:' Sherpa/$PROCESS_NAME/test/MakeSherpaLibs.sh
 
 ## prepare data card
-cd Sherpa/$job/test
-tar -czf sherpa_${job}_cards.tgz Run.dat Analysis.dat
+cd Sherpa/$PROCESS_NAME/test
+tar -czf sherpa_${PROCESS_NAME}_cards.tgz Run.dat Analysis.dat
 
 ## run step 1
-(time ./MakeSherpaLibs.sh -i ./ -p $job) >& step1.out
+##+ `-c' option is for Comix only
+(time ./MakeSherpaLibs.sh -i ./ -p $PROCESS_NAME -c) >& step1.out
 
 ## run step 2
-(time ./PrepareSherpaLibs.sh -i ./ -p $job -a Sherpa/$job -m PROD) >& step2.out
-
-## run step 3
-cat >> sherpa_cfg.py <<EOF
-process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
-    moduleSeeds = cms.PSet(generator = cms.untracked.uint32(3310)),
-    sourceSeed = cms.untracked.uint32(123456)
-)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
-EOF
-(time cmsRun sherpa_cfg.py) >& step3.out
+(time ./PrepareSherpaLibs.sh -i ./ -p $PROCESS_NAME -a Sherpa/$PROCESS_NAME -m PROD) >& step2.out
 
 ## get unique output name
-i=0
-name=${job}_res${i}.tgz
-destination=$CASTOR_HOME/mc/Spring10/Sherpa/sherpacks
-# destination=$CASTOR_HOME
-while nsls $destination | grep -q $name; do
-	((i++))
-	name=${job}_res${i}.tgz
-done
+CASTOR_PATH=$CASTOR_HOME/mc/Spring10/Sherpa_v${PROJECT_VERSION}
+CASTOR_OUTPUT_PATH=$CASTOR_PATH/sherpacks
+# SHERPACK_VERSION=0
+# NAME=sherpa_${PROCESS_NAME}_v${SHERPACK_VERSION}_MASTER.tgz
+# while nsls $CASTOR_OUTPUT_PATH | grep -q $NAME; do
+# 	((SHERPACK_VERSION++))
+# 	NAME=sherpa_${PROCESS_NAME}_v${SHERPACK_VERSION}_MASTER.tgz
+# done
 
-## store output
-cd ../..
-tar czf res.tgz $job
-rfcp res.tgz $destination/$name
-cd ../..
-echo "Exiting $0 with great success!"
+## Store output on CASTOR
+# rfcp sherpa_${PROCESS_NAME}_MASTER.tgz $CASTOR_OUTPUT_PATH/$NAME
+rfcp sherpa_${PROCESS_NAME}_MASTER.tgz $CASTOR_OUTPUT_PATH
+
+## clean up
+cd $CMSSW_BASE/..
+rm -rf $CMSSW_BASE
+
+## done!
+echo "Exiting $0 with great success."

@@ -1,7 +1,7 @@
 (run){
   QCUT:=20.0
   DCUT:=0.3
-  NUM_JETS:=1
+  NUM_JETS:=5
   LEPTON_PID:=13
   NEUTRINO_PID:=14
 
