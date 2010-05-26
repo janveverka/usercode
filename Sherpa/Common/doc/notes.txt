@@ -36,52 +36,53 @@ Job <64747003> is submitted to queue <1nh80>.
 Job <64747004> is submitted to queue <1nh80>.
 
 Wgamma Sherpacks v2
-lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1061]$ python submitBuildSherpack.py
-bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j
-bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j1
-bsub -q 1nw80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j2
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j3
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j4
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j5
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j6
-bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j
-bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j1
-bsub -q 1nw80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j2
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j3
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j4
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j5
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j6
-bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j
-bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j1
-bsub -q 1nw80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j2
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j3
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j4
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j5
-bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j6
-lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1062]$ python submitBuildSherpack.py | sh
-Job <76159915> is submitted to queue <1nh80>.
-Job <76159918> is submitted to queue <1nh80>.
-Job <76159920> is submitted to queue <1nw80>.
-Job <76159922> is submitted to queue <2nw>.
-Job <76159924> is submitted to queue <2nw>.
-Job <76159925> is submitted to queue <2nw>.
-Job <76159930> is submitted to queue <2nw>.
-Job <76159931> is submitted to queue <1nh80>.
-Job <76159932> is submitted to queue <1nh80>.
-Job <76159935> is submitted to queue <1nw80>.
-Job <76159936> is submitted to queue <2nw>.
-Job <76159938> is submitted to queue <2nw>.
-Job <76159941> is submitted to queue <2nw>.
-Job <76159945> is submitted to queue <2nw>.
-Job <76159947> is submitted to queue <1nh80>.
-Job <76159950> is submitted to queue <1nh80>.
-Job <76159954> is submitted to queue <1nw80>.
-Job <76159955> is submitted to queue <2nw>.
-Job <76159959> is submitted to queue <2nw>.
-Job <76159960> is submitted to queue <2nw>.
-Job <76159961> is submitted to queue <2nw>.
 lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1063]$ date
 Tue May 25 17:39:31 CEST 2010
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1129]$ bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j
+Job <76262463> is submitted to queue <1nh80>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1130]$ bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j1
+Job <76262464> is submitted to queue <1nh80>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1131]$ bsub -q 1nw80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j2
+Job <76262465> is submitted to queue <1nw80>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1132]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j3
+Job <76262466> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1133]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j4
+Job <76262467> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1134]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j5
+Job <76262468> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1135]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgEle_0j6
+Job <76262469> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1136]$ bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j
+Job <76262470> is submitted to queue <1nh80>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1137]$ bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j1
+Job <76262471> is submitted to queue <1nh80>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1138]$ bsub -q 1nw80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j2
+Job <76262472> is submitted to queue <1nw80>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1139]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j3
+Job <76262473> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1140]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j4
+Job <76262474> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1141]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j5
+Job <76262475> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1142]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgMu_0j6
+Job <76262476> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1143]$ bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j
+Job <76262477> is submitted to queue <1nh80>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1144]$ bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j1
+Job <76262478> is submitted to queue <1nh80>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1145]$ bsub -q 1nw80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j2
+Job <76262479> is submitted to queue <1nw80>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1146]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j3
+Job <76262480> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1147]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j4
+Job <76262481> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1148]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j5
+Job <76262482> is submitted to queue <2nw>.
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1149]$ bsub -q   2nw sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/buildSherpack.sh WgTau_0j6
+Job <76262483> is submitted to queue <2nw>.
+
+lxplus308: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1150]$ date
+Wed May 26 11:57:01 CEST 2010
 
 
 
