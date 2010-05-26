@@ -154,7 +154,10 @@ nngHistos = cms.EDAnalyzer("LLGammaAnalyzer",
 )
 
 jetCountHisto = cms.EDAnalyzer("CandViewCountAnalyzer",
-  src = cms.untracked.InputTag("meOutPartons")
+  nbins = cms.untracked.uint32(100),
+  histograms = cms.untracked.VPSet(
+    cms.PSet(src = cms.untracked.InputTag("meOutPartons")),
+  )
 )
 
 drPromptPhotonLeptonHistos = cms.EDAnalyzer("DeltaRAnalyzer",

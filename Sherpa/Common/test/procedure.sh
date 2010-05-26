@@ -2,7 +2,7 @@
 name=ZgTarget
 
 # cleanup
-todelete=`ls -d *.tgz *.log *.dat *.sh *.py *.root SHERPATMP SherpaRun MIG* 2>/dev/null`
+todelete=`ls -d *.tgz *.log *.dat *.sh *.py *.root *.tex SHERPATMP SherpaRun MIG* 2>/dev/null`
 echo "deleting `echo $todelete| tr '\n' ' '`"
 for i in $todelete; do
   # echo deleting $i
