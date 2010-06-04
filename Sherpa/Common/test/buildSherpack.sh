@@ -5,7 +5,7 @@ CMSSW_RELEASE=CMSSW_3_5_8
 ##+ 2 - Sherpa 1.2.1 with CMSSW_3_5_8 in May 2010
 PROJECT_VERSION=2
 ## UserCode/JanVeverka/Sherpa release tag
-TAG=V01-01-03
+TAG=V01-01-05
 
 ## setup CMSSW release area
 scramv1 project CMSSW $CMSSW_RELEASE
