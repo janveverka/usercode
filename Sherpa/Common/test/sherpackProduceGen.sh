@@ -1,6 +1,6 @@
 JOB=${1:-WgEle_0j}
 CMSSW_RELEASE=CMSSW_3_5_8
-NUM_EVENTS=100
+NUM_EVENTS=5000
 
 #### setup CMSSW release area
 scramv1 project CMSSW $CMSSW_RELEASE
@@ -113,8 +113,8 @@ done
 echo "Storing $CASTOR_OUTPUT_PATH/$OUTPUT_NAME"
 rfcp outputGEN.root $CASTOR_OUTPUT_PATH/$OUTPUT_NAME
 
-echo "Storing $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME"
-scp outputGEN.root $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME
+# echo "Storing $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME"
+# scp outputGEN.root $T3_URL:$T3_OUTPUT_PATH/$OUTPUT_NAME
 
 # echo "Storing $AFS_OUTPUT_PATH/$OUTPUT_NAME"
 # cp outputGEN.root $AFS_OUTPUT_PATH/$OUTPUT_NAME

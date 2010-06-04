@@ -144,6 +144,711 @@ Job <76306926> is submitted to queue <2nw>.
 Job <76306927> is submitted to queue <2nw>.
 Job <76306929> is submitted to queue <2nw>.
 
+--
+Testing sherpacsk for higher jet multiplicity
+
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1017]$ bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j3
+Job <76963996> is submitted to queue <1nd80>.
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1018]$ bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j4
+Job <76963999> is submitted to queue <1nd80>.
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1019]$ bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j5
+Job <76964000> is submitted to queue <1nd80>.
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1020]$ bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j6
+Job <76964008> is submitted to queue <1nd80>.
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1021]$ date
+Mon May 31 12:02:57 CEST 2010
+
+It's taking too long. Changing # of events from 1000 to 10:
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1024]$ bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j2
+Job <76984181> is submitted to queue <1nd80>.
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1025]$ bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j3
+Job <76984186> is submitted to queue <1nd80>.
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1026]$ bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j4
+Job <76984209> is submitted to queue <1nd80>.
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1027]$ bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j5
+Job <76984254> is submitted to queue <1nd80>.
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1028]$ bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j6
+Job <76984278> is submitted to queue <1nd80>.
+lxplus301: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [1029]$ date
+Mon May 31 15:27:24 CEST 2010
+--> Jobs with 3+ jets never finish.
+
+OK, will produce GEN for 0j2.  Testing sherpacks for all processes with 0j, 0j1 and 0j2 (1000 events):
+lxplus226: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [405]$ date; python submitSherpackProduceGen.py;python submitSherpackProduceGen.py | sh
+Thu Jun  3 14:08:54 CEST 2010
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgEle_0j2
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgMu_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgMu_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgMu_0j2
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgTau_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgTau_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgTau_0j2
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgNu_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgNu_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh ZgNu_0j2
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh WgEle_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh WgEle_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh WgEle_0j2
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh WgMu_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh WgMu_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh WgMu_0j2
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh WgTau_0j
+bsub -q 1nh80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh WgTau_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh WgTau_0j2
+Job <77397229> is submitted to queue <1nh80>.
+Job <77397230> is submitted to queue <1nh80>.
+Job <77397231> is submitted to queue <1nd80>.
+Job <77397232> is submitted to queue <1nh80>.
+Job <77397233> is submitted to queue <1nh80>.
+Job <77397234> is submitted to queue <1nd80>.
+Job <77397235> is submitted to queue <1nh80>.
+Job <77397236> is submitted to queue <1nh80>.
+Job <77397237> is submitted to queue <1nd80>.
+Job <77397238> is submitted to queue <1nh80>.
+Job <77397239> is submitted to queue <1nh80>.
+Job <77397240> is submitted to queue <1nd80>.
+Job <77397241> is submitted to queue <1nh80>.
+Job <77397242> is submitted to queue <1nh80>.
+Job <77397243> is submitted to queue <1nd80>.
+Job <77397244> is submitted to queue <1nh80>.
+Job <77397245> is submitted to queue <1nh80>.
+Job <77397246> is submitted to queue <1nd80>.
+Job <77397247> is submitted to queue <1nh80>.
+Job <77397248> is submitted to queue <1nh80>.
+Job <77397249> is submitted to queue <1nd80>.
+
+--
+Test RECO production for up to 2 jets:
+
+lxplus226: /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test [440]$ date; python submitSherpackProduceReco.py; python submitSherpackProduceReco.py | sh
+Thu Jun  3 17:30:03 CEST 2010
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgEle_0j
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgEle_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgEle_0j2
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgMu_0j
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgMu_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgMu_0j2
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgTau_0j
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgTau_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgTau_0j2
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgNu_0j
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgNu_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh ZgNu_0j2
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh WgEle_0j
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh WgEle_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh WgEle_0j2
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh WgMu_0j
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh WgMu_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh WgMu_0j2
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh WgTau_0j
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh WgTau_0j1
+bsub -q 1nd80 sh /afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh WgTau_0j2
+Job <77420663> is submitted to queue <1nd80>.
+Job <77420664> is submitted to queue <1nd80>.
+Job <77420665> is submitted to queue <1nd80>.
+Job <77420666> is submitted to queue <1nd80>.
+Job <77420667> is submitted to queue <1nd80>.
+Job <77420668> is submitted to queue <1nd80>.
+Job <77420669> is submitted to queue <1nd80>.
+Job <77420670> is submitted to queue <1nd80>.
+Job <77420671> is submitted to queue <1nd80>.
+Job <77420672> is submitted to queue <1nd80>.
+Job <77420673> is submitted to queue <1nd80>.
+Job <77420674> is submitted to queue <1nd80>.
+Job <77420676> is submitted to queue <1nd80>.
+Job <77420677> is submitted to queue <1nd80>.
+Job <77420678> is submitted to queue <1nd80>.
+Job <77420679> is submitted to queue <1nd80>.
+Job <77420680> is submitted to queue <1nd80>.
+Job <77420681> is submitted to queue <1nd80>.
+Job <77420682> is submitted to queue <1nd80>.
+Job <77420683> is submitted to queue <1nd80>.
+Job <77420684> is submitted to queue <1nd80>.
+
+--
+
+Submit 10 x 1000 reco evets x ever process
+
+lxplus238:
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test
+[191]$ date; python submitSherpackProduceReco.py; python
+submitSherpackProduceReco.py | sh
+Thu Jun  3 23:40:19 CEST 2010
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceReco.sh
+WgTau_0j2
+Job <77476845> is submitted to queue <1nd80>.
+Job <77476847> is submitted to queue <1nd80>.
+Job <77476849> is submitted to queue <1nd80>.
+Job <77476851> is submitted to queue <1nd80>.
+Job <77476853> is submitted to queue <1nd80>.
+Job <77476854> is submitted to queue <1nd80>.
+Job <77476856> is submitted to queue <1nd80>.
+Job <77476858> is submitted to queue <1nd80>.
+Job <77476860> is submitted to queue <1nd80>.
+Job <77476861> is submitted to queue <1nd80>.
+Job <77476863> is submitted to queue <1nd80>.
+Job <77476865> is submitted to queue <1nd80>.
+Job <77476867> is submitted to queue <1nd80>.
+Job <77476869> is submitted to queue <1nd80>.
+Job <77476870> is submitted to queue <1nd80>.
+Job <77476872> is submitted to queue <1nd80>.
+Job <77476874> is submitted to queue <1nd80>.
+Job <77476876> is submitted to queue <1nd80>.
+Job <77476877> is submitted to queue <1nd80>.
+Job <77476879> is submitted to queue <1nd80>.
+Job <77476880> is submitted to queue <1nd80>.
+Job <77476882> is submitted to queue <1nd80>.
+Job <77476884> is submitted to queue <1nd80>.
+Job <77476886> is submitted to queue <1nd80>.
+Job <77476887> is submitted to queue <1nd80>.
+Job <77476889> is submitted to queue <1nd80>.
+Job <77476891> is submitted to queue <1nd80>.
+Job <77476893> is submitted to queue <1nd80>.
+Job <77476895> is submitted to queue <1nd80>.
+Job <77476897> is submitted to queue <1nd80>.
+Job <77476898> is submitted to queue <1nd80>.
+Job <77476899> is submitted to queue <1nd80>.
+Job <77476901> is submitted to queue <1nd80>.
+Job <77476902> is submitted to queue <1nd80>.
+Job <77476904> is submitted to queue <1nd80>.
+Job <77476906> is submitted to queue <1nd80>.
+Job <77476907> is submitted to queue <1nd80>.
+Job <77476909> is submitted to queue <1nd80>.
+Job <77476911> is submitted to queue <1nd80>.
+Job <77476913> is submitted to queue <1nd80>.
+Job <77476915> is submitted to queue <1nd80>.
+Job <77476917> is submitted to queue <1nd80>.
+Job <77476919> is submitted to queue <1nd80>.
+Job <77476921> is submitted to queue <1nd80>.
+Job <77476923> is submitted to queue <1nd80>.
+Job <77476924> is submitted to queue <1nd80>.
+Job <77476926> is submitted to queue <1nd80>.
+Job <77476928> is submitted to queue <1nd80>.
+Job <77476930> is submitted to queue <1nd80>.
+Job <77476932> is submitted to queue <1nd80>.
+Job <77476934> is submitted to queue <1nd80>.
+Job <77476936> is submitted to queue <1nd80>.
+Job <77476938> is submitted to queue <1nd80>.
+Job <77476940> is submitted to queue <1nd80>.
+Job <77476942> is submitted to queue <1nd80>.
+Job <77476943> is submitted to queue <1nd80>.
+Job <77476945> is submitted to queue <1nd80>.
+Job <77476947> is submitted to queue <1nd80>.
+Job <77476949> is submitted to queue <1nd80>.
+Job <77476951> is submitted to queue <1nd80>.
+Job <77476953> is submitted to queue <1nd80>.
+Job <77476955> is submitted to queue <1nd80>.
+Job <77476956> is submitted to queue <1nd80>.
+Job <77476958> is submitted to queue <1nd80>.
+Job <77476960> is submitted to queue <1nd80>.
+Job <77476962> is submitted to queue <1nd80>.
+Job <77476963> is submitted to queue <1nd80>.
+Job <77476965> is submitted to queue <1nd80>.
+Job <77476967> is submitted to queue <1nd80>.
+Job <77476969> is submitted to queue <1nd80>.
+
+--
+
+submit 10 x 5000 gen events x 7 processes
+
+lxplus238:
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test
+[197]$ date; python submitSherpackProduceGen.py; python
+submitSherpackProduceGen.py | sh
+Thu Jun  3 23:46:43 CEST 2010
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+ZgNu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgEle_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgMu_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+bsub -q 1nd80 sh
+/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/Common/test/sherpackProduceGen.sh
+WgTau_0j2
+Job <77477592> is submitted to queue <1nd80>.
+Job <77477593> is submitted to queue <1nd80>.
+Job <77477594> is submitted to queue <1nd80>.
+Job <77477595> is submitted to queue <1nd80>.
+Job <77477596> is submitted to queue <1nd80>.
+Job <77477600> is submitted to queue <1nd80>.
+Job <77477601> is submitted to queue <1nd80>.
+Job <77477606> is submitted to queue <1nd80>.
+Job <77477607> is submitted to queue <1nd80>.
+Job <77477608> is submitted to queue <1nd80>.
+Job <77477613> is submitted to queue <1nd80>.
+Job <77477617> is submitted to queue <1nd80>.
+Job <77477619> is submitted to queue <1nd80>.
+Job <77477622> is submitted to queue <1nd80>.
+Job <77477623> is submitted to queue <1nd80>.
+Job <77477624> is submitted to queue <1nd80>.
+Job <77477625> is submitted to queue <1nd80>.
+Job <77477626> is submitted to queue <1nd80>.
+Job <77477627> is submitted to queue <1nd80>.
+Job <77477628> is submitted to queue <1nd80>.
+Job <77477629> is submitted to queue <1nd80>.
+Job <77477630> is submitted to queue <1nd80>.
+Job <77477631> is submitted to queue <1nd80>.
+Job <77477632> is submitted to queue <1nd80>.
+Job <77477633> is submitted to queue <1nd80>.
+Job <77477634> is submitted to queue <1nd80>.
+Job <77477635> is submitted to queue <1nd80>.
+Job <77477636> is submitted to queue <1nd80>.
+Job <77477637> is submitted to queue <1nd80>.
+Job <77477638> is submitted to queue <1nd80>.
+Job <77477639> is submitted to queue <1nd80>.
+Job <77477640> is submitted to queue <1nd80>.
+Job <77477641> is submitted to queue <1nd80>.
+Job <77477642> is submitted to queue <1nd80>.
+Job <77477643> is submitted to queue <1nd80>.
+Job <77477644> is submitted to queue <1nd80>.
+Job <77477645> is submitted to queue <1nd80>.
+Job <77477646> is submitted to queue <1nd80>.
+Job <77477647> is submitted to queue <1nd80>.
+Job <77477648> is submitted to queue <1nd80>.
+Job <77477649> is submitted to queue <1nd80>.
+Job <77477650> is submitted to queue <1nd80>.
+Job <77477651> is submitted to queue <1nd80>.
+Job <77477652> is submitted to queue <1nd80>.
+Job <77477653> is submitted to queue <1nd80>.
+Job <77477654> is submitted to queue <1nd80>.
+Job <77477655> is submitted to queue <1nd80>.
+Job <77477656> is submitted to queue <1nd80>.
+Job <77477657> is submitted to queue <1nd80>.
+Job <77477658> is submitted to queue <1nd80>.
+Job <77477659> is submitted to queue <1nd80>.
+Job <77477660> is submitted to queue <1nd80>.
+Job <77477661> is submitted to queue <1nd80>.
+Job <77477662> is submitted to queue <1nd80>.
+Job <77477663> is submitted to queue <1nd80>.
+Job <77477664> is submitted to queue <1nd80>.
+Job <77477665> is submitted to queue <1nd80>.
+Job <77477666> is submitted to queue <1nd80>.
+Job <77477668> is submitted to queue <1nd80>.
+Job <77477669> is submitted to queue <1nd80>.
+Job <77477670> is submitted to queue <1nd80>.
+Job <77477671> is submitted to queue <1nd80>.
+Job <77477672> is submitted to queue <1nd80>.
+Job <77477673> is submitted to queue <1nd80>.
+Job <77477674> is submitted to queue <1nd80>.
+Job <77477675> is submitted to queue <1nd80>.
+Job <77477676> is submitted to queue <1nd80>.
+Job <77477677> is submitted to queue <1nd80>.
+Job <77477678> is submitted to queue <1nd80>.
+Job <77477679> is submitted to queue <1nd80>.
+
+
+
 
 
 ===================================================================
