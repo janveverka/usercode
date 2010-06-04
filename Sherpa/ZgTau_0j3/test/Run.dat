@@ -10,6 +10,9 @@
   ANALYSIS     = 1
   EVENT_MODE   = HepMC
   RANDOM_SEED  = 15532 27624
+
+  # avoid comix re-init after runcard modification
+  WRITE_MAPPING_FILE 3;
 }(run)
 
 (beam){
