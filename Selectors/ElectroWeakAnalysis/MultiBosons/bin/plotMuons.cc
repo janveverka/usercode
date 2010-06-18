@@ -46,18 +46,18 @@ int main ( int argc, char ** argv )
   boost::shared_ptr<edm::ParameterSet> cfg = builder.processDesc()->getProcessPSet();
   edm::ParameterSet const& inputs =  cfg->getParameter<edm::ParameterSet>("inputs");
   edm::ParameterSet const& outputs = cfg->getParameter<edm::ParameterSet>("outputs");
-  edm::ParameterSet const& ptHisto = cfg->getParameter<edm::ParameterSet>("ptHisto");
+//   edm::ParameterSet const& ptHisto = cfg->getParameter<edm::ParameterSet>("ptHisto");
   edm::ParameterSet const& muonHistosCfg = cfg->getParameter<edm::ParameterSet>("muonHistos");
   edm::InputTag muonSrcTag = muonHistosCfg.getParameter<edm::InputTag>("src");
 
   fwlite::TFileService fs = fwlite::TFileService( outputs.getParameter<std::string>("outputName") );
-  TFileDirectory theDir = fs.mkdir( "histos" );
+//   TFileDirectory theDir = fs.mkdir( "histos" );
   TFileDirectory muonHistosDir = fs.mkdir( "muonHistos" );
 
 //   TH1F* muonPt_  = theDir.make<TH1F>("muonPt", "pt",    100,  0.,300.);
 
-  ExpressionHisto<reco::Candidate> exprHisto(ptHisto);
-  exprHisto.initialize(theDir);
+//   ExpressionHisto<reco::Candidate> exprHisto(ptHisto);
+//   exprHisto.initialize(theDir);
 
 
   vector<ExpressionHisto<pat::Muon>* > muonHistos;
@@ -93,11 +93,11 @@ int main ( int argc, char ** argv )
     event.getByLabel(muonSrcTag, muons);
 
     // loop over muons
-    for(unsigned i=0; i<muons->size(); ++i){
-      exprHisto.fill(muons->at(i) );
-
-
-    } // loop over muons
+//     for(unsigned i=0; i<muons->size(); ++i){
+//       exprHisto.fill(muons->at(i) );
+//
+//
+//     } // loop over muons
 
     // loop over muon histos
     for (vector<ExpressionHisto<pat::Muon>* >::const_iterator iHist = muonHistos.begin();

@@ -22,5 +22,19 @@ process.wplusjetsAnalysis.muonSrc = "cleanPatMuons"
 process.wplusjetsAnalysis.electronSrc = "cleanPatElectrons"
 process.wplusjetsAnalysis.jetSrc = "cleanPatJets"
 
-process.wplusjetsAnalysis.minJets = 2
+process.wplusjetsAnalysis.minJets = 1
+
+## Convert cms.EDAnalyzer to cms.PSet
+from ElectroWeakAnalysis.MultiBosons.Histogramming.muonHistos_cfi import muonHistos
+process.muonHistosAll = cms.PSet(
+  src = cms.InputTag(muonHistos.src.value() ),
+  histograms = muonHistos.histograms.copy(),
+  outputDirectory = cms.string('allMuons')
+)
+
+process.muonHistosSel = process.muonHistosAll.clone(
+  outputDirectory = "selMuons"
+)
+
+
 

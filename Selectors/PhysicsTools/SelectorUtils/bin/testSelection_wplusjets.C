@@ -8,6 +8,7 @@
 #include "PhysicsTools/FWLite/interface/TFileService.h"
 #include "FWCore/PythonParameterSet/interface/PythonProcessDesc.h"
 #include "FWCore/ParameterSet/interface/ProcessDesc.h"
+#include "ElectroWeakAnalysis/MultiBosons/bin/MuonHistogrammer.cc"
 
 #include "Math/GenVector/PxPyPzM4D.h"
 
@@ -44,6 +45,8 @@ int main ( int argc, char ** argv )
   edm::ParameterSet const& shyftParameters = builder.processDesc()->getProcessPSet()->getParameter<edm::ParameterSet>("wplusjetsAnalysis");
   edm::ParameterSet const& inputs = builder.processDesc()->getProcessPSet()->getParameter<edm::ParameterSet>("inputs");
   edm::ParameterSet const& outputs = builder.processDesc()->getProcessPSet()->getParameter<edm::ParameterSet>("outputs");
+  edm::ParameterSet const& muonHistosAllCfg = builder.processDesc()->getProcessPSet()->getParameter<edm::ParameterSet>("muonHistosAll");
+  edm::ParameterSet const& muonHistosSelCfg = builder.processDesc()->getProcessPSet()->getParameter<edm::ParameterSet>("muonHistosSel");
 
   // book a set of histograms
   fwlite::TFileService fs = fwlite::TFileService( outputs.getParameter<std::string>("outputName") );
@@ -51,6 +54,9 @@ int main ( int argc, char ** argv )
   theDir.cd();
   TH1F *hMuRelIsoSelected = theDir.make<TH1F>("hMuRelIsoSelected", "selected #mu rel. iso.", 100, 0., 0.1);
   TH1F *hMuRelIsoPassed = theDir.make<TH1F>("hMuRelIsoPassed", "passed #mu rel. iso.", 100, 0., 0.1);
+
+  MuonHistogrammer muonHistosAll(muonHistosAllCfg, fs);
+  MuonHistogrammer muonHistosSel(muonHistosSelCfg, fs);
 
   // This object 'event' is used both to get all information from the
   // event as well as to store histograms, etc.
@@ -61,9 +67,13 @@ int main ( int argc, char ** argv )
   pat::strbitset ret = wPlusJets.getBitTemplate();
 
   //loop through each event
+  uint record = 0;
   for( ev.toBegin();
-       ! ev.atEnd();
-       ++ev) {
+       ! ev.atEnd() && record < 200;
+       ++ev, ++record)
+  {
+    if (record % 100 == 0)
+      std::cout << "Begin processing record " << record << std::endl;
 /*    std::cout << "run: " << ev.id().run()
               << ", event: " << ev.id().event()
               << std::endl;*/
@@ -120,6 +130,10 @@ int main ( int argc, char ** argv )
 
     }
 
+    // all muons in the event
+//     edm::EventBase const & event = ev;
+    muonHistosAll.analyze(ev);
+    muonHistosSel.analyze(muons);
 
   } //end event loop
 
