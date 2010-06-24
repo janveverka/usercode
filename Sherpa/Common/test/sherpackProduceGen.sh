@@ -66,11 +66,14 @@ maxSeed = {"HepJamesRandom": 900000000,
 import random
 
 for name in  dir(process.RandomNumberGeneratorService):
-  module = process.RandomNumberGeneratorService.__getattribute__(name)
+  module = getattr(process.RandomNumberGeneratorService, name)
   if "initialSeed" in dir(module):
-    module.initialSeed = random.randint(0,
-      maxSeed[module.engineName.value()]
-    )
+    max = maxSeed[module.engineName.value()]
+    newSeed = random.randint(0, max)
+    oldSeed = module.initialSeed.value()
+    print "Modifying random seed: %25s: %10d -> %10d" % \
+      (name, oldSeed, newSeed)
+    module.initialSeed = newSeed
 EOF
 
 #### Run!
