@@ -13,7 +13,7 @@ process.source = cms.Source("PoolSource",
     )
 )
 
-process.maxEvents = cms.untracked.PSet( output = cms.untracked.int32(2) )
+process.maxEvents = cms.untracked.PSet( output = cms.untracked.int32(-1) )
 
 ## Define the TFileService
 process.TFileService = cms.Service("TFileService",

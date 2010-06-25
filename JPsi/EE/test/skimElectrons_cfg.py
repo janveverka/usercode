@@ -17,4 +17,7 @@ process.p = cms.Path(
 
 process.maxEvents.output = 10
 
+## require at least 2 electrons
+process.electronCountFilter.minNumber = 2
+
 if __name__ == "__main__": import user
