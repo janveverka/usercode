@@ -1,0 +1,14 @@
+## To reproduce test of the skimming 
+source /uscmst1/prod/sw/cms/bashrc uaf
+project CMSSW
+kserver_init
+cd nobackup/test
+cmsrel CMSSW_3_6_2
+cd CMSSW_3_6_2/src
+cmsenv
+cvs co -r V00-00-00 -d JPsi/EE UserCode/JanVeverka/JPsi/EE
+cd JPsi/EE/
+scram b -j4
+cd test
+cmsRun skimElectrons_cfg.py
+
