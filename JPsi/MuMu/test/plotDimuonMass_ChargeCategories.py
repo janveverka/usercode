@@ -69,9 +69,4 @@ legend.SetLineColor(ROOT.kWhite)
 legend.SetFillColor(ROOT.kWhite)
 legend.Draw()
 
-#
-# cat = categories[0]
-# expr = cat + "ssJPsiMass>>h" + cat
-# chain.Draw("ggssJPsiMass>>hMassGGPP(10,2.6,3.6)", "ggssJPsiCharge == 2 & 2.6 < ggssJPsiMass && ggssJPsiMass < 3.6")
-
 if __name__ == "__main__": import user

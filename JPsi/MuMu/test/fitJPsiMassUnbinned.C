@@ -1,6 +1,6 @@
-/** \macro pi0Fit.C
+/** \macro fitJPsiMassUnbinned.C
  *
- * $Id$
+ * $Id: fitJPsiMassUnbinned.C,v 1.1 2010/07/04 23:54:06 veverka Exp $
  *
  *
  * Macro implementing unbinned Maximum-likelihood fit of
