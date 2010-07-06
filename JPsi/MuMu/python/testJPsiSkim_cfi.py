@@ -1,46 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
-glbMuons = cms.EDFilter("PATMuonSelector",
-  src = cms.InputTag("patMuons"),
-  cut = cms.string('isGlobalMuon = 1' +
-                   '& muonID("GlobalMuonPromptTight") = 1' +
-                   '& pt > 1' +
-                   '& abs(dB) < 0.05' +
-                   '& trackIso < 0.1' +
-                   '& hcalIso < 0.1')
-)
+from JPsi.MuMu.glbMuons_cfi import *
+from JPsi.MuMu.trkMuons_cfi import *
+from JPsi.MuMu.dimuons_cfi import *
 
-trkMuons = cms.EDFilter("PATMuonSelector",
-  src = cms.InputTag("patMuons"),
-  cut = cms.string('isGlobalMuon = 0' +
-                   '& isTrackerMuon = 1 &' +
-                   'muonID("TMLastStationAngTight") = 1' +
-                   '& pt > 1' +
-                   '& p > 2.5' +
-                   '& abs(dB) < 0.05' +
-                   '& trackIso < 0.1' +
-                   '& hcalIso < 0.1')
-)
-
-dimuonsOS = cms.EDProducer("CandViewShallowCloneCombiner",
-    checkCharge = cms.bool(True),
-    cut = cms.string('0 < mass'),
-    decay = cms.string('patMuons@+ patMuons@-')
-)
-
-dimuonsSS = dimuonsOS.clone(decay = cms.string('patMuons@+ patMuons@+') )
-
-dimuonsGlbGlbOS = dimuonsOS.clone(decay = cms.string('glbMuons@+ glbMuons@-') )
-dimuonsGlbGlbSS = dimuonsOS.clone(decay = cms.string('glbMuons@+ glbMuons@+') )
-
-dimuonsGlbTrkOS = dimuonsOS.clone(decay = cms.string('glbMuons@+ trkMuons@-') )
-dimuonsGlbTrkSS = dimuonsOS.clone(decay = cms.string('glbMuons@+ trkMuons@+') )
-
-dimuonsTrkTrkOS = dimuonsOS.clone(decay = cms.string('trkMuons@+ trkMuons@-') )
-dimuonsTrkTrkSS = dimuonsOS.clone(decay = cms.string('trkMuons@+ trkMuons@+') )
 
 from ElectroWeakAnalysis.MultiBosons.Histogramming.muonHistos_cfi import *
-muonHistos.src = "patMuons"
+muonHistos.src = "selectedPatMuons"
 
 muonHistos5 = muonHistos.clone()
 
@@ -75,7 +41,7 @@ counts = cms.EDAnalyzer("CandViewCountAnalyzer",
   nbins = cms.untracked.uint32(21),
   histograms = cms.untracked.VPSet(
     #cms.PSet( src = cms.untracked.InputTag("standAloneMuons") ),
-    cms.PSet( src = cms.untracked.InputTag("patMuons") ),
+    cms.PSet( src = cms.untracked.InputTag("selectedPatMuons") ),
     cms.PSet( src = cms.untracked.InputTag("glbMuons") ),
     cms.PSet( src = cms.untracked.InputTag("trkMuons") ),
     cms.PSet( src = cms.untracked.InputTag("dimuonsOS") ),
