@@ -1,6 +1,6 @@
 /** \macro fitJPsi2SMassUnbinned.C
  *
- * $Id: fitJPsi2SMassUnbinned.C,v 1.1 2010/07/04 23:54:06 veverka Exp $
+ * $Id: fitJPsi2SMassUnbinned.C,v 1.2 2010/07/04 23:56:08 veverka Exp $
  *
  *
  * Macro implementing unbinned Maximum-likelihood fit of
@@ -34,10 +34,10 @@ double NormalizedIntegral(RooAbsPdf & function, RooRealVar & integrationVar, dou
 
 }
 
-fitJPsi2SMassUnbinned(const char *filename = "dimuonMassOS.txt",
+fitJPsi2SMassUnbinned(const char *filename = "dimuonMassOS_131511_139375.txt",
   const char* plotOpt = "NEU",
-  const int nbins = 20,
-  const char* filenameB = "dimuonMassSS.txt")
+  const int nbins = 25,
+  const char* filenameB = "dimuonMassSS_131511_139375.txt")
 {
 
   double minMass = 3.4;

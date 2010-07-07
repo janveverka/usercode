@@ -7,23 +7,16 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
-process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(50000) )
 
-pathPrefix = "file:/uscms_data/d1/veverka/data/"
-fileList = """
-MinimumBias_Commissioning10-CS_Onia-Jun14thSkim_v1_DimuonSkimPAT_1.root
-MinimumBias_Commissioning10-CS_Onia-Jun14thSkim_v1_DimuonSkimPAT_2.root
-MinimumBias_Commissioning10-CS_Onia-Jun14thSkim_v1_DimuonSkimPAT_3.root
-MinimumBias_Commissioning10-CS_Onia-Jun14thSkim_v1_DimuonSkimPAT_4.root
-MinimumBias_Commissioning10-CS_Onia-Jun14thSkim_v1_DimuonSkimPAT_5.root
-MinimumBias_Commissioning10-CS_Onia-Jun14thSkim_v1_DimuonSkimPAT_6.root
-MinimumBias_Commissioning10-CS_Onia-Jun14thSkim_v1_DimuonSkimPAT_7.root
-""".split()
+import JPsi.MuMu.Mu_Run2010A_PromptReco_v4_DimuonPhotonSkim_v1_json137437_139375_cff as promptReco_v4
+pathPrefix = "rfio:" + promptReco_v4.crabOutputPath + "/"
 
 process.source = cms.Source("PoolSource",
   fileNames = cms.untracked.vstring(pathPrefix + "Mu_Run2010A-CS_Onia-Jun14thSkim_v1_DimuonSkimPAT.root")
 )
-# process.source.fileNames = [pathPrefix + file for file in fileList]
+process.source.fileNames = [pathPrefix + file for file in promptReco_v4.crabOutputFileList]
 
 process.load("JPsi.MuMu.glbMuons_cfi")
 process.load("JPsi.MuMu.trkMuons_cfi")
@@ -89,7 +82,7 @@ process.out = cms.OutputModule("PoolOutputModule",
       '*Path',
     )
   ),
-  fileName = cms.untracked.string("muNtuples.root")
+  fileName = cms.untracked.string("ntuplePromptReco_50k.root")
 #   fileName = cms.untracked.string("minimumBiasNtuples.root")
 )
 
