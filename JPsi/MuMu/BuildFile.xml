@@ -1,0 +1,5 @@
+<use name="root"/>
+<export>
+   <lib name="JPsiMuMu"/>
+   <use name="root"/>
+</export>
