@@ -1,6 +1,6 @@
 /** \macro fitJPsiMassUnbinned.C
  *
- * $Id: fitJPsiMassUnbinned.C,v 1.2 2010/07/04 23:56:08 veverka Exp $
+ * $Id: fitJPsiMassUnbinned.C,v 1.3 2010/07/07 20:07:53 veverka Exp $
  *
  *
  * Macro implementing unbinned Maximum-likelihood fit of
@@ -34,17 +34,17 @@ double NormalizedIntegral(RooAbsPdf & function, RooRealVar & integrationVar, dou
 
 }
 
-fitJPsiMassUnbinned(const char *filename = "dimuonMassOS_131511_139375.txt",
+fitJPsiMassUnbinned(const char *filename = "JPsiMassOS_186nb.txt",
   const char* plotOpt = "NEU",
   const int nbins = 50,
-  const char* filenameB = "dimuonMassSS_131511_139375.txt")
+  const char* filenameB = "JPsiMassSS_186nb.txt")
 {
 
   gROOT->ProcessLine(".L tdrstyle.C");
   setTDRStyle();
   gStyle->SetPadRightMargin(0.05);
 
-  RooRealVar  mass("mass","M(#mu^{+}#mu^{-})", 2.6, 3.5,"GeV/c^{2}");
+  RooRealVar  mass("mass","M^{#mu#mu}", 2.6, 3.5,"GeV/c^{2}");
 
   // Read data set
 
@@ -125,7 +125,7 @@ fitJPsiMassUnbinned(const char *filename = "dimuonMassOS_131511_139375.txt",
   tex->SetLineWidth(2);
   tex->Draw();
   tex->DrawLatex(0.2, 0.725, "#sqrt{s} = 7 TeV");
-  tex->DrawLatex(0.2, 0.650, "L = 51 pb^{-1}");
+  tex->DrawLatex(0.2, 0.650, "L = 186 nb^{-1}");
 
   float fsig_peak = NormalizedIntegral(signal,
                       mass,
