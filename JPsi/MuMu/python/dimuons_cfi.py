@@ -6,21 +6,21 @@ goodDimuons = cms.EDProducer("CandViewShallowCloneCombiner",
     decay = cms.string('goodMuons goodMuons')
 )
 
-# dimuonsOS = goodDimuons.clone(
-#     checkCharge = True,
-#     decay = 'goodMuons@+ goodMuons@-'
-# )
-#
-# dimuonsSS = dimuonsOS.clone(decay = 'goodMuons@+ goodMuons@+')
-#
-# dimuonsGGOS = dimuonsOS.clone(decay = 'glbMuons@+ glbMuons@-' )
-# dimuonsGGSS = dimuonsOS.clone(decay = 'glbMuons@+ glbMuons@+' )
-#
-# dimuonsGTOS = dimuonsOS.clone(decay = 'glbMuons@+ trkMuons@-' )
-# dimuonsGTSS = dimuonsOS.clone(decay = 'glbMuons@+ trkMuons@+' )
-#
-# dimuonsTTOS = dimuonsOS.clone(decay = 'trkMuons@+ trkMuons@-' )
-# dimuonsTTSS = dimuonsOS.clone(decay = 'trkMuons@+ trkMuons@+' )
+dimuonsOS = goodDimuons.clone(
+    checkCharge = True,
+    decay = 'goodMuons@+ goodMuons@-'
+)
+
+dimuonsSS = dimuonsOS.clone(decay = 'goodMuons@+ goodMuons@+')
+
+dimuonsGGOS = dimuonsOS.clone(decay = 'glbMuons@+ glbMuons@-' )
+dimuonsGGSS = dimuonsOS.clone(decay = 'glbMuons@+ glbMuons@+' )
+
+dimuonsGTOS = dimuonsOS.clone(decay = 'glbMuons@+ trkMuons@-' )
+dimuonsGTSS = dimuonsOS.clone(decay = 'glbMuons@+ trkMuons@+' )
+
+dimuonsTTOS = dimuonsOS.clone(decay = 'trkMuons@+ trkMuons@-' )
+dimuonsTTSS = dimuonsOS.clone(decay = 'trkMuons@+ trkMuons@+' )
 
 vertexedDimuons = cms.EDProducer("KalmanVertexFitCompositeCandProducer",
   src = cms.InputTag("goodDimuons"),

@@ -67,8 +67,8 @@ jpsiSequence = cms.Sequence(muonHistos +
     + dimuonsGTOS * dimuonsGTOSHistos
     + dimuonsGTSS * dimuonsGTSSHistos
     + dimuonsTTOS * dimuonsTTOSHistos
-    + dimuonsTTSS * dimuonsTTSSHistos )
-  + counts
+    + dimuonsTTSS * dimuonsTTSSHistos ) +
+  counts
 )
 
 #goodTrackHistos = makeHistoAnalyzer("CandViewHistoAnalyzer",

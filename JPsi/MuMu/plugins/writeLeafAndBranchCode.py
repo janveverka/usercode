@@ -2,6 +2,10 @@ leafs = """
 run/i
 lumi/i
 event/i
+L1DoubleMuOpen/b
+HLT_Mu3/b
+HLT_Mu9/b
+nDimuons/b
 mass/F
 pt/F
 eta/F
@@ -33,26 +37,37 @@ dszBS/F
 dszPV/F
 pdgId/I
 backToBack/F
+dau1/b
+dau2/b
+correctedMassJPsi/F
+correctedMassY/F
+isJPsiCand/b
+isYCand/b
+isZCand/b
+orderByMuQAndPt/b
+orderByVProb/b
 """.split()
 
 dauLeafs = """
+nMuons/b
 pt/F
 eta/F
 phi/F
 p/F
 charge/I
 innerTrack->normalizedChi2/F
-innerTrack->d0/F
-innerTrack->d0BS/F
-innerTrack->d0PV/F
+innerTrack->dxy/F
+innerTrack->dxyBS/F
+innerTrack->dxyPV/F
 innerTrack->dz/F
 innerTrack->dzBS/F
 innerTrack->dzPV/F
 innerTrack->dsz/F
 innerTrack->dszBS/F
 innerTrack->dszPV/F
-innerTrack->found/I
-innerTrack->hitPattern->numberOfValidPixelHits/I
+innerTrack->found/b
+innerTrack->hitPattern->numberOfValidPixelHits/b
+vz/F
 isGlobalMuon/B
 isTrackerMuon/B
 muonID("TMLastStationAngTight")/B
@@ -60,6 +75,12 @@ muonID("TrackerMuonArbitrated")/B
 trackIso/F
 ecalIso/F
 hcalIso/F
+stations/b
+passJPsiId/b
+passYId/b
+passZId/b
+passZIdTight/b
+hltMu9Match/b
 """.split()
 
 varTypes = {
@@ -67,7 +88,8 @@ varTypes = {
   "I": "int",
   "D": "double",
   "B": "char",
-  "i": "unsigned"
+  "i": "unsigned",
+  "b": "unsigned char"
 }
 
 while leafs.count("") > 0: leafs.remove("")
@@ -77,7 +99,7 @@ def getDauName(var):
   tokens = [t[0].capitalize() + t[1:] for t in tokens]
   name = "".join(tokens)
   name = name.replace("InnerTrackHitPatternNumberOfValid", "")
-  name = name.replace("InnerTrack", "Si")
+  name = name.replace("InnerTrack", "Silicon")
   name = name.replace("Found", "Hits")
   name = name.replace("MuonID", "Is")
   name = name.replace('"', '')
@@ -111,73 +133,67 @@ for var in leafs:
   typeFlag = var.split("/")[1]
   space1 = (maxTypeLen - len(varTypes[typeFlag])) * " "
   space2 = (maxNameLen - len(name) ) * " "
-  print '  %s%s %s;' % (varTypes[typeFlag], space1, name)
+  print '  %s%s %s%s[maxDimuons];' % (varTypes[typeFlag], space1, name, space2)
 
 for var in dauLeafs:
   name = getDauName(var)
   typeFlag = var.split("/")[1]
   space1 = (maxTypeLen - len(varTypes[typeFlag])) * " "
-  space2 = (maxNameLen - len(name) -3) * " "
-  print '  {t}{s1} mu1{n}{s2};'.format(t = varTypes[typeFlag], 
+  space2 = (maxDauNameLen - len(name) ) * " "
+  print '  {t}{s1} mu{n}{s2}[maxMuons];'.format(t = varTypes[typeFlag], 
                                        s1 = space1, 
                                        n = name, 
                                        s2 = space2)
-  print '  {t}{s1} mu2{n}{s2};'.format(t = varTypes[typeFlag], 
-                                       s1 = space1, 
-                                       n = name, 
-                                       s2 = space2)
-
 print
 
-print "interface/DimuonsTree.cc ctor snippet"
+#print "interface/DimuonsTree.cc ctor snippet"
 
-for name in [var.split("/")[0] for var in leafs]:
-  space = ( maxNameLen - len(name) ) * " "
-  print '  {n}{s}(0),'.format(n=name, s=space)
-for name in [getDauName(var) for var in dauLeafs]:
-  space = ( maxNameLen - len(name) - 3 ) * " "
-  print '  mu1{n}{s}(0),'.format(n=name, s=space)
-  print '  mu2{n}{s}(0),'.format(n=name, s=space)
-print
+#for name in [var.split("/")[0] for var in leafs]:
+  #space = ( maxNameLen - len(name) ) * " "
+  #print '  {n}{s}(0),'.format(n=name, s=space)
+#for name in [getDauName(var) for var in dauLeafs]:
+  #space = ( maxNameLen - len(name) - 3 ) * " "
+  #print '  mu1{n}{s}(0),'.format(n=name, s=space)
+  #print '  mu2{n}{s}(0),'.format(n=name, s=space)
+#print
 
 
 print "src/DimuonsTree.cc init snippet"
 for var in leafs:
   name = var.split("/")[0]
+  typeFlag = var.split("/")[1]
   space = (maxNameLen - len(name)) * " "
-  print '  tree_->Branch("{n}"{s}, &{n}{s}, "{v}"{s});'.format(n=name, s=space, v=var)
+  mask = '  tree_->Branch("{n}"{s}, {n}{s}, "{n}[nDimuons]/{t}"{s});'
+  print mask.format(n=name, s=space, v=var, t=typeFlag)
 for var in dauLeafs:
   name = getDauName(var)
   typeFlag = var.split("/")[1]
   space = (maxDauNameLen - len(name)) * " "
-  mask = '  tree_->Branch("mu{d}{n}"{s}, &mu{d}{n}{s}, "mu{d}{n}/{t}"{s});'
-  print mask.format(d=1, n=name, s=space, v=var, t=typeFlag)
-  print mask.format(d=2, n=name, s=space, v=var, t=typeFlag)
+  mask = '  tree_->Branch("mu{n}"{s}, mu{n}{s}, "mu{n}[nMuons]/{t}"{s});'
+  print mask.format(n=name, s=space, v=var, t=typeFlag)
 print
 
 print "src/DimuonsTree.cc initLeafVariables snippet"
 for var in leafs:
   name = var.split("/")[0]
   space = (maxNameLen - len(name)) * " "
-  print '  {n}{s} = 0;'.format(n=name, s=space)
+  print '    {n}[i]{s} = 0;'.format(n=name, s=space)
 print
 for var in dauLeafs:
   name = getDauName(var)
   space = (maxDauNameLen - len(name)) * " "
-  print '  mu1{n}{s} = 0;'.format(n=name, s=space)
-  print '  mu2{n}{s} = 0;'.format(n=name, s=space)
+  print '    mu{n}[i]{s} = 0;'.format(n=name, s=space)
 print
 
 print "plugins/DimuonsNtupelizer.cc snippet"
 for var in leafs:
   name = var.split("/")[0]
   space = (maxNameLen - len(name)) * " "
-  print '    dimuonsTree_.{n}{s} = dimuon->{n}();'.format(n=name, s=space)
+  print '    dimuonsTree_.{n}[i]{s} = dimuon->{n}();'.format(n=name, s=space)
 print
 for var in dauLeafs:
   name = getDauName(var)
   expr = getDauExpr(var)
   space = (maxDauNameLen - len(name)) * " "
-  print '    dimuonsTree_.mu1{n}{s} = mu1->{e};'.format(n=name, s=space, e=expr)
-  print '    dimuonsTree_.mu2{n}{s} = mu2->{e};'.format(n=name, s=space, e=expr)
+  print '    dimuonsTree_.mu{n}[i]{s} = mu->{e};'.format(n=name, s=space, e=expr)
 print
