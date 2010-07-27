@@ -1,23 +1,6 @@
 import FWCore.ParameterSet.Config as cms
-import FWCore.ParameterSet.VarParsing as VarParsing
 
 from PhysicsTools.PatAlgos.patTemplate_cfg import *
-
-##########################################################
-# COMMAND LINE OPTIONS
-##########################################################
-
-options = VarParsing.VarParsing("analysis")
-options.register("globalTag",
-                 "GR_R_36X_V12A::All", # default value
-                 VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-                 VarParsing.VarParsing.varType.string,         # string, int, or float
-                 "Global tag to be used."
-                 )
-
-# get and parse the command line arguments
-options.parseArguments()
-
 
 ##########################################################
 # VARIOUS FILTERS TO CLEAN UP COLLISION DATA
@@ -86,7 +69,7 @@ process.p = cms.Path(
 # switchOnTrigger( process )
 # switchOnTriggerMatchEmbedding( process )
 
-process.GlobalTag.globaltag = options.globalTag
+process.GlobalTag.globaltag = "START3X_V26::All" # Spring10 MC
 
 #import JPsi.MuMu.filesAtFnal_CS_Onia_June9thSkim_v1_cff as June9thSkim
 # from JPsi.MuMu.filesAtFnal_Jun14thReReco_v1_cff import fileNames
@@ -94,17 +77,14 @@ from JPsi.MuMu.filesAtFnal_CS_Onia_Jun14thSkim_v1_cff import fileNames
 process.source.fileNames = cms.untracked.vstring(fileNames[:50])
 
 # process.maxEvents.input = 2000
-process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(-1))
+# process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(10))
 # process.out.fileName = "pat_test.root"
 #process.out.fileName = "/uscms/home/veverka/nobackup/CS_Onia_June9thSkim_v1_PAT.root"
-process.out.fileName = "DimuonPhotonSkim_v2.root"
+process.out.fileName = "DimuonPhotonSkim.root"
 
 ## Add extra photon / ECAL event content
 from ElectroWeakAnalysis.MultiBosons.Skimming.VgEventContent import vgExtraPhotonEventContent
-vgExtraPhotonEventContent += ["keep *_islandBasicClusters_*_*",
-  "keep *_offlinePrimaryVertices_*_*",
-  "keep *_offlineBeamSpot_*_*"
-]
+vgExtraPhotonEventContent += ["keep *_islandBasicClusters_*_*"]
 process.out.outputCommands.extend(vgExtraPhotonEventContent)
 
 process.options.wantSummary = False
@@ -116,4 +96,3 @@ process.selectedPatMuons.cut = "isGlobalMuon || (isTrackerMuon && numberOfMatche
 ## Embed tracker tracks
 process.patMuons.embedTrack = True
 
-if __name__ == "__main__": import user
