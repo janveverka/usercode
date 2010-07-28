@@ -151,7 +151,7 @@ DimuonsTree::applyZSelection() {
     muPassZId[i] = muPassZIdTight[i] = 0;
     if (!muIsTrackerMuon[i]) continue;
     if (muSiHits[i] < 10) continue;
-    if (muPt[i] < 20.) continue;
+    if (muPt[i] < 10.) continue;
     if (TMath::Abs(muEta[i]) > 2.4) continue;
     if (muTrackIso[i] > 3.0) continue;
 
@@ -180,16 +180,17 @@ DimuonsTree::applyZSelection() {
     if (!muPassZId[dau1[i]] || !muPassZId[dau2[i]]) continue;
     if (!muPassZIdTight[dau1[i]] && !muPassZIdTight[dau2[i]]) continue;
 //     if (mass[i] < 60. || mass[i] > 120.) continue;
-    if (TMath::Abs(muEta[dau1[i]]) > 2.1 && 
+    if (TMath::Abs(muEta[dau1[i]]) > 2.1 &&
         TMath::Abs(muEta[dau2[i]]) > 2.1) continue;
-
+    if (muPt[dau1[i]] < 15. &&
+        muPt[dau1[i]] < 15. ) continue;  // at least 1 muon above 15 GeV
     isZCand[i] = 1;
   } // loop over dimuons
 
 }  // DimuonsTree::applyZSelection
 
 
-void 
+void
 DimuonsTree::setOrderByMuQAndPt() {
   /// container for arbitration / sorting data
   typedef dimuonstree::jpsi::ArbitrationData Candidate;
@@ -212,7 +213,7 @@ DimuonsTree::setOrderByMuQAndPt() {
 } // DimuonsTree::setOrderByMuQAndPt()
 
 
-void 
+void
 DimuonsTree::setOrderByVProb() {
   /// container for arbitration / sorting data
   typedef dimuonstree::upsilon::ArbitrationData Candidate;
@@ -263,7 +264,7 @@ DimuonsTree::setCorrectedMassY()
   }
 } /// DimuonsTree::setCorrectedMassY
 
-void 
+void
 DimuonsTree::init(TTree *tree) {
   tree_ = tree;
   if (!tree_) return;
@@ -442,7 +443,7 @@ DimuonsTree::initLeafVariables()
   }
 }
 
-int 
+int
 DimuonsTree::Fill() {
   return tree_->Fill();
 }

@@ -71,7 +71,9 @@ removeMCMatching(process)
 process.load("JPsi.MuMu.dimuons_cfi")
 process.load("JPsi.MuMu.dimuonsFilter_cfi")
 process.dimuonsSequence = cms.Sequence(
-  process.dimuons * process.dimuonsFilter
+  process.dimuons *
+  process.vertexedDimuons *
+  process.dimuonsFilter
 )
 
 process.p = cms.Path(
@@ -92,9 +94,12 @@ process.GlobalTag.globaltag = options.globalTag
 # from JPsi.MuMu.filesAtFnal_Jun14thReReco_v1_cff import fileNames
 from JPsi.MuMu.filesAtFnal_CS_Onia_Jun14thSkim_v1_cff import fileNames
 process.source.fileNames = cms.untracked.vstring(fileNames[:50])
+process.source.fileNames = ["rfio:/castor/cern.ch/user/j/jwerner/merge_prompt_1.root"]
 
+process.maxEvents.input = 10
 # process.maxEvents.input = 2000
-process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(-1))
+# process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(-1))
+
 # process.out.fileName = "pat_test.root"
 #process.out.fileName = "/uscms/home/veverka/nobackup/CS_Onia_June9thSkim_v1_PAT.root"
 process.out.fileName = "DimuonPhotonSkim_v2.root"
@@ -108,12 +113,16 @@ vgExtraPhotonEventContent += ["keep *_islandBasicClusters_*_*",
 process.out.outputCommands.extend(vgExtraPhotonEventContent)
 
 process.options.wantSummary = False
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 ## Same muon selection as in the CS Onia
 process.selectedPatMuons.cut = "isGlobalMuon || (isTrackerMuon && numberOfMatches('SegmentAndTrackArbitration')>0)"
 
 ## Embed tracker tracks
 process.patMuons.embedTrack = True
+
+## Debug
+# process.Tracer = cms.Service("Tracer")
+
 
 if __name__ == "__main__": import user
