@@ -11,11 +11,11 @@ MuMuGammaTree_Mu_Run2010A-PromptReco-v4_137437-139558.root
 
 chain = TChain("MuMuGammaTree/mmg")
 
-# for f in inputFiles:
-#   print "Loading ", f
-#   chain.Add(f)
-#
-# print "Total entries in the chain:", chain.GetEntries()
+for f in inputFiles:
+  print "Loading ", f
+  chain.Add(f)
+
+print "Total entries in the chain:", chain.GetEntries()
 
 
 
@@ -24,7 +24,7 @@ chain = TChain("MuMuGammaTree/mmg")
 #####################################################################
 # MONTE CARLO
 inputFilesMC = """
-MuMuGammaTree_numEvent1000.root
+MuMuGammaTree_ZJets-madgraph.root
 """.split()
 
 chainMC = TChain("MuMuGammaTree/mmg")

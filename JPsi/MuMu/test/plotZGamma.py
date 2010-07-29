@@ -1,5 +1,5 @@
 from basicRoot import *
-from MuMuGammaChain import chainMC as ch
+from MuMuGammaChain import chain as ch
 from math import sqrt
 
 # handy shortcut
@@ -133,158 +133,158 @@ def savePlots(prefix = "hZGamma_", extension = "png"):
   for c in canvases:
     c.Print(prefix + plotNames[c] + "." + extension)
 
-# 1
-canvases.append(TCanvas())
-hMass3v2 = plotXY()
-drawTH2s(hMass3v2)
-
-# 2
-canvases.append(TCanvas())
-hDeltaR = plotXY("mmgDeltaRNear",
-  "deltaR",
-  "min #DeltaR(#mu^{#pm}#gamma)",
-  "Events / 0.2",
-  "20,0,4"
-  )
-drawTH1s(hDeltaR)
-
-# 3
-muFootprint = "({cut1} & {cut2})".format(
-  cut1 = "abs(phoTrackIso[g] - muPt[dau2[mm]]) < 1",
-  cut2 = "mmgDeltaRNear < 0.3"
-)
-trackIsoExpr = "phoTrackIso[g] - muPt[dau2[mm]] * " + muFootprint
-combinedIsoExpr = "phoEcalIso[g] + phoHcalIso[g] + " + trackIsoExpr
-canvases.append(TCanvas())
-hCombinedIso = plotXY(combinedIsoExpr,
-  "combinedIso",
-  "TRACK+ECAL+HCAL isolation (GeV)",
-  "Events / GeV",
-  "100,0,100"
-  )
-drawTH1s(hCombinedIso)
-
-# 4
-canvases.append(TCanvas())
-hCombinedIsoMod = plotXY("1./(1. + phoEcalIso[g]+phoHcalIso[g]+" + trackIsoExpr + ")",
-  "combinedIsoMod",
-  "1/(1 GeV + I), I = TRACK+ECAL+HCAL isolation (GeV)",
-  "Events / bin",
-  "100,0,1"
-  )
-drawTH1s(hCombinedIsoMod)
-
-# 5
-canvases.append(TCanvas())
-hTrackIso = plotXY(trackIsoExpr,
-  "trackIso",
-  "tracker isolation (GeV)",
-  "Events / 0.5 GeV",
-  "100,0,50"
-  )
-drawTH1s(hTrackIso)
-
-# 6
-canvases.append(TCanvas())
-hEcalIso = plotXY("phoEcalIso[g]",
-  "ecalIso",
-  "ECAL isolation (GeV)",
-  "Events / GeV",
-  "20,0,20"
-  )
-drawTH1s(hEcalIso)
-
-# 7
-canvases.append(TCanvas())
-hHcalIso = plotXY("phoHcalIso[g]",
-  "hcalIso",
-  "HCAL isolation (GeV)",
-  "Events / GeV",
-  "20,0,20"
-  )
-drawTH1s(hHcalIso)
-
-# 8
-canvases.append(TCanvas())
-hHadronicOverEm = plotXY("phoHadronicOverEm[g]",
-  "hadronicOverEm",
-  "H/E",
-  "Events / 0.05",
-  "20,0,1"
-  )
-drawTH1s(hHadronicOverEm)
-
-# 9
-canvases.append(TCanvas())
-hSigmaIetaIeta = plotXY("phoSigmaIetaIeta[g]",
-  "sigmaIetaIeta",
-  "#sigma_{i#etai#eta}",
-  "Events / 0.001",
-  "60,0,0.06"
-  )
-drawTH1s(hSigmaIetaIeta)
-
-# 10
-canvases.append(TCanvas())
-hSigmaIetaIetaVsCombinedIso = plotXY("phoSigmaIetaIeta[g]:" + combinedIsoExpr,
-  "sigmaIetaIetaVsCombinedIso",
-  "TRACK + ECAL + HCAL isolation (GeV)",
-  "#sigma_{i#etai#eta}",
-  )
-drawTH2s(hSigmaIetaIetaVsCombinedIso)
-canvases[-1].RedrawAxis()
-
-# 11
-canvases.append(TCanvas())
-hPt = plotXY("phoPt[g]",
-  "hPt",
-  "p_{#perp}^{#gamma} (GeV)",
-  "Events / 2 GeV",
-  "(25,0,50)"
-  )
-drawTH1s(hPt)
-canvases[-1].RedrawAxis()
-
-# 12
-canvases.append(TCanvas())
-hEta = plotXY("phoEta[g]",
-  "hEta",
-  "#eta",
-  "Events / 0.5",
-  "(12,-3,3)"
-  )
-drawTH1s(hEta)
-canvases[-1].RedrawAxis()
-
-# 13
-canvases.append(TCanvas())
-from math import pi as math_pi
-hPhi = plotXY("phoPhi[g]",
-  "hPhi",
-  "#phi",
-  "Events / 0.2 #pi",
-  "(10,-{pi},{pi})".format(pi=math_pi)
-  )
-drawTH1s(hPhi)
-canvases[-1].RedrawAxis()
-
-# 14
-canvases.append(TCanvas())
-pdgMassZ = 91.1876
-phoExpectE = "0.5*({Mz}*{Mz} - {Mmm}*{Mmm})/{Mmm}".format(Mz=pdgMassZ, Mmm="mass[mm]")
-phoMeasE = "phoPt[g] / sin(2*atan(exp(-phoEta[g])))"
-hPhoMeasVsExpectE = plotXY(phoMeasE + ":" + phoExpectE,
-  "phoMeasVsExpectE",
-  "E(#gamma) expected from muon kineamtics",
-  "measured E(#gamma)",
-  )
-fit = TF1("fit", "pol1(0)", 0, 100)
-fit.SetLineColor(kRed)
-fit.FixParameter(0,0)
-hPhoMeasVsExpectE["s"].SetStats()
-hPhoMeasVsExpectE["s"].Fit(fit)
-drawTH2s(hPhoMeasVsExpectE)
-canvases[-1].RedrawAxis()
+# # 1
+# canvases.append(TCanvas())
+# hMass3v2 = plotXY()
+# drawTH2s(hMass3v2)
+#
+# # 2
+# canvases.append(TCanvas())
+# hDeltaR = plotXY("mmgDeltaRNear",
+#   "deltaR",
+#   "min #DeltaR(#mu^{#pm}#gamma)",
+#   "Events / 0.2",
+#   "20,0,4"
+#   )
+# drawTH1s(hDeltaR)
+#
+# # 3
+# muFootprint = "({cut1} & {cut2})".format(
+#   cut1 = "abs(phoTrackIso[g] - muPt[dau2[mm]]) < 1",
+#   cut2 = "mmgDeltaRNear < 0.3"
+# )
+# trackIsoExpr = "phoTrackIso[g] - muPt[dau2[mm]] * " + muFootprint
+# combinedIsoExpr = "phoEcalIso[g] + phoHcalIso[g] + " + trackIsoExpr
+# canvases.append(TCanvas())
+# hCombinedIso = plotXY(combinedIsoExpr,
+#   "combinedIso",
+#   "TRACK+ECAL+HCAL isolation (GeV)",
+#   "Events / GeV",
+#   "100,0,100"
+#   )
+# drawTH1s(hCombinedIso)
+#
+# # 4
+# canvases.append(TCanvas())
+# hCombinedIsoMod = plotXY("1./(1. + phoEcalIso[g]+phoHcalIso[g]+" + trackIsoExpr + ")",
+#   "combinedIsoMod",
+#   "1/(1 GeV + I), I = TRACK+ECAL+HCAL isolation (GeV)",
+#   "Events / bin",
+#   "100,0,1"
+#   )
+# drawTH1s(hCombinedIsoMod)
+#
+# # 5
+# canvases.append(TCanvas())
+# hTrackIso = plotXY(trackIsoExpr,
+#   "trackIso",
+#   "tracker isolation (GeV)",
+#   "Events / 0.5 GeV",
+#   "100,0,50"
+#   )
+# drawTH1s(hTrackIso)
+#
+# # 6
+# canvases.append(TCanvas())
+# hEcalIso = plotXY("phoEcalIso[g]",
+#   "ecalIso",
+#   "ECAL isolation (GeV)",
+#   "Events / GeV",
+#   "20,0,20"
+#   )
+# drawTH1s(hEcalIso)
+#
+# # 7
+# canvases.append(TCanvas())
+# hHcalIso = plotXY("phoHcalIso[g]",
+#   "hcalIso",
+#   "HCAL isolation (GeV)",
+#   "Events / GeV",
+#   "20,0,20"
+#   )
+# drawTH1s(hHcalIso)
+#
+# # 8
+# canvases.append(TCanvas())
+# hHadronicOverEm = plotXY("phoHadronicOverEm[g]",
+#   "hadronicOverEm",
+#   "H/E",
+#   "Events / 0.05",
+#   "20,0,1"
+#   )
+# drawTH1s(hHadronicOverEm)
+#
+# # 9
+# canvases.append(TCanvas())
+# hSigmaIetaIeta = plotXY("phoSigmaIetaIeta[g]",
+#   "sigmaIetaIeta",
+#   "#sigma_{i#etai#eta}",
+#   "Events / 0.001",
+#   "60,0,0.06"
+#   )
+# drawTH1s(hSigmaIetaIeta)
+#
+# # 10
+# canvases.append(TCanvas())
+# hSigmaIetaIetaVsCombinedIso = plotXY("phoSigmaIetaIeta[g]:" + combinedIsoExpr,
+#   "sigmaIetaIetaVsCombinedIso",
+#   "TRACK + ECAL + HCAL isolation (GeV)",
+#   "#sigma_{i#etai#eta}",
+#   )
+# drawTH2s(hSigmaIetaIetaVsCombinedIso)
+# canvases[-1].RedrawAxis()
+#
+# # 11
+# canvases.append(TCanvas())
+# hPt = plotXY("phoPt[g]",
+#   "hPt",
+#   "p_{#perp}^{#gamma} (GeV)",
+#   "Events / 2 GeV",
+#   "(25,0,50)"
+#   )
+# drawTH1s(hPt)
+# canvases[-1].RedrawAxis()
+#
+# # 12
+# canvases.append(TCanvas())
+# hEta = plotXY("phoEta[g]",
+#   "hEta",
+#   "#eta",
+#   "Events / 0.5",
+#   "(12,-3,3)"
+#   )
+# drawTH1s(hEta)
+# canvases[-1].RedrawAxis()
+#
+# # 13
+# canvases.append(TCanvas())
+# from math import pi as math_pi
+# hPhi = plotXY("phoPhi[g]",
+#   "hPhi",
+#   "#phi",
+#   "Events / 0.2 #pi",
+#   "(10,-{pi},{pi})".format(pi=math_pi)
+#   )
+# drawTH1s(hPhi)
+# canvases[-1].RedrawAxis()
+#
+# # 14
+# canvases.append(TCanvas())
+# pdgMassZ = 91.1876
+# phoExpectE = "0.5*({Mz}*{Mz} - {Mmm}*{Mmm})/{Mmm}".format(Mz=pdgMassZ, Mmm="mass[mm]")
+# phoMeasE = "phoPt[g] / sin(2*atan(exp(-phoEta[g])))"
+# hPhoMeasVsExpectE = plotXY(phoMeasE + ":" + phoExpectE,
+#   "phoMeasVsExpectE",
+#   "E(#gamma) expected from muon kineamtics",
+#   "measured E(#gamma)",
+#   )
+# fit = TF1("fit", "pol1(0)", 0, 100)
+# fit.SetLineColor(kRed)
+# fit.FixParameter(0,0)
+# hPhoMeasVsExpectE["s"].SetStats()
+# hPhoMeasVsExpectE["s"].Fit(fit)
+# drawTH2s(hPhoMeasVsExpectE)
+# canvases[-1].RedrawAxis()
 
 # 15
 canvases.append(TCanvas())
@@ -303,7 +303,12 @@ hs.SetFillStyle(3002)
 hs.SetFillColor(kRed)
 hs.Draw("ex0 hist")
 hr.Draw("ex0 hist same")
-hs.Draw("ex0 same")
+# fit = TF1("fit2", "gaus(0)", 85, 95)
+# fit.SetLineColor(kRed)
+# fit.FixParameter(0,0)
+# hs.SetStats()
+# hs.Fit(fit)
+# hs.Draw("ex0 same")
 
 canvases[-1].RedrawAxis()
 legend = TLegend(0.72,0.65,0.88,0.85)
