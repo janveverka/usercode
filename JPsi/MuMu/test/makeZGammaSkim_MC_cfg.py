@@ -17,7 +17,18 @@ options.register("globalTag",
                  )
 
 # get and parse the command line arguments
-options.parseArguments()
+#options.parseArguments()
+
+prunedGenParticles = cms.EDProducer("GenParticlePruner",
+  src = cms.InputTag("genParticles"),
+  select = cms.vstring(
+    "++keep+ numberOfMothers > 0 & mother(0).status = 3", # hard scattering
+    "++keep+ numberOfMothers > 0 & mother(0).numberOfMothers > 0 & mother(0).mother(0).status = 3", # hard scattering
+    "++keep status = 1 & pdgId = 22 & abs(eta) < 3.1 & pt > 0.7",
+    "++keep status = 1 & abs(pdgId) = 13 & abs(eta) < 2.5 & pt > 9",
+  )
+)
+
 
 process.load("JPsi.MuMu.recoDimuonsFilterSequence_cff")
 
@@ -56,7 +67,7 @@ process.dimuonsSequence = cms.Sequence(
 )
 
 process.p = cms.Path(
-  #process.recoDimuonsFilterSequence * ## test
+  process.recoDimuonsFilterSequence * ## test
   process.ecalCleanClustering       *
   process.islandBasicClusters       *
   process.patDefaultSequence        *
@@ -95,9 +106,9 @@ prefix = "dcap://cmsdca.fnal.gov:22125/pnfs/fnal.gov/usr/cms/WAX/11"
 fileNames = [prefix + path + f for f in files]
 process.source.fileNames = cms.untracked.vstring(fileNames[:5])
 
-#process.maxEvents.input = -1
+process.maxEvents.input = -1
 # process.maxEvents.input = 2000
-process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(10))
+#process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(2))  # test
 
 process.out.fileName = "ZGammaSkim_v1.root"
 
@@ -105,6 +116,8 @@ process.out.fileName = "ZGammaSkim_v1.root"
 #from ElectroWeakAnalysis.MultiBosons.Skimming.VgEventContent import vgExtraPhotonEventContent
 process.out.outputCommands.extend([
   "drop *_selectedPatMuons_*_*", # duplicated by selectedPatMuonsTriggerMatch
+  "keep *_genParticles_*_*",
+  "keep *_prunedGenParticles_*_*",
   "keep *_offlinePrimaryVertices_*_*",
   "keep *_offlineBeamSpot_*_*",
   "keep *_ecalPreshowerRecHit_*_*",
@@ -125,8 +138,8 @@ process.out.outputCommands.extend([
   "keep *_patTriggerEvent_*_*"
   ])
 
-process.options.wantSummary = False # test
-process.MessageLogger.cerr.FwkReport.reportEvery = 1 # test
+process.options.wantSummary = True # test
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000 # test
 
 ## test
 process.selectedPatMuons.cut = """
@@ -155,6 +168,13 @@ process.photons.minSCEtBarrel = 1.0
 process.photons.minSCEtEndcap = 1.0
 process.photons.maxHoverEBarrel = 10.0
 process.photons.maxHoverEEndcap = 10.0
+
+## Suppress many warnings about missing prescale tables
+process.MessageLogger.categories += ["hltPrescaleTable"]
+process.MessageLogger.cerr.hltPrescaleTable = cms.untracked.PSet(
+  limit = cms.untracked.int32(5)
+  )
+
 
 ## Debug
 # process.Tracer = cms.Service("Tracer")
