@@ -1,23 +1,6 @@
 import FWCore.ParameterSet.Config as cms
-import FWCore.ParameterSet.VarParsing as VarParsing
 
 from PhysicsTools.PatAlgos.patTemplate_cfg import *
-
-
-##########################################################
-# COMMAND LINE OPTIONS
-##########################################################
-
-options = VarParsing.VarParsing("analysis")
-options.register("globalTag",
-                 "GR_R_36X_V12::All", # default value
-                 VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-                 VarParsing.VarParsing.varType.string,         # string, int, or float
-                 "Global tag to be used."
-                 )
-
-# get and parse the command line arguments
-options.parseArguments()
 
 ##########################################################
 # VARIOUS FILTERS TO CLEAN UP COLLISION DATA
@@ -52,30 +35,17 @@ process.cleanedCollisionData = cms.Sequence(
   process.primaryVertexFilter
 )
 
-process.load("JPsi.MuMu.recoDimuonsFilterSequence_cff")
-
-######################################################################
-### Rechit-level spike cleaning
-######################################################################
-process.load("EGamma.EGammaSkims.cleanReRecoSequence_cff")
-process.ecalCleanClustering = cms.Sequence(
-  process.cleanedEcalClusters*
-  process.cleanedEgammaSkimReco
-  )
-
-
 ######################################################################
 ### Add island basic clusters
 ######################################################################
 process.load("RecoEcal.EgammaClusterProducers.islandBasicClusters_cfi")
 
 ######################################################################
-### PAT
+### PAT 
 ######################################################################
 from PhysicsTools.PatAlgos.tools.coreTools import *
 removeAllPATObjectsBut(process, ["Muons", "Photons"])
 removeMCMatching(process)
-removeCleaning(process)
 
 # load the coreTools of PAT
 #from PhysicsTools.PatAlgos.tools.pfTools import *
@@ -84,84 +54,43 @@ removeCleaning(process)
 process.load("JPsi.MuMu.dimuons_cfi")
 process.load("JPsi.MuMu.dimuonsFilter_cfi")
 process.dimuonsSequence = cms.Sequence(
-  process.dimuons *
-  process.vertexedDimuons *
-  process.dimuonsFilter
+  process.dimuons * process.dimuonsFilter
 )
 
 process.p = cms.Path(
-  process.cleanedCollisionData      *
-#   process.recoDimuonsFilterSequence *
-  process.ecalCleanClustering       *
-  process.islandBasicClusters       *
-  process.patDefaultSequence        *
+  process.cleanedCollisionData *
+  process.islandBasicClusters  *
+  process.patDefaultSequence   * 
   process.dimuonsSequence
 )
 
-from PhysicsTools.PatAlgos.tools.trigTools import *
-from ElectroWeakAnalysis.MultiBosons.tools.skimmingTools import embedTriggerMatches
-process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
-switchOnTrigger(process)
-matchHltPaths = {
-  "selectedPatMuons": """
-    HLT_L1Mu14_L1ETM30
-    HLT_L1Mu14_L1SingleJet6U
-    HLT_L1Mu14_L1SingleEG10
-    HLT_L1Mu20
-    HLT_DoubleMu3
-    HLT_Mu3
-    HLT_Mu5
-    HLT_Mu9
-    HLT_L2Mu9
-    HLT_L2Mu11
-    HLT_L1Mu30
-    HLT_Mu7
-    HLT_L2Mu15
-    """.split()
-  }
-embedTriggerMatches(process, matchHltPaths)
+# process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
+# from PhysicsTools.PatAlgos.tools.trigTools import *
+# switchOnTrigger( process )
+# switchOnTriggerMatchEmbedding( process )
 
-process.GlobalTag.globaltag = options.globalTag
+process.GlobalTag.globaltag = "GR_R_36X_V12A::All"
 
 #import JPsi.MuMu.filesAtFnal_CS_Onia_June9thSkim_v1_cff as June9thSkim
-# from JPsi.MuMu.filesAtFnal_Jun14thReReco_v1_cff import fileNames
-from JPsi.MuMu.filesAtFnal_CS_Onia_Jun14thSkim_v1_cff import fileNames
-process.source.fileNames = cms.untracked.vstring(fileNames[15:50])
+from JPsi.MuMu.filesAtFnal_Jun14thReReco_v1_cff import fileNames
+process.source.fileNames = cms.untracked.vstring(fileNames[:50])
 
-process.maxEvents.input = -1
-# process.maxEvents.input = 2000
-# process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(-1))
-
+process.maxEvents.input = 2000
 # process.out.fileName = "pat_test.root"
 #process.out.fileName = "/uscms/home/veverka/nobackup/CS_Onia_June9thSkim_v1_PAT.root"
-process.out.fileName = "ZGammaSkim_v1.root"
+process.out.fileName = "DimuonPhotonSkim.root"
 
 ## Add extra photon / ECAL event content
 from ElectroWeakAnalysis.MultiBosons.Skimming.VgEventContent import vgExtraPhotonEventContent
-vgExtraPhotonEventContent += ["keep *_islandBasicClusters_*_*",
-  "keep *_offlinePrimaryVertices_*_*",
-  "keep *_offlineBeamSpot_*_*"
-]
+vgExtraPhotonEventContent += ["keep *_islandBasicClusters_*_*"]
 process.out.outputCommands.extend(vgExtraPhotonEventContent)
 
 process.options.wantSummary = False
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## Same muon selection as in the CS Onia
 process.selectedPatMuons.cut = "isGlobalMuon || (isTrackerMuon && numberOfMatches('SegmentAndTrackArbitration')>0)"
 
-## Embed tracker tracks
-process.patMuons.embedTrack = True
-
-## Loosened photon reco cuts
-process.photonCore.minSCEt = 1.0
-process.photons.minSCEtBarrel = 1.0
-process.photons.minSCEtEndcap = 1.0
-process.photons.maxHoverEBarrel = 10.0
-process.photons.maxHoverEEndcap = 10.0
-
-## Debug
-# process.Tracer = cms.Service("Tracer")
-
-## Add tab completion + history during inspection
-if __name__ == "__main__": import user
+## JSON Certified lumis
+#import JPsi.MuMu.Cert_132440_137028_7TeV_StreamExpress_Collision10_cff as json
+#process.source.lumisToProcess = json.lumisToProcess

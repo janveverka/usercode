@@ -1,11 +1,5 @@
 #include "JPsi/MuMu/interface/DimuonsTree.h"
 
-#include <algorithm>
-#include <iostream>
-#include <vector>
-
-#include "TLorentzVector.h"
-
 DimuonsTree::DimuonsTree(TTree *tree):
   tree_(0x0)
 {
@@ -15,435 +9,186 @@ DimuonsTree::DimuonsTree(TTree *tree):
 
 DimuonsTree::~DimuonsTree() {}
 
-/// auxiliary for DimuonsTree::apply*Selection
-namespace dimuonstree {
-
-  namespace jpsi {
-
-    typedef struct {
-      unsigned dimuonIndex;
-      unsigned numberOfGlobalMuons;
-      float    pt;
-    } ArbitrationData;
-
-    bool
-    compareDimuons(ArbitrationData a, ArbitrationData b)
-    {
-      if (a.numberOfGlobalMuons != b.numberOfGlobalMuons)
-        return a.numberOfGlobalMuons > b.numberOfGlobalMuons;
-      else
-        return a.pt > b.pt;
-    } // compareDimuons
-
-  } // namespace jpsi
-
-  namespace upsilon {
-
-    typedef struct {
-      unsigned dimuonIndex;
-      float    vProb;
-    } ArbitrationData;
-
-    bool
-    compareDimuons(ArbitrationData a, ArbitrationData b)
-    { return a.vProb > b.vProb; } // compareDimuons
-
-  } // namespace upsilon
-
-} // namespace dimuonstree
-
-/// J/psi PAS BPH-10-002
-void
-DimuonsTree::applyJPsiSelection() {
-  /// loop over muons
-  for (int i=0; i<nMuons; ++i) {
-    muPassJPsiId[i] = 0;
-    if (!muIsTrackerMuon[i]) continue;
-    if (muIsGlobalMuon[i] & (muStations[i] < 2) ) continue;
-    if (muIsGlobalMuon[i] & (muGlobalNormalizedChi2[i] > 20) ) continue;
-    if (!muIsGlobalMuon[i] & !muIsTMLastStationAngTight[i]) continue;
-    if (muSiHits[i] < 12) continue;
-    if (muPixelHits[i] < 2) continue;
-    if (muSiNormalizedChi2[i] > 4) continue;
-    if (TMath::Abs(muSiD0PV[i]) > 3.) continue;
-    if (TMath::Abs(muSiDzPV[i]) > 30.) continue;
-    if (TMath::Abs(muEta[i]) > 2.4) continue;
-    muPassJPsiId[i] = 1;
-  } // loop over muons
-
-  /// container for arbitration data
-  typedef dimuonstree::jpsi::ArbitrationData Candidate;
-  std::vector<Candidate> candidates(maxDimuons);
-  candidates.clear();
-
-  /// loop over dimuons
-  for (int i=0; i<nDimuons; ++i) {
-    isJPsiCand[i] = 0;
-    if (!muPassJPsiId[dau1[i]] || !muPassJPsiId[dau2[i]]) continue;
-//     if (charge[i] != 0) continue;
-//     if (mass[i] < 2.6 || mass[i] > 3.5) continue;
-    if (vProb[i] < 0.001) continue;
-    /// store arbitration data
-    Candidate cand = {i, 0, pt[i]};
-    if (muIsGlobalMuon[dau1[i]]) ++cand.numberOfGlobalMuons;
-    if (muIsGlobalMuon[dau2[i]]) ++cand.numberOfGlobalMuons;
-    candidates.push_back(cand);
-  } // loop over dimuons
-
-  /// arbitration
-  if (candidates.size() > 0) {
-    std::sort(candidates.begin(), candidates.end(), dimuonstree::jpsi::compareDimuons);
-    isJPsiCand[ candidates[0].dimuonIndex ] = 1;
-  }
-}  // DimuonsTree::applyJPsiSelection
-
-
-/// Selection from the Upsilon PAS BPH-10-003
-void
-DimuonsTree::applyYSelection() {
-  /// loop over muons
-  for (int i=0; i<nMuons; ++i) {
-    muPassYId[i] = 0;
-    if (!muIsTrackerMuon[i]) continue;
-    if (!muIsGlobalMuon[i] & !muIsTMLastStationAngTight[i]) continue;
-    if (muSiHits[i] < 12) continue;
-    if (muPixelHits[i] < 2) continue;
-    if (muSiNormalizedChi2[i] > 5) continue;
-    if (TMath::Abs(muSiD0PV[i]) > 0.2) continue;
-    if (TMath::Abs(muSiDzPV[i]) > 25.) continue;
-    if (TMath::Abs(muEta[i]) > 2.4) continue;
-    if (muPt[i] < 2.5) continue;
-    if (TMath::Abs(muEta[i]) < 1.6 && muPt[i] < 3.5) continue;
-    muPassYId[i] = 1;
-  } // loop over muons
-
-  /// container for arbitration data
-  typedef dimuonstree::upsilon::ArbitrationData Candidate;
-  std::vector<Candidate> candidates(maxDimuons);
-  candidates.clear();
-
-  /// loop over dimuons
-  for (int i=0; i<nDimuons; ++i) {
-    isYCand[i] = 0;
-    if (!muPassYId[dau1[i]] || !muPassYId[dau2[i]]) continue;
-//     if (charge[i] != 0) continue;
-//     if (mass[i] < 8. || mass[i] > 12.) continue;
-    if (vProb[i] < 0.001) continue;
-    if (TMath::Abs(muVz[dau1[i]] - muVz[dau2[i]]) > 2) continue;
-    if (y[i] > 2.0) continue;
-    /// store arbitration data
-    Candidate cand = {i, vProb[i]};
-    candidates.push_back(cand);
-  } // loop over dimuons
-
-  /// arbitration
-  if (candidates.size() > 0) {
-    std::sort(candidates.begin(), candidates.end(), dimuonstree::upsilon::compareDimuons);
-    isYCand[ candidates[0].dimuonIndex ] = 1;
-  }
-}  // DimuonsTree::applyYSelection
-
-/// Selection from the W and Z VBTF PAS EWK-10-002
-void
-DimuonsTree::applyZSelection() {
-  /// loop over muons
-  for (int i=0; i<nMuons; ++i) {
-    muPassZId[i] = muPassZIdTight[i] = 0;
-    if (!muIsTrackerMuon[i]) continue;
-    if (muSiHits[i] < 10) continue;
-    if (muPt[i] < 10.) continue;
-    if (TMath::Abs(muEta[i]) > 2.4) continue;
-    if (muTrackIso[i] > 3.0) continue;
-
-    muPassZId[i] = 1;
-
-    /// more cuts for the tight selection
-    if (!muIsGlobalMuon[i]) continue;
-    if (muGlobalNormalizedChi2[i] > 10.) continue;
-    if (muStations[i] < 2) continue;
-    if (muSiHits[i] < 11) continue;
-    if (muPixelHits[i] < 1) continue;
-    if (TMath::Abs(muSiD0BS[i]) > 0.2) continue;
-
-    muPassZIdTight[i] = 1;
-  } // loop over muons
-
-  /// container for arbitration data
-  typedef dimuonstree::upsilon::ArbitrationData Candidate;
-  std::vector<Candidate> candidates(maxDimuons);
-  candidates.clear();
-
-  /// loop over dimuons
-  for (int i=0; i<nDimuons; ++i) {
-    isZCand[i] = 0;
-//     if (charge[i] != 0) continue;
-    if (!muPassZId[dau1[i]] || !muPassZId[dau2[i]]) continue;
-    if (!muPassZIdTight[dau1[i]] && !muPassZIdTight[dau2[i]]) continue;
-//     if (mass[i] < 60. || mass[i] > 120.) continue;
-    if (TMath::Abs(muEta[dau1[i]]) > 2.1 &&
-        TMath::Abs(muEta[dau2[i]]) > 2.1) continue;
-    if (muPt[dau1[i]] < 15. &&
-        muPt[dau1[i]] < 15. ) continue;  // at least 1 muon above 15 GeV
-    isZCand[i] = 1;
-  } // loop over dimuons
-
-}  // DimuonsTree::applyZSelection
-
-
-void
-DimuonsTree::setOrderByMuQAndPt() {
-  /// container for arbitration / sorting data
-  typedef dimuonstree::jpsi::ArbitrationData Candidate;
-  std::vector<Candidate> candidates(maxDimuons);
-  candidates.clear();
-  /// loop over dimuons to fill the container
-  for (int i=0; i<nDimuons; ++i) {
-    Candidate cand = {i, 0, pt[i]};
-    if (muIsGlobalMuon[dau1[i]]) ++cand.numberOfGlobalMuons;
-    if (muIsGlobalMuon[dau2[i]]) ++cand.numberOfGlobalMuons;
-    candidates.push_back(cand);
-  } /// loop over dimuons
-  /// arbitration
-  std::sort(candidates.begin(), candidates.end(), dimuonstree::jpsi::compareDimuons);
-  /// loop over dimuons again
-  for (unsigned i = 0; i < candidates.size(); ++i) {
-    /// store arbitration data
-    orderByMuQAndPt[ candidates[i].dimuonIndex ] = i;
-  } /// loop over dimuons
-} // DimuonsTree::setOrderByMuQAndPt()
-
-
-void
-DimuonsTree::setOrderByVProb() {
-  /// container for arbitration / sorting data
-  typedef dimuonstree::upsilon::ArbitrationData Candidate;
-  std::vector<Candidate> candidates(maxDimuons);
-  candidates.clear();
-  /// loop over dimuons to fill the container
-  for (int i=0; i<nDimuons; ++i) {
-    Candidate cand = {i, vProb[i]};
-    candidates.push_back(cand);
-  } /// loop over dimuons
-  /// arbitration
-  std::sort(candidates.begin(), candidates.end(), dimuonstree::upsilon::compareDimuons);
-  /// loop over dimuons again
-  for (unsigned i = 0; i < candidates.size(); ++i) {
-    /// store arbitration data
-    orderByVProb[ candidates[i].dimuonIndex ] = i;
-  } /// loop over dimuons
-} // DimuonsTree::setOrderByVProb()
-
-
-void
-DimuonsTree::setCorrectedMassJPsi()
-{
-  TLorentzVector p1, p2;
-  const double muMass = 0.105658369; /// GeV / c^2
-  int i, d1, d2;
-  for (i=0, d1=dau1[i], d2=dau2[i]; i < nDimuons; ++i, d1=dau1[i], d2=dau2[i]) {
-    p1.SetPtEtaPhiM(1.0009 * muPt[d1], muEta[d1], muPhi[d1], muMass);
-    p2.SetPtEtaPhiM(1.0009 * muPt[d2], muEta[d2], muPhi[d2], muMass);
-    correctedMassJPsi[i] = (p1+p2).M();
-  }
-} /// DimuonsTree::setCorrectedMassJPsi
-
-
-void
-DimuonsTree::setCorrectedMassY()
-{
-  const double a[] = {0.002, -0.002, 0.001, -0.0001};
-  const double muMass = 0.105658369; /// GeV / c^2
-  int i, d1, d2;
-  TLorentzVector p1, p2;
-  for (i=0, d1=dau1[i], d2=dau2[i]; i < nDimuons; ++i, d1=dau1[i], d2=dau2[i]) {
-    double corr1 = a[0] + a[1]*TMath::Abs(muEta[d1]) + a[2]*muEta[d1]*muEta[d1] + a[3]*muPt[d1];
-    double corr2 = a[0] + a[1]*TMath::Abs(muEta[d2]) + a[2]*muEta[d2]*muEta[d2] + a[3]*muPt[d2];
-    p1.SetPtEtaPhiM( (1. + corr1) * muPt[d1], muEta[d1], muPhi[d1], muMass);
-    p2.SetPtEtaPhiM( (1. + corr2) * muPt[d2], muEta[d2], muPhi[d2], muMass);
-    correctedMassY[i] = (p1+p2).M();
-  }
-} /// DimuonsTree::setCorrectedMassY
-
-void
-DimuonsTree::init(TTree *tree) {
+void DimuonsTree::init(TTree *tree) {
   tree_ = tree;
   if (!tree_) return;
-  tree_->Branch("run"              , &run              , "run/i"              );
-  tree_->Branch("lumi"             , &lumi             , "lumi/i"             );
-  tree_->Branch("event"            , &event            , "event/i"            );
-  tree_->Branch("L1DoubleMuOpen"   , &L1DoubleMuOpen   , "L1DoubleMuOpen/b"   );
-  tree_->Branch("HLT_Mu3"          , &HLT_Mu3          , "HLT_Mu3/b"          );
-  tree_->Branch("HLT_Mu9"          , &HLT_Mu9          , "HLT_Mu9/b"          );
-  tree_->Branch("nDimuons"         , &nDimuons         , "nDimuons/b"         );
-  tree_->Branch("nMuons"           , &nMuons           , "nMuons/b"           );
+  tree_->Branch("run"       , &run       , "run/i"       );
+  tree_->Branch("lumi"      , &lumi      , "lumi/i"      );
+  tree_->Branch("event"     , &event     , "event/i"     );
+  tree_->Branch("nDimuons", &nDimuons, "nDimuons/b");
+  tree_->Branch("mass"      , mass      , "mass[nDimuons]/F"      );
+  tree_->Branch("pt"        , &pt        , "pt/F"        );
+  tree_->Branch("eta"       , &eta       , "eta/F"       );
+  tree_->Branch("phi"       , &phi       , "phi/F"       );
+  tree_->Branch("y"         , &y         , "y/F"         );
+  tree_->Branch("p"         , &p         , "p/F"         );
+  tree_->Branch("charge"    , &charge    , "charge/I"    );
+  tree_->Branch("vProb"     , &vProb     , "vProb/F"     );
+  tree_->Branch("vrho"      , &vrho      , "vrho/F"      );
+  tree_->Branch("vrhoBS"    , &vrhoBS    , "vrhoBS/F"    );
+  tree_->Branch("vrhoPV"    , &vrhoPV    , "vrhoPV/F"    );
+  tree_->Branch("vx"        , &vx        , "vx/F"        );
+  tree_->Branch("vxBS"      , &vxBS      , "vxBS/F"      );
+  tree_->Branch("vxPV"      , &vxPV      , "vxPV/F"      );
+  tree_->Branch("vy"        , &vy        , "vy/F"        );
+  tree_->Branch("vyBS"      , &vyBS      , "vyBS/F"      );
+  tree_->Branch("vyPV"      , &vyPV      , "vyPV/F"      );
+  tree_->Branch("vz"        , &vz        , "vz/F"        );
+  tree_->Branch("vzBS"      , &vzBS      , "vzBS/F"      );
+  tree_->Branch("vzPV"      , &vzPV      , "vzPV/F"      );
+  tree_->Branch("d0"        , &d0        , "d0/F"        );
+  tree_->Branch("d0BS"      , &d0BS      , "d0BS/F"      );
+  tree_->Branch("d0PV"      , &d0PV      , "d0PV/F"      );
+  tree_->Branch("dz"        , &dz        , "dz/F"        );
+  tree_->Branch("dzBS"      , &dzBS      , "dzBS/F"      );
+  tree_->Branch("dzPV"      , &dzPV      , "dzPV/F"      );
+  tree_->Branch("dsz"       , &dsz       , "dsz/F"       );
+  tree_->Branch("dszBS"     , &dszBS     , "dszBS/F"     );
+  tree_->Branch("dszPV"     , &dszPV     , "dszPV/F"     );
+  tree_->Branch("pdgId"     , &pdgId     , "pdgId/I"     );
+  tree_->Branch("backToBack", &backToBack, "backToBack/F");
+  tree_->Branch("mu1Pt"                     , &mu1Pt                     , "mu1Pt/F"                     );
+  tree_->Branch("mu2Pt"                     , &mu2Pt                     , "mu2Pt/F"                     );
+  tree_->Branch("mu1Eta"                    , &mu1Eta                    , "mu1Eta/F"                    );
+  tree_->Branch("mu2Eta"                    , &mu2Eta                    , "mu2Eta/F"                    );
+  tree_->Branch("mu1Phi"                    , &mu1Phi                    , "mu1Phi/F"                    );
+  tree_->Branch("mu2Phi"                    , &mu2Phi                    , "mu2Phi/F"                    );
+  tree_->Branch("mu1P"                      , &mu1P                      , "mu1P/F"                      );
+  tree_->Branch("mu2P"                      , &mu2P                      , "mu2P/F"                      );
+  tree_->Branch("mu1Charge"                 , &mu1Charge                 , "mu1Charge/I"                 );
+  tree_->Branch("mu2Charge"                 , &mu2Charge                 , "mu2Charge/I"                 );
+  tree_->Branch("mu1SiNormalizedChi2"       , &mu1SiNormalizedChi2       , "mu1SiNormalizedChi2/F"       );
+  tree_->Branch("mu2SiNormalizedChi2"       , &mu2SiNormalizedChi2       , "mu2SiNormalizedChi2/F"       );
+  tree_->Branch("mu1SiD0"                   , &mu1SiD0                   , "mu1SiD0/F"                   );
+  tree_->Branch("mu2SiD0"                   , &mu2SiD0                   , "mu2SiD0/F"                   );
+  tree_->Branch("mu1SiD0BS"                 , &mu1SiD0BS                 , "mu1SiD0BS/F"                 );
+  tree_->Branch("mu2SiD0BS"                 , &mu2SiD0BS                 , "mu2SiD0BS/F"                 );
+  tree_->Branch("mu1SiD0PV"                 , &mu1SiD0PV                 , "mu1SiD0PV/F"                 );
+  tree_->Branch("mu2SiD0PV"                 , &mu2SiD0PV                 , "mu2SiD0PV/F"                 );
+  tree_->Branch("mu1SiDz"                   , &mu1SiDz                   , "mu1SiDz/F"                   );
+  tree_->Branch("mu2SiDz"                   , &mu2SiDz                   , "mu2SiDz/F"                   );
+  tree_->Branch("mu1SiDzBS"                 , &mu1SiDzBS                 , "mu1SiDzBS/F"                 );
+  tree_->Branch("mu2SiDzBS"                 , &mu2SiDzBS                 , "mu2SiDzBS/F"                 );
+  tree_->Branch("mu1SiDzPV"                 , &mu1SiDzPV                 , "mu1SiDzPV/F"                 );
+  tree_->Branch("mu2SiDzPV"                 , &mu2SiDzPV                 , "mu2SiDzPV/F"                 );
+  tree_->Branch("mu1SiDsz"                  , &mu1SiDsz                  , "mu1SiDsz/F"                  );
+  tree_->Branch("mu2SiDsz"                  , &mu2SiDsz                  , "mu2SiDsz/F"                  );
+  tree_->Branch("mu1SiDszBS"                , &mu1SiDszBS                , "mu1SiDszBS/F"                );
+  tree_->Branch("mu2SiDszBS"                , &mu2SiDszBS                , "mu2SiDszBS/F"                );
+  tree_->Branch("mu1SiDszPV"                , &mu1SiDszPV                , "mu1SiDszPV/F"                );
+  tree_->Branch("mu2SiDszPV"                , &mu2SiDszPV                , "mu2SiDszPV/F"                );
+  tree_->Branch("mu1SiHits"                 , &mu1SiHits                 , "mu1SiHits/I"                 );
+  tree_->Branch("mu2SiHits"                 , &mu2SiHits                 , "mu2SiHits/I"                 );
+  tree_->Branch("mu1PixelHits"              , &mu1PixelHits              , "mu1PixelHits/I"              );
+  tree_->Branch("mu2PixelHits"              , &mu2PixelHits              , "mu2PixelHits/I"              );
+  tree_->Branch("mu1IsGlobalMuon"           , &mu1IsGlobalMuon           , "mu1IsGlobalMuon/B"           );
+  tree_->Branch("mu2IsGlobalMuon"           , &mu2IsGlobalMuon           , "mu2IsGlobalMuon/B"           );
+  tree_->Branch("mu1IsTrackerMuon"          , &mu1IsTrackerMuon          , "mu1IsTrackerMuon/B"          );
+  tree_->Branch("mu2IsTrackerMuon"          , &mu2IsTrackerMuon          , "mu2IsTrackerMuon/B"          );
+  tree_->Branch("mu1IsTMLastStationAngTight", &mu1IsTMLastStationAngTight, "mu1IsTMLastStationAngTight/B");
+  tree_->Branch("mu2IsTMLastStationAngTight", &mu2IsTMLastStationAngTight, "mu2IsTMLastStationAngTight/B");
+  tree_->Branch("mu1IsTrackerMuonArbitrated", &mu1IsTrackerMuonArbitrated, "mu1IsTrackerMuonArbitrated/B");
+  tree_->Branch("mu2IsTrackerMuonArbitrated", &mu2IsTrackerMuonArbitrated, "mu2IsTrackerMuonArbitrated/B");
+  tree_->Branch("mu1TrackIso"               , &mu1TrackIso               , "mu1TrackIso/F"               );
+  tree_->Branch("mu2TrackIso"               , &mu2TrackIso               , "mu2TrackIso/F"               );
+  tree_->Branch("mu1EcalIso"                , &mu1EcalIso                , "mu1EcalIso/F"                );
+  tree_->Branch("mu2EcalIso"                , &mu2EcalIso                , "mu2EcalIso/F"                );
+  tree_->Branch("mu1HcalIso"                , &mu1HcalIso                , "mu1HcalIso/F"                );
+  tree_->Branch("mu2HcalIso"                , &mu2HcalIso                , "mu2HcalIso/F"                );
 
-  tree_->Branch("mass"             , mass             , "mass[nDimuons]/F"             );
-  tree_->Branch("pt"               , pt               , "pt[nDimuons]/F"               );
-  tree_->Branch("eta"              , eta              , "eta[nDimuons]/F"              );
-  tree_->Branch("phi"              , phi              , "phi[nDimuons]/F"              );
-  tree_->Branch("y"                , y                , "y[nDimuons]/F"                );
-  tree_->Branch("p"                , p                , "p[nDimuons]/F"                );
-  tree_->Branch("charge"           , charge           , "charge[nDimuons]/I"           );
-  tree_->Branch("vProb"            , vProb            , "vProb[nDimuons]/F"            );
-  tree_->Branch("vrho"             , vrho             , "vrho[nDimuons]/F"             );
-  tree_->Branch("vrhoBS"           , vrhoBS           , "vrhoBS[nDimuons]/F"           );
-  tree_->Branch("vrhoPV"           , vrhoPV           , "vrhoPV[nDimuons]/F"           );
-  tree_->Branch("vx"               , vx               , "vx[nDimuons]/F"               );
-  tree_->Branch("vxBS"             , vxBS             , "vxBS[nDimuons]/F"             );
-  tree_->Branch("vxPV"             , vxPV             , "vxPV[nDimuons]/F"             );
-  tree_->Branch("vy"               , vy               , "vy[nDimuons]/F"               );
-  tree_->Branch("vyBS"             , vyBS             , "vyBS[nDimuons]/F"             );
-  tree_->Branch("vyPV"             , vyPV             , "vyPV[nDimuons]/F"             );
-  tree_->Branch("vz"               , vz               , "vz[nDimuons]/F"               );
-  tree_->Branch("vzBS"             , vzBS             , "vzBS[nDimuons]/F"             );
-  tree_->Branch("vzPV"             , vzPV             , "vzPV[nDimuons]/F"             );
-  tree_->Branch("d0"               , d0               , "d0[nDimuons]/F"               );
-  tree_->Branch("d0BS"             , d0BS             , "d0BS[nDimuons]/F"             );
-  tree_->Branch("d0PV"             , d0PV             , "d0PV[nDimuons]/F"             );
-  tree_->Branch("dz"               , dz               , "dz[nDimuons]/F"               );
-  tree_->Branch("dzBS"             , dzBS             , "dzBS[nDimuons]/F"             );
-  tree_->Branch("dzPV"             , dzPV             , "dzPV[nDimuons]/F"             );
-  tree_->Branch("dsz"              , dsz              , "dsz[nDimuons]/F"              );
-  tree_->Branch("dszBS"            , dszBS            , "dszBS[nDimuons]/F"            );
-  tree_->Branch("dszPV"            , dszPV            , "dszPV[nDimuons]/F"            );
-  tree_->Branch("pdgId"            , pdgId            , "pdgId[nDimuons]/I"            );
-  tree_->Branch("backToBack"       , backToBack       , "backToBack[nDimuons]/F"       );
-  tree_->Branch("dau1"             , dau1             , "dau1[nDimuons]/b"             );
-  tree_->Branch("dau2"             , dau2             , "dau2[nDimuons]/b"             );
-  tree_->Branch("correctedMassJPsi", correctedMassJPsi, "correctedMassJPsi[nDimuons]/F");
-  tree_->Branch("correctedMassY"   , correctedMassY   , "correctedMassY[nDimuons]/F"   );
-  tree_->Branch("isJPsiCand"       , isJPsiCand       , "isJPsiCand[nDimuons]/b"       );
-  tree_->Branch("isYCand"          , isYCand          , "isYCand[nDimuons]/b"          );
-  tree_->Branch("isZCand"          , isZCand          , "isZCand[nDimuons]/b"          );
-  tree_->Branch("orderByMuQAndPt"  , orderByMuQAndPt  , "orderByMuQAndPt[nDimuons]/b"  );
-  tree_->Branch("orderByVProb"     , orderByVProb     , "orderByVProb[nDimuons]/b"     );
-
-  tree_->Branch("muPt"                     , muPt                     , "muPt[nMuons]/F"                     );
-  tree_->Branch("muEta"                    , muEta                    , "muEta[nMuons]/F"                    );
-  tree_->Branch("muPhi"                    , muPhi                    , "muPhi[nMuons]/F"                    );
-  tree_->Branch("muP"                      , muP                      , "muP[nMuons]/F"                      );
-  tree_->Branch("muCharge"                 , muCharge                 , "muCharge[nMuons]/I"                 );
-  tree_->Branch("muSiNormalizedChi2"       , muSiNormalizedChi2       , "muSiNormalizedChi2[nMuons]/F"       );
-  tree_->Branch("muSiD0"                   , muSiD0                   , "muSiD0[nMuons]/F"                   );
-  tree_->Branch("muSiD0BS"                 , muSiD0BS                 , "muSiD0BS[nMuons]/F"                 );
-  tree_->Branch("muSiD0PV"                 , muSiD0PV                 , "muSiD0PV[nMuons]/F"                 );
-  tree_->Branch("muSiDz"                   , muSiDz                   , "muSiDz[nMuons]/F"                   );
-  tree_->Branch("muSiDzBS"                 , muSiDzBS                 , "muSiDzBS[nMuons]/F"                 );
-  tree_->Branch("muSiDzPV"                 , muSiDzPV                 , "muSiDzPV[nMuons]/F"                 );
-  tree_->Branch("muSiDsz"                  , muSiDsz                  , "muSiDsz[nMuons]/F"                  );
-  tree_->Branch("muSiDszBS"                , muSiDszBS                , "muSiDszBS[nMuons]/F"                );
-  tree_->Branch("muSiDszPV"                , muSiDszPV                , "muSiDszPV[nMuons]/F"                );
-  tree_->Branch("muSiHits"                 , muSiHits                 , "muSiHits[nMuons]/b"                 );
-  tree_->Branch("muPixelHits"              , muPixelHits              , "muPixelHits[nMuons]/b"              );
-  tree_->Branch("muStations"               , muStations               , "muStations[nMuons]/b"               );
-  tree_->Branch("muGlobalNormalizedChi2"   , muGlobalNormalizedChi2   , "muGlobalNormalizedChi2[nMuons]/b"   );
-  tree_->Branch("muVz"                     , muVz                     , "muVz[nMuons]/F"                     );
-  tree_->Branch("muIsGlobalMuon"           , muIsGlobalMuon           , "muIsGlobalMuon[nMuons]/B"           );
-  tree_->Branch("muIsTrackerMuon"          , muIsTrackerMuon          , "muIsTrackerMuon[nMuons]/B"          );
-  tree_->Branch("muIsTMLastStationAngTight", muIsTMLastStationAngTight, "muIsTMLastStationAngTight[nMuons]/B");
-  tree_->Branch("muIsTrackerMuonArbitrated", muIsTrackerMuonArbitrated, "muIsTrackerMuonArbitrated[nMuons]/B");
-  tree_->Branch("muTrackIso"               , muTrackIso               , "muTrackIso[nMuons]/F"               );
-  tree_->Branch("muEcalIso"                , muEcalIso                , "muEcalIso[nMuons]/F"                );
-  tree_->Branch("muHcalIso"                , muHcalIso                , "muHcalIso[nMuons]/F"                );
-  tree_->Branch("muPassJPsiId"             , muPassJPsiId             , "muPassJPsiId[nMuons]/b"             );
-  tree_->Branch("muPassYId"                , muPassYId                , "muPassYId[nMuons]/b"                );
-  tree_->Branch("muPassZId"                , muPassZId                , "muPassZId[nMuons]/b"                );
-  tree_->Branch("muPassZIdTight"           , muPassZIdTight           , "muPassZIdTight[nMuons]/b"           );
-  tree_->Branch("muHltMu9Match"            , muHltMu9Match            , "muHltMu9Match[nMuons]/b"            );
 }
 
-void
-DimuonsTree::initLeafVariables()
+void DimuonsTree::initLeafVariables()
 {
-  run               = 0;
-  lumi              = 0;
-  event             = 0;
-  L1DoubleMuOpen    = 0;
-  HLT_Mu3           = 0;
-  HLT_Mu9           = 0;
-  nDimuons          = 0;
-  nMuons            = 0;
-
-  for (int i=0; i<nDimuons; ++i) {
-    mass[i]              = 0;
-    pt[i]                = 0;
-    eta[i]               = 0;
-    phi[i]               = 0;
-    y[i]                 = 0;
-    p[i]                 = 0;
-    charge[i]            = 0;
-    vProb[i]             = 0;
-    vrho[i]              = 0;
-    vrhoBS[i]            = 0;
-    vrhoPV[i]            = 0;
-    vx[i]                = 0;
-    vxBS[i]              = 0;
-    vxPV[i]              = 0;
-    vy[i]                = 0;
-    vyBS[i]              = 0;
-    vyPV[i]              = 0;
-    vz[i]                = 0;
-    vzBS[i]              = 0;
-    vzPV[i]              = 0;
-    d0[i]                = 0;
-    d0BS[i]              = 0;
-    d0PV[i]              = 0;
-    dz[i]                = 0;
-    dzBS[i]              = 0;
-    dzPV[i]              = 0;
-    dsz[i]               = 0;
-    dszBS[i]             = 0;
-    dszPV[i]             = 0;
-    pdgId[i]             = 0;
-    backToBack[i]        = 0;
-    dau1[i]              = 0;
-    dau2[i]              = 0;
-    correctedMassJPsi[i] = 0;
-    correctedMassY[i]    = 0;
-    isJPsiCand[i]        = 0;
-    isYCand[i]           = 0;
-    isZCand[i]           = 0;
-    orderByMuQAndPt[i]   = 0;
-    orderByVProb[i]      = 0;
+  run        = 0;
+  lumi       = 0;
+  event      = 0;
+  for (int i=0; i<maxDimuons; ++i) {
+    mass[i]       = 0;
   }
+  pt         = 0;
+  eta        = 0;
+  phi        = 0;
+  y          = 0;
+  p          = 0;
+  charge     = 0;
+  vProb      = 0;
+  vrho       = 0;
+  vrhoBS     = 0;
+  vrhoPV     = 0;
+  vx         = 0;
+  vxBS       = 0;
+  vxPV       = 0;
+  vy         = 0;
+  vyBS       = 0;
+  vyPV       = 0;
+  vz         = 0;
+  vzBS       = 0;
+  vzPV       = 0;
+  d0         = 0;
+  d0BS       = 0;
+  d0PV       = 0;
+  dz         = 0;
+  dzBS       = 0;
+  dzPV       = 0;
+  dsz        = 0;
+  dszBS      = 0;
+  dszPV      = 0;
+  pdgId      = 0;
+  backToBack = 0;
 
-  for (int i=0; i<maxMuons; ++i) {
-    muPt[i]                      = 0;
-    muEta[i]                     = 0;
-    muPhi[i]                     = 0;
-    muP[i]                       = 0;
-    muCharge[i]                  = 0;
-    muSiNormalizedChi2[i]        = 0;
-    muSiD0[i]                    = 0;
-    muSiD0BS[i]                  = 0;
-    muSiD0PV[i]                  = 0;
-    muSiDz[i]                    = 0;
-    muSiDzBS[i]                  = 0;
-    muSiDzPV[i]                  = 0;
-    muSiDsz[i]                   = 0;
-    muSiDszBS[i]                 = 0;
-    muSiDszPV[i]                 = 0;
-    muSiHits[i]                  = 0;
-    muPixelHits[i]               = 0;
-    muStations[i]                = 0;
-    muGlobalNormalizedChi2[i]    = 0;
-    muVz[i]                      = 0;
-    muIsGlobalMuon[i]            = 0;
-    muIsTrackerMuon[i]           = 0;
-    muIsTMLastStationAngTight[i] = 0;
-    muIsTrackerMuonArbitrated[i] = 0;
-    muTrackIso[i]                = 0;
-    muEcalIso[i]                 = 0;
-    muHcalIso[i]                 = 0;
-    muPassJPsiId[i]              = 0;
-    muPassYId[i]                 = 0;
-    muPassZId[i]                 = 0;
-    muPassZIdTight[i]            = 0;
-    muHltMu9Match[i]             = 0;
-  }
+  mu1Pt                      = 0;
+  mu2Pt                      = 0;
+  mu1Eta                     = 0;
+  mu2Eta                     = 0;
+  mu1Phi                     = 0;
+  mu2Phi                     = 0;
+  mu1P                       = 0;
+  mu2P                       = 0;
+  mu1Charge                  = 0;
+  mu2Charge                  = 0;
+  mu1SiNormalizedChi2        = 0;
+  mu2SiNormalizedChi2        = 0;
+  mu1SiD0                    = 0;
+  mu2SiD0                    = 0;
+  mu1SiD0BS                  = 0;
+  mu2SiD0BS                  = 0;
+  mu1SiD0PV                  = 0;
+  mu2SiD0PV                  = 0;
+  mu1SiDz                    = 0;
+  mu2SiDz                    = 0;
+  mu1SiDzBS                  = 0;
+  mu2SiDzBS                  = 0;
+  mu1SiDzPV                  = 0;
+  mu2SiDzPV                  = 0;
+  mu1SiDsz                   = 0;
+  mu2SiDsz                   = 0;
+  mu1SiDszBS                 = 0;
+  mu2SiDszBS                 = 0;
+  mu1SiDszPV                 = 0;
+  mu2SiDszPV                 = 0;
+  mu1SiHits                  = 0;
+  mu2SiHits                  = 0;
+  mu1PixelHits               = 0;
+  mu2PixelHits               = 0;
+  mu1IsGlobalMuon            = 0;
+  mu2IsGlobalMuon            = 0;
+  mu1IsTrackerMuon           = 0;
+  mu2IsTrackerMuon           = 0;
+  mu1IsTMLastStationAngTight = 0;
+  mu2IsTMLastStationAngTight = 0;
+  mu1IsTrackerMuonArbitrated = 0;
+  mu2IsTrackerMuonArbitrated = 0;
+  mu1TrackIso                = 0;
+  mu2TrackIso                = 0;
+  mu1EcalIso                 = 0;
+  mu2EcalIso                 = 0;
+  mu1HcalIso                 = 0;
+  mu2HcalIso                 = 0;
 }
 
-int
-DimuonsTree::Fill() {
+int DimuonsTree::Fill() {
   return tree_->Fill();
 }
+
+
