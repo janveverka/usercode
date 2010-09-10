@@ -63,7 +63,6 @@ process.ecalCleanClustering = cms.Sequence(
   process.cleanedEgammaSkimReco
   )
 
-
 ######################################################################
 ### Add island basic clusters
 ######################################################################
@@ -91,7 +90,7 @@ process.dimuonsSequence = cms.Sequence(
 
 process.p = cms.Path(
   process.cleanedCollisionData      *
-#   process.recoDimuonsFilterSequence *
+  process.recoDimuonsFilterSequence *
   process.ecalCleanClustering       *
   process.islandBasicClusters       *
   process.patDefaultSequence        *
@@ -128,30 +127,59 @@ process.GlobalTag.globaltag = options.globalTag
 from JPsi.MuMu.filesAtFnal_CS_Onia_Jun14thSkim_v1_cff import fileNames
 process.source.fileNames = cms.untracked.vstring(fileNames[15:50])
 
-process.maxEvents.input = -1
+#process.maxEvents.input = -1
 # process.maxEvents.input = 2000
-# process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(2))
 
-# process.out.fileName = "pat_test.root"
-#process.out.fileName = "/uscms/home/veverka/nobackup/CS_Onia_June9thSkim_v1_PAT.root"
 process.out.fileName = "ZGammaSkim_v1.root"
 
 ## Add extra photon / ECAL event content
-from ElectroWeakAnalysis.MultiBosons.Skimming.VgEventContent import vgExtraPhotonEventContent
-vgExtraPhotonEventContent += ["keep *_islandBasicClusters_*_*",
+#from ElectroWeakAnalysis.MultiBosons.Skimming.VgEventContent import vgExtraPhotonEventContent
+process.out.outputCommands.extend([
+  "drop *_selectedPatMuons_*_*", # duplicated by selectedPatMuonsTriggerMatch
   "keep *_offlinePrimaryVertices_*_*",
-  "keep *_offlineBeamSpot_*_*"
-]
-process.out.outputCommands.extend(vgExtraPhotonEventContent)
+  "keep *_offlineBeamSpot_*_*",
+  "keep *_ecalPreshowerRecHit_*_*",
+  "keep *_ecalRecHit_*_*",
+  "keep *_pfElectronTranslator_pf_PAT",  # electron super-/preshower-/calo-clusters
+  "keep *_islandBasicClusters_*_PAT", # for soft photons
+  "keep *_hybridSuperClusters_*_PAT", # contains the instance hybridBarrelBasicClusters
+  "keep *_multi5x5BasicClusters_*_PAT",
+  "keep *_correctedHybridSuperClusters_*_PAT",
+  "keep *_multi5x5SuperClustersWithPreshower_*_PAT",
+  "keep *_correctedMulti5x5SuperClustersWithPreshower_*_PAT",
+  "keep *_photonCore_*_PAT",
+  "keep *_electronCore_*_PAT",
+  "keep *_conversions_*_PAT",
+  "keep *_trackerOnlyConversions_*_PAT",
+  "keep *_ckfInOutTracksFromConversions_*_PAT",
+  "keep *_ckfOutInTracksFromConversions_*_PAT",
+  "keep *_patTriggerEvent_*_*"
+  ])
 
-process.options.wantSummary = False
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.options.wantSummary = True
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 ## Same muon selection as in the CS Onia
-process.selectedPatMuons.cut = "isGlobalMuon || (isTrackerMuon && numberOfMatches('SegmentAndTrackArbitration')>0)"
+process.selectedPatMuons.cut = """
+  pt > 10 &
+  abs(eta) < 2.4 &
+  (
+    (
+      isGlobalMuon &
+      globalTrack.ndof > 0
+    ) ||
+    (
+      !isGlobalMuon &
+      isTrackerMuon &
+      numberOfMatches('SegmentAndTrackArbitration')>0
+    )
+  )
+  """
 
 ## Embed tracker tracks
 process.patMuons.embedTrack = True
+process.patElectrons.embedTrack = True
 
 ## Loosened photon reco cuts
 process.photonCore.minSCEt = 1.0
