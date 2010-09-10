@@ -30,7 +30,7 @@ def makeTHStack(hlist):
 
 def drawTH1s(histos):
   ymax = 0.
-  keys = ["r", "b", "s"]
+  keys = ["r", "s"]
   for k in keys:
     if histos[k].GetMaximum() > ymax:
       ymax = histos[k].GetBinContent(histos[k].GetMaximumBin())
@@ -38,11 +38,9 @@ def drawTH1s(histos):
   for k in keys:
     histos[k].SetMaximum(ymax)
   histos["r"].Draw()
-  histos["b"].Draw("ex0 same")
   histos["s"].Draw("ex0 same")
-  legend = TLegend(0.7,0.7,0.85,0.85)
-  legend.AddEntry(histos["s"], "tight #gamma", "p").SetTextColor(kRed)
-  legend.AddEntry(histos["b"], "FSR", "p").SetTextColor(kBlue)
+  legend = TLegend(0.6,0.7,0.85,0.85)
+  legend.AddEntry(histos["s"], "FSR", "p").SetTextColor(kRed)
   legend.AddEntry(histos["r"], "loose EM", "l")
   legend.SetLineColor(kWhite)
   legend.SetFillColor(kWhite)
@@ -60,11 +58,9 @@ def drawTH2s(histos, xRange=None, yRange=None):
     histos["r"].GetYaxis().SetRangeUser(yRange[0], yRange[1])
     histos["s"].GetYaxis().SetRangeUser(yRange[0], yRange[1])
   histos["r"].Draw()
-  histos["b"].Draw("same")
   histos["s"].Draw("same")
-  legend = TLegend(0.7,0.7,0.85,0.85)
-  legend.AddEntry(histos["s"], "tight #gamma", "p").SetTextColor(kRed)
-  legend.AddEntry(histos["b"], "FSR", "p").SetTextColor(kBlue)
+  legend = TLegend(0.6,0.7,0.85,0.85)
+  legend.AddEntry(histos["s"], "FSR", "p").SetTextColor(kRed)
   legend.AddEntry(histos["r"], "loose EM", "p")
   legend.SetLineColor(kWhite)
   legend.SetFillColor(kWhite)
@@ -86,17 +82,18 @@ ch.SetEventList(gDirectory.Get("elist"))
 sel = "isZCand[mm] & 45<mass[mm] & 45<mmgMass & mmgPhoton==0"
 # selMoreSignal = "mmgDeltaRNear < 1 & mass[mm] < 85"
 # selMoreSignal = "mass[mm] < 85"
-selMoreSignal = " & ".join("""
+selLooseFsr = "mass[mm] < 85 & 85 < mmgMass & mmgMass < 95"
+selTight = " & ".join("""
 phoEcalIso[g] < 4.2 + 0.004 * phoPt[g]
 phoHcalIso[g] < 2.2 + 0.001 * phoPt[g]
 phoTrackIso[g] < 2.0 + 0.001 * phoPt[g]
 phoHadronicOverEm[g] < 0.05
 ((abs(phoEta[g]) > 1.5 & phoSigmaIetaIeta[g] < 0.026) || (phoSigmaIetaIeta[g] < 0.013))
 """.split("\n")[1:-1])
-selMoreBkd = "!({s}) & mmgDeltaRNear < 1.0 & mass[mm] < 85 & mmgMass > 85".format(s=selMoreSignal)
-selOthers = "!({s})&!({b})".format(s=selMoreSignal, b=selMoreBkd)
+selNear = "mmgDeltaRNear < 1.0"
+selMoreSignal = "{l} & ({t} | {n})".format(l=selLooseFsr, t=selTight, n=selNear)
+selOthers = "!({s})".format(s=selMoreSignal)
 
-selBkd = sel + "& {s}".format(s=selMoreBkd)
 selSig = sel+ "& {s}".format(s=selMoreSignal)
 selRest = sel + "& {s}".format(s=selOthers)
 
@@ -117,14 +114,6 @@ def plotXY(xy = "mmgMass:mass[mm]",
   customizeTH2(h, xname, yname)
   h.DrawCopy()
 
-  deleteExistingHisto(hname+"B")
-  ch.Draw(xy + ">>" + hname + "B" + binning, selBkd, "same")
-  hb = gDirectory.Get(hname + "B")
-  customizeTH2(hb, xname, yname)
-  hb.SetMarkerColor(kBlue)
-  hb.SetLineColor(kBlue)
-  hb.DrawCopy("same")
-
   deleteExistingHisto(hname+"S")
   ch.Draw(xy + ">>" + hname + "S" + binning, selSig, "same")
   hs = gDirectory.Get(hname + "S")
@@ -139,7 +128,7 @@ def plotXY(xy = "mmgMass:mass[mm]",
   customizeTH2(hr, xname, yname)
   hs.DrawCopy("same")
 
-  return {"all": h, "s": hs, "b": hb, "r": hr}
+  return {"all": h, "s": hs, "r": hr}
 
 
 def savePlots(prefix = "hZGamma_", extension = "png"):
@@ -184,7 +173,6 @@ muFootprint = "({f1} + {f2})".format(
 )
 
 trackIsoExpr = "phoTrackIso[g] - (%s)" % (muFootprint,)
-
 combinedIsoExpr = "phoEcalIso[g] + phoHcalIso[g] + " + trackIsoExpr
 canvases.append(TCanvas())
 hCombinedIso = plotXY(combinedIsoExpr,
@@ -262,7 +250,7 @@ hSigmaIetaIetaVsCombinedIso = plotXY("phoSigmaIetaIeta[g]:" + combinedIsoExpr,
   "TRACK + ECAL + HCAL isolation (GeV)",
   "#sigma_{i#etai#eta}",
   )
-drawTH2s(hSigmaIetaIetaVsCombinedIso, yRange=(0,0.1))
+drawTH2s(hSigmaIetaIetaVsCombinedIso)
 canvases[-1].RedrawAxis()
 
 # 11
@@ -397,91 +385,87 @@ hSigmaIetaIetaVsEta = plotXY("phoSigmaIetaIeta[g]:phoEta[g]",
 drawTH2s(hSigmaIetaIetaVsEta)
 canvases[-1].RedrawAxis()
 
-# # 14
-# canvases.append(TCanvas())
-# pdgMassZ = 91.1876
-# phoMuonE = "0.5*({Mz}*{Mz} - {Mmm}*{Mmm})/{Mmm}".format(Mz=pdgMassZ, Mmm="mass[mm]")
-# phoEcalE = "phoPt[g] / sin(2*atan(exp(-phoEta[g])))"
-# from propagateErrors import phoMuErr, phoEcalErr
-# phoEcalErr = "(" + phoEcalErr.format(e=phoEcalE) + ")"
-# nsel = ch.Draw(
-#   "{m}:{m}*{mErr}:{e}:{e}*{eErr}".format(
-#     e=phoEcalE, eErr=phoEcalErr, m=phoMuonE, mErr=phoMuErr
-#     ),
-#   selSig, "goff"
-#   )
-# xlist, exlist, ylist, eylist = [], [], [], []
-# print "E(muon) ( error ) E(ecal) (error)"
-# for i in range(nsel):
-#   xlist.append(ch.GetV1()[i])
-#   exlist.append(ch.GetV2()[i])
-#   ylist.append(ch.GetV3()[i])
-#   eylist.append(ch.GetV4()[i])
-#   print i, xlist[i], "(", exlist[i], ")", ylist[i], "(", eylist[i], ")"
-#
-# gr = TGraphErrors(nsel, array("f", xlist), array("f", ylist), array("f", exlist), array("f", eylist))
-# canvases.append(TCanvas())
-# gr.SetMarkerStyle(20)
-# gStyle.SetOptFit(1)
-# fit2 = TF1("fit2", "pol1(0)", 0, 100)
-# fit2.FixParameter(0,0)
-# gr.Fit(fit2)
-# gr.GetXaxis().SetTitle("E(#gamma) from muons")
-# gr.GetYaxis().SetTitle("E(#gamma) from ECAL")
-# gr.Draw("azp")
-#
-# print "E(gamma) ECAL/Muons, (err(mu)/mu \Oplus err(ECAL)/ECAL)^{-2}"
-# Oplus = lambda x, y: sqrt(x*x + y*y)
-# for i in range(len(xlist)):
-#   print ylist[i] / xlist[i], pow(Oplus(exlist[i]/xlist[i], eylist[i]/ylist[i]), -2)
+# 14
+canvases.append(TCanvas())
+pdgMassZ = 91.1876
+phoMuonE = "0.5*({Mz}*{Mz} - {Mmm}*{Mmm})/{Mmm}".format(Mz=pdgMassZ, Mmm="mass[mm]")
+phoEcalE = "phoPt[g] / sin(2*atan(exp(-phoEta[g])))"
+from propagateErrors import phoMuErr, phoEcalErr
+phoEcalErr = "(" + phoEcalErr.format(e=phoEcalE) + ")"
+nsel = ch.Draw(
+  "{m}:{m}*{mErr}:{e}:{e}*{eErr}".format(
+    e=phoEcalE, eErr=phoEcalErr, m=phoMuonE, mErr=phoMuErr
+    ),
+  selSig, "goff"
+  )
+xlist, exlist, ylist, eylist = [], [], [], []
+print "E(muon) ( error ) E(ecal) (error)"
+for i in range(nsel):
+  xlist.append(ch.GetV1()[i])
+  exlist.append(ch.GetV2()[i])
+  ylist.append(ch.GetV3()[i])
+  eylist.append(ch.GetV4()[i])
+  print i, xlist[i], "(", exlist[i], ")", ylist[i], "(", eylist[i], ")"
 
-# ch.GetV1()
-# hPhoMeasVsExpectE = plotXY(phoMeasE + ":" + phoExpectE,
-#   "phoMeasVsExpectE",
-#   "E(#gamma) expected from muon kineamtics",
-#   "measured E(#gamma)",
-#   )
-# fit = TF1("fit", "pol1(0)", 0, 100)
-# fit.SetLineColor(kRed)
-# fit.FixParameter(0,0)
-# hPhoMeasVsExpectE["s"].SetStats()
-# hPhoMeasVsExpectE["s"].Fit(fit)
-# drawTH2s(hPhoMeasVsExpectE)
-# canvases[-1].RedrawAxis()
+gr = TGraphErrors(nsel, array("f", xlist), array("f", ylist), array("f", exlist), array("f", eylist))
+canvases.append(TCanvas())
+gr.SetMarkerStyle(20)
+gStyle.SetOptFit(1)
+fit2 = TF1("fit2", "pol1(0)", 0, 100)
+fit2.FixParameter(0,0)
+gr.Fit(fit2)
+gr.GetXaxis().SetTitle("E(#gamma) from muons")
+gr.GetYaxis().SetTitle("E(#gamma) from ECAL")
+gr.Draw("azp")
 
-# # 15
-# canvases.append(TCanvas())
-# hMmgMass = plotXY("mmgMass",
-#   "mmgMass",
-#   "m(#mu#mu#gamma) (GeV/c^{2})",
-#   "Events / 4 GeV",
-#   "(10,80,120)"
-#   )
-# hs = hMmgMass["s"]
-# hb = hMmgMass["b"]
-# hr = hMmgMass["r"]
-# hr.Add(hb)
-# hr.SetFillStyle(0)
-# hs.SetFillStyle(3002)
-# hs.SetFillColor(kRed)
-# hs.Draw("ex0 hist")
-# hr.Draw("ex0 hist same")
-# fit = TF1("fit2", "gaus(0)", 85, 95)
-# fit.SetLineColor(kRed)
-# fit.FixParameter(0,0)
-# hs.SetStats()
-# hs.Fit(fit)
-# hs.Draw("ex0 same")
-#
-# canvases[-1].RedrawAxis()
-# legend = TLegend(0.72,0.65,0.88,0.85)
-# legend.AddEntry(hs, "tight #gamma", "lpf").SetTextColor(kRed)
-# legend.AddEntry(hb, "FSR", "lpf").SetTextColor(kBlue)
-# legend.AddEntry(hr, "loose EM", "lp")
-# legend.SetLineColor(kWhite)
-# legend.SetFillColor(kWhite)
-# legend.Draw()
+print "E(gamma) ECAL/Muons, (err(mu)/mu \Oplus err(ECAL)/ECAL)^{-2}"
+Oplus = lambda x, y: sqrt(x*x + y*y)
+for i in range(len(xlist)):
+  print ylist[i] / xlist[i], pow(Oplus(exlist[i]/xlist[i], eylist[i]/ylist[i]), -2)
 
+ch.GetV1()
+hPhoMeasVsExpectE = plotXY(phoEcalE + ":" + phoMuonE,
+  "phoMeasVsExpectE",
+  "E(#gamma) expected from muon kineamtics",
+  "measured E(#gamma)",
+  )
+fit = TF1("fit", "pol1(0)", 0, 100)
+fit.SetLineColor(kRed)
+fit.FixParameter(0,0)
+hPhoMeasVsExpectE["s"].SetStats()
+hPhoMeasVsExpectE["s"].Fit(fit)
+drawTH2s(hPhoMeasVsExpectE)
+canvases[-1].RedrawAxis()
+
+# 15
+canvases.append(TCanvas())
+hMmgMass = plotXY("mmgMass",
+  "mmgMass",
+  "m(#mu#mu#gamma) (GeV/c^{2})",
+  "Events / 3 GeV",
+  "(20,60,120)"
+  )
+hs = hMmgMass["s"]
+hr = hMmgMass["r"]
+hr.SetFillStyle(0)
+hs.SetFillStyle(3002)
+hs.SetFillColor(kRed)
+hs.Draw("ex0 hist")
+hr.Draw("ex0 hist same")
+fit = TF1("fit2", "gaus(0)", 85, 95)
+fit.SetLineColor(kRed)
+fit.FixParameter(0,0)
+hs.SetStats()
+hs.Fit(fit)
+hs.Draw("ex0 same")
+
+canvases[-1].RedrawAxis()
+legend = TLegend(0.72,0.65,0.88,0.85)
+legend.AddEntry(hs, "FSR", "lpf").SetTextColor(kRed)
+legend.AddEntry(hr, "loose EM", "lp")
+legend.SetLineColor(kWhite)
+legend.SetFillColor(kWhite)
+legend.Draw()
 
 # # 16
 # canvases.append(TCanvas())

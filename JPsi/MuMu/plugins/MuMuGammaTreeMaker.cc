@@ -352,6 +352,7 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.phoTrackIso[i] = pho->trackIso();
     tree_.phoHadronicOverEm[i] = pho->hadronicOverEm();
     tree_.phoSigmaIetaIeta[i] = pho->sigmaIetaIeta();
+    tree_.phoHasPixelSeed[i] = pho->hasPixelSeed();
 
     reco::CompositeCandidate dimuon = (*dimuons)[primaryDimuon];
     reco::CompositeCandidate mmg;

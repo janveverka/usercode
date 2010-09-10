@@ -39,6 +39,7 @@ MuMuGammaTree::initGamma(TTree *tree) {
   tree_->Branch("phoTrackIso"             , phoTrackIso, "phoTrackIso[nPhotons]/F"             );
   tree_->Branch("phoSigmaIetaIeta"             , phoSigmaIetaIeta, "phoSigmaIetaIeta[nPhotons]/F"             );
   tree_->Branch("phoHadronicOverEm"             , phoHadronicOverEm, "phoHadronicOverEm[nPhotons]/F"             );
+  tree_->Branch("phoHasPixelSeed", phoHasPixelSeed, "phoHasPixelSeed[nPhotons]/b"             );
 }
 
 void
@@ -65,6 +66,7 @@ MuMuGammaTree::initGammaLeafVariables()
     phoTrackIso[i]                      = 0;
     phoSigmaIetaIeta[i]                      = 0;
     phoHadronicOverEm[i]                      = 0;
+    phoHasPixelSeed[i]                      = 0;
   }
 }
 

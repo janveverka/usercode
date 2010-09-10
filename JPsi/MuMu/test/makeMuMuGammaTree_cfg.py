@@ -50,6 +50,20 @@ options.register("isMC",
                  "Is this MC."
                  )
 
+options.register("firstFile",
+  1, # default value
+  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+  VarParsing.VarParsing.varType.int,          # string, int, or float
+  "Number of the first input file from the list to be processed."
+)
+
+options.register("lastFile",
+  0, # default value
+  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+  VarParsing.VarParsing.varType.int,          # string, int, or float
+  "Number of the last input file from the list to be processed."
+)
+
 # setup any defaults you want
 options.outputFile = 'MuMuGammaTree.root'
 pathPrefix = "rfio:" + options.castorPath + "/" + options.dataset + "/"
@@ -75,8 +89,9 @@ if options.datasetNumber > 0:
   datasetDir = options.castorPath + "/" + dataset
   pathPrefix = "rfio:" + datasetDir + "/"
   fileNames = os.popen("nsls " + datasetDir).read().split()
-  print "Processing %d files of %s (%d/%d)" % (len(fileNames),
-    dataset, datasetNumber, len(datasets))
+  print "Processing dataset %s (%d/%d)" % (dataset, datasetNumber,
+                                           len(datasets)
+                                           )
   del options.inputFiles[:]
   options.inputFiles = [pathPrefix + f for f in fileNames]
 else:
@@ -84,12 +99,24 @@ else:
   datasetDir = options.castorPath + "/" + dataset
   pathPrefix = "rfio:" + datasetDir + "/"
   fileNames = os.popen("nsls " + datasetDir).read().split()
-  print "Processing %d files of %s" % (len(fileNames), dataset)
+  print "Processing dataset %s" % (dataset,)
   del options.inputFiles[:]
   options.inputFiles = [pathPrefix + f for f in fileNames]
 
 if options.maxEvents < 0:
   options.outputFile = options.outputFile.split(".")[0] + "_" + options.dataset
+
+if options.firstFile != 1 or options.lastFile != 0:
+  first = options.firstFile - 1
+  last = options.lastFile
+  options.outputFile = options.outputFile.split(".")[0] + "_%d-%d" % (first, last)
+  newInputFiles = options.inputFiles[first:last]
+  del options.inputFiles[:]
+  options.inputFiles = newInputFiles[:]
+  print "Processing %d files (%d..%d) of %d available." % \
+    (len(options.inputFiles), first+1, last, len(fileNames))
+else:
+  print "Processing all %d available files." % len(fileNames)
 
 ## Message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")

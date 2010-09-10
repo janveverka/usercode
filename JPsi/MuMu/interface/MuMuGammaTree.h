@@ -33,6 +33,7 @@ public:
   float phoTrackIso[maxPhotons];
   float phoSigmaIetaIeta[maxPhotons];
   float phoHadronicOverEm[maxPhotons];
+  unsigned char phoHasPixelSeed[maxPhotons];
 
 private:
   TTree *tree_;

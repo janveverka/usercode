@@ -1,13 +1,16 @@
-from ROOT import TChain, gDirectory, TCanvas, gROOT, TH1F
+from ROOT import TChain, gDirectory, TCanvas, gROOT, TH1F, gPad
 from ROOT import kBlue, kGreen, kYellow, kRed, kWhite, kBlack
+from ROOT import kSpring, kOrange, kPink, kMagenta, kViolet, kAzure, kCyan, kTeal, kGray
+from math import log, exp, log10
 
 inputFiles = """
-MuMuGammaTree_Mu_Run2010A-PromptReco-v4_140400-140401_NoJson.root
-MuMuGammaTree_Mu_Run2010A-Jun14thReReco_v1_135803-137436.root
-MuMuGammaTree_Mu_Run2010A-PromptReco-v4_140160-140399.root
 MuMuGammaTree_MinimumBias_Commissioning10-SD_Mu-Jun14thSkim_v1_132440-137028.root
+MuMuGammaTree_Mu_Run2010A-Jun14thReReco_v1_135803-137436.root
 MuMuGammaTree_Mu_Run2010A-Jul16thReReco-v1_139559-140159.root
-MuMuGammaTree_Mu_Run2010A-PromptReco-v4_137437-139558.root
+MuMuGammaTree_Mu_Run2010A-PromptReco-v4_137437-139558_v2.root
+MuMuGammaTree_Mu_Run2010A-PromptReco-v4_140160-140399.root
+MuMuGammaTree_Mu_Run2010A-PromptReco-v4_140400-141961.root
+MuMuGammaTree_Mu_Run2010A-PromptReco-v4_141962-142264_DCSTRONLY.root
 """.split()
 
 #
@@ -31,6 +34,16 @@ pdgMass = {
 }
 
 colors = [kRed, kYellow, kGreen, kBlue]
+
+def fillHistoRange(hist, xmin=85, xmax=98, color=kBlue):
+  newh = hist.Clone(hist.GetName() + "_%f_%f" % (xmin, xmax))
+  newh.SetFillColor(color)
+  newh.SetLineColor(color)
+  for bin in range(1, newh.GetNbinsX()):
+    if newh.GetBinCenter(bin) < xmin or newh.GetBinCenter(bin) > xmax:
+      newh.SetBinContent(bin, 0)
+  newh.DrawCopy("same")
+  return newh
 
 def makeAndSelection(selString):
   # get a list of newline-separated cuts; strip their whitespace
@@ -141,6 +154,7 @@ def plotZ():
 
 ## plot the full SM spectrum
 def plotSM(nbins=1000, massMin=0.5, massMax=200, binf = lambda x: 1./x, inverseF = lambda x: 1./x):
+  """plotSM(nbins=1000, massMin=0.5, massMax=200, binf = lambda x: 1./x, inverseF = lambda x: 1./x)"""
   selection = makeAndSelection("""
     isJPsiCand || isYCand || isZCand
     {mMin} < mass & mass < {mMax}
@@ -164,13 +178,13 @@ def plotSM(nbins=1000, massMin=0.5, massMax=200, binf = lambda x: 1./x, inverseF
   # remove overlap between YnS
 #   massRange["Y1S"][1] = massRange["Y2S"][0] = 0.5 * (pdgMass["Y1S"] + pdgMass["Y2S"])
 #   massRange["Y2S"][1] = massRange["Y3S"][0] = 0.5 * (pdgMass["Y2S"] + pdgMass["Y3S"])
-  binSubset = {}
-  for k in sorted(pdgMass.keys()):
-    binSubset[k] = []
-    for m in bins:
-      if massRange[k][0] < m and m < massRange[k][1]:
-        binSubset[k].append(m)
-    print k, str(binSubset[k])
+#   binSubset = {}
+#   for k in sorted(pdgMass.keys()):
+#     binSubset[k] = []
+#     for m in bins:
+#       if massRange[k][0] < m and m < massRange[k][1]:
+#         binSubset[k].append(m)
+#     print k, str(binSubset[k])
   from array import array
   xbins = array('d', bins)
   hSM = TH1F("hSM", "Dimuon mass spectrum", nbins, xbins)
@@ -204,15 +218,28 @@ def plotSM(nbins=1000, massMin=0.5, massMax=200, binf = lambda x: 1./x, inverseF
   c1.RedrawAxis()
   return h, hss
 
-h, hss = plotSM()
+h, hss = plotSM(binf = lambda x: log(x), inverseF = lambda x: exp(x))
 transformHisto(hss, lambda x, dx: x/2.58) # scale to 100 nb^-1
 transformHisto(h, lambda x, dx: x/2.58)
 h.GetXaxis().SetTitle("m(#mu#mu) [GeV/c^{2}]")
 h.GetYaxis().SetTitle("m(dN/dm) events per 100 nb^{-1}")
+h.SetStatics(0)
+hss.SetStatistics(0)
 h.Draw()
+hss.SetLineColor(kGray)
+hss.SetFillColor(kGray)
+resonances = ["rho", "omega", "phi", "JPsi", "psi2S", "Y1S", "Y2S", "Y3S", "Z"]
+colors = {"Z": kBlue, "Y3S": kAzure, "Y2S": kTeal, "Y1S": kGreen,
+  "psi2S": kYellow, "JPsi": kOrange, "phi": kRed, "omega": kPink,
+  "rho": kMagenta
+  }
+lo, hi = 0.97, 1.03
+for x in resonances:
+  fillHistoRange(h, lo*pdgMass[x], hi*pdgMass[x], colors[x])
+
 hss.Draw("same")
 h.Draw("same")
-canvases[-1].RedrawAxis()
+gPad.RedrawAxis()
 
 # order canvases
 for c in canvases:
