@@ -127,9 +127,9 @@ process.GlobalTag.globaltag = options.globalTag
 from JPsi.MuMu.filesAtFnal_CS_Onia_Jun14thSkim_v1_cff import fileNames
 process.source.fileNames = cms.untracked.vstring(fileNames[15:50])
 
-#process.maxEvents.input = -1
+process.maxEvents.input = -1
 # process.maxEvents.input = 2000
-process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(2))
+#process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(2))
 
 process.out.fileName = "ZGammaSkim_v1.root"
 
