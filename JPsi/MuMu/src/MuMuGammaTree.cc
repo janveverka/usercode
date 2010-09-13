@@ -27,6 +27,8 @@ MuMuGammaTree::initGamma(TTree *tree) {
   tree_->Branch("mmgMass"             , mmgMass             , "mmgMass[nMuMuGammas]/F"             );
   tree_->Branch("mmgDimuon"             , mmgDimuon, "mmgDimuon[nMuMuGammas]/b"             );
   tree_->Branch("mmgPhoton"             , mmgPhoton             , "mmgPhoton[nMuMuGammas]/b"             );
+  tree_->Branch("mmgMuonNear"            , mmgMuonNear, "mmgMuonNear[nMuMuGammas]/b"             );
+  tree_->Branch("mmgMuonFar"             , mmgMuonFar             , "mmgMuonFar[nMuMuGammas]/b"             );
   tree_->Branch("mmgDeltaRNear"             , mmgDeltaRNear, "mmgDeltaRNear[nMuMuGammas]/F"             );
 //   tree_->Branch("mmgDeltaRFar"             , mmgDeltaRFar, "mmgDeltaRFar[nMuMuGammas]/F"             );
 //   tree_->Branch("mmgDeltaEta"             , mmgDeltaEta             , "mmgDeltaEta[nMuMuGammas]/F"             );
@@ -52,6 +54,8 @@ MuMuGammaTree::initGammaLeafVariables()
     mmgMass[i]              = 0;
     mmgDimuon[i]                = 0;
     mmgPhoton[i]               = 0;
+    mmgMuonNear[i]               = 0;
+    mmgMuonFar[i]               = 0;
     mmgDeltaRNear[i]               = 0;
 /*    mmgDeltaRFar[i]               = 0;
     mmgDeltaEta[i]                 = 0;*/
