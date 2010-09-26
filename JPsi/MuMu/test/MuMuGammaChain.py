@@ -10,6 +10,13 @@ MuMuGammaTree_Mu_Run2010A-PromptReco-v4_141962-142264_DCSTRONLY.root
 MuMuGammaTree_Mu_Run2010A-PromptReco-v4_137437-139558_v2.root
 """.split()
 
+inputFiles = """
+MuMuGammaTree_132440-135802_MinimumBias_Commissioning10-SD_Mu-Jun14thSkim_v1.root
+MuMuGammaTree_135803-137436_Mu_Run2010A-Jun14thReReco_v1.root
+MuMuGammaTree_137437-139558_Mu_Run2010A-PromptReco-v4b.root
+MuMuGammaTree_139559-140159_Mu_Run2010A-Jul16thReReco-v1.root
+MuMuGammaTree_140160-144114_Mu_Run2010A-PromptReco-v4.root
+""".split()
 
 chain = TChain("MuMuGammaTree/mmg")
 
@@ -26,7 +33,7 @@ print "Total entries in the chain:", chain.GetEntries()
 #####################################################################
 # MONTE CARLO
 inputFilesMC = """
-MuMuGammaTree_ZJets-madgraph.root
+MuMuGammaTree_Zmumu_Spring10.root
 """.split()
 
 chainMC = TChain("MuMuGammaTree/mmg")

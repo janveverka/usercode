@@ -35,13 +35,24 @@ MuMuGammaTree::initGamma(TTree *tree) {
 
   tree_->Branch("phoPt"             , phoPt, "phoPt[nPhotons]/F"             );
   tree_->Branch("phoEta"             , phoEta, "phoEta[nPhotons]/F"             );
+  tree_->Branch("phoScEta"             , phoScEta, "phoScEta[nPhotons]/F"             );
   tree_->Branch("phoPhi"             , phoPhi, "phoPhi[nPhotons]/F"             );
   tree_->Branch("phoEcalIso"             , phoEcalIso, "phoEcalIso[nPhotons]/F"             );
   tree_->Branch("phoHcalIso"             , phoHcalIso, "phoHcalIso[nPhotons]/F"             );
   tree_->Branch("phoTrackIso"             , phoTrackIso, "phoTrackIso[nPhotons]/F"             );
   tree_->Branch("phoSigmaIetaIeta"             , phoSigmaIetaIeta, "phoSigmaIetaIeta[nPhotons]/F"             );
   tree_->Branch("phoHadronicOverEm"             , phoHadronicOverEm, "phoHadronicOverEm[nPhotons]/F"             );
-  tree_->Branch("phoHasPixelSeed", phoHasPixelSeed, "phoHasPixelSeed[nPhotons]/b"             );
+  tree_->Branch("phoHasPixelSeed", phoHasPixelSeed, "phoHasPixelSeed[nPhotons]/b");
+  tree_->Branch("phoSeedRecoFlag", phoSeedRecoFlag, "phoSeedRecoFlag[nPhotons]/I");
+  tree_->Branch("phoSeedSeverityLevel", phoSeedSeverityLevel, "phoSeedSeverityLevel[nPhotons]/I");
+  tree_->Branch("phoMaxEnergyXtal", phoMaxEnergyXtal, "phoMaxEnergyXtal[nPhotons]/F");
+  tree_->Branch("phoE3x3", phoE3x3, "phoE3x3[nPhotons]/F");
+  tree_->Branch("phoSeedSwissCross", phoSeedSwissCross, "phoSeedSwissCross[nPhotons]/F");
+  tree_->Branch("phoSeedE1OverE9", phoSeedE1OverE9, "phoSeedE1OverE9[nPhotons]/F");
+  tree_->Branch("phoGenMatchPdgId", phoGenMatchPdgId, "phoGenMatchPdgId[nPhotons]/I");
+  tree_->Branch("phoGenMatchStatus", phoGenMatchPdgId, "phoGenMatchPdgId[nPhotons]/I");
+  tree_->Branch("phoGenMatchMomPdgId", phoGenMatchMomPdgId, "phoGenMatchMomPdgId[nPhotons]/I");
+  tree_->Branch("phoGenMatchMomStatus", phoGenMatchMomStatus, "phoGenMatchMomStatus[nPhotons]/I");
 }
 
 void
@@ -64,6 +75,7 @@ MuMuGammaTree::initGammaLeafVariables()
   for (int i=0; i<maxPhotons; ++i) {
     phoPt[i]                      = 0;
     phoEta[i]                      = 0;
+    phoScEta[i]                      = 0;
     phoPhi[i]                      = 0;
     phoEcalIso[i]                      = 0;
     phoHcalIso[i]                      = 0;
@@ -71,6 +83,17 @@ MuMuGammaTree::initGammaLeafVariables()
     phoSigmaIetaIeta[i]                      = 0;
     phoHadronicOverEm[i]                      = 0;
     phoHasPixelSeed[i]                      = 0;
+    phoSeedRecoFlag[i]                      = 0;
+    phoSeedSeverityLevel[i] = 0;
+    phoMaxEnergyXtal[i] = 0;
+    phoE3x3[i] = 0;
+    phoSeedSwissCross[i] = 0;
+    phoSeedE1OverE9[i] = 0;
+    phoGenMatchPdgId[i]       = 0;
+    phoGenMatchStatus[i]      = 0;
+    phoGenMatchMomPdgId[i]    = 0;
+    phoGenMatchMomStatus[i]   = 0;
+
   }
 }
 

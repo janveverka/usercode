@@ -13,6 +13,7 @@ public:
   void applyJPsiSelection();
   void applyYSelection();
   void applyZSelection();
+  void applyVbtfBaselineSelection();
   void setOrderByMuQAndPt();
   void setOrderByVProb();
   void setCorrectedMassJPsi();  /// TODO
@@ -70,6 +71,7 @@ public:
   unsigned char isJPsiCand       [maxDimuons];
   unsigned char isYCand          [maxDimuons];
   unsigned char isZCand          [maxDimuons];
+  unsigned char isVbtfBaselineCand[maxDimuons];
   unsigned char orderByMuQAndPt  [maxDimuons];
   unsigned char orderByVProb     [maxDimuons];
 
@@ -79,6 +81,8 @@ public:
   float         muPhi                    [maxMuons];
   float         muP                      [maxMuons];
   int           muCharge                 [maxMuons];
+  float         muDxyBS                  [maxMuons];
+  float         muDxyPV                  [maxMuons];
   float         muSiNormalizedChi2       [maxMuons];
   float         muSiD0                   [maxMuons];
   float         muSiD0BS                 [maxMuons];
@@ -91,6 +95,8 @@ public:
   float         muSiDszPV                [maxMuons];
   unsigned char muSiHits                 [maxMuons];
   unsigned char muPixelHits              [maxMuons];
+  unsigned char muStripHits              [maxMuons];
+  unsigned char muMuonHits               [maxMuons];
   unsigned char muStations               [maxMuons];
   float         muGlobalNormalizedChi2   [maxMuons];
   float         muVz                     [maxMuons];
@@ -105,6 +111,8 @@ public:
   unsigned char muPassYId                [maxMuons];
   unsigned char muPassZId                [maxMuons];
   unsigned char muPassZIdTight           [maxMuons];
+  unsigned char muPassVbtfBaseline       [maxMuons];
+  unsigned char muPassVbtfBaselineTight  [maxMuons];
   unsigned char muHltMu9Match            [maxMuons];
 
 private:

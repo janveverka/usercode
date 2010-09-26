@@ -189,6 +189,48 @@ DimuonsTree::applyZSelection() {
 
 }  // DimuonsTree::applyZSelection
 
+// https://twiki.cern.ch/twiki/bin/view/CMS/VbtfZMuMuBaselineSelection
+void
+DimuonsTree::applyVbtfBaselineSelection() {
+  /// loop over muons
+  for (int i=0; i<nMuons; ++i) {
+    muPassVbtfBaseline[i] = muPassVbtfBaselineTight[i] = 0;
+
+    if (!muIsGlobalMuon[i]) continue;
+    if (muStripHits[i] + muPixelHits[i] < 10) continue;
+    if (muTrackIso[i] > 3.0) continue;
+    if (muPt[i] < 10.) continue;
+    if (TMath::Abs(muEta[i]) > 2.4) continue;
+
+    muPassVbtfBaseline[i] = 1;
+
+    /// more cuts for the tight selection
+    if (TMath::Abs(muDxyBS[i]) > 0.2) continue;
+    if (muGlobalNormalizedChi2[i] > 10.) continue;
+    if (muPixelHits[i] < 1) continue;
+    if (muStations[i] < 2) continue;
+    if (muMuonHits[i] < 1) continue;
+    if (!muIsTrackerMuon[i]) continue;
+    if (!muHltMu9Match[i]) continue;
+    if (TMath::Abs(muEta[i]) > 2.1) continue;
+
+    muPassVbtfBaselineTight[i] = 1;
+  } // loop over muons
+
+  /// loop over dimuons
+  for (int i=0; i<nDimuons; ++i) {
+    isVbtfBaselineCand[i] = 0;
+    if (!HLT_Mu9) continue;
+    if (charge[i] != 0) continue;
+    if (!muPassVbtfBaseline[dau1[i]] || !muPassVbtfBaseline[dau2[i]]) continue;
+    if (!muPassVbtfBaselineTight[dau1[i]] && !muPassVbtfBaselineTight[dau2[i]]) continue;
+    if (muPt[dau1[i]] < 15. &&
+        muPt[dau1[i]] < 15. ) continue;  // at least 1 muon above 15 GeV
+    isVbtfBaselineCand[i] = 1;
+  } // loop over dimuons
+
+}  // DimuonsTree::applyVbtfBaselineSelection
+
 
 void
 DimuonsTree::setOrderByMuQAndPt() {
@@ -315,6 +357,7 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("isJPsiCand"       , isJPsiCand       , "isJPsiCand[nDimuons]/b"       );
   tree_->Branch("isYCand"          , isYCand          , "isYCand[nDimuons]/b"          );
   tree_->Branch("isZCand"          , isZCand          , "isZCand[nDimuons]/b"          );
+  tree_->Branch("isVbtfBaselineCand"          , isVbtfBaselineCand          , "isVbtfBaselineCand[nDimuons]/b"          );
   tree_->Branch("orderByMuQAndPt"  , orderByMuQAndPt  , "orderByMuQAndPt[nDimuons]/b"  );
   tree_->Branch("orderByVProb"     , orderByVProb     , "orderByVProb[nDimuons]/b"     );
 
@@ -323,6 +366,8 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("muPhi"                    , muPhi                    , "muPhi[nMuons]/F"                    );
   tree_->Branch("muP"                      , muP                      , "muP[nMuons]/F"                      );
   tree_->Branch("muCharge"                 , muCharge                 , "muCharge[nMuons]/I"                 );
+  tree_->Branch("muDxyPV"                  , muDxyPV                  , "muDxyPV[nMuons]/F"                  );
+  tree_->Branch("muDxyBS"                  , muDxyBS                  , "muDxyBS[nMuons]/F"                  );
   tree_->Branch("muSiNormalizedChi2"       , muSiNormalizedChi2       , "muSiNormalizedChi2[nMuons]/F"       );
   tree_->Branch("muSiD0"                   , muSiD0                   , "muSiD0[nMuons]/F"                   );
   tree_->Branch("muSiD0BS"                 , muSiD0BS                 , "muSiD0BS[nMuons]/F"                 );
@@ -335,6 +380,8 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("muSiDszPV"                , muSiDszPV                , "muSiDszPV[nMuons]/F"                );
   tree_->Branch("muSiHits"                 , muSiHits                 , "muSiHits[nMuons]/b"                 );
   tree_->Branch("muPixelHits"              , muPixelHits              , "muPixelHits[nMuons]/b"              );
+  tree_->Branch("muStripHits"              , muStripHits              , "muStripHits[nMuons]/b"              );
+  tree_->Branch("muMuonHits"               , muMuonHits               , "muMuonHits[nMuons]/b"               );
   tree_->Branch("muStations"               , muStations               , "muStations[nMuons]/b"               );
   tree_->Branch("muGlobalNormalizedChi2"   , muGlobalNormalizedChi2   , "muGlobalNormalizedChi2[nMuons]/b"   );
   tree_->Branch("muVz"                     , muVz                     , "muVz[nMuons]/F"                     );
@@ -349,6 +396,8 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("muPassYId"                , muPassYId                , "muPassYId[nMuons]/b"                );
   tree_->Branch("muPassZId"                , muPassZId                , "muPassZId[nMuons]/b"                );
   tree_->Branch("muPassZIdTight"           , muPassZIdTight           , "muPassZIdTight[nMuons]/b"           );
+  tree_->Branch("muPassVbtfBaseline"       , muPassVbtfBaseline       , "muPassVbtfBaseline[nMuons]/b"       );
+  tree_->Branch("muPassVbtfBaselineTight"  , muPassVbtfBaselineTight  , "muPassVbtfBaselineTight[nMuons]/b"  );
   tree_->Branch("muHltMu9Match"            , muHltMu9Match            , "muHltMu9Match[nMuons]/b"            );
 }
 
@@ -403,6 +452,7 @@ DimuonsTree::initLeafVariables()
     isJPsiCand[i]        = 0;
     isYCand[i]           = 0;
     isZCand[i]           = 0;
+    isVbtfBaselineCand[i] = 0;
     orderByMuQAndPt[i]   = 0;
     orderByVProb[i]      = 0;
   }
@@ -413,6 +463,8 @@ DimuonsTree::initLeafVariables()
     muPhi[i]                     = 0;
     muP[i]                       = 0;
     muCharge[i]                  = 0;
+    muDxyPV[i]                   = 0;
+    muDxyBS[i]                   = 0;
     muSiNormalizedChi2[i]        = 0;
     muSiD0[i]                    = 0;
     muSiD0BS[i]                  = 0;
@@ -425,6 +477,8 @@ DimuonsTree::initLeafVariables()
     muSiDszPV[i]                 = 0;
     muSiHits[i]                  = 0;
     muPixelHits[i]               = 0;
+    muStripHits[i]               = 0;
+    muMuonHits[i]                = 0;
     muStations[i]                = 0;
     muGlobalNormalizedChi2[i]    = 0;
     muVz[i]                      = 0;
@@ -439,6 +493,8 @@ DimuonsTree::initLeafVariables()
     muPassYId[i]                 = 0;
     muPassZId[i]                 = 0;
     muPassZIdTight[i]            = 0;
+    muPassVbtfBaseline[i] = 0;
+    muPassVbtfBaselineTight[i] = 0;
     muHltMu9Match[i]             = 0;
   }
 }

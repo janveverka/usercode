@@ -37,6 +37,7 @@ def drawTH1s(histos):
   ymax = ymax + sqrt(ymax) + 1
   for k in keys:
     histos[k].SetMaximum(ymax)
+    histos[k].SetMinimum( min( 0.01, histos[k].GetMinimum() ) )
   histos["r"].Draw()
   histos["s"].Draw("ex0 same")
   legend = TLegend(0.6,0.7,0.85,0.85)
@@ -396,7 +397,7 @@ nsel = ch.Draw(
   "{m}:{m}*{mErr}:{e}:{e}*{eErr}".format(
     e=phoEcalE, eErr=phoEcalErr, m=phoMuonE, mErr=phoMuErr
     ),
-  selSig, "goff"
+  selSig + "abs(phoEta[g]) < 1.5", "goff"
   )
 xlist, exlist, ylist, eylist = [], [], [], []
 print "E(muon) ( error ) E(ecal) (error)"
@@ -417,6 +418,7 @@ gr.Fit(fit2)
 gr.GetXaxis().SetTitle("E(#gamma) from muons")
 gr.GetYaxis().SetTitle("E(#gamma) from ECAL")
 gr.Draw("azp")
+plotNames[canvases[-1]] = "gPhotonEnergyfromEcalVsMuonsEB"
 
 print "E(gamma) ECAL/Muons, (err(mu)/mu \Oplus err(ECAL)/ECAL)^{-2}"
 Oplus = lambda x, y: sqrt(x*x + y*y)
@@ -436,6 +438,7 @@ hPhoMeasVsExpectE["s"].SetStats()
 hPhoMeasVsExpectE["s"].Fit(fit)
 drawTH2s(hPhoMeasVsExpectE)
 canvases[-1].RedrawAxis()
+
 
 # 15
 canvases.append(TCanvas())
@@ -460,6 +463,8 @@ hs.Fit(fit)
 hs.Draw("ex0 same")
 
 canvases[-1].RedrawAxis()
+plotNames[canvases[-1]] = "hMMGFsrMass"
+
 legend = TLegend(0.72,0.65,0.88,0.85)
 legend.AddEntry(hs, "FSR", "lpf").SetTextColor(kRed)
 legend.AddEntry(hr, "loose EM", "lp")

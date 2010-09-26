@@ -5,23 +5,35 @@
 #include "TH1.h"
 #include "TMath.h"
 
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Utilities/interface/InputTag.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "CommonTools/UtilAlgos/interface/DeltaR.h"
-#include "DataFormats/Math/interface/Point3D.h"
-#include "DataFormats/Math/interface/Vector3D.h"
-#include "DataFormats/Math/interface/LorentzVector.h"
-#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
+#include "CondFormats/EcalObjects/interface/EcalChannelStatus.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/CaloRecHit/interface/CaloCluster.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Candidate/interface/LeafCandidate.h"
-#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
+#include "DataFormats/Math/interface/Point3D.h"
+#include "DataFormats/Math/interface/Vector3D.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Photon.h"
+#include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/CaloRecHit/interface/CaloCluster.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
 
 #include "JPsi/MuMu/interface/MuMuGammaTree.h"
 
@@ -61,6 +73,8 @@ private:
   edm::InputTag beamSpotSrc_;
   edm::InputTag primaryVertexSrc_;
   edm::InputTag ebClusterSrc_;
+  edm::InputTag ebRecHitsSrc_;
+  edm::InputTag eeRecHitsSrc_;
   bool isMC_;
 
 };
@@ -76,6 +90,8 @@ MuMuGammaTreeMaker::MuMuGammaTreeMaker(const edm::ParameterSet& iConfig):
   beamSpotSrc_(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc")),
   primaryVertexSrc_(iConfig.getUntrackedParameter<edm::InputTag>("primaryVertexSrc")),
   ebClusterSrc_(iConfig.getUntrackedParameter<edm::InputTag>("ebClusterSrc")),
+  ebRecHitsSrc_(iConfig.getUntrackedParameter<edm::InputTag>("ebRecHitsSrc")),
+  eeRecHitsSrc_(iConfig.getUntrackedParameter<edm::InputTag>("eeRecHitsSrc")),
   isMC_(iConfig.getUntrackedParameter<bool>("isMC"))
 {
 }
@@ -149,13 +165,25 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   iEvent.getByLabel(dimuonSrc_,dimuons);
 
   edm::Handle<reco::BeamSpot> beamSpot;
-  if (!isMC_) iEvent.getByLabel(beamSpotSrc_, beamSpot);
+  iEvent.getByLabel(beamSpotSrc_, beamSpot);
 
   edm::Handle<edm::View<reco::Vertex> > primaryVertices;
-  if (!isMC_) iEvent.getByLabel(primaryVertexSrc_, primaryVertices);
+  iEvent.getByLabel(primaryVertexSrc_, primaryVertices);
 
   edm::Handle<edm::View<reco::CaloCluster> > ebClusters;
   iEvent.getByLabel(ebClusterSrc_, ebClusters);
+
+  edm::Handle<EcalRecHitCollection> eeRecHits;
+  edm::Handle<EcalRecHitCollection> ebRecHits;
+  edm::Handle<pat::TriggerEvent> triggerEvent;
+  edm::ESHandle<EcalChannelStatus> channelStatus;
+
+  iEvent.getByLabel(ebRecHitsSrc_, ebRecHits);
+  iEvent.getByLabel(eeRecHitsSrc_, eeRecHits);
+  iEvent.getByLabel("patTriggerEvent", triggerEvent);
+  iSetup.get<EcalChannelStatusRcd>().get(channelStatus);
+
+  EcalClusterLazyTools lazyTools(iEvent, iSetup, ebRecHitsSrc_, eeRecHitsSrc_);
 
 
 
@@ -165,8 +193,8 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   // TODO: ADD THE HLT BITS
 /*  tree_.L1DoubleMuOpen    = dimuon->L1DoubleMuOpen();
-  tree_.HLT_Mu3           = dimuon->HLT_Mu3();
-  tree_.HLT_Mu9           = dimuon->HLT_Mu9();*/
+  tree_.HLT_Mu3           = dimuon->HLT_Mu3();*/
+  tree_.HLT_Mu9           = triggerEvent->path("HLT_Mu9")->wasAccept();
 
   tree_.nDimuons = dimuons->size();
   if (tree_.nDimuons > MuMuGammaTree::maxDimuons)
@@ -195,27 +223,27 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
                                       dimuon->vertexNdof()
                                       );
     tree_.vrho  [i] = rho(*dimuon);
-    tree_.vrhoBS[i] = rho(*dimuon, isMC_ ? Point(0,0,0) : beamSpot->position() );
-    tree_.vrhoPV[i] = rho(*dimuon, isMC_ ? Point(0,0,0) : primaryVertices->at(0).position() );
+    tree_.vrhoBS[i] = rho(*dimuon, beamSpot->position() );
+    tree_.vrhoPV[i] = rho(*dimuon, primaryVertices->at(0).position() );
     tree_.vx    [i] = dimuon->vx();
-    tree_.vxBS  [i] = dimuon->vx() - (isMC_ ? 0 : beamSpot->position().X());
-    tree_.vxPV  [i] = dimuon->vx() - (isMC_ ? 0 : primaryVertices->at(0).position().X());
+    tree_.vxBS  [i] = dimuon->vx() - (beamSpot->position().X());
+    tree_.vxPV  [i] = dimuon->vx() - (primaryVertices->at(0).position().X());
     tree_.vy    [i] = dimuon->vy();
-    tree_.vyBS  [i] = dimuon->vy() - (isMC_ ? 0 : beamSpot->position().Y());
-    tree_.vyPV  [i] = dimuon->vy() - (isMC_ ? 0 : primaryVertices->at(0).position().Y());
+    tree_.vyBS  [i] = dimuon->vy() - (beamSpot->position().Y());
+    tree_.vyPV  [i] = dimuon->vy() - (primaryVertices->at(0).position().Y());
     tree_.vz    [i] = dimuon->vz();
-    tree_.vzBS  [i] = dimuon->vz() - (isMC_ ? 0 : beamSpot->position().Z());
-    tree_.vzPV  [i] = dimuon->vz() - (isMC_ ? 0 : primaryVertices->at(0).position().Z());
+    tree_.vzBS  [i] = dimuon->vz() - (beamSpot->position().Z());
+    tree_.vzPV  [i] = dimuon->vz() - (primaryVertices->at(0).position().Z());
 
     tree_.d0   [i] = - dxy(*dimuon);
-    tree_.d0BS [i] = - dxy(*dimuon, isMC_ ? Point(0,0,0) : beamSpot->position() );
-    tree_.d0PV [i] = - dxy(*dimuon, isMC_ ? Point(0,0,0) : primaryVertices->at(0).position() );
+    tree_.d0BS [i] = - dxy(*dimuon, beamSpot->position() );
+    tree_.d0PV [i] = - dxy(*dimuon, primaryVertices->at(0).position() );
     tree_.dz   [i] = dz(*dimuon);
-    tree_.dzBS [i] = dz(*dimuon, isMC_ ? Point(0,0,0) : beamSpot->position() );
-    tree_.dzPV [i] = dz(*dimuon, isMC_ ? Point(0,0,0) : primaryVertices->at(0).position() );
+    tree_.dzBS [i] = dz(*dimuon, beamSpot->position() );
+    tree_.dzPV [i] = dz(*dimuon, primaryVertices->at(0).position() );
     tree_.dsz  [i] = dsz(*dimuon);
-    tree_.dszBS[i] = dsz(*dimuon, isMC_ ? Point(0,0,0) : beamSpot->position() );
-    tree_.dszPV[i] = dsz(*dimuon, isMC_ ? Point(0,0,0) : primaryVertices->at(0).position() );
+    tree_.dszBS[i] = dsz(*dimuon, beamSpot->position() );
+    tree_.dszPV[i] = dsz(*dimuon, primaryVertices->at(0).position() );
     const double pdgMassJPsi  =  3.097,
                  pdgMassPsi2S =  3.686,
                  pdgMassY1S   =  9.460,
@@ -273,18 +301,24 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.muPhi[i]                     = mu->phi();
     tree_.muP[i]                       = mu->p();
     tree_.muCharge[i]                  = mu->charge();
+    if ( mu->globalTrack().isNonnull() && mu->isGlobalMuon() ) {
+      tree_.muDxyBS[i]     = mu->globalTrack()->dxy( beamSpot->position() );
+      tree_.muDxyPV[i]     = mu->globalTrack()->dxy( primaryVertices->at(0).position() );
+      tree_.muPixelHits[i] = mu->globalTrack()->hitPattern().numberOfValidPixelHits();
+      tree_.muStripHits[i] = mu->globalTrack()->hitPattern().numberOfValidStripHits();
+      tree_.muMuonHits[i]  = mu->globalTrack()->hitPattern().numberOfValidMuonHits();
+    }
     tree_.muSiNormalizedChi2[i]        = mu->innerTrack()->normalizedChi2();
     tree_.muSiD0[i]                    = mu->innerTrack()->d0();
-    tree_.muSiD0BS[i]                  = - mu->innerTrack()->dxy( isMC_ ? Point(0,0,0) : beamSpot->position() );
-    tree_.muSiD0PV[i]                  = - mu->innerTrack()->dxy( isMC_ ? Point(0,0,0) : primaryVertices->at(0).position() );
+    tree_.muSiD0BS[i]                  = - mu->innerTrack()->dxy( beamSpot->position() );
+    tree_.muSiD0PV[i]                  = - mu->innerTrack()->dxy( primaryVertices->at(0).position() );
     tree_.muSiDz[i]                    = mu->innerTrack()->dz();
-    tree_.muSiDzBS[i]                  = mu->innerTrack()->dz( isMC_ ? Point(0,0,0) : beamSpot->position() );
-    tree_.muSiDzPV[i]                  = mu->innerTrack()->dz( isMC_ ? Point(0,0,0) : primaryVertices->at(0).position() );
+    tree_.muSiDzBS[i]                  = mu->innerTrack()->dz( beamSpot->position() );
+    tree_.muSiDzPV[i]                  = mu->innerTrack()->dz( primaryVertices->at(0).position() );
     tree_.muSiDsz[i]                   = mu->innerTrack()->dsz();
-    tree_.muSiDszBS[i]                 = mu->innerTrack()->dsz( isMC_ ? Point(0,0,0) : beamSpot->position() );
-    tree_.muSiDszPV[i]                 = mu->innerTrack()->dsz( isMC_ ? Point(0,0,0) : primaryVertices->at(0).position() );
+    tree_.muSiDszBS[i]                 = mu->innerTrack()->dsz( beamSpot->position() );
+    tree_.muSiDszPV[i]                 = mu->innerTrack()->dsz( primaryVertices->at(0).position() );
     tree_.muSiHits[i]                  = mu->innerTrack()->found();
-    tree_.muPixelHits[i]               = mu->innerTrack()->hitPattern().numberOfValidPixelHits();
     // count stations
     unsigned nStations = 0, stationMask = mu->stationMask();
     for (; stationMask; nStations++)
@@ -298,12 +332,13 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.muTrackIso[i]                = mu->trackIso();
     tree_.muEcalIso[i]                 = mu->ecalIso();
     tree_.muHcalIso[i]                 = mu->hcalIso();
-//     tree_.muHltMu9Match[i]             = mu->hltMu9Match();
+    tree_.muHltMu9Match[i] = mu->triggerObjectMatchesByPath("HLT_Mu9").size() ? 1 : 0;
   } // loop over muons
 
   tree_.applyJPsiSelection();
   tree_.applyYSelection();
   tree_.applyZSelection();
+  tree_.applyVbtfBaselineSelection();
 
   tree_.setOrderByMuQAndPt();
   tree_.setOrderByVProb();
@@ -346,6 +381,7 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   for (pho = photons->begin(), i=0; i < tree_.nPhotons; ++i, ++pho) {
     tree_.phoPt[i] = pho->pt();
     tree_.phoEta[i] = pho->eta();
+    tree_.phoScEta[i] = pho->superCluster()->eta();
     tree_.phoPhi[i] = pho->phi();
     tree_.phoEcalIso[i] = pho->ecalIso();
     tree_.phoHcalIso[i] = pho->hcalIso();
@@ -353,6 +389,49 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.phoHadronicOverEm[i] = pho->hadronicOverEm();
     tree_.phoSigmaIetaIeta[i] = pho->sigmaIetaIeta();
     tree_.phoHasPixelSeed[i] = pho->hasPixelSeed();
+    tree_.phoMaxEnergyXtal[i] = pho->maxEnergyXtal();
+    tree_.phoE3x3[i] = pho->e3x3();
+    if (isMC_ && pho->genParticle(0)) {
+      // found gen match
+      tree_.phoGenMatchPdgId[i]  = pho->genParticle(0)->pdgId();
+      tree_.phoGenMatchStatus[i] = pho->genParticle(0)->status();
+      if (pho->genParticle(0)->numberOfMothers() > 0) {
+        tree_.phoGenMatchMomPdgId[i]  = pho->genParticle(0)->mother(0)->pdgId();
+        tree_.phoGenMatchMomStatus[i] = pho->genParticle(0)->mother(0)->status();
+      } else {
+        tree_.phoGenMatchMomPdgId[i]  = 0;
+        tree_.phoGenMatchMomStatus[i] = 0;
+      }
+    } else {
+      tree_.phoGenMatchPdgId[i]  = 0;
+      tree_.phoGenMatchStatus[i] = 0;
+    }
+
+    const reco::CaloCluster &phoSeed = *( pho->superCluster()->seed() );
+    DetId seedId = lazyTools.getMaximum(phoSeed).first;
+    const EcalRecHitCollection & recHits = ( pho->isEB() ?
+      *ebRecHits :
+      *eeRecHits
+      );
+    EcalRecHitCollection::const_iterator rh = recHits.find(seedId);
+    if (rh != recHits.end()) {
+/*      time          = rh->time();
+      outOfTimeChi2 = rh->outOfTimeChi2();
+      chi2          = rh->chi2();*/
+      tree_.phoSeedRecoFlag[i]      = rh->recoFlag();
+      tree_.phoSeedSeverityLevel[i] = EcalSeverityLevelAlgo::severityLevel(
+                                        seedId, recHits, *channelStatus
+                                        );
+      tree_.phoSeedSwissCross[i]    = EcalSeverityLevelAlgo::swissCross(seedId, recHits);
+      tree_.phoSeedE1OverE9[i]      = EcalSeverityLevelAlgo::E1OverE9(seedId, recHits);
+    } else {
+      edm::LogWarning("SpikeCleaningVariables") << "Didn't find seed rechit!"
+                                                << std::endl;
+      tree_.phoSeedRecoFlag[i]      = -999;
+      tree_.phoSeedSeverityLevel[i] = -999;
+      tree_.phoSeedSwissCross[i]    = -999;
+      tree_.phoSeedE1OverE9[i]      = -999;
+    }
 
     reco::CompositeCandidate dimuon = (*dimuons)[primaryDimuon];
     reco::CompositeCandidate mmg;
@@ -367,9 +446,15 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     DeltaR<pat::Photon, reco::Candidate> deltaR;
     double dr1 = deltaR( *pho, *dimuon.daughter(0) );
     double dr2 = deltaR( *pho, *dimuon.daughter(1) );
-    if (dr1 < dr2)  tree_.mmgDeltaRNear[i] = dr1;
-    else            tree_.mmgDeltaRNear[i] = dr2;
-
+    if (dr1 < dr2) {
+      tree_.mmgDeltaRNear[i] = dr1;
+      tree_.mmgMuonNear[i] = tree_.dau1[primaryDimuon];
+      tree_.mmgMuonFar[i]  = tree_.dau2[primaryDimuon];
+    } else {
+      tree_.mmgDeltaRNear[i] = dr2;
+      tree_.mmgMuonNear[i] = tree_.dau2[primaryDimuon];
+      tree_.mmgMuonFar[i]  = tree_.dau1[primaryDimuon];
+    } // if (dr1 < dr2)
 
   } // loop over photons
 

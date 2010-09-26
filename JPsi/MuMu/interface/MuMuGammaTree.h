@@ -22,11 +22,14 @@ public:
   float mmgMass[maxMuMuGammas];
   unsigned char mmgDimuon[maxMuMuGammas];
   unsigned char mmgPhoton[maxMuMuGammas];
+  unsigned char mmgMuonNear[maxMuMuGammas];
+  unsigned char mmgMuonFar[maxMuMuGammas];
   float mmgDeltaRNear[maxMuMuGammas];
 
   // photon leafs
   float phoPt[maxPhotons];
   float phoEta[maxPhotons];
+  float phoScEta[maxPhotons];
   float phoPhi[maxPhotons];
   float phoEcalIso[maxPhotons];
   float phoHcalIso[maxPhotons];
@@ -34,6 +37,17 @@ public:
   float phoSigmaIetaIeta[maxPhotons];
   float phoHadronicOverEm[maxPhotons];
   unsigned char phoHasPixelSeed[maxPhotons];
+  int phoSeedRecoFlag[maxPhotons];
+  int phoSeedSeverityLevel[maxPhotons];
+  float phoMaxEnergyXtal[maxPhotons];
+  float phoE3x3[maxPhotons];
+  float phoSeedSwissCross[maxPhotons];
+  float phoSeedE1OverE9[maxPhotons];
+  int phoGenMatchPdgId[maxPhotons];      // 0 means no MC match found
+  int phoGenMatchStatus[maxPhotons];     // 0 means no match found
+  int phoGenMatchMomPdgId[maxPhotons];   // 0 means no MC match found
+  int phoGenMatchMomStatus[maxPhotons];  // 0 means no match found
+
 
 private:
   TTree *tree_;
