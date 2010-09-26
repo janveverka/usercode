@@ -78,6 +78,8 @@ from PhysicsTools.PatAlgos.tools.trigTools import *
 from ElectroWeakAnalysis.MultiBosons.tools.skimmingTools import embedTriggerMatches
 process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
 switchOnTrigger(process)
+process.patTrigger.processName = "REDIGI36X"
+process.patTriggerEvent.processName = "REDIGI36X"
 matchHltPaths = {
   "selectedPatMuons": """
     HLT_L1Mu14_L1ETM30
@@ -100,14 +102,15 @@ embedTriggerMatches(process, matchHltPaths)
 process.GlobalTag.globaltag = options.globalTag
 
 import os
-path = "/store/mc/Spring10/Zmumu/GEN-SIM-RECO/START3X_V26_S09-v1/0006/"
+#path = "/store/mc/Spring10/Zmumu/GEN-SIM-RECO/START3X_V26_S09-v1/0006/"
+path = "/store/mc/Summer10/Zmumu_M20_CTEQ66-powheg/GEN-SIM-RECO/START36_V9_S09-v2/0032/"
 files = os.popen("ls /pnfs/cms/WAX/11" + path).read().split()
 prefix = "dcap://cmsdca.fnal.gov:22125/pnfs/fnal.gov/usr/cms/WAX/11"
 fileNames = [prefix + path + f for f in files]
 process.source.fileNames = cms.untracked.vstring(fileNames[:5])
 
-process.maxEvents.input = -1
-# process.maxEvents.input = 2000
+#process.maxEvents.input = -1
+process.maxEvents.input = 20
 #process.maxEvents = cms.untracked.PSet(output = cms.untracked.int32(2))  # test
 
 process.out.fileName = "ZGammaSkim_v1.root"
