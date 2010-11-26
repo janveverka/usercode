@@ -14,6 +14,7 @@ public:
   void applyYSelection();
   void applyZSelection();
   void applyVbtfBaselineSelection();
+  void applyBaselineSelection();
   void setOrderByMuQAndPt();
   void setOrderByVProb();
   void setCorrectedMassJPsi();  /// TODO
@@ -29,8 +30,10 @@ public:
   unsigned char L1DoubleMuOpen;
   unsigned char HLT_Mu3       ;
   unsigned char HLT_Mu9       ;
-  unsigned char nDimuons      ;
-  unsigned char nMuons        ;
+  unsigned char HLT_Mu11      ;
+  unsigned char HLT_Mu15_v1   ;
+  Int_t         nDimuons      ;
+  Int_t         nMuons        ;
 
   // dimuon leaf variables
   float         mass             [maxDimuons];
@@ -72,6 +75,7 @@ public:
   unsigned char isYCand          [maxDimuons];
   unsigned char isZCand          [maxDimuons];
   unsigned char isVbtfBaselineCand[maxDimuons];
+  unsigned char isBaselineCand[maxDimuons];
   unsigned char orderByMuQAndPt  [maxDimuons];
   unsigned char orderByVProb     [maxDimuons];
 
@@ -79,6 +83,9 @@ public:
   float         muPt                     [maxMuons];
   float         muEta                    [maxMuons];
   float         muPhi                    [maxMuons];
+  float         muGenPt                  [maxMuons];
+  float         muGenEta                 [maxMuons];
+  float         muGenPhi                 [maxMuons];
   float         muP                      [maxMuons];
   int           muCharge                 [maxMuons];
   float         muDxyBS                  [maxMuons];
@@ -113,7 +120,10 @@ public:
   unsigned char muPassZIdTight           [maxMuons];
   unsigned char muPassVbtfBaseline       [maxMuons];
   unsigned char muPassVbtfBaselineTight  [maxMuons];
+  unsigned char muPassBaselineTight      [maxMuons];
   unsigned char muHltMu9Match            [maxMuons];
+  unsigned char muHltMu11Match           [maxMuons];
+  unsigned char muHltMu15v1Match         [maxMuons];
 
 private:
   TTree *tree_;

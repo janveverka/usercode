@@ -211,25 +211,92 @@ DimuonsTree::applyVbtfBaselineSelection() {
     if (muStations[i] < 2) continue;
     if (muMuonHits[i] < 1) continue;
     if (!muIsTrackerMuon[i]) continue;
-    if (!muHltMu9Match[i]) continue;
+    if (!muHltMu9Match[i] &&
+        !muHltMu11Match[i] &&
+        !muHltMu15v1Match[i]) continue;
     if (TMath::Abs(muEta[i]) > 2.1) continue;
 
-    muPassVbtfBaselineTight[i] = 1;
+    if (muHltMu15v1Match[i])    muPassVbtfBaselineTight[i] = 3;
+    else if (muHltMu11Match[i]) muPassVbtfBaselineTight[i] = 2;
+    else                        muPassVbtfBaselineTight[i] = 1;
   } // loop over muons
 
   /// loop over dimuons
   for (int i=0; i<nDimuons; ++i) {
     isVbtfBaselineCand[i] = 0;
-    if (!HLT_Mu9) continue;
+    if (!HLT_Mu9 && !HLT_Mu11 && !HLT_Mu15_v1) continue;
     if (charge[i] != 0) continue;
     if (!muPassVbtfBaseline[dau1[i]] || !muPassVbtfBaseline[dau2[i]]) continue;
     if (!muPassVbtfBaselineTight[dau1[i]] && !muPassVbtfBaselineTight[dau2[i]]) continue;
     if (muPt[dau1[i]] < 15. &&
         muPt[dau1[i]] < 15. ) continue;  // at least 1 muon above 15 GeV
-    isVbtfBaselineCand[i] = 1;
+    if (HLT_Mu15_v1 &
+         (
+           muPassVbtfBaselineTight[dau1[i]] == 3 ||
+           muPassVbtfBaselineTight[dau2[i]] == 3
+         )
+       )
+    {
+      isVbtfBaselineCand[i] = 3;
+    }
+    else if (HLT_Mu11 &
+              (
+                muPassVbtfBaselineTight[dau1[i]] == 2 ||
+                muPassVbtfBaselineTight[dau2[i]] == 2
+              )
+            )
+    {
+      isVbtfBaselineCand[i] = 1;
+    }
+    else
+    {
+      isVbtfBaselineCand[i] = 3;
+    }
   } // loop over dimuons
 
 }  // DimuonsTree::applyVbtfBaselineSelection
+
+
+// https://twiki.cern.ch/twiki/bin/view/CMS/VbtfZMuMuBaselineSelection
+// without any trigger requirement
+void
+DimuonsTree::applyBaselineSelection() {
+  /// loop over muons
+  for (int i=0; i<nMuons; ++i) {
+    muPassVbtfBaseline[i] = muPassBaselineTight[i] = 0;
+
+    if (!muIsGlobalMuon[i]) continue;
+    if (muStripHits[i] + muPixelHits[i] < 10) continue;
+    if (muTrackIso[i] > 3.0) continue;
+    if (muPt[i] < 10.) continue;
+    if (TMath::Abs(muEta[i]) > 2.4) continue;
+
+    muPassVbtfBaseline[i] = 1;
+
+    /// more cuts for the tight selection
+    if (TMath::Abs(muDxyBS[i]) > 0.2) continue;
+    if (muGlobalNormalizedChi2[i] > 10.) continue;
+    if (muPixelHits[i] < 1) continue;
+    if (muStations[i] < 2) continue;
+    if (muMuonHits[i] < 1) continue;
+    if (!muIsTrackerMuon[i]) continue;
+    if (TMath::Abs(muEta[i]) > 2.1) continue;
+
+    muPassBaselineTight[i] = 1;
+  } // loop over muons
+
+  /// loop over dimuons
+  for (int i=0; i<nDimuons; ++i) {
+    isBaselineCand[i] = 0;
+    if (charge[i] != 0) continue;
+    if (!muPassVbtfBaseline[dau1[i]] || !muPassVbtfBaseline[dau2[i]]) continue;
+    if (!muPassBaselineTight[dau1[i]] && !muPassBaselineTight[dau2[i]]) continue;
+    if (muPt[dau1[i]] < 15. &&
+        muPt[dau1[i]] < 15. ) continue;  // at least 1 muon above 15 GeV
+    isBaselineCand[i] = 1;
+  } // loop over dimuons
+
+}  // DimuonsTree::applyBaselineSelection
 
 
 void
@@ -316,6 +383,8 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("L1DoubleMuOpen"   , &L1DoubleMuOpen   , "L1DoubleMuOpen/b"   );
   tree_->Branch("HLT_Mu3"          , &HLT_Mu3          , "HLT_Mu3/b"          );
   tree_->Branch("HLT_Mu9"          , &HLT_Mu9          , "HLT_Mu9/b"          );
+  tree_->Branch("HLT_Mu11"         , &HLT_Mu11         , "HLT_Mu11/b"         );
+  tree_->Branch("HLT_Mu15_v1"      , &HLT_Mu15_v1      , "HLT_Mu15_v1/b"      );
   tree_->Branch("nDimuons"         , &nDimuons         , "nDimuons/b"         );
   tree_->Branch("nMuons"           , &nMuons           , "nMuons/b"           );
 
@@ -358,12 +427,16 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("isYCand"          , isYCand          , "isYCand[nDimuons]/b"          );
   tree_->Branch("isZCand"          , isZCand          , "isZCand[nDimuons]/b"          );
   tree_->Branch("isVbtfBaselineCand"          , isVbtfBaselineCand          , "isVbtfBaselineCand[nDimuons]/b"          );
+  tree_->Branch("isBaselineCand"          , isBaselineCand          , "isBaselineCand[nDimuons]/b"          );
   tree_->Branch("orderByMuQAndPt"  , orderByMuQAndPt  , "orderByMuQAndPt[nDimuons]/b"  );
   tree_->Branch("orderByVProb"     , orderByVProb     , "orderByVProb[nDimuons]/b"     );
 
   tree_->Branch("muPt"                     , muPt                     , "muPt[nMuons]/F"                     );
   tree_->Branch("muEta"                    , muEta                    , "muEta[nMuons]/F"                    );
   tree_->Branch("muPhi"                    , muPhi                    , "muPhi[nMuons]/F"                    );
+  tree_->Branch("muGenPt"                  , muGenPt                  , "muGenPt[nMuons]/F"                     );
+  tree_->Branch("muGenEta"                 , muGenEta                 , "muGenEta[nMuons]/F"                    );
+  tree_->Branch("muGenPhi"                 , muGenPhi                 , "muGenPhi[nMuons]/F"                    );
   tree_->Branch("muP"                      , muP                      , "muP[nMuons]/F"                      );
   tree_->Branch("muCharge"                 , muCharge                 , "muCharge[nMuons]/I"                 );
   tree_->Branch("muDxyPV"                  , muDxyPV                  , "muDxyPV[nMuons]/F"                  );
@@ -398,7 +471,10 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("muPassZIdTight"           , muPassZIdTight           , "muPassZIdTight[nMuons]/b"           );
   tree_->Branch("muPassVbtfBaseline"       , muPassVbtfBaseline       , "muPassVbtfBaseline[nMuons]/b"       );
   tree_->Branch("muPassVbtfBaselineTight"  , muPassVbtfBaselineTight  , "muPassVbtfBaselineTight[nMuons]/b"  );
+  tree_->Branch("muPassBaselineTight"  , muPassBaselineTight  , "muPassBaselineTight[nMuons]/b"  );
   tree_->Branch("muHltMu9Match"            , muHltMu9Match            , "muHltMu9Match[nMuons]/b"            );
+  tree_->Branch("muHltMu11Match"           , muHltMu11Match           , "muHltMu11Match[nMuons]/b"           );
+  tree_->Branch("muHltMu15v1Match"         , muHltMu15v1Match         , "muHltMu15v1Match[nMuons]/b"         );
 }
 
 void
@@ -410,6 +486,8 @@ DimuonsTree::initLeafVariables()
   L1DoubleMuOpen    = 0;
   HLT_Mu3           = 0;
   HLT_Mu9           = 0;
+  HLT_Mu11          = 0;
+  HLT_Mu15_v1       = 0;
   nDimuons          = 0;
   nMuons            = 0;
 
@@ -453,6 +531,7 @@ DimuonsTree::initLeafVariables()
     isYCand[i]           = 0;
     isZCand[i]           = 0;
     isVbtfBaselineCand[i] = 0;
+    isBaselineCand[i]    = 0;
     orderByMuQAndPt[i]   = 0;
     orderByVProb[i]      = 0;
   }
@@ -461,6 +540,9 @@ DimuonsTree::initLeafVariables()
     muPt[i]                      = 0;
     muEta[i]                     = 0;
     muPhi[i]                     = 0;
+    muGenPt[i]                   = 0;
+    muGenEta[i]                  = 0;
+    muGenPhi[i]                  = 0;
     muP[i]                       = 0;
     muCharge[i]                  = 0;
     muDxyPV[i]                   = 0;
@@ -493,9 +575,12 @@ DimuonsTree::initLeafVariables()
     muPassYId[i]                 = 0;
     muPassZId[i]                 = 0;
     muPassZIdTight[i]            = 0;
-    muPassVbtfBaseline[i] = 0;
-    muPassVbtfBaselineTight[i] = 0;
+    muPassVbtfBaseline[i]        = 0;
+    muPassVbtfBaselineTight[i]   = 0;
+    muPassBaselineTight[i]       = 0;
     muHltMu9Match[i]             = 0;
+    muHltMu11Match[i]            = 0;
+    muHltMu15v1Match[i]          = 0;
   }
 }
 

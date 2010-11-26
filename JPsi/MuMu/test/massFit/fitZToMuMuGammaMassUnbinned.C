@@ -1,6 +1,6 @@
 /** \macro fitJPsi2SMassUnbinned.C
  *
- * $Id: fitZToMuMuGammaMassUnbinned.C,v 1.1 2010/09/10 11:35:08 veverka Exp $
+ * $Id: fitZToMuMuGammaMassUnbinned.C,v 1.1 2010/10/06 21:13:30 veverka Exp $
  *
  *
  * Macro implementing unbinned Maximum-likelihood fit of
@@ -160,7 +160,19 @@ RooAddPdf fitZToMuMuGammaMassUnbinned(
 //   model.plotOn(plot);
   model.plotOn(plot);
   //model.paramOn(plot, Format(plotOpt, AutoPrecision(1)), Parameters(RooArgSet(nsig, nbkg, m0, sigma)));
-  model.paramOn(plot, Format(plotOpt, AutoPrecision(1)), Parameters(RooArgSet(cbBias, cbSigma, cbCut, cbPower, bwMean, bwWidth, expRate, nsig, nbkg)));
+  model.paramOn(plot,
+                Format(plotOpt, AutoPrecision(2) ),
+                Parameters(RooArgSet(cbBias,
+                                     cbSigma,
+                                     cbCut,
+                                     cbPower,
+                                     bwMean,
+                                     bwWidth,
+                                     expRate,
+                                     nsig,
+                                     nbkg)),
+                Layout(.67, 0.97, 0.97),
+                ShowConstants(kTRUE) );
 
 //   model.plotOn(plot, Components("signal"), LineStyle(kDashed), LineColor(kRed));
   model.plotOn(plot, Components("bg"), LineStyle(kDashed), LineColor(kRed));

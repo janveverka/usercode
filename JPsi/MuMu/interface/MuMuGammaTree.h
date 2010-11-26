@@ -15,8 +15,8 @@ public:
   const static unsigned char maxMuMuGammas = -1;  // 255
 
   // event leafs
-  unsigned char nPhotons;
-  unsigned char nMuMuGammas;
+  Int_t nPhotons;
+  Int_t nMuMuGammas;
 
   // MuMuGamma leafs
   float mmgMass[maxMuMuGammas];
@@ -47,6 +47,10 @@ public:
   int phoGenMatchStatus[maxPhotons];     // 0 means no match found
   int phoGenMatchMomPdgId[maxPhotons];   // 0 means no MC match found
   int phoGenMatchMomStatus[maxPhotons];  // 0 means no match found
+//   float phoGenPt[maxPhotons];  // 0 means no match found
+//   float phoGenEta[maxPhotons];  // 0 means no match found
+//   float phoGenPhi[maxPhotons];  // 0 means no match found
+
 
 
 private:

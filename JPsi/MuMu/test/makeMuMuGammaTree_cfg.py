@@ -9,7 +9,7 @@ options = VarParsing.VarParsing ('analysis')
 
 # register more options
 options.register("castorPath",
-  "/mnt/hadoop/user/veverka/ZGammaSkim_v1", # default value
+  "/mnt/hadoop/user/veverka/VGammaSkims_v3b/DimuonSkim", # default value
   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
   VarParsing.VarParsing.varType.string,          # string, int, or float
   "Castor path with a subdirectory for each dataset with root files."
@@ -71,6 +71,13 @@ options.register("splitZMC",
   "Set to 1 to split the Zmumu MC sample into three outputs: ISR, FSR and fakes."
 )
 
+options.register("jsonFile",
+  "", # default value
+  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+  VarParsing.VarParsing.varType.string,          # string, int, or float
+  "JSON file to be applied."
+)
+
 # setup any defaults you want
 #options.castorPath = "/raid1/veverka/datafiles"
 options.outputFile = 'MuMuGammaTree.root'
@@ -120,7 +127,7 @@ if options.maxEvents < 0:
 if options.firstFile != 1 or options.lastFile != 0:
   first = options.firstFile - 1
   last = options.lastFile
-  options.outputFile = options.outputFile.split(".")[0] + "_%d-%d" % (first, last)
+  options.outputFile = options.outputFile.split(".")[0] + "_%d-%d" % (first+1, last)
   newInputFiles = options.inputFiles[first:last]
   del options.inputFiles[:]
   options.inputFiles = newInputFiles[:]
@@ -161,13 +168,13 @@ process.load("JPsi.MuMu.trkMuons_cfi")
 process.load("JPsi.MuMu.dimuons_cfi")
 process.load("JPsi.MuMu.dimuonsCountFilters_cfi")
 
-process.goodMuons.src = "selectedPatMuonsTriggerMatch"
+process.goodMuons.src = "cleanPatMuonsTriggerMatch"
 process.goodDimuons.cut = "mass > 0"
 process.goodDimuonsCountFilter = process.dimuonsCountFilter.clone(src = "goodDimuons")
 process.vertexedDimuons.src = "goodDimuons"
 
 process.MuMuGammaTree = cms.EDAnalyzer("MuMuGammaTreeMaker",
-  photonSrc   = cms.untracked.InputTag("selectedPatPhotons"),
+  photonSrc   = cms.untracked.InputTag("cleanPatPhotonsTriggerMatch"),
   muonSrc     = cms.untracked.InputTag("goodMuons"),
   dimuonSrc   = cms.untracked.InputTag("vertexedDimuons"),
   beamSpotSrc = cms.untracked.InputTag("offlineBeamSpot"),
@@ -175,6 +182,7 @@ process.MuMuGammaTree = cms.EDAnalyzer("MuMuGammaTreeMaker",
   ebClusterSrc = cms.untracked.InputTag("islandBasicClusters", "islandBarrelBasicClusters"),
   ebRecHitsSrc = cms.untracked.InputTag("ecalRecHit", "EcalRecHitsEB"),
   eeRecHitsSrc = cms.untracked.InputTag("ecalRecHit", "EcalRecHitsEE"),
+  genParticleSrc = cms.untracked.InputTag("prunedGenParticles"),
   isMC        = cms.untracked.bool(False),
 )
 process.defaultSequence = cms.Sequence(
@@ -221,9 +229,27 @@ if options.isMC == "yes":
   #process.MuMuGammaTree.photonSrc = "cleanPatPhotons"
   process.MuMuGammaTree.isMC = True
 
-# Tracer service
-# process.Tracer = cms.Service('Tracer')
-
 process.options.SkipEvent = cms.untracked.vstring('ProductNotFound')
 
+# JSON file
+if options.jsonFile != "":
+    import FWCore.PythonUtilities.LumiList as LumiList
+    import FWCore.ParameterSet.Types as CfgTypes
+    myLumis = LumiList.LumiList(
+        filename = options.jsonFile
+        ).getCMSSWString().split(',')
+    process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+    process.source.lumisToProcess.extend(myLumis)
+#     process.source.firstRun = cms.untracked.uint32(146240)
+
+
+## Debugging
+## The Tracer service
+# process.Tracer = cms.Service('Tracer')
+
+## Enable LogDebug for MuMuGammaTree module
+# process.MessageLogger.debugModules = ["MuMuGammaTree"]
+# process.MessageLogger.cerr.threshold = "DEBUG"
+
 if __name__ == "__main__": import user
+

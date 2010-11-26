@@ -3,13 +3,13 @@ from MuMuGammaChain import *
 from math import sqrt
 
 # handy shortcuts
-for ch in [chain, chainMC]:
+for ch in chain.values() + bchain.values():
   ch.SetAlias("mm", "mmgDimuon")
   ch.SetAlias("mu1", "dau1[mmgDimuon]")
   ch.SetAlias("mu2", "dau2[mmgDimuon]")
   ch.SetAlias("g", "mmgPhoton")
 
-ch = chain
+ch = chain["data36x"]
 canvases = []
 legends = []
 plotNames = {}
@@ -27,6 +27,7 @@ fsrCuts = [
 
 isrCuts = [
   "phoGenMatchPdgId[g] == 22",
+  "phoGenMatchMomPdgId[g] != 0",
   "abs(phoGenMatchMomPdgId[g]) < 6 || phoGenMatchMomPdgId[g] == 23",
   ]
 
@@ -76,6 +77,11 @@ def makeSelections(cuts, isrCuts=isrCuts, fsrCuts=fsrCuts):
 ch.Draw(">>elist", "isVbtfBaselineCand[mm]")
 ch.SetEventList(gDirectory.Get("elist"))
 
+if 1:
+    for iName, ch in chain.items():
+        ch.Draw(">>elist" + iName, "isVbtfBaselineCand[mm]")
+        ch.SetEventList(gDirectory.Get("elist_" + iName))
+
 lyonCuts = [
 #   "backToBack < 0.95",
   "nPhotons > 0",
@@ -109,6 +115,15 @@ photonIdCuts = [
   "((abs(phoEta[g]) > 1.5 & phoSigmaIetaIeta[g] < 0.026) || (phoSigmaIetaIeta[g] < 0.013))",
   ]
 
+# isrCuts = [
+#   "nPhotons > 0",
+#   "abs(phoScEta[g]) < 2.5",
+#   "abs(phoEta[g]) < 1.4442 || abs(phoEta[g]) > 1.566",
+#   "abs(mass[mm]-91.19) < 10",
+#   "mmgMass > 100",
+#   "mmgDeltaRNear > 0.7"
+# ]
+
 newCuts = cuts[:] + [
   "phoPt[g] > 5",
   "mmgDeltaRNear < 0.5 | (%s)" % makeSelection(photonIdCuts)
@@ -128,7 +143,7 @@ spikeCuts = [
 if isRealData:
   lyonCuts += spikeCuts
 
-
+isrSihihSel = makeSelections(photonIdCuts[:5] + spikeCuts + isrCuts)
 lyonSel = makeSelections(lyonCuts)
 # collinearSelections = makeSelections(collinearCuts)
 newSel= makeSelections(newCuts)

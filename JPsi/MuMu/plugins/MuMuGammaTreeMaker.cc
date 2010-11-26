@@ -16,6 +16,7 @@
 #include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/Point3D.h"
 #include "DataFormats/Math/interface/Vector3D.h"
@@ -75,6 +76,7 @@ private:
   edm::InputTag ebClusterSrc_;
   edm::InputTag ebRecHitsSrc_;
   edm::InputTag eeRecHitsSrc_;
+  edm::InputTag genParticleSrc_;
   bool isMC_;
 
 };
@@ -92,6 +94,7 @@ MuMuGammaTreeMaker::MuMuGammaTreeMaker(const edm::ParameterSet& iConfig):
   ebClusterSrc_(iConfig.getUntrackedParameter<edm::InputTag>("ebClusterSrc")),
   ebRecHitsSrc_(iConfig.getUntrackedParameter<edm::InputTag>("ebRecHitsSrc")),
   eeRecHitsSrc_(iConfig.getUntrackedParameter<edm::InputTag>("eeRecHitsSrc")),
+  genParticleSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
   isMC_(iConfig.getUntrackedParameter<bool>("isMC"))
 {
 }
@@ -148,9 +151,9 @@ double MuMuGammaTreeMaker::rho(const reco::VertexCompositeCandidate& cand,
 void
 MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+//   LogDebug("SegFault") << "Entering analyze ..." << std::endl;
 
   tree_.initLeafVariables();
-
 
   // get muon collection
   edm::Handle<edm::View<pat::Muon> > muons;
@@ -171,30 +174,51 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   iEvent.getByLabel(primaryVertexSrc_, primaryVertices);
 
   edm::Handle<edm::View<reco::CaloCluster> > ebClusters;
-  iEvent.getByLabel(ebClusterSrc_, ebClusters);
+//   iEvent.getByLabel(ebClusterSrc_, ebClusters);
 
   edm::Handle<EcalRecHitCollection> eeRecHits;
   edm::Handle<EcalRecHitCollection> ebRecHits;
   edm::Handle<pat::TriggerEvent> triggerEvent;
   edm::ESHandle<EcalChannelStatus> channelStatus;
 
-  iEvent.getByLabel(ebRecHitsSrc_, ebRecHits);
-  iEvent.getByLabel(eeRecHitsSrc_, eeRecHits);
+  edm::Handle<reco::GenParticleCollection> genParticles;
+
+//   iEvent.getByLabel(ebRecHitsSrc_, ebRecHits);
+//   iEvent.getByLabel(eeRecHitsSrc_, eeRecHits);
   iEvent.getByLabel("patTriggerEvent", triggerEvent);
-  iSetup.get<EcalChannelStatusRcd>().get(channelStatus);
+//   iSetup.get<EcalChannelStatusRcd>().get(channelStatus);
 
-  EcalClusterLazyTools lazyTools(iEvent, iSetup, ebRecHitsSrc_, eeRecHitsSrc_);
+//   EcalClusterLazyTools lazyTools(iEvent, iSetup, ebRecHitsSrc_, eeRecHitsSrc_);
+
+  iEvent.getByLabel(genParticleSrc_, genParticles);
 
 
+//   LogDebug("SegFault") << "Setting event variables ..." << std::endl;
 
   tree_.run   = iEvent.run();
   tree_.lumi  = iEvent.id().luminosityBlock();
   tree_.event = iEvent.id().event();
 
   // TODO: ADD THE HLT BITS
-/*  tree_.L1DoubleMuOpen    = dimuon->L1DoubleMuOpen();
-  tree_.HLT_Mu3           = dimuon->HLT_Mu3();*/
-  tree_.HLT_Mu9           = triggerEvent->path("HLT_Mu9")->wasAccept();
+  if ( triggerEvent->path("L1_DoubleMuOpen") != 0 )
+    tree_.L1DoubleMuOpen = triggerEvent->path("L1_DoubleMuOpen")->wasAccept();
+
+  if ( triggerEvent->path("HLT_Mu3") != 0 )
+    tree_.HLT_Mu3 = triggerEvent->path("HLT_Mu3")->wasAccept();
+
+  if ( triggerEvent->path("HLT_Mu9") != 0 )
+    tree_.HLT_Mu9 = triggerEvent->path("HLT_Mu9")->wasAccept();
+
+  if ( triggerEvent->path("HLT_Mu11") != 0 )
+    tree_.HLT_Mu11 = triggerEvent->path("HLT_Mu11")->wasAccept();
+
+  LogDebug("SegFault") << "Setting HLT_Mu15_v1 ..." << std::endl;
+  if ( triggerEvent->path("HLT_Mu15_v1") != 0x0 )
+    tree_.HLT_Mu15_v1 = triggerEvent->path("HLT_Mu15_v1")->wasAccept();
+  else
+    tree_.HLT_Mu15_v1 = 0;
+
+  LogDebug("SegFault") << "Setting nDimuons ..." << std::endl;
 
   tree_.nDimuons = dimuons->size();
   if (tree_.nDimuons > MuMuGammaTree::maxDimuons)
@@ -203,6 +227,8 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   tree_.nMuons = muons->size();
   if (tree_.nMuons > MuMuGammaTree::maxMuons)
     tree_.nMuons = MuMuGammaTree::maxMuons;
+
+//   LogDebug("SegFault") << "Looping over dimuons ..." << std::endl;
 
   // loop over dimuons
   reco::VertexCompositeCandidateView::const_iterator dimuon;
@@ -292,6 +318,8 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.dau2[i] = dau2.key();
   } // loop over dimuons
 
+//   LogDebug("SegFault") << "Looping over muons..." << std::endl;
+
   // loop over muons
   edm::View<pat::Muon>::const_iterator mu;
   for(mu = muons->begin(), i=0; i < tree_.nMuons; ++mu, ++i) {
@@ -299,6 +327,14 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.muPt[i]                      = mu->pt();
     tree_.muEta[i]                     = mu->eta();
     tree_.muPhi[i]                     = mu->phi();
+    // gen info
+    if (isMC_ && mu->genParticle(0)) {
+      // found gen match
+      tree_.muGenPt[i]  = mu->genParticle(0)->pt();
+      tree_.muGenEta[i] = mu->genParticle(0)->eta();
+      tree_.muGenPhi[i] = mu->genParticle(0)->phi();
+    }
+
     tree_.muP[i]                       = mu->p();
     tree_.muCharge[i]                  = mu->charge();
     if ( mu->globalTrack().isNonnull() && mu->isGlobalMuon() ) {
@@ -333,12 +369,17 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.muEcalIso[i]                 = mu->ecalIso();
     tree_.muHcalIso[i]                 = mu->hcalIso();
     tree_.muHltMu9Match[i] = mu->triggerObjectMatchesByPath("HLT_Mu9").size() ? 1 : 0;
+    tree_.muHltMu11Match[i] = mu->triggerObjectMatchesByPath("HLT_Mu11").size() ? 1 : 0;
+    tree_.muHltMu15v1Match[i] = mu->triggerObjectMatchesByPath("HLT_Mu15_v1").size() ? 1 : 0;
   } // loop over muons
+
+//   LogDebug("SegFault") << "Applying selections ..." << std::endl;
 
   tree_.applyJPsiSelection();
   tree_.applyYSelection();
   tree_.applyZSelection();
   tree_.applyVbtfBaselineSelection();
+  tree_.applyBaselineSelection();
 
   tree_.setOrderByMuQAndPt();
   tree_.setOrderByVProb();
@@ -366,6 +407,7 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // set the photon vertex to the vertex of the primary dimuon
   Point phoVertex = (*dimuons)[primaryDimuon].vertex();
 
+//   LogDebug("SegFault") << "Looping over photons..." << std::endl;
 
   // loop over photons
   int nPhotons = photons->size();
@@ -391,22 +433,36 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.phoHasPixelSeed[i] = pho->hasPixelSeed();
     tree_.phoMaxEnergyXtal[i] = pho->maxEnergyXtal();
     tree_.phoE3x3[i] = pho->e3x3();
+
+    tree_.phoGenMatchPdgId[i]  = 0;
+    tree_.phoGenMatchStatus[i] = 0;
+    tree_.phoGenMatchMomPdgId[i]  = 0;
+    tree_.phoGenMatchMomStatus[i] = 0;
+
     if (isMC_ && pho->genParticle(0)) {
       // found gen match
       tree_.phoGenMatchPdgId[i]  = pho->genParticle(0)->pdgId();
       tree_.phoGenMatchStatus[i] = pho->genParticle(0)->status();
-      if (pho->genParticle(0)->numberOfMothers() > 0) {
-        tree_.phoGenMatchMomPdgId[i]  = pho->genParticle(0)->mother(0)->pdgId();
-        tree_.phoGenMatchMomStatus[i] = pho->genParticle(0)->mother(0)->status();
-      } else {
-        tree_.phoGenMatchMomPdgId[i]  = 0;
-        tree_.phoGenMatchMomStatus[i] = 0;
-      }
-    } else {
-      tree_.phoGenMatchPdgId[i]  = 0;
-      tree_.phoGenMatchStatus[i] = 0;
-    }
 
+      // look for the gen match in the (pruned) gen particle collection
+      reco::GenParticleCollection::const_iterator genMatch;
+      for (genMatch = genParticles->begin(); genMatch != genParticles->end(); ++genMatch) {
+        if (genMatch->pdgId()  == pho->genParticle(0)->pdgId() &&
+            genMatch->status() == pho->genParticle(0)->status() &&
+            genMatch->p4()     == pho->genParticle(0)->p4()
+            )
+        {
+          // found the gen match in gen particles.
+          if (genMatch->numberOfMothers() > 0) {
+              tree_.phoGenMatchMomPdgId[i]  = genMatch->mother(0)->pdgId();
+              tree_.phoGenMatchMomStatus[i] = genMatch->mother(0)->status();
+          }
+          break;
+        } // if found the gen match in gen particles.
+      } // for loop over genParticles
+    } // if found gen match
+
+    /*
     const reco::CaloCluster &phoSeed = *( pho->superCluster()->seed() );
     DetId seedId = lazyTools.getMaximum(phoSeed).first;
     const EcalRecHitCollection & recHits = ( pho->isEB() ?
@@ -415,9 +471,6 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       );
     EcalRecHitCollection::const_iterator rh = recHits.find(seedId);
     if (rh != recHits.end()) {
-/*      time          = rh->time();
-      outOfTimeChi2 = rh->outOfTimeChi2();
-      chi2          = rh->chi2();*/
       tree_.phoSeedRecoFlag[i]      = rh->recoFlag();
       tree_.phoSeedSeverityLevel[i] = EcalSeverityLevelAlgo::severityLevel(
                                         seedId, recHits, *channelStatus
@@ -432,6 +485,11 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       tree_.phoSeedSwissCross[i]    = -999;
       tree_.phoSeedE1OverE9[i]      = -999;
     }
+    */
+    tree_.phoSeedRecoFlag[i]      = pho->userInt("photonUserData:seedRecoFlag");
+    tree_.phoSeedSeverityLevel[i] = pho->userInt("photonUserData:seedSeverityLevel");
+    tree_.phoSeedSwissCross[i]    = pho->userFloat("photonUserData:seedSwissCross");
+    tree_.phoSeedE1OverE9[i]      = pho->userFloat("photonUserData:seedE1OverE9");
 
     reco::CompositeCandidate dimuon = (*dimuons)[primaryDimuon];
     reco::CompositeCandidate mmg;
@@ -471,9 +529,13 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.phoPt[i] = pho.pt();
   }*/
 
+//   LogDebug("SegFault") << "Filling the tree..." << std::endl;
 
   // only store interesting events
   tree_.Fill();
+
+  LogDebug("SegFault") << "Exiting analyze..." << std::endl;
+
 }
 
 void
