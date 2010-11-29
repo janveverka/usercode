@@ -2,6 +2,9 @@ from basicRoot import *
 from MuMuGammaChain import *
 from math import sqrt
 
+chain = getChains(files, path)
+bchain = getChains(bfiles, bpath)
+
 # handy shortcuts
 for ch in chain.values() + bchain.values():
   ch.SetAlias("mm", "mmgDimuon")
@@ -86,7 +89,7 @@ lyonCuts = [
 #   "backToBack < 0.95",
   "nPhotons > 0",
   "abs(phoScEta[g]) < 2.5",
-  "abs(phoEta[g]) < 1.4442 || abs(phoEta[g]) > 1.566",
+  "abs(phoScEta[g]) < 1.4442 || abs(phoScEta[g]) > 1.566",
   "mass[mm] > 40",
   "mass[mm] < 80",
   "phoPt[g] > 10",

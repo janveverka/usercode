@@ -70,27 +70,21 @@ bfiles["data38x"] = """
   """.split()
 #   ["MuMuGammaTree_Data7TeV_FNAL_upto148864_JSON.root"]
 
-bfiles["z"] = """
-    MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_1-5.root
-    MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_6-10.root
-    MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_11-26.root
-    MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_27-29.root
-    MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_30-49.root
-    MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_50-69.root
-    MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_70-89.root
-    MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_90-101.root
-    """.split()
-bfiles["zg"] = """
-    MuMuGammaTree_Zgamma_1-1.root
-    MuMuGammaTree_Zgamma_2-3.root
-    MuMuGammaTree_Zgamma_4-8.root
-    MuMuGammaTree_Zgamma_9-18.root
-    MuMuGammaTree_Zgamma_19-26.root
-    """.split()
+bfiles["z"] = ["MuMuGammaTree_Zmumu_M20_CTEQ66-powheg.root"]
+    #MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_1-5.root
+    #MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_6-10.root
+    #MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_11-26.root
+    #MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_27-29.root
+    #MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_30-49.root
+    #MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_50-69.root
+    #MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_70-89.root
+    #MuMuGammaTree_Zmumu_M20_CTEQ66-powheg_90-101.root
+    #""".split()
+bfiles["zg"] = ["MuMuGammaTree_Zgamma.root"]
+bfiles["zmg"] = ["MuMuGammaTree_ZJets-madgraph.root"]
 bfiles["w"] = ["MuMuGammaTree_WJets-madgraph.root"]
 bfiles["qcd"] = ["MuMuGammaTree_InclusiveMu15.root"]
 bfiles["tt"] = ["MuMuGammaTree_TTbarJets_Tauola-madgraph.root"]
-bfiles["zmg"] = ["MuMuGammaTree_ZJets-madgraph.root"]
 
 bpath = "/raid1/veverka/zgamma/DimuonTrees_v3b"
 
