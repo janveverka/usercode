@@ -1,4 +1,4 @@
-## TODO: 
+## TODO:
 ## * sihih vs photon pt for both EE and EB
 ## * unbiased template for the EE
 ## * closure test of the unbiased templates
@@ -206,8 +206,8 @@ chains[dataset].Draw(expr, makeSelection(isrCuts + ebCut), "goff profile")
 
 ## Do the FSR separately
 myCuts = baselineCuts + massWindow + ebCut
-print dataset + "fsr",; flush()
 dataset = "z"
+print dataset + "fsr",; flush()
 hname = "prof_%s_%s" % (var.GetName(), dataset)
 expr = "%s>>%sfsr(%s)" % (var.GetTitle(), hname, binning)
 chains[dataset].Draw(expr, makeSelection(myCuts + fsrCuts), "goff profile")
@@ -243,8 +243,55 @@ chains[dataset].Draw(expr, makeSelection(isrCuts + ebCut + drUbCut), "goff profi
 
 ## Do the FSR separately
 myCuts = baselineCuts + massWindow + ebCut + drUbCut
-print dataset + "fsr",; flush()
 dataset = "z"
+print dataset + "fsr",; flush()
+hname = "prof_%s_%s" % (var.GetName(), dataset)
+expr = "%s>>%sfsr(%s)" % (var.GetTitle(), hname, binning)
+chains[dataset].Draw(expr, makeSelection(myCuts + fsrCuts), "goff profile")
+
+## Do the real data separately
+dataset = "data38x"
+print dataset,; flush()
+hname = "prof_%s_%s" % (var.GetName(), dataset)
+expr = "%s>>%s(%s)" % (var.GetTitle(), hname, binning)
+chains[dataset].Draw(expr, makeSelection(myCuts + photonCleaningCuts), "goff profile")
+
+## Do all the MC samples with proper weights
+hname = "prof_%s_mc" % (var.GetName())
+expr = "%s>>%s(%s)" % (var.GetTitle(), hname, binning)
+for dataset, ch in chains.items():
+    if dataset in skipDatasets: continue
+    print dataset,; flush()
+    if dataset in skipDatasets + ["data38x"]: continue
+    w = MuMuGammaChain.weight30[dataset]
+    ch.Draw(expr, "%f * (%s)" % (w, makeSelection(myCuts)), "goff profile")
+
+
+
+
+###############################################################################
+## Make EB sihih vs photon E profiles
+###############################################################################
+print "\nMaking EB sigma ihih vs photon E profiles ...\n  ",; flush()
+
+## Cuts
+drUbCut = ["0.1 < mmgDeltaRNear"]
+
+var = RooRealVar("ebSihihVsE", "phoSigmaIetaIeta[g]:phoPt[g]*TMath::CosH(phoEta[g])", 0., 100.)
+var.setBins(100)
+binning = "%d,%f,%f" % (var.getBins(), var.getMin(), var.getMax())
+
+## Do the ISR separately
+dataset = "zg"
+print dataset,; flush()
+hname = "prof_%s_%s" % (var.GetName(), dataset)
+expr = "%s>>%s(%s)" % (var.GetTitle(), hname, binning)
+chains[dataset].Draw(expr, makeSelection(isrCuts + ebCut + drUbCut), "goff profile")
+
+## Do the FSR separately
+myCuts = baselineCuts + massWindow + ebCut + drUbCut
+dataset = "z"
+print dataset + "fsr",; flush()
 hname = "prof_%s_%s" % (var.GetName(), dataset)
 expr = "%s>>%sfsr(%s)" % (var.GetTitle(), hname, binning)
 chains[dataset].Draw(expr, makeSelection(myCuts + fsrCuts), "goff profile")
@@ -358,6 +405,50 @@ for dataset, ch in chains.items():
 
 
 ###############################################################################
+## Make EE sihih vs photon E profiles
+###############################################################################
+print "\nMaking EE sigma ihih vs photon E profiles ...\n  ",; flush()
+
+var = RooRealVar("eeSihihVsPt", "phoSigmaIetaIeta[g]:phoPt[g]*TMath::CosH(phoEta[g])", 0., 100.)
+var.setBins(100)
+binning = "%d,%f,%f" % (var.getBins(), var.getMin(), var.getMax())
+
+## Do the ISR separately
+dataset = "zg"
+print dataset,; flush()
+hname = "prof_%s_%s" % (var.GetName(), dataset)
+expr = "%s>>%s(%s)" % (var.GetTitle(), hname, binning)
+chains[dataset].Draw(expr, makeSelection(isrCuts + eeCut + drUbCut), "goff profile")
+
+## Do the FSR separately
+myCuts = baselineCuts + massWindow + eeCut + drUbCut
+print dataset + "fsr",; flush()
+dataset = "z"
+hname = "prof_%s_%s" % (var.GetName(), dataset)
+expr = "%s>>%sfsr(%s)" % (var.GetTitle(), hname, binning)
+chains[dataset].Draw(expr, makeSelection(myCuts + fsrCuts), "goff profile")
+
+## Do the real data separately
+dataset = "data38x"
+print dataset,; flush()
+hname = "prof_%s_%s" % (var.GetName(), dataset)
+expr = "%s>>%s(%s)" % (var.GetTitle(), hname, binning)
+chains[dataset].Draw(expr, makeSelection(myCuts + photonCleaningCuts), "goff profile")
+
+## Do all the MC samples with proper weights
+hname = "prof_%s_mc" % (var.GetName())
+expr = "%s>>%s(%s)" % (var.GetTitle(), hname, binning)
+for dataset, ch in chains.items():
+    if dataset in skipDatasets: continue
+    print dataset,; flush()
+    if dataset in skipDatasets + ["data38x"]: continue
+    w = MuMuGammaChain.weight30[dataset]
+    ch.Draw(expr, "%f * (%s)" % (w, makeSelection(myCuts)), "goff profile")
+
+
+
+
+###############################################################################
 ## Make the unbiased EB sigma ihih histos
 ###############################################################################
 print "\nMaking unbiased EB sigma ihih histos ...\n  ",; flush()
@@ -390,6 +481,46 @@ for dataset, ch in chains.items():
         else:
             ch.Draw(expr, makeSelection(myCuts), "goff")
 print
+
+
+
+
+###############################################################################
+## Make the unbiased EE sigma ihih histos
+###############################################################################
+print "\nMaking unbiased EE sigma ihih histos ...\n  ",; flush()
+
+## Cuts
+ubCuts = [
+    "mmgDeltaRNear > 0.1",
+    "phoPt[g] > 10"
+    ]
+
+myCuts = baselineCuts + massWindow + ebCut + ubCuts
+
+## The variable - its title holds the expression for TTree::Draw
+var = RooRealVar("ubebSihih", "phoSigmaIetaIeta[g]", 0., 0.05)
+var.setBins(50)
+for dataset, ch in chains.items():
+    if dataset in skipDatasets: continue
+    print dataset,; flush()
+    hname = "h_%s_%s" % (var.GetName(), dataset)
+    binning = "%d,%f,%f" % (var.getBins(), var.getMin(), var.getMax())
+    if dataset == "z":
+        expr = "%s>>%sfsr(%s)" % (var.GetTitle(), hname, binning)
+        ch.Draw(expr, makeSelection(myCuts + fsrCuts), "goff")
+        expr = "%s>>%sjets(%s)" % (var.GetTitle(), hname, binning)
+        ch.Draw(expr, makeSelection(myCuts + fsrVeto), "goff")
+    else:
+        expr = "%s>>%s(%s)" % (var.GetTitle(), hname, binning)
+        if dataset == "data38x":
+            ch.Draw(expr, makeSelection(myCuts + photonCleaningCuts), "goff")
+        else:
+            ch.Draw(expr, makeSelection(myCuts), "goff")
+print
+
+
+
 
 file.Write()
 # file.Close()
