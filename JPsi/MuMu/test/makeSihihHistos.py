@@ -409,7 +409,7 @@ for dataset, ch in chains.items():
 ###############################################################################
 print "\nMaking EE sigma ihih vs photon E profiles ...\n  ",; flush()
 
-var = RooRealVar("eeSihihVsPt", "phoSigmaIetaIeta[g]:phoPt[g]*TMath::CosH(phoEta[g])", 0., 100.)
+var = RooRealVar("eeSihihVsE", "phoSigmaIetaIeta[g]:phoPt[g]*TMath::CosH(phoEta[g])", 0., 100.)
 var.setBins(100)
 binning = "%d,%f,%f" % (var.getBins(), var.getMin(), var.getMax())
 

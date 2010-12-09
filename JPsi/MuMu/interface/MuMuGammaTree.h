@@ -50,6 +50,12 @@ public:
 //   float phoGenPt[maxPhotons];  // 0 means no match found
 //   float phoGenEta[maxPhotons];  // 0 means no match found
 //   float phoGenPhi[maxPhotons];  // 0 means no match found
+  float phoR9    [maxPhotons];
+  float phoIEta  [maxPhotons];
+  float phoIPhi  [maxPhotons];
+  float phoESC   [maxPhotons];
+  float phoESCRaw[maxPhotons];
+  float phoE5x5  [maxPhotons];
 
 
 

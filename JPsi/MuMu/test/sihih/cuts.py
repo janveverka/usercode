@@ -72,13 +72,16 @@ isrCuts = [
     "0.7 < mmgDeltaRNear", # FSR veto
     ]
 
+## Updated version retreived in Dec 10
 photonIdCuts = [
   "phoPt[g] > 10",
-  "phoEcalIso[g] < 4.2 + 0.004 * phoPt[g]",
-  "phoHcalIso[g] < 2.2 + 0.001 * phoPt[g]",
+  "phoEcalIso[g] < 4.2 + 0.006 * phoPt[g]",
+  "phoHcalIso[g] < 2.2 + 0.0025 * phoPt[g]",
   "phoTrackIso[g] < 2.0 + 0.001 * phoPt[g]",
   "phoHadronicOverEm[g] < 0.05",
-  "((abs(phoEta[g]) > 1.5 & phoSigmaIetaIeta[g] < 0.026) || (phoSigmaIetaIeta[g] < 0.013))",
+  "((abs(phoEta[g]) > 1.5 & phoSigmaIetaIeta[g] < 0.03) || (phoSigmaIetaIeta[g] < 0.013))",
+    "!phoHasPixelSeed", # optional
+
   ]
 
 ubebCuts = [
@@ -117,6 +120,29 @@ lyonCuts = [
     "muHcalIso[mmgMuonNear] <= 1.0"
     ]
 
+
+escaleCuts = [
+    "isBaselineCand[mm]",
+    "orderByVProb[mm] == 0",
+    "mass[mm] > 40",
+    "mass[mm] < 80", ## originally 85
+#     "abs(mmgMass-zMassPdg()) < 4",
+    "nPhotons > 0",
+    "mmgPhoton == 0", # require the hardest photon in the events
+    "abs(phoScEta[g]) < 2.5",
+    "abs(phoScEta[g]) < 1.4442 || abs(phoScEta[g]) > 1.566",
+    "5 < phoPt[g]", ## originally 5
+#     "phoSeedRecoFlag[g] != 2",       # DATA ONLY! EcalRecHit::kOutOfTime = 2
+#     "phoSeedSeverityLevel[g] != 4",  # DATA ONLY! EcalSeverityLevelAlgo::kWeird = 4
+#     "phoSeedSeverityLevel[g] != 5",  # DATA ONLY! EcalSeverityLevelAlgo::kBad = 5
+    "phoSeedSwissCross[g] < 0.95",   # extra spike cleaning check
+    "mmgDeltaRNear < 0.5 || (%s)" % common.makeSelection(photonIdCuts),
+    ]
+
+
+ebr9Cuts = ["phoR9[g] < 0.94"] + ebCut
+eer9Cuts = ["phoR9[g] < 0.95"] + eeCut
+
 def setFsrCuts(varname, isrCuts, fsrCuts, commonCuts = []):
     ic = isrCuts + commonCuts
     fc = fsrCuts + commonCuts
@@ -153,24 +179,29 @@ for d in datasets:
     cuts["mass"][d] = (d, dimuonCuts)
 
 ## FSR spectra
-setFsrCuts("mmgMass"  , isrCuts, baselineCuts)
-setFsrCuts("mmgMassEB", isrCuts, baselineCuts, ebCut)
-setFsrCuts("mmgMassEE", isrCuts, baselineCuts, eeCut)
-setFsrCuts("ebSihih", isrCuts + photonIdCuts, baselineCuts + massWindow, ebCut)
-setFsrCuts("eeSihih", isrCuts + photonIdCuts, baselineCuts + massWindow, eeCut)
-setFsrCuts("phoPt"  , isrCuts + photonIdCuts, baselineCuts + massWindow)
-setFsrCuts("ubebSihih", isrCuts + photonIdCuts, baselineCuts + massWindow, ebCut + ubebCuts)
-setFsrCuts("phoPtEB", isrCuts + photonIdCuts, baselineCuts + massWindow, ebCut)
-setFsrCuts("phoPtEE", isrCuts + photonIdCuts, baselineCuts + massWindow, eeCut)
-setFsrCuts("phoE"  , isrCuts + photonIdCuts, baselineCuts + massWindow)
-setFsrCuts("phoEEB", isrCuts + photonIdCuts, baselineCuts + massWindow, ebCut)
-setFsrCuts("phoEEE", isrCuts + photonIdCuts, baselineCuts + massWindow, eeCut)
-setFsrCuts("kRatio", isrCuts + photonIdCuts, lyonCuts)
-setFsrCuts("kRatio2", isrCuts + photonIdCuts, lyonCuts)
-setFsrCuts("inverseK", isrCuts + photonIdCuts, lyonCuts)
-setFsrCuts("inverseK2", isrCuts + photonIdCuts, lyonCuts)
-setFsrCuts("minusLogK", isrCuts + photonIdCuts, lyonCuts)
-setFsrCuts("minusLogK2", isrCuts + photonIdCuts, lyonCuts)
+setFsrCuts("mmgMass"  , isrCuts, escaleCuts)
+setFsrCuts("mmgMassEB", isrCuts, escaleCuts, ebCut)
+setFsrCuts("mmgMassEE", isrCuts, escaleCuts, eeCut)
+setFsrCuts("ebSihih", isrCuts + photonIdCuts, escaleCuts + massWindow, ebCut)
+setFsrCuts("eeSihih", isrCuts + photonIdCuts, escaleCuts + massWindow, eeCut)
+setFsrCuts("phoPt"  , isrCuts + photonIdCuts, escaleCuts + massWindow)
+setFsrCuts("phoEta" , isrCuts + photonIdCuts, escaleCuts + massWindow)
+setFsrCuts("ubebSihih", isrCuts + photonIdCuts, escaleCuts + massWindow, ebCut + ubebCuts)
+setFsrCuts("phoPtEB", isrCuts + photonIdCuts, escaleCuts + massWindow, ebCut)
+setFsrCuts("phoPtEE", isrCuts + photonIdCuts, escaleCuts + massWindow, eeCut)
+setFsrCuts("phoE"  , isrCuts + photonIdCuts, escaleCuts + massWindow)
+setFsrCuts("phoEEB", isrCuts + photonIdCuts, escaleCuts + massWindow, ebCut)
+setFsrCuts("phoEEE", isrCuts + photonIdCuts, escaleCuts + massWindow, eeCut)
+setFsrCuts("kRatio", isrCuts + photonIdCuts, escaleCuts + massWindow)
+setFsrCuts("kRatio2", isrCuts + photonIdCuts, escaleCuts + massWindow)
+setFsrCuts("inverseK", isrCuts + photonIdCuts, escaleCuts + massWindow)
+setFsrCuts("inverseK2", isrCuts + photonIdCuts, escaleCuts + massWindow)
+setFsrCuts("minusLogK", isrCuts + photonIdCuts, escaleCuts + massWindow)
+setFsrCuts("minusLogKEB", isrCuts + photonIdCuts, escaleCuts + massWindow, ebCut)
+setFsrCuts("minusLogKEE", isrCuts + photonIdCuts, escaleCuts + massWindow, eeCut)
+setFsrCuts("minusLogKEBR9", isrCuts + photonIdCuts, escaleCuts + massWindow, ebr9Cuts)
+setFsrCuts("minusLogKEER9", isrCuts + photonIdCuts, escaleCuts + massWindow, eer9Cuts)
+setFsrCuts("minusLogK2", isrCuts + photonIdCuts, escaleCuts + massWindow)
 
 ## sihih profiles
-setProfileCuts("eeSihihVsDR", isrCuts, baselineCuts + massWindow, eeCut)
+setProfileCuts("eeSihihVsDR", isrCuts, escaleCuts + massWindow, eeCut)

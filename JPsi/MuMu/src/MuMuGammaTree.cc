@@ -53,6 +53,13 @@ MuMuGammaTree::initGamma(TTree *tree) {
   tree_->Branch("phoGenMatchStatus", phoGenMatchPdgId, "phoGenMatchPdgId[nPhotons]/I");
   tree_->Branch("phoGenMatchMomPdgId", phoGenMatchMomPdgId, "phoGenMatchMomPdgId[nPhotons]/I");
   tree_->Branch("phoGenMatchMomStatus", phoGenMatchMomStatus, "phoGenMatchMomStatus[nPhotons]/I");
+
+  tree_->Branch("phoR9"    , phoR9    , "phoR9[nPhotons]/F");
+  tree_->Branch("phoIEta"  , phoIEta  , "phoIEta[nPhotons]/F");
+  tree_->Branch("phoIPhi"  , phoIPhi  , "phoIPhi[nPhotons]/F");
+  tree_->Branch("phoESC"   , phoESC   , "phoESC[nPhotons]/F");
+  tree_->Branch("phoESCRaw", phoESCRaw, "phoESCRaw[nPhotons]/F");
+  tree_->Branch("phoE5x5"  , phoE5x5  , "phoE5x5[nPhotons]/F");
 }
 
 void
@@ -93,7 +100,12 @@ MuMuGammaTree::initGammaLeafVariables()
     phoGenMatchStatus[i]      = 0;
     phoGenMatchMomPdgId[i]    = 0;
     phoGenMatchMomStatus[i]   = 0;
-
+    phoR9    [i] = 0;
+    phoIEta  [i] = 0;
+    phoIPhi  [i] = 0;
+    phoESC   [i] = 0;
+    phoESCRaw[i] = 0;
+    phoE5x5  [i] = 0;
   }
 }
 

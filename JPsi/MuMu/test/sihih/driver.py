@@ -8,7 +8,14 @@ from common import *
 filename = "kHistos.root"
 # histosToMake = "mass mmgMass".split()
 # histosToMake = "mmgMassEB mmgMassEE phoPt phoPtEB phoPtEE phoE phoEEB phoEEE".split()
-histosToMake = "kRatio inverseK minusLogK kRatio2 inverseK2 minusLogK2".split()
+histosToMake = """
+    mmgMass
+    phoEta
+    phoPtEB phoPtEE
+    minusLogK
+    minusLogKEB minusLogKEBR9
+    minusLogKEE minusLogKEER9
+    """.split()
 # profilesToMake = ["eeSihihVsDR"]
 profilesToMake = []
 

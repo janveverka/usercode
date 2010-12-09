@@ -15,6 +15,9 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/EcalDetId/interface/EBDetId.h"
+#include "DataFormats/EcalDetId/interface/EEDetId.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
@@ -461,6 +464,19 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
         } // if found the gen match in gen particles.
       } // for loop over genParticles
     } // if found gen match
+
+    tree_.phoR9    [i] = pho->r9();
+    tree_.phoESC   [i] = pho->superCluster()->energy();
+    tree_.phoESCRaw[i] = pho->superCluster()->rawEnergy();
+    tree_.phoE5x5  [i] = pho->e5x5();
+
+/*    DetId seedId = pho->superCluster()->seed()->seed();
+    if (pho->isEB() && EBDetId::validHashIndex(EBDetId(seedId).hashedIndex()))
+    {
+        // We are in the EB and have a valid det id
+      tree_.phoIEta  [i] = EBDetId(seedId).ieta();
+      tree_.phoIPhi  [i] = EBDetId(seedId).iphi();
+    }*/
 
     /*
     const reco::CaloCluster &phoSeed = *( pho->superCluster()->seed() );
