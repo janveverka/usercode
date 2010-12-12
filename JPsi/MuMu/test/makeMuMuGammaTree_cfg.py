@@ -1,15 +1,17 @@
+import re
+import os
 import FWCore.ParameterSet.Config as cms
-
-process = cms.Process("DimuonNtuple")
-
 import FWCore.ParameterSet.VarParsing as VarParsing
+from FWCore.Utilities.FileUtils import sectionNofTotal
+
+process = cms.Process("NTPMAKER")
 
 # setup 'analysis'  options
 options = VarParsing.VarParsing ('analysis')
 
 # register more options
 options.register("castorPath",
-  "/mnt/hadoop/user/veverka/VGammaSkims_v3b/DimuonSkim", # default value
+  "/mnt/hadoop/user/veverka/DimuonVGammaSkim_v3", # default value
   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
   VarParsing.VarParsing.varType.string,          # string, int, or float
   "Castor path with a subdirectory for each dataset with root files."
@@ -22,12 +24,12 @@ options.register("dataset",
   "Name of a directory under castorPath containing data"
 )
 
-options.register("datasetNumber",
-  -1, # default value
-  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-  VarParsing.VarParsing.varType.int,          # string, int, or float
-  "Number of dataset to process. Overrides dataset unless equal -1."
-)
+#options.register("datasetNumber",
+  #-1, # default value
+  #VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+  #VarParsing.VarParsing.varType.int,          # string, int, or float
+  #"Number of dataset to process. Overrides dataset unless equal -1."
+#)
 
 options.register("reportEvery",
   100, # default value
@@ -50,19 +52,19 @@ options.register("isMC",
                  "Is this MC."
                  )
 
-options.register("firstFile",
-  1, # default value
-  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-  VarParsing.VarParsing.varType.int,          # string, int, or float
-  "Number of the first input file from the list to be processed."
-)
+#options.register("firstFile",
+  #1, # default value
+  #VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+  #VarParsing.VarParsing.varType.int,          # string, int, or float
+  #"Number of the first input file from the list to be processed."
+#)
 
-options.register("lastFile",
-  0, # default value
-  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
-  VarParsing.VarParsing.varType.int,          # string, int, or float
-  "Number of the last input file from the list to be processed."
-)
+#options.register("lastFile",
+  #0, # default value
+  #VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+  #VarParsing.VarParsing.varType.int,          # string, int, or float
+  #"Number of the last input file from the list to be processed."
+#)
 
 options.register("splitZMC",
   0, # default value
@@ -77,6 +79,18 @@ options.register("jsonFile",
   VarParsing.VarParsing.varType.string,          # string, int, or float
   "JSON file to be applied."
 )
+
+options.setupTags(tag = "of%d",
+                  ifCond = "totalSections != 0",
+                  tagArg = "totalSections")
+
+options.setupTags(tag = "job%d",
+                  ifCond = "section != 0",
+                  tagArg = "section")
+
+options.setupTags(tag = "%s",
+                  ifCond = "maxEvents < 0",
+                  tagArg = "dataset")
 
 # setup any defaults you want
 #options.castorPath = "/raid1/veverka/datafiles"
@@ -97,44 +111,68 @@ options.parseArguments()
 
 import os
 ## get the file list from CASTOR
-if options.datasetNumber > 0:
-  datasets = os.popen("ls " + options.castorPath).read().split()
-  datasetNumber = options.datasetNumber
-  if datasetNumber > len(datasets):
-    print "Illegal datasetNumber =", datasetNumber
-  exit
-  dataset = options.dataset = datasets[datasetNumber - 1]
-  datasetDir = options.castorPath + "/" + dataset
-  pathPrefix = "file:" + datasetDir + "/"
-  fileNames = os.popen("ls " + datasetDir).read().split()
-  print "Processing dataset %s (%d/%d)" % (dataset, datasetNumber,
-                                           len(datasets)
-                                           )
-  del options.inputFiles[:]
-  options.inputFiles = [pathPrefix + f for f in fileNames]
-elif options.dataset != "":
-  dataset = options.dataset
-  datasetDir = options.castorPath + "/" + dataset
-  pathPrefix = "file:" + datasetDir + "/"
-  fileNames = os.popen("ls " + datasetDir).read().split()
-  print "Processing dataset %s" % (dataset,)
-  del options.inputFiles[:]
-  options.inputFiles = [pathPrefix + f for f in fileNames]
+#if options.datasetNumber > 0:
+  #datasets = os.popen("ls " + options.castorPath).read().split()
+  #datasetNumber = options.datasetNumber
+  #if datasetNumber > len(datasets):
+    #print "Illegal datasetNumber =", datasetNumber
+  #exit
+  #dataset = options.dataset = datasets[datasetNumber - 1]
+  #datasetDir = options.castorPath + "/" + dataset
+  #pathPrefix = "file:" + datasetDir + "/"
+  #fileNames = os.popen("ls " + datasetDir).read().split()
+  #print "Processing dataset %s (%d/%d)" % (dataset, datasetNumber,
+                                           #len(datasets)
+                                           #)
+  #del options.inputFiles[:]
+  #options.inputFiles = [pathPrefix + f for f in fileNames]
+if options.dataset != "":
+    #dataset = options.dataset
+    print "Processing dataset %s" % (options.dataset,)
+    datasetDir = options.castorPath + "/" + options.dataset
+    rootRE = re.compile(".+\.root")
+    options.clearList("inputFiles")
+    for root, dirs, files in os.walk(datasetDir):
+        fileNames = []
+        for f in files:
+            if rootRE.match(f):
+                fileNames.append(os.path.join(root, f))
+        if fileNames:
+            print "  Added %d files from %s ..." % (len(fileNames), root)
+        ## sort by job number
+        fileNames.sort(key = lambda f: int(f.split("_")[-3]) )
+        options.inputFiles = ["file:" + f for f in fileNames]
+    
+    if options._register.has_key('totalSections') and \
+        options._register.has_key('section') and \
+        options._register.has_key('inputFiles') and \
+        options.totalSections and options.section:
+        # copy list
+        oldInputFiles = options.inputFiles
+        # clear list
+        options.clearList('inputFiles')
+        # used old list to make list
+        options.inputFiles = sectionNofTotal(oldInputFiles,
+                                             options.section,
+                                             options.totalSections)
+        print "  Processing %d files (section %d of %d) ... " % \
+            (len(options.inputFiles), options.section, options.totalSections)
+    
 
-if options.maxEvents < 0:
-  options.outputFile = options.outputFile.split(".")[0] + "_" + options.dataset
+#if options.maxEvents < 0:
+  #options.outputFile = options.outputFile.split(".")[0] + "_" + options.dataset.replace("/", "_")
 
-if options.firstFile != 1 or options.lastFile != 0:
-  first = options.firstFile - 1
-  last = options.lastFile
-  options.outputFile = options.outputFile.split(".")[0] + "_%d-%d" % (first+1, last)
-  newInputFiles = options.inputFiles[first:last]
-  del options.inputFiles[:]
-  options.inputFiles = newInputFiles[:]
-  print "Processing %d files (%d..%d) of %d available." % \
-    (len(options.inputFiles), first+1, last, len(options.inputFiles))
-else:
-  print "Processing all %d available files." % len(options.inputFiles)
+#if options.firstFile != 1 or options.lastFile != 0:
+  #first = options.firstFile - 1
+  #last = options.lastFile
+  #options.outputFile = options.outputFile.split(".")[0] + "_%d-%d" % (first+1, last)
+  #newInputFiles = options.inputFiles[first:last]
+  #del options.inputFiles[:]
+  #options.inputFiles = newInputFiles[:]
+  #print "Processing %d files (%d..%d) of %d available." % \
+    #(len(options.inputFiles), first+1, last, len(options.inputFiles))
+#else:
+  #print "Processing all %d available files." % len(options.inputFiles)
 
 ## Message logger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")

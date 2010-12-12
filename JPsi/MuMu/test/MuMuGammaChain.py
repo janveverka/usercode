@@ -63,6 +63,7 @@ files["test"] = """
     MuMuGammaTree_148003-148068_PromptRecov2_json148058.root
     """.split()
 
+bpath = "/raid1/veverka/zgamma/DimuonTrees_v3b"
 bfiles = {}
 bfiles["data38x"] = """
   MuMuGammaTree_combined_Sep17ReRecov2_StremExpressv3_json_135821-144114_Sept17ReReco_FNAL.root
@@ -86,7 +87,17 @@ bfiles["w"] = ["MuMuGammaTree_WJets-madgraph.root"]
 bfiles["qcd"] = ["MuMuGammaTree_InclusiveMu15.root"]
 bfiles["tt"] = ["MuMuGammaTree_TTbarJets_Tauola-madgraph.root"]
 
-bpath = "/raid1/veverka/zgamma/DimuonTrees_v3b"
+cpath = "/raid1/veverka/zgamma/DimuonTrees_v3c"
+cfiles = {}
+cfiles["data38x"] = ["MuMuGammaTree_Mu_Nov4ReRecoJSON.root"]
+cfiles["data38xNoJson"] = ["MuMuGammaTree_Mu.root"]
+cfiles["z"] = ["MuMuGammaTree_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia.root"]
+#cfiles["zg"] = [""]
+#cfiles["zmg"] = [""]
+cfiles["w"] = ["MuMuGammaTree_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola.root"]
+cfiles["qcd"] = ["MuMuGammaTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6.root"]
+cfiles["tt"] = ["MuMuGammaTree_TTJets_TuneZ2_7TeV-madgraph-tauola.root"]
+
 
 def getChains(files=bfiles, path=bpath):
     chains = {}
@@ -109,6 +120,13 @@ weight30["z"  ] = 2.83E-02
 weight30["qcd"] = 4.67E-01
 weight30["w"  ] = 9.19E-02
 weight30["tt" ] = 3.38E-03
+
+## NLO weight for c trees for 1/pb
+cweight1 = {}
+cweight1["z"  ] = 2.83E-02
+cweight1["qcd"] = 4.67E-01
+cweight1["w"  ] = 9.19E-02
+cweight1["tt" ] = 3.38E-03
 
 if __name__ == "__main__": import user
 
