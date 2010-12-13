@@ -6,7 +6,7 @@
 Cert_136033-149442_7TeV_Nov4ReReco_Collisions10_JSON.txt
 
 === Lumi ===
-Lumi from lumiCalc.py for an "AND" of lumis in files and combined JSON:
+Lumi from lumiCalc.py for an "AND" of lumis in files (edmLumisInFiles.py) and the JSON:
 | Delivered LS | Delivered (/μb) | Selected LS | Recorded (/μb) |
 -------------------------------------------------------------------
 |       100254 |     43506945.316 |       75081 |    36145000.992 |
