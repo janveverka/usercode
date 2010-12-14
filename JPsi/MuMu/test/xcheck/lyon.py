@@ -3,21 +3,26 @@ import ROOT
 
 class Event:
     """Container for the Lyon's mmg event data"""
-    varNames = tuple("""run
-                        lumi
-                        eid
-                        mmgMass
-                        phoPt
-                        nearMuPt
-                        farMuPt
-                        drNear
-                        drFar
-                        mmMass
-                        nearMuEta
-                        farMuEta
-                        phoEta
-                        k
+    varNames = tuple("""run         
+                        lumi        
+                        eid         
+                        mmgMass     
+                        phoPt       
+                        nearMuPt    
+                        farMuPt     
+                        drNear      
+                        drFar       
+                        mmMass      
+                        nearMuEta   
+                        farMuEta    
+                        phoEta      
+                        k           
                         """.split())
+    
+    @staticmethod
+    def initLeafs(struct):
+        for xname in Event.varNames:
+            setattr(struct, xname, 0)
     
     def __init__(self, line):
         varNames = Event.varNames

@@ -21,6 +21,11 @@ class Event:
                         k
                         """.split())
     
+    @staticmethod
+    def initLeafs(struct):
+        for xname in Event.varNames:
+            setattr(struct, xname, 0)
+    
     def __init__(self, line):
         varNames = Event.varNames
         values = line.split()
