@@ -3,8 +3,8 @@ import MuMuGammaChain
 import ROOT
 
 ## Define the TChains
-chains = MuMuGammaChain.getChains(MuMuGammaChain.bfiles,
-                                  MuMuGammaChain.bpath
+chains = MuMuGammaChain.getChains(MuMuGammaChain.cfiles,
+                                  MuMuGammaChain.cpath
                                   )
 
 ## Aliases

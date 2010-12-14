@@ -5,17 +5,23 @@ from ROOT import *
 from common import *
 
 
-filename = "kHistos.root"
+filename = "mmMassHistos.root"
 # histosToMake = "mass mmgMass".split()
 # histosToMake = "mmgMassEB mmgMassEE phoPt phoPtEB phoPtEE phoE phoEEB phoEEE".split()
+    #ikReco
+    #ikRecoEB
+    #ikRecoEE
+    #ikVReco
+    #ikVRecoEB
+    #ikVRecoEE
+
 histosToMake = """
-    mmgMass
-    phoEta
-    phoPtEB phoPtEE
-    minusLogK
-    minusLogKEB minusLogKEBR9
-    minusLogKEE minusLogKEER9
+    ikRecoOverGen
+    ikVRecoOverGen
+    ikVVRecoOverGen
     """.split()
+
+#histosToMake = "mmMassRecoOverGen mmMassVRecoOverGen".split()
 # profilesToMake = ["eeSihihVsDR"]
 profilesToMake = []
 
@@ -35,11 +41,11 @@ file = TFile(filename, "recreate")
 
 print "Starting loop over histos ..."
 for x in histosToMake:
-    makeHistos(chains, histos.histos[x], cuts.cuts[x], ["zmg"])
+    makeHistos(chains, histos.histos[x], cuts.cuts[x], "qcd tt w data38x".split() )
 
 print "Starting loop over profiles ... "
 for x in profilesToMake:
-    makeHistos(chains, histos.histos[x], cuts.cuts[x], ["zmg"], "profile")
+    makeHistos(chains, histos.histos[x], cuts.cuts[x], ["zmg", "data38x"], "profile")
 
 print "Saving output to %s ... " % file.GetName()
 file.Write()

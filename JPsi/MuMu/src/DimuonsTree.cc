@@ -206,7 +206,7 @@ DimuonsTree::applyVbtfBaselineSelection() {
 
     /// more cuts for the tight selection
     if (TMath::Abs(muDxyBS[i]) > 0.2) continue;
-    if (muGlobalNormalizedChi2[i] > 10.) continue;
+ if (muGlobalNormalizedChi2[i] > 10.) continue;
     if (muPixelHits[i] < 1) continue;
     if (muStations[i] < 2) continue;
     if (muMuonHits[i] < 1) continue;
@@ -389,6 +389,8 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("nMuons"           , &nMuons           , "nMuons/b"           );
 
   tree_->Branch("mass"             , mass             , "mass[nDimuons]/F"             );
+  tree_->Branch("massGen"          , massGen          , "massGen[nDimuons]/F"          );
+  tree_->Branch("massVanilla"      , massVanilla      , "massVanilla[nDimuons]/F"      );
   tree_->Branch("pt"               , pt               , "pt[nDimuons]/F"               );
   tree_->Branch("eta"              , eta              , "eta[nDimuons]/F"              );
   tree_->Branch("phi"              , phi              , "phi[nDimuons]/F"              );
@@ -434,9 +436,11 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("muPt"                     , muPt                     , "muPt[nMuons]/F"                     );
   tree_->Branch("muEta"                    , muEta                    , "muEta[nMuons]/F"                    );
   tree_->Branch("muPhi"                    , muPhi                    , "muPhi[nMuons]/F"                    );
+  tree_->Branch("muVtx"                    , muVtx                    , "muVtx[3][nMuons]/F"                    );
   tree_->Branch("muGenPt"                  , muGenPt                  , "muGenPt[nMuons]/F"                     );
   tree_->Branch("muGenEta"                 , muGenEta                 , "muGenEta[nMuons]/F"                    );
   tree_->Branch("muGenPhi"                 , muGenPhi                 , "muGenPhi[nMuons]/F"                    );
+  tree_->Branch("muGenVtx"                 , muGenVtx                 , "muGenVtx[3][nMuons]/F"                 );
   tree_->Branch("muP"                      , muP                      , "muP[nMuons]/F"                      );
   tree_->Branch("muCharge"                 , muCharge                 , "muCharge[nMuons]/I"                 );
   tree_->Branch("muDxyPV"                  , muDxyPV                  , "muDxyPV[nMuons]/F"                  );
@@ -493,6 +497,8 @@ DimuonsTree::initLeafVariables()
 
   for (int i=0; i<nDimuons; ++i) {
     mass[i]              = 0;
+    massGen[i]              = 0;
+    massVanilla[i]       = 0;
     pt[i]                = 0;
     eta[i]               = 0;
     phi[i]               = 0;
@@ -581,6 +587,10 @@ DimuonsTree::initLeafVariables()
     muHltMu9Match[i]             = 0;
     muHltMu11Match[i]            = 0;
     muHltMu15v1Match[i]          = 0;
+    for (int j=0; j<3; ++j) {
+      muVtx   [j][i]             = 0;
+      muGenVtx[j][i]             = 0;
+    }
   }
 }
 

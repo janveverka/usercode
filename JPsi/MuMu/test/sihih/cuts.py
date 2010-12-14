@@ -74,15 +74,14 @@ isrCuts = [
 
 ## Updated version retreived in Dec 10
 photonIdCuts = [
-  "phoPt[g] > 10",
-  "phoEcalIso[g] < 4.2 + 0.006 * phoPt[g]",
-  "phoHcalIso[g] < 2.2 + 0.0025 * phoPt[g]",
-  "phoTrackIso[g] < 2.0 + 0.001 * phoPt[g]",
-  "phoHadronicOverEm[g] < 0.05",
-  "((abs(phoEta[g]) > 1.5 & phoSigmaIetaIeta[g] < 0.03) || (phoSigmaIetaIeta[g] < 0.013))",
+    "phoPt[g] > 10",
+    "phoEcalIso[g] < 4.2 + 0.006 * phoPt[g]",
+    "phoHcalIso[g] < 2.2 + 0.0025 * phoPt[g]",
+    "phoTrackIso[g] < 2.0 + 0.001 * phoPt[g]",
+    "phoHadronicOverEm[g] < 0.05",
+    "((abs(phoEta[g]) > 1.5 & phoSigmaIetaIeta[g] < 0.03) || (phoSigmaIetaIeta[g] < 0.013))",
     "!phoHasPixelSeed", # optional
-
-  ]
+    ]
 
 ubebCuts = [
     "mmgDeltaRNear > 0.1",
@@ -91,7 +90,7 @@ ubebCuts = [
 
 lyonCuts = [
     "abs(phoScEta[g]) < 2.5",
-    "abs(phoEta[g]) < 1.4442 || abs(phoEta[g]) > 1.566",
+    "abs(phoScEta[g]) < 1.4442 || abs(phoScEta[g]) > 1.566",
     #"phoSeedRecoFlag[g] != 2",       # DATA ONLY! EcalRecHit::kOutOfTime = 2
     #"phoSeedSeverityLevel[g] != 4",  # DATA ONLY! EcalSeverityLevelAlgo::kWeird = 4
     #"phoSeedSeverityLevel[g] != 5",  # DATA ONLY! EcalSeverityLevelAlgo::kBad = 5
@@ -142,6 +141,15 @@ escaleCuts = [
 
 ebr9Cuts = ["phoR9[g] < 0.94"] + ebCut
 eer9Cuts = ["phoR9[g] < 0.95"] + eeCut
+
+muGenMatchCuts = [
+    "muGenPt[mu1] > 0",
+    "muGenPt[mu2] > 0"
+    ]
+
+genMatchCuts = muGenMatchCuts + [
+    "phoGenPt[g] > 0"
+    ]
 
 def setFsrCuts(varname, isrCuts, fsrCuts, commonCuts = []):
     ic = isrCuts + commonCuts
@@ -202,6 +210,23 @@ setFsrCuts("minusLogKEE", isrCuts + photonIdCuts, escaleCuts + massWindow, eeCut
 setFsrCuts("minusLogKEBR9", isrCuts + photonIdCuts, escaleCuts + massWindow, ebr9Cuts)
 setFsrCuts("minusLogKEER9", isrCuts + photonIdCuts, escaleCuts + massWindow, eer9Cuts)
 setFsrCuts("minusLogK2", isrCuts + photonIdCuts, escaleCuts + massWindow)
+setFsrCuts("ikReco"    , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts)
+setFsrCuts("ikRecoEB"  , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts, ebCut)
+setFsrCuts("ikRecoEE"  , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts, eeCut)
+setFsrCuts("ikVReco"   , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts)
+setFsrCuts("ikVRecoEB" , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts, ebCut)
+setFsrCuts("ikVRecoEE" , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts, eeCut)
+setFsrCuts("ikVVReco"  , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts)
+setFsrCuts("ikVVRecoEB", isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts, ebCut)
+setFsrCuts("ikVVRecoEE", isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts, eeCut)
+setFsrCuts("ikRecoOverGen"  , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts)
+setFsrCuts("ikVRecoOverGen" , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts)
+setFsrCuts("ikVVRecoOverGen", isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts)
+setFsrCuts("mmMassRecoOverGen" , isrCuts + photonIdCuts, lyonCuts + massWindow + muGenMatchCuts)
+setFsrCuts("mmMassVRecoOverGen", isrCuts + photonIdCuts, lyonCuts + massWindow + muGenMatchCuts)
+setFsrCuts("mmgMassRecoOverGen" , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts)
+setFsrCuts("mmgMassVRecoOverGen" , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts)
+setFsrCuts("mmgMassVVRecoOverGen" , isrCuts + photonIdCuts, lyonCuts + massWindow + genMatchCuts)
 
 ## sihih profiles
 setProfileCuts("eeSihihVsDR", isrCuts, escaleCuts + massWindow, eeCut)

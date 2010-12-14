@@ -37,6 +37,8 @@ public:
 
   // dimuon leaf variables
   float         mass             [maxDimuons];
+  float         massGen          [maxDimuons];
+  float         massVanilla      [maxDimuons];
   float         pt               [maxDimuons];
   float         eta              [maxDimuons];
   float         phi              [maxDimuons];
@@ -83,9 +85,11 @@ public:
   float         muPt                     [maxMuons];
   float         muEta                    [maxMuons];
   float         muPhi                    [maxMuons];
+  float         muVtx[3]                 [maxMuons];
   float         muGenPt                  [maxMuons];
   float         muGenEta                 [maxMuons];
   float         muGenPhi                 [maxMuons];
+  float         muGenVtx[3]              [maxMuons];
   float         muP                      [maxMuons];
   int           muCharge                 [maxMuons];
   float         muDxyBS                  [maxMuons];

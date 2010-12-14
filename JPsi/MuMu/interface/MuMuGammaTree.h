@@ -19,7 +19,10 @@ public:
   Int_t nMuMuGammas;
 
   // MuMuGamma leafs
-  float mmgMass[maxMuMuGammas];
+  float mmgMass[maxMuMuGammas];       // use vertexed dimuon
+  float mmgMassGen[maxMuMuGammas];       // gen-level invariant mass
+  float mmgMassVanilla[maxMuMuGammas];   // vanilla
+  float mmgMassVCorr[maxMuMuGammas];  // use vertexed dimuon, and dimuon vertex for the photon
   unsigned char mmgDimuon[maxMuMuGammas];
   unsigned char mmgPhoton[maxMuMuGammas];
   unsigned char mmgMuonNear[maxMuMuGammas];
@@ -29,8 +32,10 @@ public:
   // photon leafs
   float phoPt[maxPhotons];
   float phoEta[maxPhotons];
-  float phoScEta[maxPhotons];
   float phoPhi[maxPhotons];
+  float phoScEta[maxPhotons];
+  float phoCaloPosition[3][maxPhotons]; // 0: x, 1: y, 2: z
+  float phoVtx[3][maxPhotons];          // 0: x, 1: y, 2: z
   float phoEcalIso[maxPhotons];
   float phoHcalIso[maxPhotons];
   float phoTrackIso[maxPhotons];
@@ -47,9 +52,10 @@ public:
   int phoGenMatchStatus[maxPhotons];     // 0 means no match found
   int phoGenMatchMomPdgId[maxPhotons];   // 0 means no MC match found
   int phoGenMatchMomStatus[maxPhotons];  // 0 means no match found
-//   float phoGenPt[maxPhotons];  // 0 means no match found
-//   float phoGenEta[maxPhotons];  // 0 means no match found
-//   float phoGenPhi[maxPhotons];  // 0 means no match found
+  float phoGenPt [maxPhotons];  // 0 means no match found
+  float phoGenEta[maxPhotons];  // 0 means no match found
+  float phoGenPhi[maxPhotons];  // 0 means no match found
+  float phoGenVtx[3][maxPhotons]; // 0: x, 1: y, 2: z
   float phoR9    [maxPhotons];
   float phoIEta  [maxPhotons];
   float phoIPhi  [maxPhotons];

@@ -35,6 +35,7 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Utilities/interface/EDMException.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
@@ -157,6 +158,7 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 //   LogDebug("SegFault") << "Entering analyze ..." << std::endl;
 
   tree_.initLeafVariables();
+  AddFourMomenta addP4;
 
   // get muon collection
   edm::Handle<edm::View<pat::Muon> > muons;
@@ -241,6 +243,13 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
 
     tree_.mass[i]              = dimuon->mass();
+
+    reco::CompositeCandidate mmVanilla;
+    mmVanilla.addDaughter( * dimuon->daughter(0) );
+    mmVanilla.addDaughter( * dimuon->daughter(1) );
+    addP4.set(mmVanilla);
+    tree_.massVanilla[i]       = mmVanilla.mass();
+
     tree_.pt[i]                = dimuon->pt();
     tree_.eta[i]               = dimuon->eta();
     tree_.phi[i]               = dimuon->phi();
@@ -310,15 +319,52 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       tree_.pdgId[i] = 0;
     }
 
-    // get the daughters
-    const reco::CandidateBaseRef dau1 = dimuon->daughter(0)->masterClone();
-    const reco::CandidateBaseRef dau2 = dimuon->daughter(1)->masterClone();
+
+    // Jump through 3 hoops to get pointers to the daughters.
+    const reco::Candidate * dau1 = dimuon->daughter(0);
+    const reco::Candidate * dau2 = dimuon->daughter(1);
+    if (dau1 == 0 || dau2 == 0)
+      throw edm::Exception(edm::errors::InvalidReference) <<
+        "One of the dimuon daughters does not exist.\n";
+    // Jump through the 2nd hoop - get the master of the shallow clones.
+    if (dau1->hasMasterClone() && dau2->hasMasterClone() ) {
+      dau1 = dau1->masterClone().get();
+      dau2 = dau2->masterClone().get();
+    } else {
+      throw edm::Exception(edm::errors::InvalidReference) <<
+        "One of the dimuon daughters is not a shallow clone.\n";
+    }
+    // Jump throught the 3rd hoop - cast up the pointers.
+    const pat::Muon * mu1 = dynamic_cast<const pat::Muon*>(dau1);
+    const pat::Muon * mu2 = dynamic_cast<const pat::Muon*>(dau2);
+    if (mu1 == 0 || mu2 == 0)
+      throw edm::Exception(edm::errors::InvalidReference) <<
+        "One of the dimuon daughters is not a pat::Muon.\n";
+
+    // The back-to-back cut
     double cosOpeningAngle = dau1->momentum().Dot(dau2->momentum()) /
                              ( dau1->p() * dau2->p() );
     tree_.backToBack[i] = 0.5 * (1. - cosOpeningAngle);
 
-    tree_.dau1[i] = dau1.key();
-    tree_.dau2[i] = dau2.key();
+    // use pointer arithmetics to retreive the daughter indices
+    const pat::Muon * muBegin = &*muons->begin();
+    tree_.dau1[i] = mu1 - muBegin;
+    tree_.dau2[i] = mu2 - muBegin;
+
+    if ( isMC_ &&
+         mu1->genParticle(0) &&
+         mu2->genParticle(0) )
+    {
+      reco::CompositeCandidate mmGen;
+      mmGen.addDaughter(*mu1, "muon1");
+      mmGen.addDaughter(*mu2, "muon2");
+      addP4.set(mmGen);
+      tree_.massGen[i] = mmGen.mass();
+    }
+    else
+    {
+      tree_.massGen[i] = 0;
+    }
   } // loop over dimuons
 
 //   LogDebug("SegFault") << "Looping over muons..." << std::endl;
@@ -330,12 +376,18 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.muPt[i]                      = mu->pt();
     tree_.muEta[i]                     = mu->eta();
     tree_.muPhi[i]                     = mu->phi();
+    tree_.muVtx[0][i]                  = mu->vx();
+    tree_.muVtx[1][i]                  = mu->vy();
+    tree_.muVtx[2][i]                  = mu->vz();
     // gen info
     if (isMC_ && mu->genParticle(0)) {
       // found gen match
-      tree_.muGenPt[i]  = mu->genParticle(0)->pt();
-      tree_.muGenEta[i] = mu->genParticle(0)->eta();
-      tree_.muGenPhi[i] = mu->genParticle(0)->phi();
+      tree_.muGenPt    [i] = mu->genParticle(0)->pt();
+      tree_.muGenEta   [i] = mu->genParticle(0)->eta();
+      tree_.muGenPhi   [i] = mu->genParticle(0)->phi();
+      tree_.muGenVtx[0][i] = mu->genParticle(0)->vx();
+      tree_.muGenVtx[1][i] = mu->genParticle(0)->vy();
+      tree_.muGenVtx[2][i] = mu->genParticle(0)->vz();
     }
 
     tree_.muP[i]                       = mu->p();
@@ -428,6 +480,12 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_.phoEta[i] = pho->eta();
     tree_.phoScEta[i] = pho->superCluster()->eta();
     tree_.phoPhi[i] = pho->phi();
+    tree_.phoCaloPosition[0][i] = pho->caloPosition().x();
+    tree_.phoCaloPosition[1][i] = pho->caloPosition().y();
+    tree_.phoCaloPosition[2][i] = pho->caloPosition().z();
+    tree_.phoVtx[0][i] = pho->vx();
+    tree_.phoVtx[1][i] = pho->vy();
+    tree_.phoVtx[2][i] = pho->vz();
     tree_.phoEcalIso[i] = pho->ecalIso();
     tree_.phoHcalIso[i] = pho->hcalIso();
     tree_.phoTrackIso[i] = pho->trackIso();
@@ -446,6 +504,13 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       // found gen match
       tree_.phoGenMatchPdgId[i]  = pho->genParticle(0)->pdgId();
       tree_.phoGenMatchStatus[i] = pho->genParticle(0)->status();
+
+      tree_.phoGenPt [i]    = pho->genParticle(0)->pt ();
+      tree_.phoGenEta[i]    = pho->genParticle(0)->eta();
+      tree_.phoGenPhi[i]    = pho->genParticle(0)->phi();
+      tree_.phoGenVtx[0][i] = pho->genParticle(0)->vx();
+      tree_.phoGenVtx[1][i] = pho->genParticle(0)->vy();
+      tree_.phoGenVtx[2][i] = pho->genParticle(0)->vz();
 
       // look for the gen match in the (pruned) gen particle collection
       reco::GenParticleCollection::const_iterator genMatch;
@@ -511,9 +576,64 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     reco::CompositeCandidate mmg;
     mmg.addDaughter(dimuon, "dimuon");
     mmg.addDaughter(*pho, "photon");
-    AddFourMomenta addP4;
     addP4.set(mmg);
     tree_.mmgMass[i] = mmg.mass();
+
+
+    // Jump through 3 hoops to get pointers to the daughters.
+    const reco::Candidate * dau1 = dimuon.daughter(0);
+    const reco::Candidate * dau2 = dimuon.daughter(1);
+    if (dau1 == 0 || dau2 == 0)
+      throw edm::Exception(edm::errors::InvalidReference) <<
+        "One of the mmg dimuon daughters does not exist.\n";
+    // Jump through the 2nd hoop - get the master of the shallow clones.
+    if (dau1->hasMasterClone() && dau2->hasMasterClone() ) {
+      dau1 = dau1->masterClone().get();
+      dau2 = dau2->masterClone().get();
+    } else {
+      throw edm::Exception(edm::errors::InvalidReference) <<
+        "One of the mmg dimuon daughters is not a shallow clone.\n";
+    }
+    // Jump throught the 3rd hoop - cast up the pointers.
+    const pat::Muon * mu1 = dynamic_cast<const pat::Muon*>(dau1);
+    const pat::Muon * mu2 = dynamic_cast<const pat::Muon*>(dau2);
+    if (mu1 == 0 || mu2 == 0)
+      throw edm::Exception(edm::errors::InvalidReference) <<
+        "One of the mmg dimuon daughters is not a pat::Muon.\n";
+
+    if ( isMC_ &&
+         mu1->genParticle(0) &&
+         mu2->genParticle(0) &&
+         pho->genParticle(0) )
+    {
+      reco::CompositeCandidate mmgGen;
+      mmgGen.addDaughter(*mu1->genParticle(0), "muon1");
+      mmgGen.addDaughter(*mu2->genParticle(0), "muon2");
+      mmgGen.addDaughter(*pho->genParticle(0), "photon");
+      addP4.set(mmgGen);
+      tree_.mmgMassGen[i] = mmgGen.mass();
+    }
+    else
+    {
+      tree_.mmgMassGen[i] = 0;
+    }
+
+    reco::CompositeCandidate mmgVanilla;
+    mmgVanilla.addDaughter( *dimuon.daughter(0), "muon1" );
+    mmgVanilla.addDaughter( *dimuon.daughter(1), "muon2" );
+    mmgVanilla.addDaughter( *pho               , "photon");
+    addP4.set(mmgVanilla);
+    tree_.mmgMassVanilla[i] = mmgVanilla.mass();
+
+    pat::Photon *phoVCorr = pho->clone();
+    Point dimuonVtx( dimuon.vx(), dimuon.vy(), dimuon.vz() );
+    phoVCorr->setVertex(dimuonVtx);
+    reco::CompositeCandidate mmgVCorr;
+    mmgVCorr.addDaughter( dimuon, "dimuon");
+    mmgVCorr.addDaughter(*phoVCorr, "photon");
+    addP4.set(mmgVCorr);
+    tree_.mmgMassVCorr[i] = mmgVCorr.mass();
+
     tree_.mmgDimuon[i] = primaryDimuon;
     tree_.mmgPhoton[i] = i;
 

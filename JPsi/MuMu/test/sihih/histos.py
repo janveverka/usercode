@@ -42,3 +42,46 @@ histos["minusLogKEBR9"] = Var("minusLogKEBR9", "-log(kRatio(mmgMass, mass[mm]))"
 histos["minusLogKEER9"] = Var("minusLogKEER9", "-log(kRatio(mmgMass, mass[mm]))", -1, 1, "", 40)
 histos["minusLogK2"] = Var("minusLogK2", "-log(kRatio(mmgMass, mass[mm]))", -1, 1, "", 200)
 
+mu1P4 =  "muPt[mu1] muEta[mu1] muPhi[mu1] 0.105658".split()
+mu2P4 =  "muPt[mu2] muEta[mu2] muPhi[mu2] 0.105658".split()
+phoP4 = "phoPt[g]  phoEta[g]  phoPhi[g]   0".split()
+
+mu1GenP4 =  "muGenPt[mu1] muGenEta[mu1] muGenPhi[mu1] 0.105658".split()
+mu2GenP4 =  "muGenPt[mu2] muGenEta[mu2] muGenPhi[mu2] 0.105658".split()
+phoGenP4 = "phoGenPt[g]  phoGenEta[g]  phoGenPhi[g]   0".split()
+
+mmMassGen   = "twoBodyMass(%s,%s,%s,%s,%s,%s,%s,%s)" % tuple(mu1GenP4 + mu2GenP4)
+mmMassReco  = "twoBodyMass(%s,%s,%s,%s,%s,%s,%s,%s)" % tuple(mu1P4 + mu2P4)
+mmMassVReco = "mass[mm]"
+
+mmgMassGen   = "treeBodyMass(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" % \
+               tuple(mu1GenP4 + mu2GenP4 + phoGenP4)
+mmgMassReco  = "treeBodyMass(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" % \
+               tuple(mu1P4 + mu2P4 + phoP4)
+mmgMassVReco = "mmgMass"
+
+kGen   = "kRatio(%s, %s)" % (mmgMassGen  , mmMassGen  )
+kReco  = "kRatio(%s, %s)" % (mmgMassReco , mmMassReco )
+kVReco = "kRatio(%s, %s)" % (mmgMassVReco, mmMassVReco)
+
+
+histos["ikReco"     ] = Var("ikReco"  , "1./kRatio(mmgMassVanilla, massVanilla[mm])" , 0, 2, "", 200)
+histos["ikRecoEB"   ] = Var("ikRecoEB", "1./kRatio(mmgMassVanilla, massVanilla[mm])" , 0, 2, "", 200)
+histos["ikRecoEE"   ] = Var("ikRecoEE", "1./kRatio(mmgMassVanilla, massVanilla[mm])" , 0, 2, "", 200)
+histos["ikVReco"    ] = Var("ikVReco"  , "1./kRatio(mmgMass, mass[mm])" , 0, 2, "", 200)
+histos["ikVRecoEB"  ] = Var("ikVRecoEB", "1./kRatio(mmgMass, mass[mm])" , 0, 2, "", 200)
+histos["ikVRecoEE"  ] = Var("ikVRecoEE", "1./kRatio(mmgMass, mass[mm])" , 0, 2, "", 200)
+histos["ikVVReco"   ] = Var("ikVVReco"  , "1./kRatio(mmgMassVCorr, massVCorr[mm])" , 0, 2, "", 200)
+histos["ikVVRecoEB" ] = Var("ikVVRecoEB", "1./kRatio(mmgMassVCorr, massVCorr[mm])" , 0, 2, "", 200)
+histos["ikVVRecoEE" ] = Var("ikVVRecoEE", "1./kRatio(mmgMassVCorr, massVCorr[mm])" , 0, 2, "", 200)
+
+histos["ikRecoOverGen"  ] = Var("ikRecoOverGen"  , "kRatio(mmgMassGen, massGen[mm]) / kRatio(mmgMassVanilla, massVanilla[mm])", 0, 2, "", 200)
+histos["ikVRecoOverGen" ] = Var("ikVRecoOverGen" , "kRatio(mmgMassGen, massGen[mm]) / kRatio(mmgMass, mass[mm])", 0, 2, "", 200)
+histos["ikVVRecoOverGen"] = Var("ikVVRecoOverGen", "kRatio(mmgMassGen, massGen[mm]) / kRatio(mmgMassVCorr, mass[mm])", 0, 2, "", 200)
+
+histos["mmMassRecoOverGen" ] = Var("mmMassRecoOverGen" , "massVanilla[mm]/massGen[mm]", 0.8, 1.2, "", 200)
+histos["mmMassVRecoOverGen"] = Var("mmMassVRecoOverGen" , "mass[mm]/massGen[mm]", 0.8, 1.2, "", 200)
+histos["mmgMassRecoOverGen" ] = Var("mmgMassRecoOverGen" , "mmgMassVanilla[mm]/mmgMassGen[mm]", 0.8, 1.2, "", 200)
+histos["mmgMassVRecoOverGen"] = Var("mmgMassVRecoOverGen" , "mmgMass[mm]/mmgMassGen[mm]", 0.8, 1.2, "", 200)
+histos["mmgMassVVRecoOverGen"] = Var("mmgMassVVRecoOverGen" , "mmgMassVCorr[mm]/mmgMassGen[mm]", 0.8, 1.2, "", 200)
+
