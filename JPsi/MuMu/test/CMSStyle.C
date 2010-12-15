@@ -1,7 +1,7 @@
 //##########################################################################
 // Initialization code executed at the start of a ROOT session.
 //
-// File: $Id: CMSStyle.C,v 1.1 2005/11/10 15:46:14 ganzhur Exp $
+// File: $Id: CMSStyle.C,v 1.1 2010/12/15 00:02:18 veverka Exp $
 //##########################################################################
 
 //#include <iostream>
@@ -73,6 +73,18 @@ void CMSstyle(){
 //  cout << endl << "    For approved plots use: gROOT->SetStyle(\"CMS\");"
 //       << endl << "  To add a CMS label use: CMSLabel();"
 //       << endl << endl;
+
+  // JV: set title style
+  cmsStyle->SetTitleFillColor(kWhite);
+  cmsStyle->SetTitleFont(132);
+  cmsStyle->SetTitleBorderSize(0);
+
+  // JV: set stats style
+  cmsStyle->SetStatBorderSize(0);
+  cmsStyle->SetStatColor(kWhite);
+  cmsStyle->SetStatFont(132);
+
+
 
   // restore the plain style
   gROOT->SetStyle("Plain");
