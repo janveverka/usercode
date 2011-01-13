@@ -1,6 +1,6 @@
 /** \macro fitJPsi2SMassUnbinned.C
  *
- * $Id: fitZToMuMuGammaMassUnbinned.C,v 1.1 2010/10/06 21:13:30 veverka Exp $
+ * $Id: fitZToMuMuGammaMassUnbinned.C,v 1.2 2010/11/26 16:45:28 veverka Exp $
  *
  *
  * Macro implementing unbinned Maximum-likelihood fit of
@@ -61,9 +61,11 @@ double NormalizedIntegral(RooAbsPdf & function, RooRealVar & integrationVar, dou
 RooAddPdf fitZToMuMuGammaMassUnbinned(
 //   const char *filename = "ZMuMuGammaMass_2.9ipb_EB.txt",
 //   const char *filename = "ZMuMuGammaMass_2.9ipb_EE.txt",
-  const char *filename = "ZMuMuGammaMass_Zmumu_Spring10_EB.txt",
+//   const char *filename = "ZMuMuGammaMass_Zmumu_Spring10_EB.txt",
+  const char *filename = "DimuonMass_data_Nov4ReReco.txt",
+ 
   const char* plotOpt = "NEU",
-  const int nbins = 20)
+  const int nbins = 60)
 {
   gROOT->ProcessLine(".L tdrstyle.C");
   setTDRStyle();

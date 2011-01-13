@@ -64,10 +64,10 @@ float inverseK(float mmgMass, float mmMass) {
   return  phoEmeas(mmgMass, mmMass) / phoEtrue(mmMass);
 }
 
-float scaledMmgMass(float scale3,
-                    float pt1, float eta1, float phi1,
-                    float pt2, float eta2, float phi2,
-                    float pt3, float eta3, float phi3)
+float scaledMmgMass10(float scale3,
+                     float pt1, float eta1, float phi1,
+                     float pt2, float eta2, float phi2,
+                     float pt3, float eta3, float phi3)
 {
     TLorentzVector p1, p2, p3;
     p1.SetPtEtaPhiM(pt1, eta1, phi1, 0);
@@ -76,7 +76,7 @@ float scaledMmgMass(float scale3,
     return (p1+p2+p3).M();
 }
 
-float scaledMmgMass(float sfactor, float mmgMass, float mmMass)
+float scaledMmgMass3(float sfactor, float mmgMass, float mmMass)
 {
     float mm2 = mmMass*mmMass;
     float mmg2 = mmgMass*mmgMass;
