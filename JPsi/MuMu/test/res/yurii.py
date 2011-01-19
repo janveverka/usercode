@@ -7,8 +7,10 @@ rand = TRandom3()
 mcTree = TTree("mcTree", "MC tree")
 dataTree = TTree("dataTree", "tree with real data")
 
-mcTree.ReadFile("yuriisMethod-Powheg_Fall10.txt", "m2/F:m3:pt:eta")
-dataTree.ReadFile("yuriisMethod-data_Nov4ReReco.txt", "m2/F:m3:pt:eta")
+# mcTree.ReadFile("yuriisMethod-Powheg_Fall10.txt", "m2/F:m3:pt:eta")
+# dataTree.ReadFile("yuriisMethod-data_Nov4ReReco.txt", "m2/F:m3:pt:eta")
+mcTree.ReadFile("Selected_MC_1.000_fromOlivier.txt", "m2/F:m3:pt:eta")
+dataTree.ReadFile("Selected_DATA_fromOlivier.txt", "m2/F:m3:pt:eta")
 
 dataTree.Draw(">>presel", "pt > 10", "entrylist")
 dataTree.SetEntryList(gDirectory.Get("presel"))
@@ -33,7 +35,7 @@ def applySelection(selection):
         lname = "elist_" + t.GetName()
         t.Draw(">>" + lname, selection, "entrylist")
         elist = gDirectory.Get(lname)
-        t.SetEntryList(gDirectory.Get(lname)) 
+        t.SetEntryList(gDirectory.Get(lname))
 
 def nllik(scale, res):
     """Calculate the negative log likelihood of data with 1/k PDF from MC.
@@ -49,7 +51,7 @@ def nllik(scale, res):
     else:
         nevents = mcTree.GetEntries()
         getMcEntry = mcTree.GetEntry
-    
+
     ## Loop over the MC to fill the histogram
     for i in range(nevents):
         sfactor = TMath.Exp(rand.Gaus(TMath.Log(1. + scale/100.), res/100.))
@@ -59,17 +61,17 @@ def nllik(scale, res):
         if abs(scaledMmgMass3(sfactor, mcLeafs.m3, mcLeafs.m2) - 91.2) > 4.:
             continue
         hmc.Fill(sfactor * inverseK(mcLeafs.m3, mcLeafs.m2))
-    
+
     ## Normalize area to 1
     hmc.Scale( 1./hmc.Integral() / hmc.GetBinWidth(1) )
-    
+
     ## Fit with Gauss; use the fit to get an estimate for the tails where there is no data
     hmc.Fit("gaus", "Q0")
     fit = hmc.GetFunction("gaus")
-    
+
     ## Get the real data
     dataTree.Draw("inverseK(m3, m2) >> hdata(20,0,2)",  "abs(m3 - 91.2) < 4", "goff")
-    
+
     ## Sum the negative log likelihood over all the data
     sum = 0.
     for i in range( dataTree.GetSelectedRows() ):
@@ -96,7 +98,7 @@ def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30):
     else:
         nevents = mcTree.GetEntries()
         getMcEntry = mcTree.GetEntry
-    
+
     ## Loop over the MC to fill the histogram
     for i in range(nevents):
         if res > 0:
@@ -112,19 +114,19 @@ def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30):
         if sm3 < m3min or m3max < sm3:
             continue
         hmc.Fill(sm3)
-    
+
     ## Normalize area to 1
     hmc.Scale( 1./hmc.Integral() / hmc.GetBinWidth(1) )
-    
+
     ## Fit with Gauss; use the fit to get an estimate for the tails where there is no data
     hmc.Fit("gaus", "Q0")
     fit = hmc.GetFunction("gaus")
-    
+
     ## Get the real data
     if hdata.GetEntries() == 0:
         hdata = TH1F("hdata", "hdata", nbinsData, m3min, m3max)
         dataTree.Draw("m3 >> hdata", "%f < m3 & m3 < %f" % (m3min, m3max), "goff")
-    
+
     ## Sum the negative log likelihood over all the data
     sum = 0.
     for i in range( dataTree.GetSelectedRows() ):

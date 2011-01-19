@@ -54,9 +54,9 @@ mmMassGen   = "twoBodyMass(%s,%s,%s,%s,%s,%s,%s,%s)" % tuple(mu1GenP4 + mu2GenP4
 mmMassReco  = "twoBodyMass(%s,%s,%s,%s,%s,%s,%s,%s)" % tuple(mu1P4 + mu2P4)
 mmMassVReco = "mass[mm]"
 
-mmgMassGen   = "treeBodyMass(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" % \
+mmgMassGen   = "threeBodyMass(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" % \
                tuple(mu1GenP4 + mu2GenP4 + phoGenP4)
-mmgMassReco  = "treeBodyMass(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" % \
+mmgMassReco  = "threeBodyMass(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)" % \
                tuple(mu1P4 + mu2P4 + phoP4)
 mmgMassVReco = "mmgMass"
 
@@ -76,8 +76,8 @@ histos["ikVVRecoEB" ] = Var("ikVVRecoEB", "1./kRatio(mmgMassVCorr, massVCorr[mm]
 histos["ikVVRecoEE" ] = Var("ikVVRecoEE", "1./kRatio(mmgMassVCorr, massVCorr[mm])" , 0, 2, "", 200)
 
 histos["ikRecoOverGen"  ] = Var("ikRecoOverGen"  , "kRatio(mmgMassGen, massGen[mm]) / kRatio(mmgMassVanilla, massVanilla[mm])", 0, 2, "", 200)
-histos["ikVRecoOverGen" ] = Var("ikVRecoOverGen" , "kRatio(mmgMassGen, massGen[mm]) / kRatio(mmgMass, mass[mm])", 0, 2, "", 200)
-histos["ikVVRecoOverGen"] = Var("ikVVRecoOverGen", "kRatio(mmgMassGen, massGen[mm]) / kRatio(mmgMassVCorr, mass[mm])", 0, 2, "", 200)
+histos["ikVRecoOverGen" ] = Var("ikVRecoOverGen" , "kRatio(mmgMassGen, massGen[mm]) / kRatio(mmgMass       , mass       [mm])", 0, 2, "", 200)
+histos["ikVVRecoOverGen"] = Var("ikVVRecoOverGen", "kRatio(mmgMassGen, massGen[mm]) / kRatio(mmgMassVCorr  , mass       [mm])", 0, 2, "", 200)
 
 histos["mmMassRecoOverGen" ] = Var("mmMassRecoOverGen" , "massVanilla[mm]/massGen[mm]", 0.8, 1.2, "", 200)
 histos["mmMassVRecoOverGen"] = Var("mmMassVRecoOverGen" , "mass[mm]/massGen[mm]", 0.8, 1.2, "", 200)

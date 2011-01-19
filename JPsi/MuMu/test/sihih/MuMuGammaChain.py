@@ -87,7 +87,7 @@ bfiles["w"] = ["MuMuGammaTree_WJets-madgraph.root"]
 bfiles["qcd"] = ["MuMuGammaTree_InclusiveMu15.root"]
 bfiles["tt"] = ["MuMuGammaTree_TTbarJets_Tauola-madgraph.root"]
 
-cpath = "/raid1/veverka/zgamma/DimuonTrees_v3c"
+cpath = "/raid2/veverka/zgamma/DimuonTrees_v3c"
 cfiles = {}
 cfiles["data38x"] = ["MuMuGammaTree_Mu_Nov4ReRecoJSON.root"]
 # cfiles["data38xNoJson"] = ["MuMuGammaTree_Mu.root"]
@@ -121,12 +121,13 @@ weight30["qcd"] = 4.67E-01
 weight30["w"  ] = 9.19E-02
 weight30["tt" ] = 3.38E-03
 
-## NLO weight for c trees for 1/pb
-cweight1 = {}
-cweight1["z"  ] = 2.83E-02
-cweight1["qcd"] = 4.67E-01
-cweight1["w"  ] = 9.19E-02
-cweight1["tt" ] = 3.38E-03
+## NLO weight for c trees for 36.15/pb
+cweight = {}
+cweight["z"  ] = 2.55E-02
+cweight["qcd"] = 1.04E-01
+cweight["w"  ] = 5.89E-02
+cweight["tt" ] = 3.75E-03
+cweight["data38x"] = 1.
 
 if __name__ == "__main__": import user
 

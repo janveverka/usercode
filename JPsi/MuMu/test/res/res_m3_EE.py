@@ -8,7 +8,8 @@ selection = "abs(eta) > 1.5 & m2 < 80 & pt > 10"
 label = "|#eta^{#gamma}| > 1.5"
 #selection = "abs(eta)>1.5 & m2 < 80"
 scale = 1.
-xRange = (0., 40.)
+xRange = (0., 40.) ## Jan's data
+# xRange = (0., 40.) ## Olivier's data
 yRange = (-5., 11.)
 numScanSteps = 100
 fitRange = xRange
@@ -33,7 +34,7 @@ def drawLatex(x, y, text):
     latexLabels.append(latexLabel.DrawClone())
 
 yurii.applySelection(selection)
-    
+
 iteration = 1
 xvar = []
 nll = []
@@ -121,7 +122,7 @@ drawLatex(0.2,  0.25, "Estimated Surplus Resolution: (%.1f #pm %.1f) %%" % (xvar
 ##latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2010")
 ##latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 
-for l in latexLabels: 
+for l in latexLabels:
     if l: l.Draw()
 
 for c in canvases:

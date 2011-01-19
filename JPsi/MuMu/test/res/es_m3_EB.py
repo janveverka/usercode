@@ -8,7 +8,8 @@ selection = "abs(eta)<1.5 & m2 < 80 & pt > 10"
 label = "|#eta^{#gamma}| < 1.5"
 #selection = "abs(eta)>1.5 & m2 < 80"
 scale = 1.
-xRange = (-6.5, 3.5)
+xRange = (-6.5, 3.5) ## Jan's data
+# xRange = (-3.5, 6.5) ## Olivier's tight-mass-window data
 yRange = (-3., 11.)
 numScanSteps = 100
 fitRange = xRange
@@ -33,7 +34,7 @@ def drawLatex(x, y, text):
     latexLabels.append(latexLabel.DrawClone())
 
 yurii.applySelection(selection)
-    
+
 iteration = 1
 xvar = []
 nll = []
@@ -119,8 +120,10 @@ drawLatex(0.21,  0.25, "Estimated Photon Energy Scale: (%.1f #pm %.1f) %%" % (xv
 ##latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2010")
 ##latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 
-for l in latexLabels: 
-    if l: l.Draw()
+def drawResults():
+    "Redraw results on the canvas"
+    for l in latexLabels:
+        if l: l.Draw()
 
 for c in canvases:
     i = canvases.index(c)

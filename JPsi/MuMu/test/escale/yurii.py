@@ -18,7 +18,7 @@ def applySelection(selection):
         lname = "elist_" + t.GetName()
         t.Draw(">>" + lname, selection, "entrylist")
         elist = gDirectory.Get(lname)
-        t.SetEntryList(gDirectory.Get(lname)) 
+        t.SetEntryList(gDirectory.Get(lname))
 
 
 def plotDataVsPdf():

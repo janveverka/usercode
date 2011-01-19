@@ -5,21 +5,26 @@ from ROOT import *
 from common import *
 
 
-filename = "mmMassHistos.root"
-# histosToMake = "mass mmgMass".split()
+filename = "sihihHistos_Nov4ReReco_38XMC.root"
+histosToMake = "mass mmgMass".split()
 # histosToMake = "mmgMassEB mmgMassEE phoPt phoPtEB phoPtEE phoE phoEEB phoEEE".split()
-    #ikReco
-    #ikRecoEB
-    #ikRecoEE
-    #ikVReco
-    #ikVRecoEB
-    #ikVRecoEE
 
-histosToMake = """
-    ikRecoOverGen
-    ikVRecoOverGen
-    ikVVRecoOverGen
-    """.split()
+# histosToMake = """
+#     ikReco
+#     ikRecoEB
+#     ikRecoEE
+#     ikVReco
+#     ikVRecoEB
+#     ikVRecoEE
+#     ikRecoOverGen
+#     ikVRecoOverGen
+#     ikVVRecoOverGen
+#     mmMassRecoOverGen
+#     mmMassVRecoOverGen
+#     mmgMassRecoOverGen
+#     mmgMassVRecoOverGen
+#     mmgMassVVRecoOverGen
+#     """.split()
 
 #histosToMake = "mmMassRecoOverGen mmMassVRecoOverGen".split()
 # profilesToMake = ["eeSihihVsDR"]
@@ -41,7 +46,7 @@ file = TFile(filename, "recreate")
 
 print "Starting loop over histos ..."
 for x in histosToMake:
-    makeHistos(chains, histos.histos[x], cuts.cuts[x], "qcd tt w data38x".split() )
+    makeHistos(chains, histos.histos[x], cuts.cuts[x], ignoreDatasets = [])
 
 print "Starting loop over profiles ... "
 for x in profilesToMake:

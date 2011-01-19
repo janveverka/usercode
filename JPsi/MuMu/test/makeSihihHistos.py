@@ -7,8 +7,8 @@ import sys
 import MuMuGammaChain
 from ROOT import *
 
-chains = MuMuGammaChain.getChains(MuMuGammaChain.bfiles,
-                                  MuMuGammaChain.bpath
+chains = MuMuGammaChain.getChains(MuMuGammaChain.cfiles,
+                                  MuMuGammaChain.cpath
                                   )
 skipDatasets = ["zg", "zmg"]
 
@@ -31,7 +31,7 @@ for name, ch in chains.items():
     ch.Draw(">>%s" % lname, "isBaselineCand")
     ch.SetEventList(gDirectory.Get(lname))
 
-file = TFile("sihihHistos.root", "recreate")
+file = TFile("sihihHistos_Nov4ReReco_Fall10.root", "recreate")
 
 ###############################################################################
 ## Make Dimuon invariant mass histos

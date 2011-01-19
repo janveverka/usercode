@@ -10,7 +10,7 @@ process = cms.Process("NTPMAKER")
 options = VarParsing.VarParsing ('analysis')
 
 # register more options
-options.register("castorPath",
+options.register("datasetPath",
   "/mnt/hadoop/user/veverka/DimuonVGammaSkim_v3", # default value
   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
   VarParsing.VarParsing.varType.string,          # string, int, or float
@@ -21,7 +21,7 @@ options.register("dataset",
   "", # default value
   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
   VarParsing.VarParsing.varType.string,          # string, int, or float
-  "Name of a directory under castorPath containing data"
+  "Name of a directory under datasetPath containing data"
 )
 
 #options.register("datasetNumber",
@@ -93,9 +93,9 @@ options.setupTags(tag = "%s",
                   tagArg = "dataset")
 
 # setup any defaults you want
-#options.castorPath = "/raid1/veverka/datafiles"
+#options.datasetPath = "/raid1/veverka/datafiles"
 options.outputFile = 'MuMuGammaTree.root'
-#pathPrefix = "file:" + options.castorPath + "/" + options.dataset + "/"
+#pathPrefix = "file:" + options.datasetPath + "/" + options.dataset + "/"
 #fileList = """
 #ZGammaSkim_v1_100_1_Ce8.root  ZGammaSkim_v1_147_1_NQd.root  ZGammaSkim_v1_193_1_4sr.root  ZGammaSkim_v1_239_1_Z1l.root  ZGammaSkim_v1_57_1_lsw.root
 #ZGammaSkim_v1_101_1_M9q.root  ZGammaSkim_v1_148_1_7em.root  ZGammaSkim_v1_194_1_9hq.root  ZGammaSkim_v1_23_1_BY2.root   ZGammaSkim_v1_58_1_LRW.root
@@ -112,13 +112,13 @@ options.parseArguments()
 import os
 ## get the file list from CASTOR
 #if options.datasetNumber > 0:
-  #datasets = os.popen("ls " + options.castorPath).read().split()
+  #datasets = os.popen("ls " + options.datasetPath).read().split()
   #datasetNumber = options.datasetNumber
   #if datasetNumber > len(datasets):
     #print "Illegal datasetNumber =", datasetNumber
   #exit
   #dataset = options.dataset = datasets[datasetNumber - 1]
-  #datasetDir = options.castorPath + "/" + dataset
+  #datasetDir = options.datasetPath + "/" + dataset
   #pathPrefix = "file:" + datasetDir + "/"
   #fileNames = os.popen("ls " + datasetDir).read().split()
   #print "Processing dataset %s (%d/%d)" % (dataset, datasetNumber,
@@ -129,7 +129,7 @@ import os
 if options.dataset != "":
     #dataset = options.dataset
     print "Processing dataset %s" % (options.dataset,)
-    datasetDir = options.castorPath + "/" + options.dataset
+    datasetDir = os.path.join(options.datasetPath, options.dataset)
     rootRE = re.compile(".+\.root")
     options.clearList("inputFiles")
     for root, dirs, files in os.walk(datasetDir):
@@ -142,7 +142,7 @@ if options.dataset != "":
         ## sort by job number
         fileNames.sort(key = lambda f: int(f.split("_")[-3]) )
         options.inputFiles = ["file:" + f for f in fileNames]
-    
+
     if options._register.has_key('totalSections') and \
         options._register.has_key('section') and \
         options._register.has_key('inputFiles') and \
@@ -157,7 +157,7 @@ if options.dataset != "":
                                              options.totalSections)
         print "  Processing %d files (section %d of %d) ... " % \
             (len(options.inputFiles), options.section, options.totalSections)
-    
+
 
 #if options.maxEvents < 0:
   #options.outputFile = options.outputFile.split(".")[0] + "_" + options.dataset.replace("/", "_")

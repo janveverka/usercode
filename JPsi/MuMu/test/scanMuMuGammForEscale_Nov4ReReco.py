@@ -38,19 +38,28 @@ outputVars = """
     phoEta[g] muEta[mnear] muEta[mfar]
     phoPhi[g] muPhi[mnear] muPhi[mfar]
     mass[mm]
-    twoBodyMass(muPt[mu1],muEta[mu1],muPhi[mu1],0.105658,muPt[mu2],muEta[mu2],muPhi[mu2],0.105658)
+    massVanilla[mm]
     mmgMass
-    treeBodyMass(muPt[mu1],muEta[mu1],muPhi[mu1],0.105658,muPt[mu2],muEta[mu2],muPhi[mu2],0.105658,phoPt[g],phoEta[g],phoPhi[g],0.)
+    mmgMassVanilla
     mmgDeltaRNear 
     kRatio(mmgMass,mass[mm])
-    kRatio(treeBodyMass(muPt[mu1],muEta[mu1],muPhi[mu1],0.105658,muPt[mu2],muEta[mu2],muPhi[mu2],0.105658,phoPt[g],phoEta[g],phoPhi[g],0.),twoBodyMass(muPt[mu1],muEta[mu1],muPhi[mu1],0.105658,muPt[mu2],muEta[mu2],muPhi[mu2],0.105658))
+    kRatio(mmgMassVanilla,massVanilla[mm])
+    HLT_Mu9
+    HLT_Mu11
+    HLT_Mu15_v1
+    muHltMu9Match[mnear]
+    muHltMu11Match[mnear]
+    muHltMu15v1Match[mnear]
+    muHltMu9Match[mfar]
+    muHltMu11Match[mfar]
+    muHltMu15v1Match[mfar]
     """.split()
 outputExpression = ":".join(outputVars)
 
-##                event id   pt             eta            phi            m2   m2'  m3   dr   k
-##                1  2  3    4    5    6    7    8    9    10   11   12   13   14   15   16   17
-scanOption = "col=6d:4d:10ld:6.3f:6.3f:6.3f:7.4f:7.4f:7.4f:7.4f:7.4f:7.4f:6.3f:6.3f:6.3f:6.4f:6.4f"
-scanOption = "col=6d:4d:10ld:::::::::::::"
+##                event id   pt             eta            phi            m2   m2'  m3   dr   k    Paths    NearMatch FarMatch 
+##                1  2  3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18 19 20 21 22 23 24 25 26
+scanOption = "col=6d:4d:10ld:6.3f:6.3f:6.3f:7.4f:7.4f:7.4f:7.4f:7.4f:7.4f:6.3f:6.3f:6.3f:6.4f:6.4f:2d:2d:2d:2d:2d:2d:2d:2d:2d"
+scanOption = "col=6d:4d:10ld:::::::::::::::::2d:2d:2d:2d:2d:2d:2d:2d:2d"
 
 def makeSelection(cuts):
   return " & ".join("(%s)" % cut for cut in cuts)
