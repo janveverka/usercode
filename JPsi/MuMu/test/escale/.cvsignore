@@ -1,4 +1,6 @@
 *.root *.out
 *.tgz
-*.png
+*.eps *.png
 *.json
+*_C.d
+plots*
