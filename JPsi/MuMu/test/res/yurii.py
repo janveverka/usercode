@@ -90,7 +90,8 @@ def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30):
     global hmc
     global hdata
     if hmc: hmc.Delete()
-    hmc = TH1F("hmc", "hmc", nbinsMC, m3min, m3max)
+#     hmc = TH1F("hmc", "hmc", nbinsMC, m3min, m3max)
+    hmc = TH1F("hmc", "hmc", nbinsMC, 60, 120)
     # Check if there is already pre-selection applied
     if mcTree.GetEntryList():
         nevents = mcTree.GetEntryList().GetN()
@@ -111,8 +112,8 @@ def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30):
         if sfactor * mcLeafs.pt < 10: continue
         sm3 = scaledMmgMass3(sfactor, mcLeafs.m3, mcLeafs.m2)
         #if abs(sm3 - 90.) > 30.:
-        if sm3 < m3min or m3max < sm3:
-            continue
+#         if sm3 < m3min or m3max < sm3:
+#             continue
         hmc.Fill(sm3)
 
     ## Normalize area to 1
@@ -123,9 +124,9 @@ def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30):
     fit = hmc.GetFunction("gaus")
 
     ## Get the real data
-    if hdata.GetEntries() == 0:
-        hdata = TH1F("hdata", "hdata", nbinsData, m3min, m3max)
-        dataTree.Draw("m3 >> hdata", "%f < m3 & m3 < %f" % (m3min, m3max), "goff")
+    if hdata: hdata.Delete()
+    hdata = TH1F("hdata", "hdata", nbinsData, m3min, m3max)
+    dataTree.Draw("m3 >> hdata", "%f < m3 & m3 < %f" % (m3min, m3max), "goff")
 
     ## Sum the negative log likelihood over all the data
     sum = 0.

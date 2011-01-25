@@ -8,9 +8,9 @@ selection = "abs(eta)>1.5 & m2 < 80 & pt > 10"
 label = "|#eta^{#gamma}| > 1.5"
 #selection = "abs(eta)>1.5 & m2 < 80"
 scale = 1.
-# xRange = (-16., -1.) ## Jan's data
+xRange = (-16., -1.) ## Jan's data
 # xRange = (-11., 4.) ## Olivier's data - tight m window
-xRange = (-17., 5.) ## Olivier's data - loose m window
+# xRange = (-17., 5.) ## Olivier's data - loose m window
 # yRange = (-2., 7.)
 yRange = (-3., 12.)  ## Olivier's data - loose m window
 numScanSteps = 100
@@ -46,7 +46,7 @@ dx = (xMax - xMin) / (numScanSteps - 1)
 ## Scan the NLL
 for istep in range(numScanSteps):
     xvar.append(xMin + dx * istep)
-    nll.append( yurii.nllm3(scale=xvar[-1], res=0.) )
+    nll.append( yurii.nllm3(scale=xvar[-1], res=0., m3min=84, m3max=96) )
 ## Make a graph
 x = array.array("d", xvar)
 y = array.array("d", nll)
