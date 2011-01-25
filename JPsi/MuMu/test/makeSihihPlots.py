@@ -8,7 +8,9 @@ from MuMuGammaChain import *
 ## Common stuff
 
 
-file = TFile("sihihHistos.root")
+# file = TFile("sihihHistos.root")
+file = TFile("sihihHistos_Nov4ReReco_Fall10.root")
+weight = cweight
 
 gROOT.LoadMacro("tdrstyle.C")
 ROOT.setTDRStyle()
@@ -43,7 +45,8 @@ def newCanvas(name, title="", windowWidth=600, windowHeight=600):
 
 ##############################################################################
 ## Make the dimuon mass plot on linear scale
-lumi = 34. # pb^-1
+# lumi = 34. # pb^-1
+lumi = 36.15 # pb^-1
 realData = "data38x"
 mcSamples = "z qcd w tt".split()
 colors = {
@@ -81,7 +84,7 @@ for dataset in mcSamples + [realData]:
 
     if dataset in mcSamples:
         ## Normalize to the expected lumi
-        h.Scale(lumi * weight30[dataset] / 30.)
+        h.Scale(weight[dataset])
 
         ## Add to the total integral
         mcIntegral += h.Integral(1, var.getBins())
@@ -127,7 +130,7 @@ hstacks.reverse()
 print "Z -> uu for m(uu) in [60, 120] GeV"
 print "  MC expectation:", hstacks[0].Integral(31, 90)
 print "  Observed yield:", hdata.Integral(31, 90)
-
+print "  Signal purity : %.1f%%" % (100 * histos["z"].Integral(1, var.getBins()) / mcIntegral)
 kfactor = hdata.Integral(31, 90) / hstacks[0].Integral(31, 90) ## normalize to (60,120)
 print "  Normalizing MC to data by", kfactor
 for h in histos.values():
@@ -247,8 +250,8 @@ var = RooRealVar("mmgMass", "m(#mu^{+}#mu^{-}#gamma)", 60, 120, "GeV")
 c1 = TCanvas(var.GetName(), var.GetName(), 80, 80, wWidth, wHeight)
 canvases["mmgMass"] = c1
 
-weight30["zfsr" ] = weight30["z"]
-weight30["zjets"] = weight30["z"]
+weight["zfsr" ] = weight["z"]
+weight["zjets"] = weight["z"]
 
 histos = {}
 mcIntegral = 0.
@@ -261,7 +264,7 @@ for dataset in mcSamples + [realData]:
 
     if dataset in mcSamples:
         ## Normalize to the expected lumi
-        h.Scale(kfactor * lumi * weight30[dataset] / 30.)
+        h.Scale(kfactor * weight[dataset])
 
         ## Add to the total integral
         mcIntegral += h.Integral(1, var.getBins())
@@ -416,7 +419,7 @@ for dataset in mcSamples + [realData]:
 
     if dataset in mcSamples:
         ## Normalize to the expected lumi
-        h.Scale(kfactor * lumi * weight30[dataset] / 30.)
+        h.Scale(kfactor * weight[dataset])
 
         ## Add to the total integral
         mcIntegral += h.Integral(1, var.getBins())
@@ -575,7 +578,7 @@ for dataset in mcSamples + [realData]:
 
     if dataset in mcSamples:
         ## Normalize to the expected lumi
-        h.Scale(kfactor * lumi * weight30[dataset] / 30.)
+        h.Scale(kfactor * weight[dataset])
 
         ## Add to the total integral
         mcIntegral += h.Integral(1, var.getBins())
@@ -729,7 +732,7 @@ for dataset in mcSamples + [realData]:
 
     if dataset in mcSamples:
         ## Normalize to the expected lumi
-        h.Scale(kfactor * lumi * weight30[dataset] / 30.)
+        h.Scale(kfactor * weight[dataset])
 
         ## Add to the total integral
         mcIntegral += h.Integral(1, var.getBins())

@@ -38,28 +38,26 @@ outputVars = """
     phoEta[g] muEta[mnear] muEta[mfar]
     phoPhi[g] muPhi[mnear] muPhi[mfar]
     mass[mm]
-    massVanilla[mm]
     mmgMass
-    mmgMassVanilla
     mmgDeltaRNear 
     kRatio(mmgMass,mass[mm])
-    kRatio(mmgMassVanilla,massVanilla[mm])
-    HLT_Mu9
-    HLT_Mu11
-    HLT_Mu15_v1
-    muHltMu9Match[mnear]
-    muHltMu11Match[mnear]
-    muHltMu15v1Match[mnear]
-    muHltMu9Match[mfar]
-    muHltMu11Match[mfar]
-    muHltMu15v1Match[mfar]
     """.split()
+#    HLT_Mu9
+#    HLT_Mu11
+#    HLT_Mu15_v1
+#    muHltMu9Match[mnear]
+#    muHltMu11Match[mnear]
+#    muHltMu15v1Match[mnear]
+#    muHltMu9Match[mfar]
+#    muHltMu11Match[mfar]
+#    muHltMu15v1Match[mfar]
 outputExpression = ":".join(outputVars)
 
 ##                event id   pt             eta            phi            m2   m2'  m3   dr   k    Paths    NearMatch FarMatch 
 ##                1  2  3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18 19 20 21 22 23 24 25 26
 scanOption = "col=6d:4d:10ld:6.3f:6.3f:6.3f:7.4f:7.4f:7.4f:7.4f:7.4f:7.4f:6.3f:6.3f:6.3f:6.4f:6.4f:2d:2d:2d:2d:2d:2d:2d:2d:2d"
 scanOption = "col=6d:4d:10ld:::::::::::::::::2d:2d:2d:2d:2d:2d:2d:2d:2d"
+scanOption = "col=6d:4d:10ld::::::::::::::"
 
 def makeSelection(cuts):
   return " & ".join("(%s)" % cut for cut in cuts)
@@ -129,7 +127,36 @@ myCuts = [
     "mmgDeltaRNear < 0.5 || (%s)" % photonId,
     ]
 
-selection = makeSelection(lyonCuts)
+baselineCuts = [
+    "isBaselineCand[mm]",
+    "orderByVProb[mm] == 0",
+    "40 < mass[mm] & mass[mm] < 85",
+    "nPhotons > 0",
+    "mmgPhoton == 0", # require the hardest photon in the events
+    "abs(phoScEta[g]) < 2.5",
+    "abs(phoScEta[g]) < 1.4442 || abs(phoScEta[g]) > 1.566",
+    "5 < phoPt[g]",
+    "60 < mmgMass & mmgMass < 120",
+    "mmgDeltaRNear < 1",
+    ]
+
+fsrCuts = [
+    "phoGenMatchPdgId[g] == 22",
+    "abs(phoGenMatchMomPdgId[g]) == 13",
+    ]
+
+fsrVeto = [ "!(%s)" % makeSelection(fsrCuts) ]
+
+photonCleaningCuts = [
+  "phoSeedRecoFlag[g] != 2",       # EcalRecHit::kOutOfTime = 2
+  "phoSeedSeverityLevel[g] != 4",  # EcalSeverityLevelAlgo::kWeird = 4
+  "phoSeedSeverityLevel[g] != 5",  # EcalSeverityLevelAlgo::kBad = 5
+  "phoSeedSwissCross[g] < 0.95",   # extra spike cleaning check
+  ]
+
+
+# selection = makeSelection(lyonCuts)
+selection = makeSelection(baselineCuts + photonCleaningCuts)
 
 ## To reproduce Lyons selection do
 ##+   selection + "& phoPt[g]>10 & mmgDeltaRNear<0.8 & muPt[mmgMuonFar]>30
