@@ -212,60 +212,61 @@ process.goodDimuonsCountFilter = process.dimuonsCountFilter.clone(src = "goodDim
 process.vertexedDimuons.src = "goodDimuons"
 
 process.MuMuGammaTree = cms.EDAnalyzer("MuMuGammaTreeMaker",
-  photonSrc   = cms.untracked.InputTag("cleanPatPhotonsTriggerMatch"),
-  muonSrc     = cms.untracked.InputTag("goodMuons"),
-  dimuonSrc   = cms.untracked.InputTag("vertexedDimuons"),
-  beamSpotSrc = cms.untracked.InputTag("offlineBeamSpot"),
-  primaryVertexSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
-  ebClusterSrc = cms.untracked.InputTag("islandBasicClusters", "islandBarrelBasicClusters"),
-  ebRecHitsSrc = cms.untracked.InputTag("ecalRecHit", "EcalRecHitsEB"),
-  eeRecHitsSrc = cms.untracked.InputTag("ecalRecHit", "EcalRecHitsEE"),
-  genParticleSrc = cms.untracked.InputTag("prunedGenParticles"),
-  isMC        = cms.untracked.bool(False),
-)
+    photonSrc   = cms.untracked.InputTag("cleanPatPhotonsTriggerMatch"),
+    muonSrc     = cms.untracked.InputTag("goodMuons"),
+    dimuonSrc   = cms.untracked.InputTag("vertexedDimuons"),
+    beamSpotSrc = cms.untracked.InputTag("offlineBeamSpot"),
+    primaryVertexSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
+    ebClusterSrc = cms.untracked.InputTag("islandBasicClusters", "islandBarrelBasicClusters"),
+    ebRecHitsSrc = cms.untracked.InputTag("ecalRecHit", "EcalRecHitsEB"),
+    eeRecHitsSrc = cms.untracked.InputTag("ecalRecHit", "EcalRecHitsEE"),
+    genParticleSrc = cms.untracked.InputTag("prunedGenParticles"),
+    isMC        = cms.untracked.bool(False),
+    )
+
 process.defaultSequence = cms.Sequence(
-  process.goodMuons *
-  process.goodDimuons *
-  process.goodDimuonsCountFilter *
-  process.vertexedDimuons
-  )
+    process.goodMuons *
+    process.goodDimuons *
+    process.goodDimuonsCountFilter *
+    process.vertexedDimuons
+    )
 
 if options.splitZMC == 1:
-  process.load("JPsi.MuMu.photonFilters_cff")
+    process.load("JPsi.MuMu.photonFilters_cff")
 
-  process.MuMuGammaTreeFsr  = process.MuMuGammaTree.clone()
-  process.MuMuGammaTreeIsr  = process.MuMuGammaTree.clone()
-  process.MuMuGammaTreeFake = process.MuMuGammaTree.clone()
+    process.MuMuGammaTreeFsr  = process.MuMuGammaTree.clone()
+    process.MuMuGammaTreeIsr  = process.MuMuGammaTree.clone()
+    process.MuMuGammaTreeFake = process.MuMuGammaTree.clone()
 
-  process.pFsr = cms.Path(
-    process.defaultSequence *
-    process.fsrFilterSequence *
-    process.MuMuGammaTreeFsr
-  )
+    process.pFsr = cms.Path(
+        process.defaultSequence *
+        process.fsrFilterSequence *
+        process.MuMuGammaTreeFsr
+    )
 
-  process.pIsr = cms.Path(
-    process.defaultSequence *
-    process.isrFilterSequence *
-    process.MuMuGammaTreeIsr
-  )
+    process.pIsr = cms.Path(
+        process.defaultSequence *
+        process.isrFilterSequence *
+        process.MuMuGammaTreeIsr
+    )
 
-  process.pFake = cms.Path(
-    process.defaultSequence *
-    process.fakeFilterSequence *
-    process.MuMuGammaTreeFake
-  )
+    process.pFake = cms.Path(
+        process.defaultSequence *
+        process.fakeFilterSequence *
+        process.MuMuGammaTreeFake
+    )
 
 else:
-  process.p = cms.Path(
-    process.defaultSequence *
-    process.MuMuGammaTree
-  )
+    process.p = cms.Path(
+        process.defaultSequence *
+        process.MuMuGammaTree
+    )
 
 
 if options.isMC == "yes":
-  #process.goodMuons.src = "cleanPatMuons"
-  #process.MuMuGammaTree.photonSrc = "cleanPatPhotons"
-  process.MuMuGammaTree.isMC = True
+    #process.goodMuons.src = "cleanPatMuons"
+    #process.MuMuGammaTree.photonSrc = "cleanPatPhotons"
+    process.MuMuGammaTree.isMC = True
 
 process.options.SkipEvent = cms.untracked.vstring('ProductNotFound')
 

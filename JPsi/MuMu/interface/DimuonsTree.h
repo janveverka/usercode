@@ -34,6 +34,7 @@ public:
   unsigned char HLT_Mu15_v1   ;
   Int_t         nDimuons      ;
   Int_t         nMuons        ;
+  Int_t         nVertices     ;
 
   // dimuon leaf variables
   float         mass             [maxDimuons];

@@ -385,8 +385,9 @@ DimuonsTree::init(TTree *tree) {
   tree_->Branch("HLT_Mu9"          , &HLT_Mu9          , "HLT_Mu9/b"          );
   tree_->Branch("HLT_Mu11"         , &HLT_Mu11         , "HLT_Mu11/b"         );
   tree_->Branch("HLT_Mu15_v1"      , &HLT_Mu15_v1      , "HLT_Mu15_v1/b"      );
-  tree_->Branch("nDimuons"         , &nDimuons         , "nDimuons/b"         );
-  tree_->Branch("nMuons"           , &nMuons           , "nMuons/b"           );
+  tree_->Branch("nDimuons"         , &nDimuons         , "nDimuons/I"         );
+  tree_->Branch("nMuons"           , &nMuons           , "nMuons/I"           );
+  tree_->Branch("nVertices"        , &nVertices        , "nVertices/I"        );
 
   tree_->Branch("mass"             , mass             , "mass[nDimuons]/F"             );
   tree_->Branch("massGen"          , massGen          , "massGen[nDimuons]/F"          );
@@ -494,6 +495,7 @@ DimuonsTree::initLeafVariables()
   HLT_Mu15_v1       = 0;
   nDimuons          = 0;
   nMuons            = 0;
+  nVertices         = 0;
 
   for (int i=0; i<nDimuons; ++i) {
     mass[i]              = 0;

@@ -233,6 +233,8 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   if (tree_.nMuons > MuMuGammaTree::maxMuons)
     tree_.nMuons = MuMuGammaTree::maxMuons;
 
+  tree_.nVertices = primaryVertices->size();
+
 //   LogDebug("SegFault") << "Looping over dimuons ..." << std::endl;
 
   // loop over dimuons
@@ -243,13 +245,6 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
 
     tree_.mass[i]              = dimuon->mass();
-
-    reco::CompositeCandidate mmVanilla;
-    mmVanilla.addDaughter( * dimuon->daughter(0) );
-    mmVanilla.addDaughter( * dimuon->daughter(1) );
-    addP4.set(mmVanilla);
-    tree_.massVanilla[i]       = mmVanilla.mass();
-
     tree_.pt[i]                = dimuon->pt();
     tree_.eta[i]               = dimuon->eta();
     tree_.phi[i]               = dimuon->phi();
@@ -365,6 +360,12 @@ MuMuGammaTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     {
       tree_.massGen[i] = 0;
     }
+
+    reco::CompositeCandidate mmVanilla;
+    mmVanilla.addDaughter( * mu1 );
+    mmVanilla.addDaughter( * mu2 );
+    addP4.set(mmVanilla);
+    tree_.massVanilla[i]       = mmVanilla.mass();
   } // loop over dimuons
 
 //   LogDebug("SegFault") << "Looping over muons..." << std::endl;
