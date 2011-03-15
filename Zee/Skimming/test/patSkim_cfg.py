@@ -200,7 +200,7 @@ process.skimFilterSequence.remove(process.hltFilter)
 # process.hltFilter.HLTPaths = ["*Mu*"]
 if not options.ignoreSkimFilter:
     process.load("Zee.Skimming.dielectronSkimFilterSequence_cff")
-    process.skimFilterSequence += process.dimuonSkimFilterSequence
+    process.skimFilterSequence += process.dielectronSkimFilterSequence
 ## Add the photon re-reco.
 addPhotonReReco(process)
 ## Now change the photon reco to much looser settings.
@@ -253,7 +253,11 @@ process.ZeePath   = cms.Path(
     )
 
 ## Output configuration (add event content, select events, output file name)
-process.out.outputCommands += vgEventContent.extraSkimEventContent
+process.out.outputCommands += vgEventContent.extraSkimEventContent + [
+    "keep *_%s_*_PAT" % collection for collection in """vbtf95Electrons
+                                                        goldenElectrons
+                                                        goldenDielectrons""".split()
+    ]
 
 if not options.isRealData:
     process.out.outputCommands += ["keep *_prunedGenParticles_*_PAT"]
