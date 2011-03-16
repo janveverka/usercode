@@ -17,13 +17,20 @@ dataSource = {
     #"cutScan_100k.root": ("ws", range(1,22)),
     #"powerScan_100k.root": ("ws", range(1,11)),
     #"resolutionScan2.root": ("ws", [10]),
-    "resolutionScan4_trueCut1.00_20k.root": ("ws", range(1,6) ),
+    "resolutionScan4_trueCut1.00_100k.root": ("ws", range(1,21) ),
 }
 
 xname = "resolution"
-xunit = "(Gev)"
+xunit = "(GeV)"
 # fitrange = (0, 10.5)
 fitrange = (0, 2)
+
+yunit = {
+    "scale"     : "(%)" ,
+    "resolution": "(GeV)",
+    "cut"       : "cbCut"  ,
+    "power"     : "cbPower"
+    }
 
 wsyname = {
     "scale"     : "cbBias" ,
@@ -34,7 +41,9 @@ wsyname = {
 
 wsxname = {}
 for key, value in wsyname.items():
-    wsxname[key] = value + "_true"
+    wsxname[key] = value
+    
+wsxsnapshot = "true_parameters"
 
 xtransform = {
     "scale": lambda x: x / 0.9119,
@@ -62,14 +71,16 @@ for fileName, (workspaceName, cycles) in dataSource.items():
         ws = file.Get("%s;%d" % (workspaceName, cycle) )
         if not ws: break
         for yname in xdata.keys():
-            if not ws.var(wsxname[xname]):
-                raise RuntimeError, "Didn't find %s in !" % wsxname[xname]
             if not ws.var(wsyname[yname]):
                 raise RuntimeError, "Didn't find %s in !" % wsyname[yname]
-            xdata[yname].append( xtransform[yname]( ws.var(wsxname[yname]).getVal() ) )
             ydata[yname].append( ytransform[yname]( ws.var(wsyname[yname]).getVal() ) )
-            exdata[yname].append( xtransform[yname]( ws.var(wsxname[yname]).getError() ) )
             eydata[yname].append( ytransform[yname]( ws.var(wsyname[yname]).getError() ) )
+        ws.loadSnapshot(wsxsnapshot)
+        for yname in xdata.keys():
+            if not ws.var(wsxname[xname]):
+                raise RuntimeError, "Didn't find %s in !" % wsxname[xname]
+            xdata[yname].append( xtransform[yname]( ws.var(wsxname[yname]).getVal() ) )
+            exdata[yname].append( xtransform[yname]( ws.var(wsxname[yname]).getError() ) )
 
 gROOT.LoadMacro("tdrstyle.C")
 ROOT.setTDRStyle()
@@ -88,7 +99,6 @@ canvas = {}
     #}
 
 for yname in "scale resolution cut power".split():
-    yunit = paramInfo[yname][2]
     x = array.array("d", xdata[xname])
     y = array.array("d", ydata[yname])
     y0 = array.array("d", xdata[yname])
@@ -101,7 +111,7 @@ for yname in "scale resolution cut power".split():
         #else:
             #y[i] = y[i] - ytrue[yname]
     gr[yname] = TGraphErrors(len(xdata[yname]), x, y, ex, ey)
-    gr[yname].GetYaxis().SetTitle(" ".join(["measured - true", yname, yunit]))
+    gr[yname].GetYaxis().SetTitle(" ".join(["measured - true", yname, yunit[yname] ]))
     gr[yname].GetXaxis().SetTitle(" ".join(["true", xname, xunit]))
     gr[yname].GetYaxis().SetTitleOffset(1.4)
     gr[yname].Fit("pol1", "", "", *fitrange)
