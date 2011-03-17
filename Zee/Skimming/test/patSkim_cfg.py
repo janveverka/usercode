@@ -36,7 +36,7 @@ options = copy.deepcopy(defaultOptions)
 applyJobOptions(options)
 
 ## Input
-process.source.fileNames = options.inputFiles
+process.source.fileNames = options.inputFiles[:3]
 
 process.maxEvents.input = -1
 if options.outEvents >= 0:
@@ -247,16 +247,36 @@ else:
 # if options.isRealData <-----------------------------------------------------
 
 
+process.load(basePath + "VGammaSkimSequences_cff")
 process.load("Zee.Skimming.ZeeSequence_cff")
-process.ZeePath   = cms.Path(
-    process.defaultSequence * process.ZeeSequence
-    )
+
+process.dielectrons.cut = "mass > 20"
+process.dielectrons.checkCharge = True
+
+process.p = cms.Path(
+    process.defaultSequence *
+    (process.ZEEGammaSequence + process.ZeeSequence)
+)
+
+# process.WENuGammaPath  = cms.Path(
+#     process.defaultSequence * process.WENuGammaSequence
+#     )
+#
+# process.dielectrons.cut = """
+#     min(daughter('lepton1').pt, daughter('lepton2').pt) > 10 &&
+#     max(daughter('lepton1').pt, daughter('lepton2').pt) > 15
+#     """
+# process.electronPlusMETs.cut = "daughter('lepton').pt > 10"
 
 ## Output configuration (add event content, select events, output file name)
 process.out.outputCommands += vgEventContent.extraSkimEventContent + [
     "keep *_%s_*_PAT" % collection for collection in """vbtf95Electrons
                                                         goldenElectrons
-                                                        goldenDielectrons""".split()
+                                                        goldenDielectrons
+                                                        showeringElectrons
+                                                        showeringDielectrons
+                                                        goldenShoweringDielectrons
+                                                        """.split()
     ]
 
 if not options.isRealData:
