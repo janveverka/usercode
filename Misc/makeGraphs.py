@@ -12,16 +12,18 @@ from parseCBxBWOutput import xdata, ydata, exdata, eydata, paramInfo
 dataSource = {
     #"scaleScan2_100k.root": ("ws", range(26,30) + range(31,47)), # cycle 30 doesn't converge nicely
     #"scaleScan2_10k.root": ("ws", range(1,7) + range(8,16) + range(18,22)),
-    "resolutionScan.root": ("ws", [1] + range(3,21)),
-    "resolutionScan2.root": ("ws", [10]),
+#     "resolutionScan.root": ("ws", [1] + range(3,21)),
+#     "resolutionScan2.root": ("ws", [10]),
     #"cutScan_100k.root": ("ws", range(1,22)),
     #"powerScan_100k.root": ("ws", range(1,11)),
     #"resolutionScan2.root": ("ws", [10]),
+    "resolutionScan3_trueCut3.00_20k.root": ("ws", range(1,21) ),
 }
 
 xname = "resolution"
 xunit = "(%)"
-fitrange = (0, 10.5)
+# fitrange = (0, 10.5)
+fitrange = (0, 2)
 
 wsxname = {
     "scale"     : "bias_True",
@@ -29,7 +31,7 @@ wsxname = {
     "cut"       : "cut_True",
     "power"     : "power_True"
     }
-    
+
 wsyname = {
     "scale"     : "cbBias",
     "resolution": "cbSigma",
@@ -43,7 +45,7 @@ xtransform = {
     "cut": lambda x: x,
     "power": lambda x: x
     }
-    
+
 ytransform = {
     "scale": lambda x: x / 0.9119,
     "resolution": lambda x: x * math.sqrt(2.) / 0.9119,
@@ -76,6 +78,9 @@ gROOT.LoadMacro("tdrstyle.C")
 ROOT.setTDRStyle()
 
 
+c1 = TCanvas("c1", "c1", 300,900)
+c1.Divide(1,4)
+
 gr = {}
 canvas = {}
 #ytrue = {
@@ -85,7 +90,7 @@ canvas = {}
     #"power":      1.5,
     #}
 
-for yname in xdata.keys():
+for yname in "scale resolution cut power".split():
     yunit = paramInfo[yname][2]
     x = array.array("d", xdata[xname])
     y = array.array("d", ydata[yname])
@@ -103,9 +108,12 @@ for yname in xdata.keys():
     gr[yname].GetXaxis().SetTitle(" ".join(["true", xname, xunit]))
     gr[yname].GetYaxis().SetTitleOffset(1.4)
     gr[yname].Fit("pol1", "", "", *fitrange)
-    canvas[yname] = TCanvas()
+#     canvas[yname] = TCanvas()
+    canvas[yname] = c1.cd(len(canvas.values()) + 1)
     canvas[yname].SetLeftMargin(0.2)
     gr[yname].Draw("ap")
 
-for yname, c in canvas.items():
-    c.Print(yname + "BiasVs" + xname.title() + ".eps")
+# for yname, c in canvas.items():
+#     c.Print(yname + "BiasVs" + xname.title() + ".eps")
+
+c1.Print(xname + "Scan.eps")

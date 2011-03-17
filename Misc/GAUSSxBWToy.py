@@ -90,22 +90,22 @@ def getModelParams(ws, mean = 1., sigma = 0.02, nevents=10000):
 exec(usingNamespaceRooFit())
 params = []
 
-N = 1000
+N = 100000
 
-scale = 0.98
+scale = 1.00
 resolution = 0.01
 
-#xvalues = [0.005 + 0.005*i for i in range(20)]
-#for sigma in xvalues:
-    #ws = ROOT.RooWorkspace("ws")
-    #params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=sigma, mean=scale)))
-    #ws.writeToFile("GxBWResolutionScan_scale_0.98_10k.root", False)
-
-xvalues = [0.95 + 0.005*i for i in range(21)]
-for scale in xvalues:
+xvalues = [0.005 + 0.001*i for i in range(5)]
+for sigma in xvalues:
     ws = ROOT.RooWorkspace("ws")
-    params.append(copy.deepcopy(getModelParams(ws, nevents=N, mean=scale, sigma=resolution)))
-    ws.writeToFile("GxBWScaleScan_resolution_0.01_10k.root", False)
+    params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=sigma, mean=scale)))
+    ws.writeToFile("GxBWResolutionScan_test10k.root", False)
+
+# xvalues = [0.95 + 0.005*i for i in range(21)]
+# for scale in xvalues:
+#     ws = ROOT.RooWorkspace("ws")
+#     params.append(copy.deepcopy(getModelParams(ws, nevents=N, mean=scale, sigma=resolution)))
+#     ws.writeToFile("GxBWScaleScan_resolution_0.01_10k.root", False)
 
 print "# x, xerr, mean(%), mean_err(%), sigma, sigma_err(%)"
 for i in range(len(xvalues)):

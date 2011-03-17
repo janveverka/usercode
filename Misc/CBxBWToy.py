@@ -111,11 +111,29 @@ def getModelParams(ws, bias = 1.005, sigma = 0.009, cut = 1., power = 1.9, neven
     model = buildModel(ws)
     data = getData(ws, bias, sigma, cut, power, nevents)
     #mframe = ws.var("mass")
-    ws.var("cbCut").setVal(1.0)
-    ws.var("cbCut").setConstant()
+
+    ## Set the mass absolute resolution model values to expected defaults
+    zmass = ws.var("bwMean").getVal()
+    ws.var("cbBias" ).setVal( (bias - 1) * zmass )
+    ws.var("cbSigma").setVal( sigma * zmass * math.sqrt(2) )
+    ws.var("cbCut"  ).setVal(cut)
+    ws.var("cbCut"  ).setVal(power)
+
+#     ws.var("cbCut").setConstant()
+
+    ## Save a snapshot of the initial parameter values
+    observables = ROOT.RooArgSet(ws.var("mass"))
+    parameters = ws.pdf("BWxCB").getParameters(observables)
+    ws.defineSet("parameters", parameters)
+    ws.saveSnapshot("initial", parameters, True)
+
+
     model.fitTo(data, PrintLevel(-1))
+
+    ws.saveSnapshot("fitted", parameters, True)
+
     getFitPlot(ws).Draw()
-    ws.var("cbBias").getVal()
+#     ws.var("cbBias").getVal()
     return tuple([ws.var(x) for x in "cbBias cbSigma cbCut cbPower".split()])
 
 #ws = test()
@@ -124,6 +142,10 @@ exec(usingNamespaceRooFit())
 params = []
 
 N = 100000
+trueCut = 0.5
+if len(sys.argv) > 1:
+    trueCut = float(sys.argv[1])
+    print "Setting true cut to %f ..." % trueCut
 #ws = ROOT.RooWorkspace("ws"); params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=0.01)))
 #ws = ROOT.RooWorkspace("ws"); params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=0.01)))
 #ws = ROOT.RooWorkspace("ws"); params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=0.01)))
@@ -131,11 +153,11 @@ N = 100000
 #ws = ROOT.RooWorkspace("ws"); params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=0.008)))
 
 
-xvalues = [0.001 + 0.001*i for i in range(20)]
+xvalues = [0.005 + 0.001*i for i in range(20)]
 for sigma in xvalues:
     ws = ROOT.RooWorkspace("ws")
-    params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=sigma)))
-    ws.writeToFile("resolutionScan3_100k.root", False)
+    params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=sigma, cut=trueCut)))
+    ws.writeToFile("resolutionScan5_trueCut%.2f_%dk.root" % (trueCut, N/1000), False)
 
 #xvalues = [0.95 + 0.005*i for i in range(3)]
 #for bias in xvalues:
@@ -166,5 +188,5 @@ for i in range(len(xvalues)):
     for j in range(2, 4):
         print "% 8.4g %8.2g   " % (params[i][j].getVal(), params[i][j].getError(),),
     print
-    
+
 if __name__ == "__main__": import user

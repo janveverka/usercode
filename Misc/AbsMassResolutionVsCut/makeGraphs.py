@@ -1,6 +1,7 @@
 import array
 import math
 import ROOT
+import sys
 from ROOT import *
 from parseCBxBWOutput import xdata, ydata, exdata, eydata, paramInfo
 
@@ -20,6 +21,9 @@ dataSource = {
     "resolutionScan4_trueCut1.00_100k.root": ("ws", range(1,21) ),
 }
 
+if (len(sys.argv) > 2):
+    dataSource = {sys.argv[2]: ("ws", range(1,21))}
+
 xname = "resolution"
 xunit = "(GeV)"
 # fitrange = (0, 10.5)
@@ -28,8 +32,8 @@ fitrange = (0, 2)
 yunit = {
     "scale"     : "(%)" ,
     "resolution": "(GeV)",
-    "cut"       : "cbCut"  ,
-    "power"     : "cbPower"
+    "cut"       : ""  ,
+    "power"     : ""
     }
 
 wsyname = {
@@ -42,7 +46,7 @@ wsyname = {
 wsxname = {}
 for key, value in wsyname.items():
     wsxname[key] = value
-    
+
 wsxsnapshot = "true_parameters"
 
 xtransform = {
@@ -123,4 +127,11 @@ for yname in "scale resolution cut power".split():
 # for yname, c in canvas.items():
 #     c.Print(yname + "BiasVs" + xname.title() + ".eps")
 
-c1.Print(xname + "Scan.eps")
+tag = ""
+if (len(sys.argv) > 3):
+    tag = sys.argv[3]
+
+for suffix in "eps png svg".split():
+    c1.Print(xname + "Scan" + tag + "." + suffix)
+
+print str(sys.argv)

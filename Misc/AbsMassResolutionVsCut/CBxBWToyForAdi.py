@@ -114,7 +114,7 @@ def getModelParams(ws, bias = 1.005, sigma = 0.009, cut = 1., power = 1.9, neven
     
     
     ## generate data
-    data = model.generate(ROOT.RooArgSet(ws.var("mass")), nevents)
+    data = model.generate(observables, nevents)
     data.SetName("data")
     ws.Import(data)
 
@@ -125,6 +125,9 @@ def getModelParams(ws, bias = 1.005, sigma = 0.009, cut = 1., power = 1.9, neven
     ## perform the fit
     model.fitTo(data, PrintLevel(-1))
     getFitPlot(ws).Draw()
+    
+    ## save the fitted parameters
+    ws.saveSnapshot("fitted_parameters", parameters, ROOT.kTRUE)
 
     return tuple([ws.var(x) for x in "cbBias cbSigma cbCut cbPower".split()])
 

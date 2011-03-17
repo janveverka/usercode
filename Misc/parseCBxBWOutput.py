@@ -1,6 +1,7 @@
 xname = "scale"
 xunit = "(%)"
-fileToParse = "res_scaleScan_100k.out"
+# fileToParse = "res_scaleScan_100k.out"
+fileToParse = "resolutionScan3_trueCut0.70_20k.out"
 numberOfLastLinesToParse = 21
 outputSuffix = "_scaleScan_100k"
 
@@ -28,8 +29,8 @@ lines = file(fileToParse).read().split("\n")
 for yname, (iy, iey, yunit) in paramInfo.items():
     #output = file("%s_vs_%s%s.dat" % (yname, xname, outputSuffix), "w")
     #output.write(
-        #"# true_%s %s   model_%s %s    true_%s_error %s    model_%s_error %s\n" % 
-        #(xname, xunit, yname, yunit, xname, xunit, yname, yunit) 
+        #"# true_%s %s   model_%s %s    true_%s_error %s    model_%s_error %s\n" %
+        #(xname, xunit, yname, yunit, xname, xunit, yname, yunit)
         #)
     for line in lines[-numberOfLastLinesToParse-1:]:
         if len(line) == 0 or line[0] == "#": continue
