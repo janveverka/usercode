@@ -1,6 +1,6 @@
 /** \macro fitJPsi2SMassUnbinned.C
  *
- * $Id: fitZToMuMuGammaMassUnbinned.C,v 1.2 2010/11/26 16:45:28 veverka Exp $
+ * $Id: ikFit.C,v 1.1 2010/12/09 15:52:33 veverka Exp $
  *
  *
  * Macro implementing unbinned Maximum-likelihood fit of
@@ -64,25 +64,49 @@ double NormalizedIntegral(RooAbsPdf & function, RooRealVar & integrationVar, dou
 void fit(
   const char* cut = "abs(eta) < 1.5",
   const char* label = "|#eta^{#gamma}| < 1.5",
-  const char *filename = "ikRatio-CaltechSelection_mm80_34ipb.txt",
+//   const char *filename = "ikRatio-CaltechSelection_mm80_34ipb.txt",
+  const char *filename = "Dec22ReReco.dat",
   const char* plotOpt = "NEU",
-  const int nbins = 40
+  const int nbins = 20
 )
 {
-  double minik = 0;
-  double maxik = 2;
+  double minik = 0.;
+  double maxik = 2.;
+  double minikfit = 0.;
+  double maxikfit = 2.;
   RooRealVar  ik("ik","E^{#gamma}_{ECAL}/E^{#gamma}_{muons}", minik, maxik);
   RooRealVar  eta("eta","eta^{#gamma}", -3, 3);
   RooRealVar  r9("r9","R_{9}^{#gamma}", -3, 3);
+  RooRealVar  m3("m3","m(#mu#mu#gamma)", 0, 999);
 
   // Read data set
 
   TTree tree("tree", "fit data");
-  tree.ReadFile(filename, "ik/F:pt:eta:r9");
+  const char * leafVariables =
+    /*  1. run                      */ "run/I:"
+    /*  2. lumi                     */ "lumi:"
+    /*  3. event                    */ "event:"
+    /*  4. isEB                     */ "isEB:"
+    /*  5. phoPt[g]                 */ "pt/F:"
+    /*  6. muPt[mnear]              */ "muNearPt:"
+    /*  7. muPt[mfar]               */ "muFarPt:"
+    /*  8. phoEta[g]                */ "eta:"
+    /*  9. muEta[mnear]             */ "muNearEta:"
+    /* 10. muEta[mfar]              */ "muFarEta:"
+    /* 11. phoPhi[g]                */ "phi:"
+    /* 12. muPhi[mnear]             */ "muNearPhi:"
+    /* 13. muPhi[mfar]              */ "muFarPhi:"
+    /* 14. phoR9                    */ "r9:"
+    /* 15. mass[mm]                 */ "m2:"
+    /* 16. mmgMass                  */ "m3:"
+    /* 17. mmgDeltaRNear            */ "dr:"
+    /* 18. kRatio(mmgMass,mass[mm]) */ "ik";
+
+  tree.ReadFile(filename, leafVariables);
   RooDataSet *data = new RooDataSet("data",
                                     "pho scale data",
                                     &tree,
-                                    RooArgSet(ik, eta, r9),
+                                    RooArgSet(ik, eta, r9, m3),
                                     cut);
 
   std::cout << "Selected events: " << data->sumEntries() << cout::endl;
@@ -109,7 +133,7 @@ void fit(
 
   TStopwatch t ;
   t.Start() ;
-  model.fitTo(*data,FitOptions("mh"),Optimize(0),Timer(1));
+  model.fitTo(*data,FitOptions("mh"),Optimize(0),Timer(1),Range(minikfit,maxikfit));
 
   t.Print() ;
 
@@ -198,12 +222,12 @@ void ikFit()
   gStyle->SetPadRightMargin(0.05);
 
   TCanvas *c1 = new TCanvas("c1", "c1", 0, 0, 800, 600);
-  fit("abs(eta) < 1.5", "|#eta^{#gamma}| < 1.5");
+  fit("abs(eta) < 1.5 & abs(m3-91.2)<4", "|#eta^{#gamma}| < 1.5");
   TCanvas *c2 = new TCanvas("c2", "c2", 20, 20, 800, 600);
-  fit("abs(eta) > 1.5", "|#eta^{#gamma}| > 1.5");
+  fit("abs(eta) > 1.5 & abs(m3-91.2)<4", "|#eta^{#gamma}| > 1.5");
   TCanvas *c3 = new TCanvas("c3", "c3", 40, 40, 800, 600);
-  fit("abs(eta) < 1.5 && r9 > 0.94", "|#eta^{#gamma}| < 1.5, r_{9}^{#gamma} > 0.94");
+  fit("abs(eta) < 1.5 & abs(m3-91.2)<4 & r9 > 0.94", "|#eta^{#gamma}| < 1.5, r_{9}^{#gamma} > 0.94");
   TCanvas *c4 = new TCanvas("c4", "c4", 50, 50, 800, 600);
-  fit("abs(eta) > 1.5 && r9 > 0.95", "|#eta^{#gamma}| > 1.5, r_{9}^{#gamma} > 0.95");
+  fit("abs(eta) > 1.5 & abs(m3-91.2)<4 & r9 > 0.95", "|#eta^{#gamma}| > 1.5, r_{9}^{#gamma} > 0.95");
 }
 
