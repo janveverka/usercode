@@ -5,12 +5,14 @@ import ROOT
 from ROOT import *
 
 selection = "abs(eta)<1.5 & m2 < 80 & pt > 10"
-label = "|#eta^{#gamma}| < 1.5"
+label = "Barrel"
 #selection = "abs(eta)>1.5 & m2 < 80"
 scale = 1.
-xRange = (-6.5, 3.5) ## Jan's data
+xRange = (-3., 7.) ## Dec22 rereco
+# xRange = (-6.5, 3.5) ## Jan's data
 # xRange = (-3.5, 6.5) ## Olivier's tight-mass-window data
-yRange = (-3., 11.)
+yRange = (-3., 13.)
+# yRange = (-3., 11.)
 numScanSteps = 100
 fitRange = xRange
 
@@ -19,6 +21,7 @@ xMin, xMax = xRange
 gROOT.LoadMacro("../CMSStyle.C")
 ROOT.CMSstyle()
 gStyle.SetOptFit(11)
+gStyle.SetOptTitle(0)
 
 canvases = []
 graphs = []
@@ -44,7 +47,7 @@ dx = (xMax - xMin) / (numScanSteps - 1)
 ## Scan the NLL
 for istep in range(numScanSteps):
     xvar.append(xMin + dx * istep)
-    nll.append( yurii.nllm3(scale=xvar[-1], res=0.) )
+    nll.append( yurii.nllm3(scale=xvar[-1], res=0., m3min=87.2, m3max=95.2, nbinsMC=60) )
 ## Make a graph
 x = array.array("d", xvar)
 y = array.array("d", nll)
@@ -107,8 +110,18 @@ xvarVal = -0.5 * b / a
 xvarErr = math.sqrt(0.5 / a)
 minNLL = c - 0.25*b*b/a
 print "Iteration %d results" % iteration
-print "  photon energy res: (%.3g +/- %.3g)%%" % (xvarVal, xvarErr)
+print "  photon energy scale: (%.3g +/- %.3g)%%" % (xvarVal, xvarErr)
 print "  min -log(L)        : %.4g" % minNLL
+
+## Move the stats box
+stats1 = c1.GetPrimitive("stats")
+if stats1:
+    sWidthNDC = stats1.GetX2NDC() - stats1.GetX1NDC()
+    sHeightNDC = stats1.GetY2NDC() - stats1.GetY1NDC()
+    stats1.SetX1NDC(0.375)
+    stats1.SetX2NDC(0.375 + sWidthNDC)
+    stats1.SetY1NDC(0.7)
+    stats1.SetY2NDC(0.7 + sHeightNDC)
 
 
 ##latexLabel.DrawLatex(0.2,  0.8, "p_{T}^{#gamma} > 10 GeV")
@@ -120,7 +133,7 @@ drawLatex(0.21,  0.25, "Estimated Photon Energy Scale: (%.1f #pm %.1f) %%" % (xv
 ##latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2010")
 ##latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 
-def drawResults():
+def redrawResults():
     "Redraw results on the canvas"
     for l in latexLabels:
         if l: l.Draw()

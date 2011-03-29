@@ -5,10 +5,11 @@ import ROOT
 from ROOT import *
 
 selection = "abs(eta)>1.5 & m2 < 80 & pt > 10"
-label = "|#eta^{#gamma}| > 1.5"
+label = "Endcaps"
 #selection = "abs(eta)>1.5 & m2 < 80"
 scale = 1.
-xRange = (-16., -1.) ## Jan's data
+xRange = (-15., 5.) ## Dec22 rereco
+# xRange = (-16., -1.) ## Jan's data
 # xRange = (-11., 4.) ## Olivier's data - tight m window
 # xRange = (-17., 5.) ## Olivier's data - loose m window
 # yRange = (-2., 7.)
@@ -21,6 +22,7 @@ xMin, xMax = xRange
 gROOT.LoadMacro("../CMSStyle.C")
 ROOT.CMSstyle()
 gStyle.SetOptFit(11)
+gStyle.SetOptTitle(0)
 
 canvases = []
 graphs = []
@@ -46,7 +48,7 @@ dx = (xMax - xMin) / (numScanSteps - 1)
 ## Scan the NLL
 for istep in range(numScanSteps):
     xvar.append(xMin + dx * istep)
-    nll.append( yurii.nllm3(scale=xvar[-1], res=0., m3min=84, m3max=96) )
+    nll.append( yurii.nllm3(scale=xvar[-1], res=0., m3min=84, m3max=96, nbinsMC=60) )
 ## Make a graph
 x = array.array("d", xvar)
 y = array.array("d", nll)
@@ -112,6 +114,15 @@ print "Iteration %d results" % iteration
 print "  photon energy res: (%.3g +/- %.3g)%%" % (xvarVal, xvarErr)
 print "  min -log(L)        : %.4g" % minNLL
 
+## Move the stats box
+stats1 = c1.GetPrimitive("stats")
+sWidthNDC = stats1.GetX2NDC() - stats1.GetX1NDC()
+sHeightNDC = stats1.GetY2NDC() - stats1.GetY1NDC()
+
+stats1.SetX1NDC(0.375)
+stats1.SetX2NDC(0.375 + sWidthNDC)
+stats1.SetY1NDC(0.7)
+stats1.SetY2NDC(0.7 + sHeightNDC)
 
 ##latexLabel.DrawLatex(0.2,  0.8, "p_{T}^{#gamma} > 10 GeV")
 latexLabel.SetText(0.21,  0.35, label)
