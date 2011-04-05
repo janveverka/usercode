@@ -90,36 +90,36 @@ private:
   }; // end of struct Variable definition
 
   struct BranchManager {
-    std::vector<Variable> variables;
-    std::string sizeTag;
+    std::vector<Variable> variables_;
+    std::string sizeTag_;
     Int_t size;
 
     // ctor
-    BranchManager(std::string tag) : variables(), sizeTag(tag), size(0) {}
+    BranchManager(std::string tag) : variables_(), sizeTag_(tag), size(0) {}
 
-    void push_back(Variable var) {variables.push_back(var);}
+    void push_back(Variable var) {variables_.push_back(var);}
 
     void makeBranches(TTree &tree) {
-      tree.Branch(sizeTag.c_str(), &size, (sizeTag + "/I").c_str() );
+      tree.Branch(sizeTag_.c_str(), &size, (sizeTag_ + "/I").c_str() );
 
-      for (std::vector<Variable>::iterator var = variables.begin();
-           var != variables.end(); ++var) {
-        var->makeBranch(tree, sizeTag.c_str() );
-      } // end of loop over variables
+      for (std::vector<Variable>::iterator var = variables_.begin();
+           var != variables_.end(); ++var) {
+        var->makeBranch(tree, sizeTag_.c_str() );
+      } // end of loop over variables_
 
     } // end of makeBranches
 
     void getData(const C &collection) {
       size = collection.size();
       for (std::vector<Variable>::iterator
-           var = variables.begin(); var != variables.end(); ++var) {
+           var = variables_.begin(); var != variables_.end(); ++var) {
         var->data.clear();
         for (typename_C::const_iterator element = collection.begin();
              element != collection.end(); ++element) {
           var->data.push_back( var->quantity(*element) );
         } // end of loop over collection
         var->updateBranchAddress();
-      } // end of loop over variables
+      } // end of loop over variables_
     } // end of method getData(...)
   }; // end of struc BranchManager
 
