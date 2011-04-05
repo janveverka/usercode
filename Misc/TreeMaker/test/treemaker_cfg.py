@@ -43,27 +43,7 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string(options.outputFile)
 )
 
-process.tree = cms.EDAnalyzer('TreeMaker',
-  name = cms.untracked.string("tree2"),
-  title = cms.untracked.string("testing TreeMaker"),
-  src = cms.InputTag("cleanPatPhotonsTriggerMatch"),
-  prefix = cms.untracked.string("cand"),
-  sizeName = cms.untracked.string("nPhotons"),
-  variables = cms.VPSet(
-    cms.PSet(
-      tag = cms.untracked.string("Pt"),
-      quantity = cms.untracked.string("pt")
-    ),
-    cms.PSet(
-      tag = cms.untracked.string("Eta"),
-      quantity = cms.untracked.string("eta")
-    ),
-    cms.PSet(
-      tag = cms.untracked.string("Phi"),
-      quantity = cms.untracked.string("phi")
-    ),
-  )
-)
+process.load("Misc.TreeMaker.treemaker_cfi")
 
 process.testTree = cms.EDAnalyzer('TestTreeMaker',
   candSrc = cms.untracked.InputTag("cleanPatPhotonsTriggerMatch")

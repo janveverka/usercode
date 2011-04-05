@@ -20,25 +20,21 @@
 
 // system include files
 #include <memory>
+#include <string>
+
+#include "TTree.h"
 
 // user include files
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-
-#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "DataFormats/Candidate/interface/Candidate.h"
-#include <string>
-#include "TTree.h"
 #include "CommonTools/Utils/interface/StringObjectFunction.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include <iostream>
-#include <sstream>
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 
 const unsigned VECTOR_SIZE = 99;
 
@@ -75,98 +71,57 @@ private:
     StringObjectFunction<typename_C::value_type> quantity;
     std::vector<Float_t> data;
     TBranch *branch;
+
     // default ctor
     Variable(const std::string &iTag,
              const StringObjectFunction<typename_C::value_type> &iQuantity,
              size_t size = VECTOR_SIZE) :
       tag(iTag), quantity(iQuantity), data(size), branch(0) {data.clear();}
+
     // member methods
-    Float_t *address() {return &(data[0]);}
-    const char *name() {return tag.c_str();}
-    const char *leaflist(const char *size) {
-      return (tag + "[" + size + "]/F").c_str();
-    }
     void makeBranch(TTree &tree, const char *size) {
       branch = tree.Branch(tag.c_str(),
                            &(data[0]),
                            (tag + "[" + size + "]/F").c_str() );
     }
-    void setBranch(TBranch *iBranch) {branch = iBranch;}
-    void setBranchAddress() {if (branch != 0) branch->SetAddress( &(data[0]) );}
+
+    void updateBranchAddress() {if (branch != 0) branch->SetAddress( &(data[0]) );}
 
   }; // end of struct Variable definition
 
-  struct VarCollection {
+  struct BranchManager {
     std::vector<Variable> variables;
     std::string sizeTag;
     Int_t size;
+
     // ctor
-    VarCollection(std::string tag) : variables(), sizeTag(tag), size(0) {}
+    BranchManager(std::string tag) : variables(), sizeTag(tag), size(0) {}
+
     void push_back(Variable var) {variables.push_back(var);}
+
     void makeBranches(TTree &tree) {
       tree.Branch(sizeTag.c_str(), &size, (sizeTag + "/I").c_str() );
+
       for (std::vector<Variable>::iterator var = variables.begin();
            var != variables.end(); ++var) {
         var->makeBranch(tree, sizeTag.c_str() );
       } // end of loop over variables
-    }
-    void fill(const C &collection) {
+
+    } // end of makeBranches
+
+    void getData(const C &collection) {
       size = collection.size();
       for (std::vector<Variable>::iterator
            var = variables.begin(); var != variables.end(); ++var) {
-        /// Begin debug
-        std::ostringstream dataAddress1(std::ostringstream::out);
-        if (var->data.size() > 0)
-          dataAddress1 << (Float_t*) &(var->data[0]);
-        else
-          dataAddress1 << "n/a";
-        LogDebug("Fill") << "Before: "
-                         << var->branch->GetName() << "["
-                         << var->data.size() << "] ->"
-                         << (Float_t*) var->branch->GetAddress() << "<- ->"
-                         << dataAddress1.str() << "<-"
-                         << std::endl;
-        /// End debug
         var->data.clear();
         for (typename_C::const_iterator element = collection.begin();
              element != collection.end(); ++element) {
           var->data.push_back( var->quantity(*element) );
         } // end of loop over collection
-
-        /// Begin debug
-        std::ostringstream dataAddress2(std::ostringstream::out);
-        if (var->data.size() > 0)
-          dataAddress2 << (Float_t*) &(var->data[0]);
-        else
-          dataAddress2 << "n/a";
-        LogDebug("Fill") << "After: "
-                         << var->branch->GetName() << "["
-                         << var->data.size() << "] ->"
-                         << (Float_t*) var->branch->GetAddress() << "<- ->"
-                         << dataAddress2.str() << "<-"
-                         << std::endl;
-        /// End debug
-
-        // update the branch addresses
-        var->setBranchAddress();
-
-        /// Begin debug
-        std::ostringstream dataAddress3(std::ostringstream::out);
-        if (var->data.size() > 0)
-          dataAddress3 << (Float_t*) &(var->data[0]);
-        else
-          dataAddress3 << "n/a";
-        LogDebug("Fill") << "After setBranchAddress: "
-                         << var->branch->GetName() << "["
-                         << var->data.size() << "] ->"
-                         << (Float_t*) var->branch->GetAddress() << "<- ->"
-                         << dataAddress3.str() << "<-"
-                         << std::endl;
-        /// End debug
-
+        var->updateBranchAddress();
       } // end of loop over variables
-    } // end of method fill(...)
-  };
+    } // end of method getData(...)
+  }; // end of struc BranchManager
 
   TTree *tree_;
   std::string name_;
@@ -178,7 +133,7 @@ private:
 
   /// leaf variables
   EventIdData id_;
-  VarCollection vars_;
+  BranchManager vars_;
 }; // of TreeMaker class declaration
 
 // constructors and destructor
@@ -217,13 +172,8 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig) :
 } // end of constructor
 
 
-TreeMaker::~TreeMaker()
-{
+TreeMaker::~TreeMaker() {
 //   LogDebug("Processing") << "Entering dtor ..." << std::endl;
-
-  // do anything here that needs to be done at desctruction time
-  // (e.g. close files, deallocate resources etc.)
-
 }
 
 
@@ -242,32 +192,19 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   edm::Handle<C> collection;
   iEvent.getByLabel(src_, collection);
 
-  vars_.fill(*collection);
+  vars_.getData(*collection);
   tree_->Fill();
-
-  /// Dump the last entry from data
-  tree_->Scan("", "", "", 1, tree_->GetEntries()-1);
-  for (int i=0; i < vars_.size; ++i) {
-    printf("%3d  ", i);
-    for (std::vector<Variable>::const_iterator var = vars_.variables.begin();
-         var != vars_.variables.end(); ++var) {
-      printf("%10f  ", var->data[i]);
-    }
-    std::cout << std::endl << std::flush;
-  }
 }
 
 
 // ------------ method called once each job just before starting event loop  ------------
 void
 TreeMaker::beginJob() {
-  LogDebug("Processing") << "Entering beginJob() ..." << std::endl;
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
 TreeMaker::endJob() {
-  LogDebug("Processing") << "Entering endJob() ..." << std::endl;
 }
 
 //define this as a plug-in

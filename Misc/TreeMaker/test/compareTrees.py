@@ -1,10 +1,20 @@
+import sys
 from ROOT import *
-file1 = TFile("tree_numEvent5.root")
-tree = file1.Get("tree/tree2")
+
+filename = "tree_numEvent100.root"
+if len(sys.argv) == 2:
+  filename = sys.argv[1]
+
+file1 = TFile(filename)
+
+file
+tree = file1.Get("tree/tree")
 testTree = file1.Get("testTree/testTree")
+
 tree.AddFriend(testTree, "ref")
 canvases = []
-for var in "id.run id.luminosityBlock id.event candPt candEta candPhi".split():
+
+for var in "id.run id.luminosityBlock ncands id.event candPt candEta candPhi".split():
   canvases.append(TCanvas(var, var))
   tree.Draw("%s-ref.%s" % (var,var))
 
