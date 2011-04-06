@@ -108,3 +108,22 @@ float treeBodyMass(double pt1, double eta1, double phi1, double m1,
     p3.SetPtEtaPhiM(pt3, eta3, phi3, m3);
     return (p1 + p2 + p3).M();
 }
+
+inline double deltaPhi(double phi1, double phi2)
+{
+    double result = phi1 - phi2;
+    while (result > M_PI) result -= 2*M_PI;
+    while (result <= -M_PI) result += 2*M_PI;
+    return result;
+}
+
+inline double deltaTheta(double eta1, double eta2)
+{
+    double theta1 = 2. * TMath::ATan(TMath::Exp(-eta1));
+    double theta2 = 2. * TMath::ATan(TMath::Exp(-eta2));
+    double result = theta2 - theta1;
+    while (result > M_PI) result -= 2*M_PI;
+    while (result <= -M_PI) result += 2*M_PI;
+    return result;
+}
+

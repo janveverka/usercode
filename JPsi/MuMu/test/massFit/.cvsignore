@@ -1,6 +1,5 @@
 *.root *.out
 *.tgz
-*.png
-*.txt
-*.dat
+*.eps *.png
 *.json
+*_C.d
