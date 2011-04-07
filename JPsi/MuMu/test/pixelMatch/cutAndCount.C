@@ -1,8 +1,10 @@
 {
 gROOT->LoadMacro("../resolutionErrors.C");
 
-const char *filenameData = "pixelMatch_data_Nov4ReReco_v4.dat";
-const char *filenameMC   = "pixelMatch_Powheg_Fall10_v4.dat";
+// const char *filenameData = "pixelMatch_data_Nov4ReReco_v4.dat";
+// const char *filenameMC   = "pixelMatch_Powheg_Fall10_v4.dat";
+const char *filenameData = "pixelMatch_data_Dec22ReReco.dat";
+const char *filenameMC   = "pixelMatch_Powheg_Winter10.dat";
 /// Read data set
 TTree tdata("tdata", "real data");
 TTree tmc("tmc", "MC");
