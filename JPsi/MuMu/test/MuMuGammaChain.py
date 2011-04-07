@@ -98,19 +98,19 @@ cfiles["w"] = ["MuMuGammaTree_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola.root"]
 cfiles["qcd"] = ["MuMuGammaTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6.root"]
 cfiles["tt"] = ["MuMuGammaTree_TTJets_TuneZ2_7TeV-madgraph-tauola.root"]
 
-dpath = ""
-dfiles = {}
-dfiles["data39x"] = [""]
-dfiles["z"  ] = ["MuMuGammaTree_DYToMuMu-powheg-Winter10-v1.root"]
-dfiles["z2" ] = """
+epath = ""
+efiles = {}
+efiles["data39x"] = [""]
+efiles["z"  ] = ["MuMuGammaTree_DYToMuMu-powheg-Winter10-v1.root"]
+efiles["z2" ] = """
     MuMuGammaTree_DYToMuMu-powheg-Winter10-v2_part1of4.root
     MuMuGammaTree_DYToMuMu-powheg-Winter10-v2_part2of4.root
     MuMuGammaTree_DYToMuMu-powheg-Winter10-v2_part3of4.root
     MuMuGammaTree_DYToMuMu-powheg-Winter10-v2_part4of4.root
     """.split
-dfiles["w"  ] = ["MuMuGammaTree_WJets-Winter10.root"]
-dfiles["qcd"] = ["MuMuGammaTree_QCD-Winter10.root"]
-dfiles["tt" ] = ["MuMuGammaTree_TTJets-Winter10.root"]
+efiles["w"  ] = ["MuMuGammaTree_WJets-Winter10.root"]
+efiles["qcd"] = ["MuMuGammaTree_QCD-Winter10.root"]
+efiles["tt" ] = ["MuMuGammaTree_TTJets-Winter10.root"]
 
 def getChains(files=bfiles, path=bpath):
     chains = {}
@@ -141,7 +141,8 @@ cweight["qcd"] = 1.04E-01
 cweight["w"  ] = 5.89E-02
 cweight["tt" ] = 3.75E-03
 
-dweight = {
+## Dec22 rereco + winter 10 weights for 35.9/pb
+eweight = {
     "data38x": 1.
     "z"  : 0.030541912803076
     "qcd": 0.10306919044126
