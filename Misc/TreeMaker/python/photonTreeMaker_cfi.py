@@ -4,7 +4,7 @@ MuMuGammaTree = cms.EDAnalyzer("TreeMaker",
   name = cms.untracked.string("mmg"),
   title = cms.untracked.string("mmg TreeMaker"),
   src = cms.InputTag("cleanPatPhotonsTriggerMatch"),
-  prefix = cms.untracked.string("cand"),
+  prefix = cms.untracked.string("pho"),
   sizeName = cms.untracked.string("nPhotons"),
   variables = cms.VPSet()
 )
@@ -32,11 +32,12 @@ branches = """Pt                pt
 
 genBranches =  """GenMatchPdgId     genParticle.pdgId
                   GenMatchStatus    genParticle.status
-                  GenMatchMomPdgId  genParticle.mother(0).pdgId
-                  GenMatchMomStatus genParticle.mother(0).status
                   GenPt             genParticle.pt
                   GenEta            genParticle.eta
                   GenPhi            genParticle.phi""".split("\n")
+
+#                  GenMatchMomPdgId  genParticle.mother(0).pdgId
+#                  GenMatchMomStatus genParticle.mother(0).status
 
 for line in  branches:
     tag, var = line.split()

@@ -4,6 +4,27 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 # setup 'analysis'  options
 options = VarParsing.VarParsing ('analysis')
 
+options.register("reportEvery",
+  100, # default value
+  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+  VarParsing.VarParsing.varType.int,          # string, int, or float
+  "Frequency of ouput."
+)
+options.register("jsonFile",
+  "", # default value
+  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+  VarParsing.VarParsing.varType.string,          # string, int, or float
+  "JSON file to be applied."
+)
+
+options.setupTags(tag = "of%d",
+                  ifCond = "totalSections != 0",
+                  tagArg = "totalSections")
+
+options.setupTags(tag = "job%d",
+                  ifCond = "section != 0",
+                  tagArg = "section")
+
 ## default options
 options.inputFiles = [
     "file:/mnt/hadoop/user/veverka/DimuonVGammaSkim_v3/Mu/Run2010A-Nov4ReReco_v1-DimuonVGammaSkim_v3/f81f6ec801d687f509099b4fa4a3c90c/"
@@ -26,7 +47,7 @@ process = cms.Process("TREE")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 ## Enable LogDebug for MuMuGammaTree module
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = options.reportEvery
 process.MessageLogger.debugModules = ["tree"]
 #process.MessageLogger.cerr.threshold = "DEBUG"
 
