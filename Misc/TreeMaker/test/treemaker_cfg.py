@@ -45,6 +45,21 @@ process.TFileService = cms.Service("TFileService",
 
 process.load("Misc.TreeMaker.treemaker_cfi")
 
+process.tree.variables.extend([
+    cms.PSet(
+        tag = cms.untracked.string("R9"),
+        quantity = cms.untracked.string("r9"),
+    ),
+    cms.PSet(
+        tag = cms.untracked.string("GenPt"),
+        quantity = cms.untracked.PSet(
+           ifCondition = cms.untracked.string("genParticlesSize > 0"),
+           thenQuantity = cms.untracked.string("genParticle.pt"),
+           elseQuantity = cms.untracked.string("0")
+        )
+    )
+])
+
 process.testTree = cms.EDAnalyzer('TestTreeMaker',
   candSrc = cms.untracked.InputTag("cleanPatPhotonsTriggerMatch")
 )

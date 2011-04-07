@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Veverka
 //      Created:  Mon Apr  4 21:25:02 CEST 2011
-// $Id$
+// $Id: TreeMaker.cc,v 1.3 2011/04/05 19:56:01 veverka Exp $
 //
 //
 
@@ -26,8 +26,10 @@
 
 // user include files
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "CommonTools/UtilAlgos/interface/StringCutObjectSelector.h"
 #include "CommonTools/Utils/interface/StringObjectFunction.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
+// #include "DataFormats/PatCandidates/interface/Photon.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -50,6 +52,7 @@ private:
   virtual void endJob() ;
 
   // ----------member data ---------------------------
+//   typedef pat::PhotonCollection C;
   typedef reco::CandidateView C;
   typedef C typename_C;
 
@@ -66,16 +69,16 @@ private:
     {}
   }; // end of struct EventIdData definition
 
-  struct Variable {
+  struct SingleBranchManager {
     std::string tag;
     StringObjectFunction<typename_C::value_type> quantity;
     std::vector<Float_t> data;
     TBranch *branch;
 
     // default ctor
-    Variable(const std::string &iTag,
-             const StringObjectFunction<typename_C::value_type> &iQuantity,
-             size_t size = VECTOR_SIZE) :
+    SingleBranchManager(const std::string &iTag,
+                        const StringObjectFunction<typename_C::value_type> &iQuantity,
+                        size_t size = VECTOR_SIZE) :
       tag(iTag), quantity(iQuantity), data(size), branch(0) {data.clear();}
 
     // member methods
@@ -85,41 +88,103 @@ private:
                            (tag + "[" + size + "]/F").c_str() );
     }
 
+    virtual void getData(C const & collection) {
+      LogDebug("genParticle") << tag << ": Entering SingleBranchManager::getData(...) ..." << std::flush;
+      for (typename_C::const_iterator element = collection.begin();
+            element != collection.end(); ++element) {
+        data.push_back( quantity(*element) );
+      } // end of loop over collection
+    }
+
     void updateBranchAddress() {if (branch != 0) branch->SetAddress( &(data[0]) );}
 
-  }; // end of struct Variable definition
+  }; // end of struct SingleBranchManager definition
+
+  struct ConditionalSingleBranchManager : public SingleBranchManager {
+    // data members
+    StringCutObjectSelector<typename_C::value_type, true> condition;
+    StringObjectFunction<typename_C::value_type> elseQuantity;
+    // ctor
+    ConditionalSingleBranchManager(
+      const std::string &iTag,
+      StringCutObjectSelector<typename_C::value_type, true> &iCondition,
+      const StringObjectFunction<typename_C::value_type> &iQuantity,
+      const StringObjectFunction<typename_C::value_type> &iElseQuantity,
+      size_t size = VECTOR_SIZE) :
+      SingleBranchManager(iTag, iQuantity, size),
+      condition(iCondition),
+      elseQuantity(iElseQuantity)
+    {} // end of ctor
+
+    void getData(C const & collection) {
+      LogDebug("genParticle") << tag << ": Entering ConditionalSingleBranchManager::getData(...) ..." << std::flush;
+      for (typename_C::const_iterator element = collection.begin();
+            element != collection.end(); ++element) {
+        LogDebug("genParticle") << "before if" << std::flush;
+        if ( condition(*element) ) {
+          LogDebug("genParticle") << "before quantity" << std::flush;
+          data.push_back( quantity(*element) );
+        } else {
+          LogDebug("genParticle") << "before elseQuantity" << std::flush;
+          data.push_back( elseQuantity(*element) );
+        }
+      } // end of loop over collection
+    } // end of getData(...) method
+  }; // end of struct ConditionalSingleBranchManager
 
   struct BranchManager {
-    std::vector<Variable> variables_;
+    // TODO: figure out how to store both SingleBranchManagers
+    // and ConditionalSingleBranchManagers in one container.
+    // Worth trying: use pure virtual base class BMBase with two specializations
+    // SBM and CSBM
+    std::vector<SingleBranchManager> variables_;
+    std::vector<ConditionalSingleBranchManager> conditionalVariables_;
     std::string sizeTag_;
     Int_t size;
 
     // ctor
     BranchManager(std::string tag) : variables_(), sizeTag_(tag), size(0) {}
 
-    void push_back(Variable var) {variables_.push_back(var);}
+    void push_back(SingleBranchManager var) {variables_.push_back(var);}
+
+    void push_back(ConditionalSingleBranchManager var) {
+      conditionalVariables_.push_back(var);
+    }
 
     void makeBranches(TTree &tree) {
       tree.Branch(sizeTag_.c_str(), &size, (sizeTag_ + "/I").c_str() );
 
-      for (std::vector<Variable>::iterator var = variables_.begin();
+      for (std::vector<SingleBranchManager>::iterator var = variables_.begin();
            var != variables_.end(); ++var) {
         var->makeBranch(tree, sizeTag_.c_str() );
       } // end of loop over variables_
+
+      for (std::vector<ConditionalSingleBranchManager>::iterator 
+           var = conditionalVariables_.begin(); 
+           var != conditionalVariables_.end(); ++var) {
+        var->makeBranch(tree, sizeTag_.c_str() );
+      } // end of loop over conditionalVariables_
 
     } // end of makeBranches
 
     void getData(const C &collection) {
       size = collection.size();
-      for (std::vector<Variable>::iterator
+
+      for (std::vector<SingleBranchManager>::iterator
            var = variables_.begin(); var != variables_.end(); ++var) {
         var->data.clear();
-        for (typename_C::const_iterator element = collection.begin();
-             element != collection.end(); ++element) {
-          var->data.push_back( var->quantity(*element) );
-        } // end of loop over collection
+        var->getData(collection);
         var->updateBranchAddress();
       } // end of loop over variables_
+
+      for (std::vector<ConditionalSingleBranchManager>::iterator 
+           var = conditionalVariables_.begin(); 
+           var != conditionalVariables_.end(); ++var) {
+        var->data.clear();
+        var->getData(collection);
+        var->updateBranchAddress();
+      } // end of loop over conditionalVariables_
+
     } // end of method getData(...)
   }; // end of struc BranchManager
 
@@ -163,10 +228,43 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig) :
   for (VPSet::const_iterator q = variables.begin(); q != variables.end(); ++q){
     std::string tag = prefix_ + q->getUntrackedParameter<std::string>("tag");
 
-    StringObjectFunction<typename_C::value_type>
-    quantity(q->getUntrackedParameter<std::string>("quantity"), lazyParser_);
+    LogDebug("genParticle") << tag;
+    if ( q->existsAs<std::string>("quantity", false) ) {
+      LogDebug("genParticle") << "before quantity";
+      StringObjectFunction<typename_C::value_type>
+      quantity(q->getUntrackedParameter<std::string>("quantity"), lazyParser_);
 
-    vars_.push_back(Variable(tag, quantity) );
+      vars_.push_back(SingleBranchManager(tag, quantity) );
+    } else {
+      // expect a conditional quantity
+      LogDebug("genParticle") << "before conditional quantity";
+      edm::ParameterSet const &
+      qConfig = q->getUntrackedParameter<edm::ParameterSet>("quantity");
+
+      StringCutObjectSelector<typename_C::value_type, true>
+      condition(
+        qConfig.getUntrackedParameter<std::string>("ifCondition"),
+        lazyParser_
+      );
+
+      StringObjectFunction<typename_C::value_type>
+      quantity(
+        qConfig.getUntrackedParameter<std::string>("thenQuantity"),
+        lazyParser_
+      );
+
+      StringObjectFunction<typename_C::value_type>
+      elseQuantity(
+        qConfig.getUntrackedParameter<std::string>("elseQuantity"),
+        lazyParser_
+      );
+
+      vars_.push_back(
+        ConditionalSingleBranchManager(
+          tag, condition, quantity, elseQuantity
+        )
+      );
+    } // end if is a standard or conditional quantity
   } // end of loop over variables
   vars_.makeBranches(*tree_);
 } // end of constructor
