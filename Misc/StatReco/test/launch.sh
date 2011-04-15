@@ -6,13 +6,17 @@
 #    -n 10 \
 #    --no_exec
 
-cmsDriver.py SingleGammaPt60_cfi.py \
+# cmsDriver.py SingleGammaPt60_cfi.py \
+cmsDriver.py SingleGammaE60_cfi.py \
     -s GEN,FASTSIM,HLT:GRun \
-    --pileup=NoPileUp \
-    --geometry DB \
-    --conditions=auto:mc \
-    --eventcontent=FEVTSIM \
+    --beamspot Flat \
+    --pileup NoPileUp \
+    --geometry Ideal \
+    --conditions auto:mc \
+    --eventcontent FEVTSIM \
     --datatier GEN-SIM-DIGI-RECO \
     -n 100 \
     --fileout file:fastsim.root \
-    --no_exec
+    --customise Misc/StatReco/NoSmearBeamSpot_cff.py \
+    --no_exec \
+#     --inline_eventcontent \
