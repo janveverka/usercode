@@ -21,5 +21,6 @@ for var in "id.run id.luminosityBlock ncands id.event candPt candEta candPhi".sp
 for c in canvases:
   i = canvases.index(c)
   c.SetWindowPosition(20*i, 20*i)
+  c.Print(c.GetName() + ".png")
 
 if __name__ == "__main__": import user

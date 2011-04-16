@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Veverka
 //      Created:  Mon Apr  4 21:25:02 CEST 2011
-// $Id: TreeMaker.cc,v 1.5 2011/04/16 11:41:10 veverka Exp $
+// $Id: TreeMaker.cc,v 1.6 2011/04/16 13:32:15 veverka Exp $
 //
 //
 
@@ -40,6 +40,8 @@
 #include "Misc/TreeMaker/interface/EventIdBranchManager.h"
 
 const unsigned VECTOR_SIZE = 99;
+
+namespace jv {
 
 // class declaration
 class TreeMaker : public edm::EDAnalyzer {
@@ -184,7 +186,7 @@ private:
   bool lazyParser_;
 
   /// leaf variables
-  EventIdBranchManger eventId_;
+  EventIdBranchManager eventId_;
   BranchManager vars_;
 //   PmvBranchManager pmv_;
 }; // of TreeMaker class declaration
@@ -293,3 +295,5 @@ TreeMaker::endJob() {
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(TreeMaker);
+
+} // end of namespace jv
