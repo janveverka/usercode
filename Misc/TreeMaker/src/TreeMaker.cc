@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Veverka
 //      Created:  Mon Apr  4 21:25:02 CEST 2011
-// $Id: TreeMaker.cc,v 1.4 2011/04/07 02:04:30 veverka Exp $
+// $Id: TreeMaker.cc,v 1.5 2011/04/16 11:41:10 veverka Exp $
 //
 //
 
@@ -37,7 +37,7 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-// #include "Misc/TreeMaker/interface/PmvBranchManager.h"
+#include "Misc/TreeMaker/interface/EventIdBranchManager.h"
 
 const unsigned VECTOR_SIZE = 99;
 
@@ -56,19 +56,6 @@ private:
 //   typedef pat::PhotonCollection C;
   typedef reco::CandidateView C;
   typedef C typename_C;
-
-  /// data formats
-  struct EventIdData {
-    UInt_t run, luminosityBlock, event;
-    // default constructor
-    EventIdData() : run(0), luminosityBlock(0), event(0) {}
-    // custom constructor
-    EventIdData(const edm::EventID id) :
-      run( id.run() ),
-      luminosityBlock( id.luminosityBlock() ),
-      event( id.event() )
-    {}
-  }; // end of struct EventIdData definition
 
   struct SingleBranchManager {
     std::string tag;
@@ -194,11 +181,10 @@ private:
   std::string title_;
   edm::InputTag src_;
   std::string prefix_;
-  bool eventInfo_;
   bool lazyParser_;
 
   /// leaf variables
-  EventIdData id_;
+  EventIdBranchManger eventId_;
   BranchManager vars_;
 //   PmvBranchManager pmv_;
 }; // of TreeMaker class declaration
@@ -211,9 +197,8 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig) :
                                                      "TreeMaker tree") ),
   src_       ( iConfig.getParameter<edm::InputTag>("src") ),
   prefix_    ( iConfig.getUntrackedParameter<std::string>("prefix", "") ),
-  eventInfo_ ( iConfig.getUntrackedParameter<bool>("eventInfo", true) ),
   lazyParser_( iConfig.getUntrackedParameter<bool>("lazyParser", true) ),
-  id_(),
+  eventId_(iConfig),
   vars_( iConfig.getUntrackedParameter<std::string>("sizeName",
                                                     "n" + prefix_ + "s") )
 //   pmv_( iConfig )
@@ -222,9 +207,7 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig) :
   // book the tree:
   tree_ = fs->make<TTree>(name_.c_str(), title_.c_str() );
 
-  if (eventInfo_) {
-    tree_->Branch("id", &id_, "run/i:luminosityBlock:event");
-  }
+  eventId_.init( *tree_ );
 
   typedef std::vector<edm::ParameterSet> VPSet;
   VPSet variables = iConfig.getParameter<VPSet>("variables");
@@ -270,7 +253,6 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig) :
     } // end if is a standard or conditional quantity
   } // end of loop over variables
   vars_.makeBranches(*tree_);
-//   pmv_.makeBranches(*tree_);
 } // end of constructor
 
 
@@ -289,13 +271,12 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
 
-  id_ = EventIdData( iEvent.id() );
+  eventId_.getData(iEvent, iSetup);
 
   edm::Handle<C> collection;
   iEvent.getByLabel(src_, collection);
 
   vars_.getData(*collection);
-//   pmv_.getData(iEvent, iSetup);
   tree_->Fill();
 }
 
