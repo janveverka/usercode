@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:   TreeMaker
-// Class:    TreeMaker
+// Class:    PmvTreeMaker
 //
-/**\class TreeMaker TreeMaker.cc Misc/TreeMaker/src/TreeMaker.cc
+/**\class PmvTreeMaker PmvTreeMaker.cc Misc/TreeMaker/src/PmvTreeMaker.cc
 
  Description: [one line class summary]
 
@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Veverka
 //      Created:  Mon Apr  4 21:25:02 CEST 2011
-// $Id: TreeMaker.cc,v 1.4 2011/04/07 02:04:30 veverka Exp $
+// $Id: PmvTreeMaker.cc,v 1.4 2011/04/07 02:04:30 veverka Exp $
 //
 //
 
@@ -37,15 +37,15 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-// #include "Misc/TreeMaker/interface/PmvBranchManager.h"
+#include "Misc/TreeMaker/interface/PmvBranchManager.h"
 
 const unsigned VECTOR_SIZE = 99;
 
 // class declaration
-class TreeMaker : public edm::EDAnalyzer {
+class PmvTreeMaker : public edm::EDAnalyzer {
 public:
-  explicit TreeMaker(const edm::ParameterSet&);
-  ~TreeMaker();
+  explicit PmvTreeMaker(const edm::ParameterSet&);
+  ~PmvTreeMaker();
 
 private:
   virtual void beginJob() ;
@@ -200,23 +200,23 @@ private:
   /// leaf variables
   EventIdData id_;
   BranchManager vars_;
-//   PmvBranchManager pmv_;
-}; // of TreeMaker class declaration
+  PmvBranchManager pmv_;
+}; // of PmvTreeMaker class declaration
 
 // constructors and destructor
-TreeMaker::TreeMaker(const edm::ParameterSet& iConfig) :
+PmvTreeMaker::PmvTreeMaker(const edm::ParameterSet& iConfig) :
   tree_(0),
   name_ ( iConfig.getUntrackedParameter<std::string>("name", "tree") ),
   title_( iConfig.getUntrackedParameter<std::string>("title",
-                                                     "TreeMaker tree") ),
+                                                     "PmvTreeMaker tree") ),
   src_       ( iConfig.getParameter<edm::InputTag>("src") ),
   prefix_    ( iConfig.getUntrackedParameter<std::string>("prefix", "") ),
   eventInfo_ ( iConfig.getUntrackedParameter<bool>("eventInfo", true) ),
   lazyParser_( iConfig.getUntrackedParameter<bool>("lazyParser", true) ),
   id_(),
   vars_( iConfig.getUntrackedParameter<std::string>("sizeName",
-                                                    "n" + prefix_ + "s") )
-//   pmv_( iConfig )
+                                                    "n" + prefix_ + "s") ),
+  pmv_( iConfig )
 {
   edm::Service<TFileService> fs;
   // book the tree:
@@ -270,11 +270,11 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig) :
     } // end if is a standard or conditional quantity
   } // end of loop over variables
   vars_.makeBranches(*tree_);
-//   pmv_.makeBranches(*tree_);
+  pmv_.makeBranches(*tree_);
 } // end of constructor
 
 
-TreeMaker::~TreeMaker() {
+PmvTreeMaker::~PmvTreeMaker() {
 //   LogDebug("Processing") << "Entering dtor ..." << std::endl;
 }
 
@@ -285,7 +285,7 @@ TreeMaker::~TreeMaker() {
 
 // ------------ method called to for each event  ------------
 void
-TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+PmvTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
 
@@ -295,20 +295,20 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByLabel(src_, collection);
 
   vars_.getData(*collection);
-//   pmv_.getData(iEvent, iSetup);
+  pmv_.getData(iEvent, iSetup);
   tree_->Fill();
 }
 
 
 // ------------ method called once each job just before starting event loop  ------------
 void
-TreeMaker::beginJob() {
+PmvTreeMaker::beginJob() {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
-TreeMaker::endJob() {
+PmvTreeMaker::endJob() {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(TreeMaker);
+DEFINE_FWK_MODULE(PmvTreeMaker);
