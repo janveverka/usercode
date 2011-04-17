@@ -7,7 +7,7 @@
 
 #include "TTree.h"
 
-namespace jv {
+namespace cit {
   class EventIdBranchManager {
     public:
       /// ctor and dtor
@@ -36,6 +36,6 @@ namespace jv {
       EventIdData id_;
 
   };  // end of class EventIdBranchManager declaration
-} // end of namespace jv
+} // end of namespace cit
 
 #endif

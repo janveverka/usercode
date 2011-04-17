@@ -1,6 +1,6 @@
 #include "Misc/TreeMaker/interface/EventIdBranchManager.h"
 
-namespace jv {
+namespace cit {
 
   EventIdBranchManager::EventIdBranchManager(const edm::ParameterSet& iConfig) :
       eventInfo_ ( iConfig.getUntrackedParameter<bool>("eventInfo", true) ),
@@ -30,4 +30,4 @@ namespace jv {
     id_ = EventIdData( iEvent.id() );
   } // end of EventIdBranchManager::getData(...) definition
 
-} // end of namespace jv
+} // end of namespace cit
