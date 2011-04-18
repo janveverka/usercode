@@ -1,0 +1,5 @@
+<use name="boost"/>
+<environment>
+  <bin file="polymorphic_vector.cc">
+  </bin>
+</environment>
