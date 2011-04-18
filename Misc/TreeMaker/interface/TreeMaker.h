@@ -42,7 +42,8 @@
 
 namespace cit {
 
-  // class declaration
+  // TreeMaker declaration
+  template <typename Collection>
   class TreeMaker : public edm::EDAnalyzer {
   public:
     explicit TreeMaker(const edm::ParameterSet&);
@@ -63,12 +64,13 @@ namespace cit {
 
     /// leaf variables
     EventIdBranchManager eventId_;
-    BranchManager<reco::CandidateView> vars_;
+    BranchManager<Collection> vars_;
   //   PmvBranchManager pmv_;
   }; // of TreeMaker class declaration
 
   // constructors and destructor
-  TreeMaker::TreeMaker(const edm::ParameterSet& iConfig) :
+  template <typename Collection>
+  TreeMaker<Collection>::TreeMaker(const edm::ParameterSet& iConfig) :
     tree_(0),
     name_ ( iConfig.getUntrackedParameter<std::string>( "name", "tree" ) ),
     title_( iConfig.getUntrackedParameter<std::string>( "title",
@@ -87,8 +89,9 @@ namespace cit {
   } // end of constructor
 
 
-  TreeMaker::~TreeMaker() {
-  }
+  template <typename Collection>
+  TreeMaker<Collection>::~TreeMaker()
+  { }
 
 
   //
@@ -96,8 +99,11 @@ namespace cit {
   //
 
   // ------------ method called to for each event  ------------
+
+  template <typename Collection>
   void
-  TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+  TreeMaker<Collection>::analyze( const edm::Event& iEvent,
+                                  const edm::EventSetup& iSetup )
   {
     using namespace edm;
 
@@ -109,19 +115,18 @@ namespace cit {
 
 
   // ------------ method called once each job just before starting event loop  ------------
+  template <typename Collection>
   void
-  TreeMaker::beginJob() {
-  }
+  TreeMaker<Collection>::beginJob()
+  { }
 
   // ------------ method called once each job just after ending the event loop  ------------
+  template <typename Collection>
   void
-  TreeMaker::endJob() {
-  }
+  TreeMaker<Collection>::endJob()
+  { }
 
 
 } // end of namespace cit
 
 
-//define this as a plug-in
-using cit::TreeMaker;
-DEFINE_FWK_MODULE(TreeMaker);

@@ -70,6 +70,7 @@ class TestTreeMaker : public edm::EDAnalyzer {
     Float_t candPt_ [ncandsMax];
     Float_t candEta_[ncandsMax];
     Float_t candPhi_[ncandsMax];
+    Float_t candZSide_[ncandsMax];
 
 }; // end of class declaration
 
@@ -116,6 +117,10 @@ TestTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     candPt_ [ncands_] = cands->at(ncands_).pt ();
     candEta_[ncands_] = cands->at(ncands_).eta();
     candPhi_[ncands_] = cands->at(ncands_).phi();
+    if ( cands->at(ncands_).eta() > 0 )
+      candZSide_[ncands_] = 1;
+    else
+      candZSide_[ncands_] = -1;
   }
 
   tree_->Fill();
@@ -131,6 +136,7 @@ TestTreeMaker::beginJob()
   tree_->Branch("candPt" , &candPt_ , "candPt[ncands]/F");
   tree_->Branch("candEta", &candEta_, "candEta[ncands]/F");
   tree_->Branch("candPhi", &candPhi_, "candPhi[ncands]/F");
+  tree_->Branch("candZSide" , &candZSide_ , "candZSide[ncands]/F");
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

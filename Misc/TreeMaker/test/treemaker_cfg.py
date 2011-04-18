@@ -52,7 +52,7 @@ process.tree.variables.extend([
     ),
     cms.PSet(
         tag = cms.untracked.string("GenPt"),
-        quantity = cms.untracked.PSet(
+        conditionalQuantity = cms.untracked.PSet(
            ifCondition = cms.untracked.string("genParticlesSize > 0"),
            thenQuantity = cms.untracked.string("genParticle.pt"),
            elseQuantity = cms.untracked.string("0")

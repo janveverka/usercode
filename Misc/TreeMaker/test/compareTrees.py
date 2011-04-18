@@ -17,7 +17,14 @@ tree.AddFriend(testTree, "ref")
 canvases = []
 
 print "== var   entries mean rms =="
-for var in "id.run id.luminosityBlock ncands id.event candPt candEta candPhi".split():
+for var in """id.run
+              id.luminosityBlock
+              ncands
+              id.event
+              candPt
+              candEta
+              candPhi
+              candZSide""".split():
   canvases.append(TCanvas(var, var))
   tree.Draw("%s-ref.%s>>h%s" % (var,var,var))
   hist = gDirectory.Get("h" + var)
