@@ -12,11 +12,11 @@
 
 namespace cit {
 
-  template <typename Collection>
+  template <typename Collection, typename T>
   class BranchManager {
     public:
-      typedef SingleBranchManager<Collection> var_type;
-      typedef ConditionalSingleBranchManager<Collection> condvar_type;
+      typedef SingleBranchManager<Collection, T> var_type;
+      typedef ConditionalSingleBranchManager<Collection, T> condvar_type;
       typedef typename var_type::obj_type obj_type;
       typedef typename var_type::func_type func_type;
       typedef typename condvar_type::cut_type cut_type;

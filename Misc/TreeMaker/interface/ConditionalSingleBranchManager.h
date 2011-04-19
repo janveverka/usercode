@@ -11,15 +11,16 @@
 
 namespace cit {
 
-  template <typename Collection>
+  template <typename Collection, typename T>
   class ConditionalSingleBranchManager :
-    public SingleBranchManager<Collection>
+    public SingleBranchManager<Collection, T>
   {
     public:
 
       /// typedefs
-      typedef typename SingleBranchManager<Collection>::obj_type obj_type;
-      typedef typename SingleBranchManager<Collection>::func_ptr_type func_ptr_type;
+      enum MAX_SIZE {VECTOR_SIZE = 100};
+      typedef typename SingleBranchManager<Collection, T>::obj_type obj_type;
+      typedef typename SingleBranchManager<Collection, T>::func_ptr_type func_ptr_type;
       typedef StringCutObjectSelector<obj_type, true> cut_type;
       typedef std::auto_ptr<cut_type> cut_ptr_type;
 
@@ -29,8 +30,8 @@ namespace cit {
           cut_ptr_type iCondition,
           func_ptr_type iQuantity,
           func_ptr_type iElseQuantity,
-          size_t size = SingleBranchManager<Collection>::VECTOR_SIZE) :
-        SingleBranchManager<Collection>(iTag, iQuantity, size),
+          size_t size = VECTOR_SIZE) :
+        SingleBranchManager<Collection, T>(iTag, iQuantity, size),
         condition_(iCondition),
         elseQuantity_(iElseQuantity)
       {} // end of ctor

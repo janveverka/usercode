@@ -3,12 +3,14 @@
 
 #include <string>
 #include <memory>
-#include "CommonTools/Utils/interface/StringObjectFunction.h"
+#include <boost/type_traits/is_same.hpp>
 #include "TTree.h"
+#include "CommonTools/Utils/interface/StringObjectFunction.h"
+#include "FWCore/Utilities/interface/Exception.h"
 
 namespace cit {
 
-  template <typename Collection>
+  template <typename Collection, typename T>
   class SingleBranchManager {
     public:
       /// typedefs
@@ -33,9 +35,37 @@ namespace cit {
       void
       makeBranch( TTree &tree, const char *size )
       {
-        branch_ = tree.Branch(tag_.c_str(),
-                              &(data_[0]),
-                              (tag_ + "[" + size + "]/F").c_str() );
+        std::string leafTypeFlag;
+
+        /*
+          - B : an 8 bit signed integer (Char_t)
+          - b : an 8 bit unsigned integer (UChar_t)
+          - S : a 16 bit signed integer (Short_t)
+          - s : a 16 bit unsigned integer (UShort_t)
+          - I : a 32 bit signed integer (Int_t)
+          - i : a 32 bit unsigned integer (UInt_t)
+          - F : a 32 bit floating point (Float_t)
+          - D : a 64 bit floating point (Double_t)
+          - L : a 64 bit signed integer (Long64_t)
+          - l : a 64 bit unsigned integer (ULong64_t)
+          - O : a boolean (Bool_t)
+        */
+
+        if      ( boost::is_same<T, Char_t   >::value ) leafTypeFlag = "B";
+        else if ( boost::is_same<T, UChar_t  >::value ) leafTypeFlag = "b";
+        else if ( boost::is_same<T, Int_t    >::value ) leafTypeFlag = "I";
+        else if ( boost::is_same<T, Float_t  >::value ) leafTypeFlag = "F";
+        else if ( boost::is_same<T, Double_t >::value ) leafTypeFlag = "D";
+        else if ( boost::is_same<T, Long64_t >::value ) leafTypeFlag = "L";
+        else if ( boost::is_same<T, ULong64_t>::value ) leafTypeFlag = "l";
+        else 
+          throw cms::Exception("IllegalType") 
+            << "Illegal template argument T!\n";
+
+        branch_ = tree.Branch( tag_.c_str(),
+                               &( data_[0] ),
+                               ( tag_ + "[" + size + "]/" +
+                                 leafTypeFlag               ).c_str() );
       } // end of method makeBranch(...)
 
 
@@ -62,7 +92,7 @@ namespace cit {
     protected:
       std::string tag_;
       func_ptr_type quantity_;
-      std::vector<Float_t> data_;
+      std::vector<T> data_;
       TBranch *branch_;
   }; // end of class SingleBranchManager definition
 } // end of namespace cit

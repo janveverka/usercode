@@ -43,34 +43,31 @@
 namespace cit {
 
   // TreeMaker declaration
-  template <typename Collection>
+  template <typename Collection, typename T = Float_t>
   class TreeMaker : public edm::EDAnalyzer {
   public:
     explicit TreeMaker(const edm::ParameterSet&);
     ~TreeMaker();
 
-  private:
+  protected:
     virtual void beginJob();
     virtual void analyze(const edm::Event&, const edm::EventSetup&);
     virtual void endJob();
 
     // ----------member data ---------------------------
-    typedef reco::CandidateView C;
-    typedef C typename_C;
-
     TTree *tree_;
     std::string name_;
     std::string title_;
 
-    /// leaf variables
+    /// branch managers
     EventIdBranchManager eventId_;
-    BranchManager<Collection> vars_;
+    BranchManager<Collection, T> vars_;
   //   PmvBranchManager pmv_;
   }; // of TreeMaker class declaration
 
   // constructors and destructor
-  template <typename Collection>
-  TreeMaker<Collection>::TreeMaker(const edm::ParameterSet& iConfig) :
+  template <typename Collection, typename T>
+  TreeMaker<Collection, T>::TreeMaker(const edm::ParameterSet& iConfig) :
     tree_(0),
     name_ ( iConfig.getUntrackedParameter<std::string>( "name", "tree" ) ),
     title_( iConfig.getUntrackedParameter<std::string>( "title",
@@ -89,8 +86,8 @@ namespace cit {
   } // end of constructor
 
 
-  template <typename Collection>
-  TreeMaker<Collection>::~TreeMaker()
+  template <typename Collection, typename T>
+  TreeMaker<Collection, T>::~TreeMaker()
   { }
 
 
@@ -100,9 +97,9 @@ namespace cit {
 
   // ------------ method called to for each event  ------------
 
-  template <typename Collection>
+  template <typename Collection, typename T>
   void
-  TreeMaker<Collection>::analyze( const edm::Event& iEvent,
+  TreeMaker<Collection, T>::analyze( const edm::Event& iEvent,
                                   const edm::EventSetup& iSetup )
   {
     using namespace edm;
@@ -115,15 +112,15 @@ namespace cit {
 
 
   // ------------ method called once each job just before starting event loop  ------------
-  template <typename Collection>
+  template <typename Collection, typename T>
   void
-  TreeMaker<Collection>::beginJob()
+  TreeMaker<Collection, T>::beginJob()
   { }
 
   // ------------ method called once each job just after ending the event loop  ------------
-  template <typename Collection>
+  template <typename Collection, typename T>
   void
-  TreeMaker<Collection>::endJob()
+  TreeMaker<Collection, T>::endJob()
   { }
 
 
