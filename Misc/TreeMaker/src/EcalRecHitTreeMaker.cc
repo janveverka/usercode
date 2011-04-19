@@ -29,5 +29,4 @@ namespace cit {
 
 //define this as a plug-in
 using cit::EcalRecHitTreeMaker;
-// using namespace cit;
 DEFINE_FWK_MODULE(EcalRecHitTreeMaker);
