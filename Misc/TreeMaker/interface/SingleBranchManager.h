@@ -10,7 +10,7 @@
 
 namespace cit {
 
-  template <typename Collection, typename T>
+  template <typename Collection, typename T=Float_t>
   class SingleBranchManager {
     public:
       /// typedefs
@@ -58,8 +58,8 @@ namespace cit {
         else if ( boost::is_same<T, Double_t >::value ) leafTypeFlag = "D";
         else if ( boost::is_same<T, Long64_t >::value ) leafTypeFlag = "L";
         else if ( boost::is_same<T, ULong64_t>::value ) leafTypeFlag = "l";
-        else 
-          throw cms::Exception("IllegalType") 
+        else
+          throw cms::Exception("IllegalType")
             << "Illegal template argument T!\n";
 
         branch_ = tree.Branch( tag_.c_str(),

@@ -11,7 +11,7 @@
 
 namespace cit {
 
-  template <typename Collection, typename T>
+  template <typename Collection, typename T=Float_t>
   class ConditionalSingleBranchManager :
     public SingleBranchManager<Collection, T>
   {

@@ -12,7 +12,7 @@
 
 namespace cit {
 
-  template <typename Collection, typename T>
+  template <typename Collection, typename T=Float_t>
   class BranchManager {
     public:
       typedef SingleBranchManager<Collection, T> var_type;
@@ -32,39 +32,36 @@ namespace cit {
                                                               "n"         ) ),
         size(0)
       {
-        typedef std::vector<edm::ParameterSet> VPSet;
+        typedef edm::ParameterSet PSet;
+        typedef std::vector<PSet> VPSet;
         VPSet variables = iConfig.getParameter<VPSet>("variables");
-        for (VPSet::const_iterator q = variables.begin(); q != variables.end(); ++q){
+        for (VPSet::const_iterator q = variables.begin();
+             q != variables.end(); ++q)
+        {
           std::string tag = prefix_ + q->getUntrackedParameter<std::string>("tag");
 
           if ( q->existsAs<std::string>("quantity", false) ) {
-            func_ptr_type
-            quantity( new func_type(
-                      q->getUntrackedParameter<std::string>("quantity"),
-                      lazyParser_                                        ) );
+            func_ptr_type quantity( new func_type(
+              q->getUntrackedParameter<std::string>("quantity"),
+              lazyParser_                                        ) );
 
             variables_.push_back( new var_type(tag, quantity) );
           } else {
             // expect a conditional quantity
-            edm::ParameterSet const &
-            cfg = q->getUntrackedParameter<
-                        edm::ParameterSet
-                     >( "conditionalQuantity" );
+            PSet const &
+            cfg = q->getUntrackedParameter<PSet>( "conditionalQuantity" );
 
-            cut_ptr_type
-            condition( new cut_type(
-                       cfg.getUntrackedParameter<std::string>("ifCondition"),
-                       lazyParser_                                            ) );
+            cut_ptr_type condition( new cut_type(
+              cfg.getUntrackedParameter<std::string>("ifCondition"),
+              lazyParser_                                            ) );
 
-            func_ptr_type
-            quantity( new func_type(
-                      cfg.getUntrackedParameter<std::string>("thenQuantity"),
-                      lazyParser_                                             ) );
+            func_ptr_type quantity( new func_type(
+              cfg.getUntrackedParameter<std::string>("thenQuantity"),
+              lazyParser_                                             ) );
 
-            func_ptr_type
-            elseQuantity( new func_type(
-                          cfg.getUntrackedParameter<std::string>("elseQuantity"),
-                          lazyParser_                                             ) );
+            func_ptr_type elseQuantity( new func_type(
+              cfg.getUntrackedParameter<std::string>("elseQuantity"),
+              lazyParser_                                             ) );
 
             variables_.push_back( new condvar_type( tag,
                                                     condition,
