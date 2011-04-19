@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Veverka
 //      Created:  Mon Apr  4 21:25:02 CEST 2011
-// $Id: EcalRecHitTreeMaker.cc,v 1.8 2011/04/17 22:14:12 veverka Exp $
+// $Id: EcalRecHitTreeMaker.cc,v 1.2 2011/04/19 09:02:36 veverka Exp $
 //
 //
 
