@@ -9,7 +9,6 @@
 <use   name="DataFormats/PatCandidates"/>
 <use   name="DataFormats/VertexReco"/>
 <use   name="FWCore/MessageLogger"/>
-<flags   EDM_PLUGIN="1"/>
 <export>
   <lib   name="1"/>
 </export>

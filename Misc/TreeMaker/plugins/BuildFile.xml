@@ -1,15 +1,21 @@
-<use   name="FWCore/Framework"/>
-<use   name="FWCore/PluginManager"/>
-<use   name="FWCore/ParameterSet"/>
+<use   name="AnalysisDataFormats/EWK"/>
+<use   name="CommonTools/CandAlgos"/>
+<use   name="CommonTools/CandUtils"/>
 <use   name="CommonTools/UtilAlgos"/>
+<use   name="CommonTools/Utils"/>
+<use   name="CondFormats/EcalObjects"/>
 <use   name="DataFormats/Candidate"/>
 <use   name="DataFormats/Common"/>
+<use   name="DataFormats/HepMCCandidate"/>
 <use   name="DataFormats/EcalDetId"/>
 <use   name="DataFormats/EcalRecHit"/>
 <use   name="DataFormats/PatCandidates"/>
 <use   name="DataFormats/VertexReco"/>
-<use   name="Misc/TreeMaker"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/PluginManager"/>
+<use   name="FWCore/ParameterSet"/>
 <use   name="FWCore/MessageLogger"/>
 <flags   EDM_PLUGIN="1"/>
-<library   name="MiscTreeMaker_plugins" file="*.cc"/>
-
+<library   name="MiscTreeMaker_plugins" file="*.cc">
+  <use   name="Misc/TreeMaker"/>
+</library>
