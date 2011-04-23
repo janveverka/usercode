@@ -70,7 +70,7 @@ hpass = h_DEta.Clone(h_DEta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
 geff.BayesDivide(hpass,htot)
-geff.GetXaxis().SetTitle("#Delta#eta(#mu_{near},#gamma)")
+geff.GetXaxis().SetTitle("min#Delta#eta(#mu,#gamma)")
 geff.GetYaxis().SetTitle("Pixel Match Veto Efficiency")
 geff.SetTitle("Dec22ReReco, L = 35.9 pb^{-1}")
 geff.Draw("ap")
@@ -101,7 +101,7 @@ hpass = h_DEta.Clone(h_DEta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
 geff.BayesDivide(hpass,htot)
-geff.GetXaxis().SetTitle("#Delta#eta(#mu_{near},#gamma)");
+geff.GetXaxis().SetTitle("min#Delta#eta(#mu,#gamma)");
 geff.GetYaxis().SetTitle("Pixel Match Veto Efficiency");
 geff.Draw("ap");
 graphs.append(geff)
@@ -129,7 +129,7 @@ hpass = h_DEta.Clone(h_DEta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
 geff.BayesDivide(hpass,htot)
-geff.GetXaxis().SetTitle("#Delta#eta(#mu_{near},#gamma)")
+geff.GetXaxis().SetTitle("min#Delta#eta(#mu,#gamma)")
 geff.GetYaxis().SetTitle("Pixel Match Veto Efficiency")
 geff.SetTitle("Dec22ReReco, L = 35.9 pb^{-1}")
 geff.Draw("ap")
@@ -160,7 +160,7 @@ hpass = h_DEta.Clone(h_DEta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
 geff.BayesDivide(hpass,htot)
-geff.GetXaxis().SetTitle("#Delta#eta(#mu_{near},#gamma)");
+geff.GetXaxis().SetTitle("min#Delta#eta(#mu,#gamma)");
 geff.GetYaxis().SetTitle("Pixel Match Veto Efficiency");
 geff.Draw("ap");
 graphs.append(geff)
