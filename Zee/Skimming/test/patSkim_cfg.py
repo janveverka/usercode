@@ -20,7 +20,7 @@ from ElectroWeakAnalysis.MultiBosons.tools.skimmingTools import *
 
 ## See link below for the definition of the selection
 ## https://twiki.cern.ch/twiki/bin/view/CMS/VGammaFirstPaper#Vgamma_Group_skims
-skimVersion = 3  # Do we need this?
+skimVersion = 4  # Do we need this?
 basePath = "ElectroWeakAnalysis.MultiBosons.Skimming." # shorthand
 
 options = copy.deepcopy(defaultOptions)
@@ -36,7 +36,8 @@ options = copy.deepcopy(defaultOptions)
 applyJobOptions(options)
 
 ## Input
-process.source.fileNames = options.inputFiles[:3]
+#process.source.fileNames = options.inputFiles[:3]
+process.source.fileNames = options.inputFiles
 
 process.maxEvents.input = -1
 if options.outEvents >= 0:
@@ -111,15 +112,27 @@ if not options.isRealData:
         cms.InputTag("photonGenMatch", "grandMotherStatus"),
         ])
 
-process.patDefaultSequence.replace(process.patPhotons,
-    process.preshowerClusterShape *
-    process.piZeroDiscriminators  *
-    process.pi0Discriminator      *
-    process.patPhotons
+if not options.isAOD:
+    process.patDefaultSequence.replace(process.patPhotons,
+        process.preshowerClusterShape *
+        process.piZeroDiscriminators  *
+        process.pi0Discriminator      *
+        process.patPhotons
+        )
+    # this can be moved out of the if block when the pizero descrim. works in AOD
+    process.patPhotons.userData.userFloats.src.append(
+        cms.InputTag("pi0Discriminator")
     )
-process.patPhotons.userData.userFloats.src.append(
-    cms.InputTag("pi0Discriminator")
-    )
+# this is for later, Aris needs to fix a the pi-zero discriminator
+#else:
+#    process.patDefaultSequence.replace(process.patPhotons,
+#        process.piZeroDiscriminators  *
+#        process.pi0Discriminator      *
+#        process.patPhotons
+#        )
+#    process.piZeroDiscriminators.preshClusterShapeProducer = cms.string('multi5x5PreshowerClusterShape')
+#    process.piZeroDiscriminators.preshClusterShapeCollectionX = cms.string('multi5x5PreshowerXClustersShape')
+#    process.piZeroDiscriminators.preshClusterShapeCollectionY = cms.string('multi5x5PreshowerYClustersShape')
 
 ## Add electron user data
 process.load(basePath + "electronUserData_cfi")
@@ -202,13 +215,13 @@ if not options.ignoreSkimFilter:
     process.load("Zee.Skimming.dielectronSkimFilterSequence_cff")
     process.skimFilterSequence += process.dielectronSkimFilterSequence
 ## Add the photon re-reco.
-addPhotonReReco(process)
+#addPhotonReReco(process)
 ## Now change the photon reco to much looser settings.
-process.photonCore.minSCEt = 2.0
-process.photons.minSCEtBarrel = 2.0
-process.photons.minSCEtEndcap = 2.0
-process.photons.maxHoverEBarrel = 10.0
-process.photons.maxHoverEEndcap = 10.0
+#process.photonCore.minSCEt = 2.0
+#process.photons.minSCEtBarrel = 2.0
+#process.photons.minSCEtEndcap = 2.0
+#process.photons.maxHoverEBarrel = 10.0
+#process.photons.maxHoverEEndcap = 10.0
 ## Remove the pi0 discriminator
 ## (currently doesn't work with extremely loose photons)
 ## FIXME: make the pi0Discriminator work for these weird photons too
@@ -248,15 +261,17 @@ else:
 
 
 process.load(basePath + "VGammaSkimSequences_cff")
-process.load("Zee.Skimming.ZeeSequence_cff")
+#process.load("Zee.Skimming.ZeeSequence_cff")
 
-process.dielectrons.cut = "mass > 20"
+process.dielectrons.cut = "(%s) & mass>20" % process.dielectrons.cut.value()
 process.dielectrons.checkCharge = True
+process.ZEEGammaSequence.remove(process.ZEEGammaFilter)
 
 process.p = cms.Path(
-    process.defaultSequence *
-    (process.ZEEGammaSequence + process.ZeeSequence)
-)
+    process.defaultSequence
+    + process.ZEEGammaSequence
+    #+ process.ZeeSequence
+    )
 
 # process.WENuGammaPath  = cms.Path(
 #     process.defaultSequence * process.WENuGammaSequence
@@ -282,7 +297,7 @@ process.out.outputCommands += vgEventContent.extraSkimEventContent + [
 if not options.isRealData:
     process.out.outputCommands += ["keep *_prunedGenParticles_*_PAT"]
 
-process.out.SelectEvents.SelectEvents = ["skimFilterPath"]
+process.out.SelectEvents.SelectEvents = ["p"]
 
 process.out.fileName = options.outputFile
 
