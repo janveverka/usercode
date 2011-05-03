@@ -134,14 +134,14 @@ ZeeTree::init(TTree *tree) {
 //   branch("nZees", &nZees_);
 //   branch("mass" , mass_ , "nZees");
 //   branch("massGen", massGen_, "nZees");
-  branch("massEfromGenPfromEle", &massEfromGenPfromEle_, "nZees");
+/*  branch("massEfromGenPfromEle", &massEfromGenPfromEle_, "nZees");
   branch("massEfromScPfromEle", massEfromScPfromEle_, "nZees");
   branch("massEfromPhoPfromEle", massEfromPhoPfromEle_, "nZees");
   branch("massEfromPhoPfromPho", massEfromPhoPfromPho_, "nZees");
   branch("massEfromPhoPfromPhoVtxFromEle", massEfromPhoPfromPhoVtxFromEle_, "nZees");
   branch("massEfromPhoPfromEleVtxFromPho", massEfromPhoPfromEleVtxFromPho_, "nZees");
   branch("ele1", ele1_, "nZees");
-  branch("ele2", ele2_, "nZees");
+  branch("ele2", ele2_, "nZees");*/
 } // end ZeeTree::init(..)
 
 
