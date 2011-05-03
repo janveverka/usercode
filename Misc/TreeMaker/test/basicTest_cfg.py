@@ -38,9 +38,9 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string(options.outputFile)
 )
 
-process.load("Misc.TreeMaker.treemaker_cfi")
+process.load("Misc.TreeMaker.basicTest_cfi")
 
-process.p = cms.Path(process.tree)
+process.p = cms.Path(process.basicTest)
 
 ## Enable history and tab-completion for interactive inspection
 if __name__ == "__main__": import user
