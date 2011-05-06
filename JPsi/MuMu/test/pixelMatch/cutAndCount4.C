@@ -51,16 +51,18 @@ TCut phoPt5to10("5 <= phoPt & phoPt < 10");
 TCut phoPt10to20("10 <= phoPt & phoPt < 20");
 TCut phoPt20up("20 <= phoPt");
 
-TCut ebSelection("phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.04 | minDPhi > 0.3)");
-TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 0.3)");
+/*TCut ebSelection("phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.04 | minDPhi > 0.3)");
+TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 0.3)");*/
+TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)");
+TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)");
 
 // TCut selection = eeSelection;
-// TCut selection = ebSelection;
+TCut selection = ebSelection;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;
 // TCut selection = ebSelection && phoPt10to20;
-TCut selection = ebSelection && phoPt20up;
+// TCut selection = ebSelection && phoPt20up;
 
 // gStyle->SetPadLeftMargin(1.3);
 TCanvas * c1 = new TCanvas("c1", "c1", 20, 20, 800, 400);
@@ -204,6 +206,7 @@ hpb_mc->Draw("same");
 hpb_qcd->Draw("same");
 hp->Draw("e0same");
 c1->cd(1)->RedrawAxis();
+
 
 // Draw failing probes
 TH1F *hf = (TH1F*) gDirectory->Get("hf");

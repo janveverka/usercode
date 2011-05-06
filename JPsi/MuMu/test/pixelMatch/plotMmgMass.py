@@ -61,8 +61,9 @@ eeSelection = "!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)"
 c1 = TCanvas()
 canvases.append(c1)
 
-h_mmgMass = {}
-h_mmgMass["data"] = TH1F("h_mmgMass_data_eb", "min #Delta #eta (#mu, #gamma)", 60, 60, 120)
+#h_mmgMass = {}
+#h_mmgMass["data"] = TH1F("h_mmgMass_data_eb", "min #Delta #eta (#mu, #gamma)", 60, 60, 120)
+h_mmgMass = TH1F("h_mmgMass_data_eb", "min #Delta #eta (#mu, #gamma)", 60, 60, 120)
 
 tree["data"].Draw("mmgMass>>h_mmgMass_data_eb", ebSelection)
 htot = h_mmgMass.Clone(h_mmgMass.GetName() + "_tot")

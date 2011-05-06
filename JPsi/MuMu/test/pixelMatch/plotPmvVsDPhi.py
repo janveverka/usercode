@@ -79,6 +79,7 @@ graphs.append(geff)
 latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2010")
 latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 latexLabel.DrawLatex(0.7, 0.2, "Barrel")
+c1.SetName( "pmvEff_vs_DPhi_data_EB" )
 c1.Update()
 
 
@@ -109,6 +110,7 @@ graphs.append(geff)
 latexLabel.DrawLatex(0.15, 0.96, "Powheg/Pythia Z#rightarrow#mu#mu+X")
 latexLabel.DrawLatex(0.75, 0.96, "Winter10")
 latexLabel.DrawLatex(0.7, 0.2, "Barrel")
+c1.SetName( "pmvEff_vs_DPhi_MC_EB" )
 c1.Update()
 
 
@@ -138,6 +140,7 @@ graphs.append(geff)
 latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2010")
 latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 latexLabel.DrawLatex(0.7, 0.2, "Endcaps")
+c1.SetName( "pmvEff_vs_DPhi_data_EE" )
 c1.Update()
 
 
@@ -168,8 +171,14 @@ graphs.append(geff)
 latexLabel.DrawLatex(0.15, 0.96, "Powheg/Pythia Z#rightarrow#mu#mu+X")
 latexLabel.DrawLatex(0.75, 0.96, "Winter10")
 latexLabel.DrawLatex(0.7, 0.2, "Endcaps")
+
+c1.SetName( "pmvEff_vs_DPhi_MC_EE" )
 c1.Update()
 
+for c in canvases:
+    i = canvases.index(c)
+    c.SetWindowPosition(10+20*i, 10+20*i)
+    c.Print( c.GetName() + ".eps" )
 
 #geff_DPhi_mc.BayesDivide(h_DPhi_mc_pass, h_DPhi_mc_tot)
 
