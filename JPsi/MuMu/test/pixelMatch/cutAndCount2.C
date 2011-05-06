@@ -67,13 +67,13 @@ TCut selectionBase = drCut &&
 TCut ebSelection = selectionBase && ebCut && ebSihihCut;
 TCut eeSelection = selectionBase && eeCut;
 
-// TCut selection = ebSelection;
+TCut selection = ebSelection;
 // TCut selection = eeSelection;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;
 // TCut selection = ebSelection && phoPt10to20;
-TCut selection = ebSelection && phoPt20up;
+// TCut selection = ebSelection && phoPt20up;
 
 // gStyle->SetPadLeftMargin(1.3);
 TCanvas * c1 = new TCanvas("c1", "c1", 20, 20, 800, 400);
@@ -241,6 +241,6 @@ frame->GetXaxis()->SetBinLabel(2,"MC");
 frame->Draw();
 g_eff.Draw("p");
 
-c1->Print("m3_x.png");
-c2->Print("eff_x.png");
+c1->Print("m3_x.eps");
+c2->Print("eff_x.eps");
 }
