@@ -1,16 +1,30 @@
 from ROOT import *
 
-file = TFile("bumpTree_wjets.root")
-# file = TFile("bumpTree.root")
-tree = file.Get("tree/tree")
+tags = "zg zjets wg wjets".split()
+#tags = "zg".split()
 
-def selection(minPt):
-    return "min(eg.ele.pt,eg.pho.pt)>%s & max(eg.ele.pt,eg.pho.pt) > 40" % minPt
+file, tree = {}, {}
+for tag in tags:
+    file[tag] = TFile("bumpTree_%s.root" % tag)
+    tree[tag] = file[tag].Get("tree/tree") 
 
-# tree.Draw("eg.mass>>h20(40,80,160)", selection(20))
-# tree.Draw("eg.mass>>h30(40,80,160)", selection(30), "same")
-c1 = TCanvas()
-tree.Draw("eg.mass>>h40(40,80,160)", selection(40))
-c2 = TCanvas()
-tree.Draw("eg.mass>>h40(50,0,250)", selection(40))
-# tree.Draw("eg.mass>>h50(40,80,160)", selection(50), "same")
+weight100ipb = {
+    "wg"    : 0.03901,
+    "wjets" : 0.30664,
+    "zjets" : 0.11729,
+    "zg"    : 0.01308,
+}
+
+def selection(minPt, tag):
+    return "( min(eg.ele.pt,eg.pho.pt) > %s &  " % minPt + \
+           "  max(eg.ele.pt,eg.pho.pt) > 40 &  " + \
+           "  !eg.pho.hasPixelSeed ) * %f" % weight100ipb[tag]
+
+canvas = {}
+hist = {}
+for tag in tags:
+    canvas[tag] = TCanvas()
+    tree[tag].Draw( "eg.mass>>h40_%s(25,0,250)" % tag, selection(40, tag) )
+    hist[tag] = gDirectory.Get("h40_" + tag)
+    canvas[tag].Print( tag + ".png" )
+
