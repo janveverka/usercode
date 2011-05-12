@@ -6,5 +6,6 @@ cmsRun patSkim_cfg.py print \
     globalTag=GR_R_311_V2::All \
     hltProcessName=HLT \
     wantSummary=True \
-    outputFile=data/skim_v2 \
-    maxEvents=-1 \
+    outputFile=data/skim_v3 \
+    maxEvents=1000 \
+    reportEvery=1
