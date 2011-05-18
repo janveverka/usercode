@@ -249,9 +249,9 @@ else:
     process.primaryVertexFilterPath = cms.Path(process.primaryVertexFilter)
     process.noScrapingPath = cms.Path(process.noScraping)
     process.load(basePath + "prunedGenParticles_cfi")
-    if not options.applyCollisionDataCleaningToMC \
-        and repr(process.skimFilterSequence) != repr(cms.Sequence()):
-        process.skimFilterSequence.remove(process.goodCollisionDataSequence)
+    #if not options.applyCollisionDataCleaningToMC \
+        #and repr(process.skimFilterSequence) != repr(cms.Sequence()):
+        #process.skimFilterSequence.remove(process.goodCollisionDataSequence)
     process.defaultSequence = cms.Sequence(
         process.skimFilterSequence +
         process.prunedGenParticles *
