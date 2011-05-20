@@ -172,7 +172,7 @@ PmvBranchManager::getData( const edm::Event& iEvent,
     const pat::Muon * nearMuon;
     const pat::Muon * farMuon;
 
-    dimuon = (const reco::CompositeCandidate*) mmgCands->at(i).daughter("dimuon");
+    dimuon = (const reco::CompositeCandidate*) mmgCands->at(i).daughter("dimuon")->masterClonePtr().get();
     muon1 = (const pat::Muon*) dimuon->daughter("muon1")->masterClonePtr().get();
     muon2 = (const pat::Muon*) dimuon->daughter("muon2")->masterClonePtr().get();
 
