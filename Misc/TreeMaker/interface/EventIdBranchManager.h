@@ -6,6 +6,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "TTree.h"
+#include "TBranch.h"
 
 namespace cit {
   class EventIdBranchManager {
@@ -33,8 +34,13 @@ namespace cit {
       }; // end of struct EventIdData definition
 
       bool eventInfo_;
+      bool pileupInfo_;
+      edm::InputTag pileupInfoSrc_;
+
       EventIdData id_;
 
+      /// Pile-up info branche
+      UInt_t numPileup_;
   };  // end of class EventIdBranchManager declaration
 } // end of namespace cit
 
