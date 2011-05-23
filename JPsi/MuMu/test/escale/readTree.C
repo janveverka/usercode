@@ -1,9 +1,11 @@
 {
+// const char *filenameData = "Nov4ReReco.dat";
+const char *filenameMC   = "DYToMuMu_powheg_Fall10.dat";
 const char *filenameData = "Dec22ReReco.dat";
 // const char *filenameMC   = "DYToMuMu_Winter10_Powheg.dat";
 /// Read data set
 TTree tdata("tdata", "real data");
-// TTree tmc("tmc", "MC");
+TTree tmc("tmc", "MC");
   const char * leafVariables =
     /*  1. run                      */ "run/I:"
     /*  2. lumi                     */ "lumi:"
@@ -24,7 +26,7 @@ TTree tdata("tdata", "real data");
     /* 16. mmgDeltaRNear            */ "dr:"
     /* 17. kRatio(mmgMass,mass[mm]) */ "ik";
 tdata.ReadFile(filenameData, leafVariables);
-// tmc  .ReadFile(filenameMC  , leafVariables);
+tmc  .ReadFile(filenameMC  , leafVariables);
 
 
 }
