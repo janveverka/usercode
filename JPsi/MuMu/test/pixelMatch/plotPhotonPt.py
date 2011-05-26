@@ -63,24 +63,23 @@ selection = "1"
 c1 = TCanvas()
 canvases.append(c1)
 
-#h_mmgMass = {}
-#h_mmgMass["data"] = TH1F("h_mmgMass_data_eb", "min #Delta #eta (#mu, #gamma)", 60, 60, 120)
-h_mmgMass = TH1F("h_mmgMass", "", 60, 60, 120)
-h_mmgMass.SetTitle("")
-h_mmgMass.SetStats(0)
-h_mmgMass.GetYaxis().SetTitle("Events / GeV")
-h_mmgMass.GetXaxis().SetTitle("m_{#mu#mu#gamma} (GeV)")
-h_mmgMass.GetYaxis().SetRangeUser(0, 700)
+#h_temp = {}
+#h_temp["data"] = TH1F("h_temp_data_eb", "min #Delta #eta (#mu, #gamma)", 60, 60, 120)
+h_temp = TH1F("h_temp", "", 100, 0, 100)
+h_temp.SetTitle("")
+h_temp.SetStats(0)
+h_temp.GetYaxis().SetTitle("Events / GeV")
+h_temp.GetXaxis().SetTitle("p_{T}^{#gamma} (GeV)")
 
 
-tree["data"].Draw("mmgMass>>h_mmgMass", selection)
-hdata = h_mmgMass.Clone(h_mmgMass.GetName() + "_data")
+tree["data"].Draw("phoPt>>h_temp", selection)
+hdata = h_temp.Clone(h_temp.GetName() + "_data")
 
-tree["z"].Draw("mmgMass>>h_mmgMass", selection)
-hmc = h_mmgMass.Clone(h_mmgMass.GetName() + "_mc")
+tree["z"].Draw("phoPt>>h_temp", selection)
+hmc = h_temp.Clone(h_temp.GetName() + "_mc")
 
-tree["z"].Draw("mmgMass>>h_mmgMass", "(%s) && !isFSR" % (selection) )
-hbkg = h_mmgMass.Clone(h_mmgMass.GetName() + "_bkgd")
+tree["z"].Draw("phoPt>>h_temp", "(%s) && !isFSR" % (selection) )
+hbkg = h_temp.Clone(h_temp.GetName() + "_bkgd")
 
 hmc .SetFillColor(kAzure - 9)
 hbkg.SetFillColor(kSpring + 5)

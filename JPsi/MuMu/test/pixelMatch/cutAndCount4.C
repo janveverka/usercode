@@ -6,7 +6,8 @@ gROOT->LoadMacro("../resolutionErrors.C");
 
 const char *path = "/home/veverka/Work/data/pmv/";
 
-const char *filenameData = "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root";
+// const char *filenameData = "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root";
+const char *filenameData = "pmvTree_ZMu-May10ReReco_V4.root";
 const char *filenameMC   = "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root";
 const char *filenameQCD  = "pmvTree_QCD_Pt-20_MuEnrichedPt-15_Winter10_V3.root";
 const char *filenameW    = "pmvTree_WJetsToLNu_TuneZ2_7TeV-madgraph_Winter10_V3.root";
@@ -56,8 +57,8 @@ TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 
 TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)");
 TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)");
 
-// TCut selection = eeSelection;
-TCut selection = ebSelection;
+TCut selection = eeSelection;
+// TCut selection = ebSelection;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;

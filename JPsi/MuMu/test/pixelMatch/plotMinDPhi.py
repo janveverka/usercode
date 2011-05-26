@@ -54,8 +54,8 @@ for tag, f in file.items():
 
 ## make histos of pmv vs mmgMass
 
-#ebSelection = "phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
-#eeSelection = "!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)"
+#ebSelection = "phoIsEB & abs(mmgMass-90)<15 & (minDPhi > 0.04 | minDPhi > 0.3)"
+#eeSelection = "!phoIsEB & abs(mmgMass-90)<15 & (minDPhi > 0.08 | minDPhi > 0.3)"
 selection = "1"
 
 ###############################################################################
@@ -63,24 +63,23 @@ selection = "1"
 c1 = TCanvas()
 canvases.append(c1)
 
-#h_mmgMass = {}
-#h_mmgMass["data"] = TH1F("h_mmgMass_data_eb", "min #Delta #eta (#mu, #gamma)", 60, 60, 120)
-h_mmgMass = TH1F("h_mmgMass", "", 60, 60, 120)
-h_mmgMass.SetTitle("")
-h_mmgMass.SetStats(0)
-h_mmgMass.GetYaxis().SetTitle("Events / GeV")
-h_mmgMass.GetXaxis().SetTitle("m_{#mu#mu#gamma} (GeV)")
-h_mmgMass.GetYaxis().SetRangeUser(0, 700)
+#h_temp = {}
+#h_temp["data"] = TH1F("h_temp_data_eb", "min #Delta #eta (#mu, #gamma)", 60, 60, 120)
+h_temp = TH1F("h_temp", "", 100, 0, 1)
+h_temp.SetTitle("")
+h_temp.SetStats(0)
+h_temp.GetYaxis().SetTitle("Events / 0.01")
+h_temp.GetXaxis().SetTitle("min |#Delta #phi(#mu^{#pm},#gamma)|")
 
 
-tree["data"].Draw("mmgMass>>h_mmgMass", selection)
-hdata = h_mmgMass.Clone(h_mmgMass.GetName() + "_data")
+tree["data"].Draw("minDPhi>>h_temp", selection)
+hdata = h_temp.Clone(h_temp.GetName() + "_data")
 
-tree["z"].Draw("mmgMass>>h_mmgMass", selection)
-hmc = h_mmgMass.Clone(h_mmgMass.GetName() + "_mc")
+tree["z"].Draw("minDPhi>>h_temp", selection)
+hmc = h_temp.Clone(h_temp.GetName() + "_mc")
 
-tree["z"].Draw("mmgMass>>h_mmgMass", "(%s) && !isFSR" % (selection) )
-hbkg = h_mmgMass.Clone(h_mmgMass.GetName() + "_bkgd")
+tree["z"].Draw("minDPhi>>h_temp", "(%s) && !isFSR" % (selection) )
+hbkg = h_temp.Clone(h_temp.GetName() + "_bkgd")
 
 hmc .SetFillColor(kAzure - 9)
 hbkg.SetFillColor(kSpring + 5)
@@ -91,20 +90,20 @@ hmc.Scale(scale)
 hbkg.Scale(scale)
 
 hmc.Draw()
-hmc.GetYaxis().SetRangeUser(0, 700)
+hmc.GetYaxis().SetRangeUser(0, 2000)
 
 hbkg.Draw("same")
 hdata.Draw("e1same")
 
-c1.RedrawAxis()
-
 latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2011")
 latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 #latexLabel.DrawLatex(0.7, 0.2, "Barrel")
-latexLabel.DrawLatex(0.2, 0.875, "May10ReReco + Winter10 MC")
-latexLabel.DrawLatex(0.2, 0.8, "Total events: %d" % (int( hdata.GetEntries() ),) )
-latexLabel.DrawLatex(0.2, 0.725, "L = 221 pb^{-1}")
+#latexLabel.DrawLatex(0.2, 0.875, "May10ReReco + Winter10 MC")
+#latexLabel.DrawLatex(0.2, 0.8, "Total events: %d" % (int( hdata.GetEntries() ),) )
+#latexLabel.DrawLatex(0.2, 0.725, "L = 221 pb^{-1}")
 
 c1.Update()
+
+c1.RedrawAxis()
 
 

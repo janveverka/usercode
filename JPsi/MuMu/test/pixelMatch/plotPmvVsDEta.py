@@ -5,7 +5,8 @@ from array import array
 path = "/home/veverka/Work/data/pmv"
 
 fileName = {
-    "data": "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
+    #"data": "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
+    "data": "pmvTree_ZMu-May10ReReco_V4.root",
     #"z"   : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v1_V3.root",
     "z"  : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",
     #"tt"  : "pmvTree_TTJets_TuneZ2-madgraph-Winter10_V2.root",
