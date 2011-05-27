@@ -13,7 +13,7 @@ namespace cit {
       pileupInfo_( iConfig.existsAs<edm::InputTag>( "pileupInfoSrc", false ) ),
       pileupInfoSrc_( iConfig.getUntrackedParameter<
                         edm::InputTag
-                      >( "pileupInfoSrc" ) ),
+                      >( "pileupInfoSrc", edm::InputTag("Dummy") ) ),
       id_()
   {} // end of ctor definition
 
@@ -51,7 +51,7 @@ namespace cit {
       for(std::vector<PileupSummaryInfo>::const_iterator
           iPileup = pileupInfo->begin();
           iPileup != pileupInfo->end(); ++iPileup) {
-  
+
         numPileup_ += iPileup->getPU_NumInteractions();
       } // end of loop over pileup bunch crossings
     } // end of pileup

@@ -38,8 +38,7 @@ namespace cit {
       edm::InputTag pileupInfoSrc_;
 
       EventIdData id_;
-
-      /// Pile-up info branche
+      /// Pile-up info branch
       UInt_t numPileup_;
   };  // end of class EventIdBranchManager declaration
 } // end of namespace cit
