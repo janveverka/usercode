@@ -33,7 +33,7 @@ PmvBranchManager::PmvBranchManager(edm::ParameterSet const& iConfig) :
 PmvBranchManager::~PmvBranchManager() {}
 
 void
-PmvBranchManager::makeBranches(TTree& tree) 
+PmvBranchManager::init(TTree& tree) 
 {
   tree.Branch("nVertices", &nVertices_, "nVertices/I");
 

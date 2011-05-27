@@ -10,8 +10,10 @@ namespace cit {
 
   EventIdBranchManager::EventIdBranchManager(const edm::ParameterSet& iConfig) :
       eventInfo_( iConfig.getUntrackedParameter<bool>( "eventInfo", true ) ),
-      pileupInfo_( iConfig.existsAs<std::string>( "pileupInfoSrc", false ) ),
-      pileupInfoSrc_( iConfig.getUntrackedParameter<std::string>( "pileupInfoSrc", "" ) ),
+      pileupInfo_( iConfig.existsAs<edm::InputTag>( "pileupInfoSrc", false ) ),
+      pileupInfoSrc_( iConfig.getUntrackedParameter<
+                        edm::InputTag
+                      >( "pileupInfoSrc" ) ),
       id_()
   {} // end of ctor definition
 
@@ -27,9 +29,6 @@ namespace cit {
     /// Do we want to store the pile-up info?
     if (pileupInfo_ == true)
       tree.Branch("numPileup", &numPileup_, "numPileup/i");
-
-    std::cout << "pileupInfo_: " << pileupInfo_ << std::endl;
-    std::cout << "pileupInfoSrc: " << pileupInfoSrc_ << std::endl;
 
   } // end of EventIdBranchManager::init(TTree & tree) definition
 

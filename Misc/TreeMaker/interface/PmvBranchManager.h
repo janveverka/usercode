@@ -13,7 +13,7 @@ class PmvBranchManager {
 public:
   PmvBranchManager(const edm::ParameterSet&);
   ~PmvBranchManager();
-  void makeBranches(TTree &);
+  void init(TTree &);
   void getData(const edm::Event&, const edm::EventSetup&);
 private:
   /// input tags
