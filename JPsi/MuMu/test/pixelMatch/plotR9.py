@@ -92,9 +92,10 @@ for tag, f in file.items():
 
 #ebSelection = "phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
 #eeSelection = "!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)"
-selection = "1"
-#selection = 'phoIsEB'
+#selection = "1"
 #selection = '!phoIsEB'
+#selection = 'phoIsEB && phoPt > 10'
+selection = '!phoIsEB && 20 <= phoPt'
 
 ###############################################################################
 # Plot a quantity in data for EB
@@ -103,17 +104,17 @@ yRange = (1e-4, 1000.)
 c1 = TCanvas()
 canvases.append(c1)
 
-var = RooRealVar("mmgMass", "m_{#mu#mu#gamma}", 60, 120, "GeV")
-var.setBins(60)
+var = RooRealVar("phoR9", "photon r_{9}", 0, 1.5)
+var.setBins(50)
 
 h_temp = TH1F("h_temp", "", var.getBins(), var.getMin(), var.getMax() )
 h_temp.GetXaxis().SetTitle( var.GetTitle() )
-h_temp.GetYaxis().SetTitle("Events / 1 GeV")
+h_temp.GetYaxis().SetTitle("Events / 0.01")
 h_temp.SetTitle("")
 h_temp.SetStats(0)
 histos = {}
 for tag, t in tree.items():
-    sel = 'puWeight *%f * (%s) ' % (cweight[tag], selection,)
+    sel = 'puWeight * %f * (%s) ' % (cweight[tag], selection,)
     if tag == 'z':
         sel += ' && isFSR'
     if tag == 'data':
@@ -167,10 +168,14 @@ c1.RedrawAxis()
 latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2011")
 latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 #latexLabel.DrawLatex(0.7, 0.2, "Barrel")
-#latexLabel.DrawLatex(0.7, 0.2, "Endcaps")
+latexLabel.DrawLatex(0.7, 0.2, "Endcaps")
 latexLabel.DrawLatex(0.2, 0.875, "May10ReReco + Spring11 MC")
 latexLabel.DrawLatex(0.2, 0.8, "Total events: %d" % (int( hdata.GetEntries() ),) )
 latexLabel.DrawLatex(0.2, 0.725, "L = 191 pb^{-1}")
+#latexLabel.DrawLatex(0.2, 0.65, "E_{T}^{#gamma} #in [5,10] GeV")
+#latexLabel.DrawLatex(0.2, 0.65, "E_{T}^{#gamma} #in [10,15] GeV")
+#latexLabel.DrawLatex(0.2, 0.65, "E_{T}^{#gamma} #in [15,20] GeV")
+latexLabel.DrawLatex(0.2, 0.65, "E_{T}^{#gamma} > 20 GeV")
 
 c1.Update()
 

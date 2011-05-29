@@ -2,24 +2,60 @@ import os
 from ROOT import *
 from array import array
 
-path = "/home/veverka/Work/data/pmv"
+realData = "data38x"
+mcSamples = "z qcd w tt".split()
+
+lumi = 36.15 # pb^-1
+
+
+path = "/home/veverka/Work/data/pmv/PMVTrees_v5"
 
 fileName = {
     #"data": "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
-    "data": "pmvTree_ZMu-May10ReReco_V4.root",
+    "data": "pmvTree_ZMu-May10ReReco-42X-v3_V5.root",
     #"z"   : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v1_V3.root",
-    "z"  : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",
-    "tt"  : "pmvTree_TTJets_TuneZ2-madgraph-Winter10_V3.root",
-    "w"   : "pmvTree_WJetsToLNu_TuneZ2_7TeV-madgraph_Winter10_V3.root",
-    "qcd" : "pmvTree_QCD_Pt-20_MuEnrichedPt-15_Winter10_V3.root",
+    #"z"  : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",
+    #"tt"  : "pmvTree_TTJets_TuneZ2-madgraph-Winter10_V3.root",
+    #"w"   : "pmvTree_WJetsToLNu_TuneZ2_7TeV-madgraph_Winter10_V3.root",
+    #"qcd" : "pmvTree_QCD_Pt-20_MuEnrichedPt-15_Winter10_V3.root",
+        
+    'w': 'pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V5.root',
+    'qcd': 'pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V5.root',
+    'tt': 'pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V5.root',
+    'z': 'pmvTree_Z-RECO-41X-v2_V5.root',
 }
 
-weight = {
+
+cweight = {
     "data": 1.,
-    "z"  : 0.030541912803076,
-    "qcd": 0.10306919044126,
-    "w"  : 0.074139194512438,
-    "tt" : 0.005083191122289,
+    #"z"  : 0.030541912803076,
+    #"qcd": 0.10306919044126,
+    #"w"  : 0.074139194512438,
+    #"tt" : 0.005083191122289,
+    
+    'z'  : 0.17175592557735,
+    'tt' : 0.019860956416475,
+    'w'  : 0.54974976060237,
+    'qcd': 0.27884236321449,
+    
+}
+
+mcSamples = 'z zj qcd tt w'.split()
+
+colors = {
+    "z"     : kAzure - 9,
+    'zj'    : kSpring + 5,
+    "qcd"   : kYellow - 7,
+    "tt"    : kOrange - 2,
+    "w"     : kRed -3,
+}
+
+legendTitles = {
+    "z"   : "FSR",
+    'zj'  : 'Z+jets',
+    "qcd" : "QCD",
+    "tt"  : "t#bar{t}",
+    "w"   : "W",
 }
 
 canvases = []
@@ -59,42 +95,70 @@ for tag, f in file.items():
 selection = "1"
 
 ###############################################################################
-# Plot mmgMass in data for EB
+# Plot a quantity in data for EB
+yRange = (1e-4, 400.)
+
 c1 = TCanvas()
 canvases.append(c1)
 
-#h_temp = {}
-#h_temp["data"] = TH1F("h_temp_data_eb", "min #Delta #eta (#mu, #gamma)", 60, 60, 120)
+var = RooRealVar("minDeltaR", "min #Delta R(#mu^{#pm},#gamma)", 0, 1)
+
 h_temp = TH1F("h_temp", "", 100, 0, 1)
+h_temp.GetXaxis().SetTitle( var.GetTitle() )
+h_temp.GetYaxis().SetTitle("Events / 0.01")
 h_temp.SetTitle("")
 h_temp.SetStats(0)
-h_temp.GetYaxis().SetTitle("Events / GeV")
-h_temp.GetXaxis().SetTitle("min #Delta R(#mu^{#pm},#gamma)")
+histos = {}
+for tag, t in tree.items():
+    sel = '%f * (%s) ' % (cweight[tag], selection,)
+    if tag == 'z':
+        sel += ' && isFSR'
+    if tag == 'data':
+        continue
+    t.Draw(var.GetName() + '>>h_temp', sel )
+    histos[tag] = h_temp.Clone( 'h_' + tag )
+
+tree['z'].Draw(var.GetName() + '>>h_temp', "puWeight * %f * (%s) && !isFSR" % (cweight[tag], selection) )
+histos['zj'] = h_temp.Clone( 'h_zj' )
+
+tree['data'].Draw(var.GetName() + '>>h_temp', selection )
+hdata = h_temp.Clone( 'hdata' )
+
+for tag in mcSamples:
+    histos[tag].SetFillColor( colors[tag] )
+    histos[tag].SetLineColor( colors[tag] )
+
+## Sort histos
+sortedHistos = histos.values()
+sortedHistos.sort( key=lambda h: h.Integral() )
+
+## Make stacked histos (THStack can't redraw axis!? -> roottalk)
+hstacks = []
+for h in sortedHistos:
+    hstemp = h.Clone( h.GetName().replace("h_", "hs_") )
+    if hstacks:
+        hstemp.Add( hstacks[-1] )
+    hstacks.append( hstemp )
+
+## Draw
+hstacks.reverse()
+
+## Normalize MC to data
+mcIntegral = hstacks[0].Integral( 1, var.getBins() )
+
+for hist in hstacks:
+    hist.Scale( hdata.GetEntries() / mcIntegral )
 
 
-tree["data"].Draw("minDeltaR>>h_temp", selection)
-hdata = h_temp.Clone(h_temp.GetName() + "_data")
+for h in hstacks:
+    h.GetYaxis().SetRangeUser(*yRange)
+    if hstacks.index(h) == 0: h.Draw()
+    else:                     h.Draw("same")
 
-tree["z"].Draw("minDeltaR>>h_temp", selection)
-hmc = h_temp.Clone(h_temp.GetName() + "_mc")
 
-tree["z"].Draw("minDeltaR>>h_temp", "(%s) && !isFSR" % (selection) )
-hbkg = h_temp.Clone(h_temp.GetName() + "_bkgd")
 
-hmc .SetFillColor(kAzure - 9)
-hbkg.SetFillColor(kSpring + 5)
-hmc .SetLineColor(kAzure - 9)
-hbkg.SetLineColor(kSpring + 5)
-scale = hdata.GetEntries() / hmc.GetEntries()
-hmc.Scale(scale)
-hbkg.Scale(scale)
 
-hmc.Draw()
-hmc.GetYaxis().SetRangeUser(0, 1000)
-
-hbkg.Draw("same")
-hdata.Draw("e1same")
-
+hdata.Draw("e1 same")
 c1.RedrawAxis()
 
 latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2011")
