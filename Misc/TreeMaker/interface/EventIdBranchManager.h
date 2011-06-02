@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 
 #include "TTree.h"
 #include "TBranch.h"
@@ -34,12 +35,17 @@ namespace cit {
       }; // end of struct EventIdData definition
 
       bool eventInfo_;
-      bool pileupInfo_;
-      edm::InputTag pileupInfoSrc_;
-
+//       bool pileupInfo_;
+//       bool doPileupWeight_;
+ 
       EventIdData id_;
+//       edm::InputTag pileupInfoSrc_;
+//       edm::ParameterSet pileupReweightingCfg_;
       /// Pile-up info branch
-      UInt_t numPileup_;
+//       UInt_t numPileup_;
+//       Float_t puWeight_;
+//       Float_t puWeightOOT_;
+//       edm::LumiReWeighting LumiWeights_;
   };  // end of class EventIdBranchManager declaration
 } // end of namespace cit
 
