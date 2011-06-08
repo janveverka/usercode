@@ -42,7 +42,7 @@ histo.Fit("gaus")
 fit = histo.GetFunction("gaus")
 ikValData = fit.GetParameter(1)
 ikErrData = fit.GetParError(1)
-report.append("%30s %10s k: %.4f +/- %.4f" % (name, subdet, ikValData, ikErrData))
+report.append("%30s %10s 1/k: %.4f +/- %.4f" % (name, subdet, ikValData, ikErrData))
 histo.SetTitle(c1.GetTitle())
 histo.GetXaxis().SetTitle("k^{-1} = E^{#gamma}_{ECAL} / E^{#gamma}_{muons}")
 c1.Update()
@@ -52,13 +52,13 @@ canvases.append(c1)
 name = '42x MC'
 subdet = "Barrel"
 c1 = TCanvas(name + "_" + subdet, name + " " + subdet)
-tmc.Draw("1/k>>ik_mc_eb(20,0,2)", "abs(m3-91.2)<4 & isEB")
+tmc.Draw("1/k>>ik_mc_eb(20,0,2)", "(abs(m3-91.2)<4 & isEB) * pileup.weightOOT ")
 histo = gDirectory.Get("ik_mc_eb")
 histo.Fit("gaus")
 fit = histo.GetFunction("gaus")
 ikValMc = fit.GetParameter(1)
 ikErrMc = fit.GetParError(1)
-report.append("%30s %10s k: %.4f +/- %.4f" % (name, subdet, ikValMc, ikErrMc))
+report.append("%30s %10s 1/k: %.4f +/- %.4f" % (name, subdet, ikValMc, ikErrMc))
 histo.SetTitle(c1.GetTitle())
 histo.GetXaxis().SetTitle("k^{-1} = E^{#gamma}_{ECAL} / E^{#gamma}_{muons}")
 c1.Update()
@@ -67,7 +67,7 @@ canvases.append(c1)
 
 scaleVal = ikValData - ikValMc
 scaleErr = oplus(ikErrData, ikErrMc) ## is this correct?
-report.append("%30s %10s %%: %.2f +/- %.2f" % ("relative scale", subdet, 100*scaleVal, 100*scaleErr))
+report.append("%30s %10s %%  : %.2f +/- %.2f" % ("relative scale", subdet, 100*scaleVal, 100*scaleErr))
 
 #################
 # Endcaps
@@ -82,7 +82,7 @@ histo.Fit("gaus")
 fit = histo.GetFunction("gaus")
 ikValData = fit.GetParameter(1)
 ikErrData = fit.GetParError(1)
-report.append("%30s %10s k: %.4f +/- %.4f" % (name, subdet, ikValData, ikErrData))
+report.append("%30s %10s 1/k: %.4f +/- %.4f" % (name, subdet, ikValData, ikErrData))
 histo.SetTitle(c1.GetTitle())
 histo.GetXaxis().SetTitle("k^{-1} = E^{#gamma}_{ECAL} / E^{#gamma}_{muons}")
 c1.Update()
@@ -92,13 +92,13 @@ canvases.append(c1)
 name = '42x MC'
 subdet = "Endcaps"
 c1 = TCanvas(name + "_" + subdet, name + " " + subdet)
-tmc.Draw("1/k>>ik_mc_ee(20,0,2)", "abs(m3-91.2)<4 & !isEB")
+tmc.Draw("1/k>>ik_mc_ee(20,0,2)", "( abs(m3-91.2)<4 & !isEB ) * pileup.weightOOT")
 histo = gDirectory.Get("ik_mc_ee")
 histo.Fit("gaus")
 fit = histo.GetFunction("gaus")
 ikValMc = fit.GetParameter(1)
 ikErrMc = fit.GetParError(1)
-report.append("%30s %10s k: %.4f +/- %.4f" % (name, subdet, ikValMc, ikErrMc))
+report.append("%30s %10s 1/k: %.4f +/- %.4f" % (name, subdet, ikValMc, ikErrMc))
 histo.SetTitle(c1.GetTitle())
 histo.GetXaxis().SetTitle("k^{-1} = E^{#gamma}_{ECAL} / E^{#gamma}_{muons}")
 c1.Update()
@@ -107,7 +107,7 @@ canvases.append(c1)
 
 scaleVal = ikValData - ikValMc
 scaleErr = oplus(ikErrData, ikErrMc) ## is this correct?
-report.append("%30s %10s %%: %.2f +/- %.2f" % ("relative scale", subdet, 100*scaleVal, 100*scaleErr))
+report.append("%30s %10s %%  : %.2f +/- %.2f" % ("relative scale", subdet, 100*scaleVal, 100*scaleErr))
 
 #######################################
 ## Outro

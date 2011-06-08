@@ -1,10 +1,27 @@
 Binned 1/k Fit
-                    Nov4ReReco     Barrel k: 1.0031 +/- 0.0083
-        DYToMuMu_powheg_Fall10     Barrel k: 0.9995 +/- 0.0015
-                relative scale     Barrel %: 0.35 +/- 0.84
-                    Nov4ReReco    Endcaps k: 0.9432 +/- 0.0270
-        DYToMuMu_powheg_Fall10    Endcaps k: 0.9928 +/- 0.0030
-                relative scale    Endcaps %: -4.96 +/- 2.71
+2010 data + MC
+                    Nov4ReReco     Barrel 1/k: 1.0031 +/- 0.0083
+        DYToMuMu_powheg_Fall10     Barrel 1/k: 0.9995 +/- 0.0015
+                relative scale     Barrel %  : 0.35 +/- 0.84
+                    Nov4ReReco    Endcaps 1/k: 0.9432 +/- 0.0270
+        DYToMuMu_powheg_Fall10    Endcaps 1/k: 0.9928 +/- 0.0030
+                relative scale    Endcaps %  : -4.96 +/- 2.71
+
+2011 data + MC, no pileup reweighing
+                      42x data     Barrel 1/k: 1.0010 +/- 0.0030
+                        42x MC     Barrel 1/k: 1.0048 +/- 0.0016
+                relative scale     Barrel %  :  -0.39 +/- 0.34
+                      42x data    Endcaps 1/k: 1.0027 +/- 0.0056
+                        42x MC    Endcaps 1/k: 1.0068 +/- 0.0030
+                relative scale    Endcaps %  :  -0.41 +/- 0.64
+
+2011 data + MC, with OOT pileup reweighing
+                      42x data     Barrel 1/k: 1.0010 +/- 0.0030
+                        42x MC     Barrel 1/k: 1.0047 +/- 0.0016
+                relative scale     Barrel %  :  -0.37 +/- 0.34
+                      42x data    Endcaps 1/k: 1.0027 +/- 0.0056
+                        42x MC    Endcaps 1/k: 1.0060 +/- 0.0029
+                relative scale    Endcaps %  :  -0.33 +/- 0.64
 
 JSON & files lumi = 331.6 / pb
 JSON file: lumiCalc_160404-165970_7TeV_PromptReco_Collisions11_JSON.out
