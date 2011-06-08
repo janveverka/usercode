@@ -4,19 +4,18 @@ gROOT->LoadMacro("../resolutionErrors.C");
 // const char *filenameData = "pixelMatch_data_Nov4ReReco_v4.dat";
 // const char *filenameMC   = "pixelMatch_Powheg_Fall10_v4.dat";
 
-const char *path = "/home/veverka/Work/data/pmv/";
+const char *path = "/raid2/veverka/PMVTrees_v5/";
 
-// const char *filenameData = "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root";
 const char *filenameData = "pmvTree_ZMu-May10ReReco_V4.root";
-const char *filenameMC   = "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root";
+const char *filenameMC   = "pmvTree_zSpring11_V4.root";
 const char *filenameQCD  = "pmvTree_QCD_Pt-20_MuEnrichedPt-15_Winter10_V3.root";
 const char *filenameW    = "pmvTree_WJetsToLNu_TuneZ2_7TeV-madgraph_Winter10_V3.root";
 const char *filenameTT   = "pmvTree_TTJets_TuneZ2-madgraph-Winter10_V3.root";
 
 enum mcSample {z=0, qcd, w, tt};
 double weight[] = {
-  0.030541912803076 * 0.07393, // z2
-//   0.030541912803076, // z
+//   0.030541912803076 * 0.07393, // z2
+  0.030541912803076, // z
   0.10306919044126,  // qcd
   0.074139194512438, // w
   0.005083191122289  // tt
@@ -76,11 +75,11 @@ c1->cd(1);
 // Barrel MC, passing probes
 double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)", selection && pmvCut);
 double pb_mc = tmc->Draw("mmgMass>>hpb_mc(30,75,105)", selection && pmvCut && backgroundCut);
-double pb_qcd = tqcd->Draw("mmgMass>>hpb_qcd(30,75,105)", 
+double pb_qcd = tqcd->Draw("mmgMass>>hpb_qcd(30,75,105)",
                            selection && pmvCut * Form("(%f/%f)", weight[qcd], weight[z]));
-double pb_w = tw->Draw("mmgMass>>hpb_w(30,75,105)", 
+double pb_w = tw->Draw("mmgMass>>hpb_w(30,75,105)",
                            selection && pmvCut * Form("(%f/%f)", weight[w], weight[z]));
-double pb_tt = ttt->Draw("mmgMass>>hpb_tt(30,75,105)", 
+double pb_tt = ttt->Draw("mmgMass>>hpb_tt(30,75,105)",
                            selection && pmvCut * Form("(%f/%f)", weight[tt], weight[z]));
 double ps_mc = p_mc - pb_mc;
 double eps_mc = sqrt(ps_mc);
@@ -88,11 +87,11 @@ double eps_mc = sqrt(ps_mc);
 // Barrel MC, failing probes
 double f_mc = tmc->Draw("mmgMass>>hf_mc(15,75,105)", selection && !pmvCut);
 double fb_mc = tmc->Draw("mmgMass>>hfb_mc(15,75,105)", selection && !pmvCut && backgroundCut);
-double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(15,75,105)", 
+double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(15,75,105)",
                            selection && !pmvCut * Form("(%f/%f)", weight[qcd], weight[z]) );
-double fb_w = tw->Draw("mmgMass>>hfb_w(15,75,105)", 
+double fb_w = tw->Draw("mmgMass>>hfb_w(15,75,105)",
                            selection && !pmvCut * Form("(%f/%f)", weight[w], weight[z]) );
-double fb_tt = ttt->Draw("mmgMass>>hfb_tt(15,75,105)", 
+double fb_tt = ttt->Draw("mmgMass>>hfb_tt(15,75,105)",
                            selection && !pmvCut * Form("(%f/%f)", weight[tt], weight[z]) );
 
 double fs_mc = f_mc - fb_mc;

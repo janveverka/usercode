@@ -56,8 +56,7 @@ TCut signalCut("isFSR");
 TCut backgroundCut("!isFSR");
 TCut mWindowCut("abs(mmgMass-90) < 15");
 TCut ubCut("(minDEta > 0.04 | minDPhi > 0.5)");
-TCut vetoCut("phoDeltaRToTrack > 1");
-// TCut vetoCut("!phoHasPixelMatch");
+TCut pmvCut("!phoHasPixelMatch");
 TCut nVtx1to2("nVertices<=2");
 TCut phoPt5to10("5 <= phoPt & phoPt < 10");
 TCut phoPt10to20("10 <= phoPt & phoPt < 20");
@@ -68,8 +67,8 @@ TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 
 TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)");
 TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)");
 
-// TCut selection = eeSelection;
-TCut selection = ebSelection;
+TCut selection = eeSelection;
+// TCut selection = ebSelection;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;
@@ -85,33 +84,33 @@ c1->cd(1);
 // Scale all MC such that z has event weight 1 to maintain it's statistical error
 
 // Barrel MC, passing probes
-double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)", selection && vetoCut);
-double pb_mc = tmc->Draw("mmgMass>>hpb_mc(30,75,105)", selection && vetoCut && backgroundCut);
+double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)", selection && pmvCut);
+double pb_mc = tmc->Draw("mmgMass>>hpb_mc(30,75,105)", selection && pmvCut && backgroundCut);
 double pb_qcd = tqcd->Draw("mmgMass>>hpb_qcd(30,75,105)",
-                           selection && vetoCut * Form("(%f/%f)", weight[qcd], weight[z]));
+                           selection && pmvCut * Form("(%f/%f)", weight[qcd], weight[z]));
 double pb_w = tw->Draw("mmgMass>>hpb_w(30,75,105)",
-                           selection && vetoCut * Form("(%f/%f)", weight[w], weight[z]));
+                           selection && pmvCut * Form("(%f/%f)", weight[w], weight[z]));
 double pb_tt = ttt->Draw("mmgMass>>hpb_tt(30,75,105)",
-                           selection && vetoCut * Form("(%f/%f)", weight[tt], weight[z]));
+                           selection && pmvCut * Form("(%f/%f)", weight[tt], weight[z]));
 double ps_mc = p_mc - pb_mc;
 double eps_mc = sqrt(ps_mc);
 
 // Barrel MC, failing probes
-double f_mc = tmc->Draw("mmgMass>>hf_mc(6,75,105)", selection && !vetoCut);
-double fb_mc = tmc->Draw("mmgMass>>hfb_mc(6,75,105)", selection && !vetoCut && backgroundCut);
-double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(6,75,105)",
-                           selection && !vetoCut * Form("(%f/%f)", weight[qcd], weight[z]) );
-double fb_w = tw->Draw("mmgMass>>hfb_w(6,75,105)",
-                           selection && !vetoCut * Form("(%f/%f)", weight[w], weight[z]) );
-double fb_tt = ttt->Draw("mmgMass>>hfb_tt(6,75,105)",
-                           selection && !vetoCut * Form("(%f/%f)", weight[tt], weight[z]) );
+double f_mc = tmc->Draw("mmgMass>>hf_mc(15,75,105)", selection && !pmvCut);
+double fb_mc = tmc->Draw("mmgMass>>hfb_mc(15,75,105)", selection && !pmvCut && backgroundCut);
+double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(15,75,105)",
+                           selection && !pmvCut * Form("(%f/%f)", weight[qcd], weight[z]) );
+double fb_w = tw->Draw("mmgMass>>hfb_w(15,75,105)",
+                           selection && !pmvCut * Form("(%f/%f)", weight[w], weight[z]) );
+double fb_tt = ttt->Draw("mmgMass>>hfb_tt(15,75,105)",
+                           selection && !pmvCut * Form("(%f/%f)", weight[tt], weight[z]) );
 
 double fs_mc = f_mc - fb_mc;
 double efs_mc = sqrt(fs_mc);
 
 // Barrel data
-double p = tdata->Draw("mmgMass>>hp(30,75,105)", selection && vetoCut);
-double f = tdata->Draw("mmgMass>>hf(6,75,105)", selection && !vetoCut);
+double p = tdata->Draw("mmgMass>>hp(15,75,105)", selection && pmvCut);
+double f = tdata->Draw("mmgMass>>hf(6,75,105)", selection && !pmvCut);
 
 double ps = ps_mc * p / (p_mc + pb_qcd + pb_w + pb_tt);
 double fs = fs_mc * f / (f_mc + fb_qcd + fb_w + fb_tt);
@@ -131,8 +130,8 @@ double eeff = eff*(1-eff)*Oplus(eps/ps, efs/fs);
 double eeff_mc = eff_mc*(1-eff_mc)*Oplus(eps_mc/ps_mc, efs_mc/fs_mc);
 
 cout << "== Normal approx. errors == " << endl;
-cout << "veto efficiency in MC: " << eff_mc << " +/- " << eeff_mc << endl;
-cout << "veto efficiency in data: " << eff << " +/- " << eeff << endl;
+cout << "MC PMV efficiency: " << eff_mc << " +/- " << eeff_mc << endl;
+cout << "data PMV efficiency: " << eff << " +/- " << eeff << endl;
 
 /// CL 1-sigma/68% Bayesian with Beta(1,1) prior with mode of posterior
 /// to define the interval
@@ -159,13 +158,13 @@ double eeff_syst = eff*(1-eff)*Oplus(pb/ps, fb/fs);
 
 cout << "== Bayesian binomial errors == " << endl;
 
-cout << "MC veto efficiency: "
+cout << "MC PMV efficiency: "
       << g_eff.GetY()[1]
       << " + " << g_eff.GetErrorYhigh(1)
       << " - " << g_eff.GetErrorYlow(1)
       << " (stat.)" << endl;
 
-cout << "Data veto efficiency: "
+cout << "Data PMV efficiency: "
       << g_eff.GetY()[0]
       << " + " << g_eff.GetErrorYhigh(0)
       << " - " << g_eff.GetErrorYlow(0)
@@ -184,7 +183,7 @@ hp_mc->Add(hpb_qcd);
 hpb_mc->Add(hpb_qcd);
 
 double scaleFactor = hp->Integral() / hp_mc->Integral();
-scaleFactor *= hp->GetBinWidth(1) / hp_mc->GetBinWidth(1);
+scaleFactor *= hp->GetBinWidth(1) / hp_mc->GetBinWidth(0);
 hp_mc->Scale(scaleFactor);
 hpb_mc->Scale(scaleFactor);
 hpb_qcd->Scale(scaleFactor);
@@ -198,13 +197,11 @@ hpb_qcd->SetFillColor(kYellow - 7);
 
 hp_mc->SetTitle("Passing Probes");
 hp_mc->GetXaxis()->SetTitle("m(#mu#mu#gamma) (GeV)");
-hp_mc->GetYaxis()->SetTitle("Entries / 1 GeV");
+hp_mc->GetYaxis()->SetTitle("Entries / 2 GeV");
 
 hp_mc->SetStats(0);
 hpb_mc->SetStats(0);
 hpb_qcd->SetStats(0);
-
-hp->SetMarkerStyle(20);
 
 double ymax = TMath::Max(
     hp->GetMaximum() + TMath::Sqrt(hp->GetMaximum()),
@@ -228,7 +225,7 @@ TH1F *hf_mc = (TH1F*) gDirectory->Get("hf_mc");
 TH1F *hfb_mc = (TH1F*) gDirectory->Get("hfb_mc");
 
 double scaleFactor = hf->Integral() / hf_mc->Integral();
-scaleFactor *= hf->GetBinWidth(1) / hf_mc->GetBinWidth(1);
+scaleFactor *= hf->GetBinWidth(1) / hf_mc->GetBinWidth(0);
 hf_mc->Scale(scaleFactor);
 hfb_mc->Scale(scaleFactor);
 
@@ -243,8 +240,6 @@ hf_mc->GetYaxis()->SetTitle("Entries / 5 GeV");
 
 hf_mc->SetStats(0);
 hfb_mc->SetStats(0);
-
-hf->SetMarkerStyle(20);
 
 double ymax = TMath::Max(
     hf->GetMaximum() + TMath::Sqrt(hf->GetMaximum()),

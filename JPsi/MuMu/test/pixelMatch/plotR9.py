@@ -18,7 +18,7 @@ fileName = {
     #"tt"  : "pmvTree_TTJets_TuneZ2-madgraph-Winter10_V3.root",
     #"w"   : "pmvTree_WJetsToLNu_TuneZ2_7TeV-madgraph_Winter10_V3.root",
     #"qcd" : "pmvTree_QCD_Pt-20_MuEnrichedPt-15_Winter10_V3.root",
-        
+
     'w': 'pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V5.root',
     'qcd': 'pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V5.root',
     'tt': 'pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V5.root',
@@ -32,12 +32,12 @@ cweight = {
     #"qcd": 0.10306919044126,
     #"w"  : 0.074139194512438,
     #"tt" : 0.005083191122289,
-    
+
     'z'  : 0.17175592557735,
     'tt' : 0.019860956416475,
     'w'  : 0.54974976060237,
     'qcd': 0.27884236321449,
-    
+
 }
 
 mcSamples = 'z zj qcd tt w'.split()
@@ -47,7 +47,7 @@ colors = {
     'zj'    : kSpring + 5,
     "qcd"   : kYellow - 7,
     "tt"    : kOrange - 2,
-    "w"     : kRed -3,
+    "w"     : kRed - 3,
 }
 
 legendTitles = {
@@ -95,7 +95,7 @@ for tag, f in file.items():
 #selection = "1"
 #selection = '!phoIsEB'
 #selection = 'phoIsEB && phoPt > 10'
-selection = '!phoIsEB && 20 <= phoPt'
+selection = '!phoIsEB && 20 <= phoPt & phoR9 < 0.94'
 
 ###############################################################################
 # Plot a quantity in data for EB

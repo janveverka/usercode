@@ -4,32 +4,43 @@ gROOT->LoadMacro("../resolutionErrors.C");
 // const char *filenameData = "pixelMatch_data_Nov4ReReco_v4.dat";
 // const char *filenameMC   = "pixelMatch_Powheg_Fall10_v4.dat";
 
-const char *path = "/raid2/veverka/PMVTrees_v5/";
+const char *path = "/raid2/veverka/PMVTrees_v6/";
 
 /**
-pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V5.root
-pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V5.root
-pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V5.root
-pmvTree_ZMu-May10ReReco-42X-v3_V5.root
-pmvTree_Z-RECO-41X-v2_V5.root
+    "data": "pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root",
+
+    'w'  : 'pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V6.root',
+    'qcd': 'pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V6.root',
+    'tt' : 'pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root',
+    'z'  : 'pmvTree_DYToMuMu_pythia6_AOD-42X-v4_V6.root',
 */
 
-// const char *filenameData = "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root";
-const char *filenameData = "pmvTree_ZMu-May10ReReco-42X-v3_V5.root";
-const char *filenameMC   = "pmvTree_Z-RECO-41X-v2_V5.root";
-const char *filenameQCD  = "pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V5.root";
-const char *filenameW    = "pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V5.root";
-const char *filenameTT   = "pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V5.root";
+const char *filenameData = "pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root";
+const char *filenameMC   = "pmvTree_DYToMuMu_pythia6_AOD-42X-v4_V6.root";
+const char *filenameQCD  = "pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V6.root";
+const char *filenameW    = "pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V6.root";
+const char *filenameTT   = "pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root";
 
 enum mcSample {z=0, qcd, w, tt};
 
 /// FIXME
+/*
+cweight = {
+    "data": 1.,
+    'z'  : 0.17175592557735,
+    'tt' : 0.019860956416475,
+    'w'  : 0.54974976060237,
+    'qcd': 0.27884236321449,
+}
+
+
+
+*/
 double weight[] = {
-  0.030541912803076 * 0.07393, // z2
-//   0.030541912803076, // z
-  0.10306919044126,  // qcd
-  0.074139194512438, // w
-  0.005083191122289  // tt
+  0.17175592557735 * 1795714. / 2008540., // z
+  0.27884236321449,  // qcd
+  0.54974976060237,  // w
+  0.019860956416475  // tt
 };
 
 TFile dataFile(Form("%s%s", path, filenameData));
@@ -55,21 +66,28 @@ TCut eeCut("abs(phoEta) > 1.5");
 TCut signalCut("isFSR");
 TCut backgroundCut("!isFSR");
 TCut mWindowCut("abs(mmgMass-90) < 15");
-TCut ubCut("(minDEta > 0.04 | minDPhi > 0.5)");
+TCut ubCut("(minDEta > 0.04 | minDPhi > 0.2)");
 TCut vetoCut("phoDeltaRToTrack > 1");
+// TCut vetoCut("phoDeltaRToTrack > 0.062"); //eb low R9
 // TCut vetoCut("!phoHasPixelMatch");
 TCut nVtx1to2("nVertices<=2");
 TCut phoPt5to10("5 <= phoPt & phoPt < 10");
 TCut phoPt10to20("10 <= phoPt & phoPt < 20");
 TCut phoPt20up("20 <= phoPt");
+TCut ebLowR9("0.36 < phoR9 && phoR9 <= 0.94");
+TCut eeLowR9("0.32 < phoR9 && phoR9 <= 0.94");
+TCut highR9("0.94 < phoR9");
 
 /*TCut ebSelection("phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.04 | minDPhi > 0.3)");
 TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 0.3)");*/
-TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)");
-TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)");
+TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.1) && scEt > 10 && phoHoE < 0.5");
+TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.2) && scEt > 10 && phoHoE < 0.5");
 
 // TCut selection = eeSelection;
-TCut selection = ebSelection;
+// TCut selection = ebSelection && highR9;
+// TCut selection = ebSelection && ebLowR9;
+// TCut selection = eeSelection && highR9;
+TCut selection = eeSelection && eeLowR9;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;
@@ -85,26 +103,70 @@ c1->cd(1);
 // Scale all MC such that z has event weight 1 to maintain it's statistical error
 
 // Barrel MC, passing probes
-double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)", selection && vetoCut);
-double pb_mc = tmc->Draw("mmgMass>>hpb_mc(30,75,105)", selection && vetoCut && backgroundCut);
+double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)",
+                        Form("pileup.weightOOT * %f * (%s)",
+                             weight[z],
+                             (selection && vetoCut).GetTitle()
+                            )
+                        );
+double pb_mc = tmc->Draw("mmgMass>>hpb_mc(30,75,105)",
+                         Form("pileup.weightOOT * %f * (%s)",
+                              weight[z],
+                              (selection && vetoCut && backgroundCut).GetTitle()
+                             )
+                        );
 double pb_qcd = tqcd->Draw("mmgMass>>hpb_qcd(30,75,105)",
-                           selection && vetoCut * Form("(%f/%f)", weight[qcd], weight[z]));
+                           Form("pileup.weightOOT * %f * (%s)",
+                                 weight[qcd],
+                                 (selection && vetoCut).GetTitle()
+                                )
+                          );
 double pb_w = tw->Draw("mmgMass>>hpb_w(30,75,105)",
-                           selection && vetoCut * Form("(%f/%f)", weight[w], weight[z]));
+                       Form("pileup.weightOOT * %f * (%s)",
+                             weight[w],
+                             (selection && vetoCut).GetTitle()
+                            )
+                      );
 double pb_tt = ttt->Draw("mmgMass>>hpb_tt(30,75,105)",
-                           selection && vetoCut * Form("(%f/%f)", weight[tt], weight[z]));
+                         Form("pileup.weightOOT * %f * (%s)",
+                               weight[w],
+                               (selection && vetoCut).GetTitle()
+                              )
+                        );
 double ps_mc = p_mc - pb_mc;
 double eps_mc = sqrt(ps_mc);
 
 // Barrel MC, failing probes
-double f_mc = tmc->Draw("mmgMass>>hf_mc(6,75,105)", selection && !vetoCut);
-double fb_mc = tmc->Draw("mmgMass>>hfb_mc(6,75,105)", selection && !vetoCut && backgroundCut);
+double f_mc = tmc->Draw("mmgMass>>hf_mc(6,75,105)",
+                         Form("pileup.weightOOT * %f * (%s)",
+                              weight[z],
+                              (selection && !vetoCut).GetTitle()
+                             )
+                        );
+double fb_mc = tmc->Draw("mmgMass>>hfb_mc(6,75,105)",
+                         Form("pileup.weightOOT * %f * (%s)",
+                               weight[z],
+                               (selection && !vetoCut && backgroundCut).GetTitle()
+                              )
+                        );
 double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(6,75,105)",
-                           selection && !vetoCut * Form("(%f/%f)", weight[qcd], weight[z]) );
+                           Form("pileup.weightOOT * %f * (%s)",
+                                 weight[qcd],
+                                 (selection && !vetoCut).GetTitle()
+                                )
+                           );
 double fb_w = tw->Draw("mmgMass>>hfb_w(6,75,105)",
-                           selection && !vetoCut * Form("(%f/%f)", weight[w], weight[z]) );
+                        Form("pileup.weightOOT * %f * (%s)",
+                              weight[w],
+                              (selection && !vetoCut).GetTitle()
+                             )
+                       );
 double fb_tt = ttt->Draw("mmgMass>>hfb_tt(6,75,105)",
-                           selection && !vetoCut * Form("(%f/%f)", weight[tt], weight[z]) );
+                         Form("pileup.weightOOT * %f * (%s)",
+                               weight[tt],
+                               (selection && !vetoCut).GetTitle()
+                             )
+                         );
 
 double fs_mc = f_mc - fb_mc;
 double efs_mc = sqrt(fs_mc);
@@ -127,6 +189,9 @@ double eff = ps / (ps + fs);
 double eff_mc = ps_mc / (ps_mc + fs_mc);
 
 // Efficiency error
+if (fs < 1.e-5) {
+    fs = 1.;
+}
 double eeff = eff*(1-eff)*Oplus(eps/ps, efs/fs);
 double eeff_mc = eff_mc*(1-eff_mc)*Oplus(eps_mc/ps_mc, efs_mc/fs_mc);
 

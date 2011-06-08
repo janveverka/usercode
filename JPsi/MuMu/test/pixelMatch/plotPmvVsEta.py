@@ -3,17 +3,19 @@ from ROOT import *
 from array import array
 
 # path = "/home/veverka/Work/data/pmv"
-path = "/raid2/veverka/PMVTrees_v1"
+path = "/raid2/veverka"
 
 fileName = {
-    "data": "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
+#     "data": "PMVTrees_v1/pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
+    'data': 'PMVTrees_v6/pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root',
     #"z"   : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v1_V3.root",
-    "z"  : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",
+#     "z"  : "PMVTrees_v1/pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",
+    'z'  : 'PMVTrees_v6/pmvTree_DYToMuMu_pythia6_AOD-42X-v4_V6.root',
     #"tt"  : "pmvTree_TTJets_TuneZ2-madgraph-Winter10_V2.root",
     #"w"   : "",
     #"qcd" : "",
-#     "gj"  : "pmvTree_GJets_TuneD6T_HT-40To100-madgraph_Winter10_V3.root",
-    "gj"  : "pmvTree_GJets_TuneD6T_HT-40To100-madgraph_Winter10_V3_numEvents40k.root",
+    "gj"  : "PMVTrees_v6/pmvTree_G_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6_Summer11_AOD_42X-v4_V6.root",
+#     "gj"  : "PMVTrees_v1/pmvTree_GJets_TuneD6T_HT-40To100-madgraph_Winter10_V3_numEvents40k.root",
 }
 
 weight = {
@@ -61,26 +63,26 @@ for tag, f in file.items():
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [5., 10., 20., 50.]
+xbins = [0., 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5]
 
-h_Pt = TH1F("h_Pt_data_eb", "p_{T}^#gamma", len(xbins)-1, array("d", xbins))
+h_Eta = TH1F("h_Eta_data_eb", "#eta^#gamma", len(xbins)-1, array("d", xbins))
 
-selection = "phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
-tree["data"].Draw("phoPt>>" + h_Pt.GetName(), selection)
-htot = h_Pt.Clone(h_Pt.GetName() + "_tot")
+selection = " abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
+tree["data"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection)
+htot = h_Eta.Clone(h_Eta.GetName() + "_tot")
 
-tree["data"].Draw("phoPt>>" + h_Pt.GetName(), selection + "& !phoHasPixelMatch")
-hpass = h_Pt.Clone(h_Pt.GetName() + "_pass")
+tree["data"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection + "& !phoHasPixelMatch")
+hpass = h_Eta.Clone(h_Eta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
 geff.BayesDivide(hpass,htot)
-geff.GetXaxis().SetTitle("p_{T}^{#gamma}")
+geff.GetXaxis().SetTitle("|#eta^{#gamma}|")
 geff.GetYaxis().SetTitle("Pixel Match Veto Efficiency")
-geff.SetTitle("Dec22ReReco, L = 35.9 pb^{-1}")
+geff.SetTitle("Run2011A+B, L = 241 pb^{-1}")
 geff.Draw("ap")
 graphs["data"] = geff
 
-latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2010")
+latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2011")
 latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 latexLabel.DrawLatex(0.7, 0.2, "Barrel")
 c1.Update()
@@ -91,20 +93,20 @@ c1.Update()
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [5, 7.5, 10, 15, 20, 25, 30, 50, 100]
+xbins = [0.25 * i for i in range(11)]
 
-h_Pt = TH1F("h_Pt_mc_eb", "p_{T}^#gamma", len(xbins)-1, array("d", xbins))
+h_Eta = TH1F("h_Eta_mc_eb", "#eta^#gamma", len(xbins)-1, array("d", xbins))
 
-selection = "phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
-tree["z"].Draw("phoPt>>" + h_Pt.GetName(), selection )
-htot = h_Pt.Clone(h_Pt.GetName() + "_tot")
+selection = " abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
+tree["z"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection )
+htot = h_Eta.Clone(h_Eta.GetName() + "_tot")
 
-tree["z"].Draw("phoPt>>" + h_Pt.GetName(), selection + "& !phoHasPixelMatch")
-hpass = h_Pt.Clone(h_Pt.GetName() + "_pass")
+tree["z"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection + "& !phoHasPixelMatch")
+hpass = h_Eta.Clone(h_Eta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
 geff.BayesDivide(hpass,htot)
-geff.GetXaxis().SetTitle("p_{T}^{#gamma}");
+geff.GetXaxis().SetTitle("|#eta^{#gamma}|");
 geff.GetYaxis().SetTitle("Pixel Match Veto Efficiency");
 geff.Draw("ap");
 graphs["z"] = geff
@@ -119,15 +121,15 @@ c1.Update()
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [20, 25, 30, 35, 40, 45, 50, 60, 70, 100]
+xbins = [0.05 * i for i in range(61)]
 
 andCuts = lambda cuts: "&".join( "(%s)" % c for c in cuts )
 
 idCuts = [
     "phoHoE < 0.05",
-    "phoTrackIso < 2 + 0.001 * phoPt",
-    "phoEcalIso < 4.2 + 0.003 * phoPt",
-    "phoHcalIso < 2.2 + 0.001 * phoPt",
+    "phoTrackIso < 2 + 0.001 * phoEta",
+    "phoEcalIso < 4.2 + 0.003 * phoEta",
+    "phoHcalIso < 2.2 + 0.001 * phoEta",
     "phoSigmaIetaIeta < 0.01 | (!phoIsEB & phoSigmaIetaIeta < 0.03)",
 ]
 
@@ -139,19 +141,19 @@ kineCuts = [
     'phoIsEB'
 ]
 
-h_Pt = TH1F("h_Pt_gj_eb", "p_{T}^#gamma", len(xbins)-1, array("d", xbins))
+h_Eta = TH1F("h_Eta_gj_eb", "#eta^#gamma", len(xbins)-1, array("d", xbins))
 
-selection = andCuts(genCuts + kineCuts)
+selection = andCuts(genCuts)
 
-tree["gj"].Draw("phoPt>>" + h_Pt.GetName(), selection)
-htot = h_Pt.Clone(h_Pt.GetName() + "_tot")
+tree["gj"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection)
+htot = h_Eta.Clone(h_Eta.GetName() + "_tot")
 
-tree["gj"].Draw("phoPt>>" + h_Pt.GetName(), selection + "& !phoHasPixelMatch")
-hpass = h_Pt.Clone(h_Pt.GetName() + "_pass")
+tree["gj"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection + "& !phoHasPixelMatch")
+hpass = h_Eta.Clone(h_Eta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
 geff.BayesDivide(hpass,htot)
-geff.GetXaxis().SetTitle("p_{T}^{#gamma}");
+geff.GetXaxis().SetTitle("|#eta^{#gamma}|");
 geff.GetYaxis().SetTitle("Pixel Match Veto Efficiency");
 geff.Draw("ap");
 graphs["gj_no_id"] = geff
@@ -166,15 +168,16 @@ c1.Update()
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [20, 25, 30, 35, 40, 45, 50, 60, 70, 100]
+xbins = [0.05 * i for i in range(61)]
+# xbins = [0.25 * i for i in range(11)]
 
 andCuts = lambda cuts: "&".join( "(%s)" % c for c in cuts )
 
 idCuts = [
 #     "phoHoE < 0.05",
-    "phoTrackIso < 2 + 0.001 * phoPt",
-    "phoEcalIso < 4.2 + 0.003 * phoPt",
-#     "phoHcalIso < 2.2 + 0.001 * phoPt",
+    "phoTrackIso < 2 + 0.001 * phoEta",
+    "phoEcalIso < 4.2 + 0.003 * phoEta",
+#     "phoHcalIso < 2.2 + 0.001 * phoEta",
 #     "phoSigmaIetaIeta < 0.01 | (!phoIsEB & phoSigmaIetaIeta < 0.03)",
 ]
 
@@ -186,19 +189,19 @@ kineCuts = [
     'phoIsEB'
 ]
 
-h_Pt = TH1F("h_Pt_gj_partialID_eb", "p_{T}^#gamma", len(xbins)-1, array("d", xbins))
+h_Eta = TH1F("h_Eta_gj_partialID_eb", "#eta^#gamma", len(xbins)-1, array("d", xbins))
 
-selection = andCuts(idCuts + genCuts + kineCuts)
+selection = andCuts(idCuts + genCuts)
 
-tree["gj"].Draw("phoPt>>" + h_Pt.GetName(), selection)
-htot = h_Pt.Clone(h_Pt.GetName() + "_tot")
+tree["gj"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection)
+htot = h_Eta.Clone(h_Eta.GetName() + "_tot")
 
-tree["gj"].Draw("phoPt>>" + h_Pt.GetName(), selection + "& !phoHasPixelMatch")
-hpass = h_Pt.Clone(h_Pt.GetName() + "_pass")
+tree["gj"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection + "& !phoHasPixelMatch")
+hpass = h_Eta.Clone(h_Eta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
 geff.BayesDivide(hpass,htot)
-geff.GetXaxis().SetTitle("p_{T}^{#gamma}");
+geff.GetXaxis().SetTitle("|#eta^{#gamma}|");
 geff.GetYaxis().SetTitle("Pixel Match Veto Efficiency");
 geff.Draw("ap");
 graphs["gj_partial_id"] = geff
@@ -213,15 +216,16 @@ c1.Update()
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [20, 25, 30, 35, 40, 45, 50, 60, 70, 100]
+xbins = [0.05 * i for i in range(61)]
+# xbins = [0.25 * i for i in range(11)]
 
 andCuts = lambda cuts: "&".join( "(%s)" % c for c in cuts )
 
 idCuts = [
     "phoHoE < 0.05",
-    "phoTrackIso < 2 + 0.001 * phoPt",
-    "phoEcalIso < 4.2 + 0.003 * phoPt",
-    "phoHcalIso < 2.2 + 0.001 * phoPt",
+    "phoTrackIso < 2 + 0.001 * phoEta",
+    "phoEcalIso < 4.2 + 0.003 * phoEta",
+    "phoHcalIso < 2.2 + 0.001 * phoEta",
     "phoSigmaIetaIeta < 0.01 | (!phoIsEB & phoSigmaIetaIeta < 0.03)",
 ]
 
@@ -233,19 +237,19 @@ kineCuts = [
     'phoIsEB'
 ]
 
-h_Pt = TH1F("h_Pt_gj_fullID_eb", "p_{T}^#gamma", len(xbins)-1, array("d", xbins))
+h_Eta = TH1F("h_Eta_gj_fullID_eb", "#eta^#gamma", len(xbins)-1, array("d", xbins))
 
-selection = andCuts(idCuts + genCuts + kineCuts)
+selection = andCuts(idCuts + genCuts)
 
-tree["gj"].Draw("phoPt>>" + h_Pt.GetName(), selection)
-htot = h_Pt.Clone(h_Pt.GetName() + "_tot")
+tree["gj"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection)
+htot = h_Eta.Clone(h_Eta.GetName() + "_tot")
 
-tree["gj"].Draw("phoPt>>" + h_Pt.GetName(), selection + "& !phoHasPixelMatch")
-hpass = h_Pt.Clone(h_Pt.GetName() + "_pass")
+tree["gj"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection + "& !phoHasPixelMatch")
+hpass = h_Eta.Clone(h_Eta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
 geff.BayesDivide(hpass,htot)
-geff.GetXaxis().SetTitle("p_{T}^{#gamma}");
+geff.GetXaxis().SetTitle("|#eta^{#gamma}|");
 geff.GetYaxis().SetTitle("Pixel Match Veto Efficiency");
 geff.Draw("ap");
 graphs["gj_full_id"] = geff
@@ -282,7 +286,7 @@ for tag, gr in graphs.items():
     gr.SetMarkerStyle( markers[tag] )
 
 graphs["z"].Draw("ap")
-graphs["z"].GetYaxis().SetRangeUser(0.85, 1.1)
+graphs["z"].GetYaxis().SetRangeUser(0.65, 1.)
 
 for tag in "gj_no_id gj_partial_id gj_full_id data".split():
     graphs[tag].Draw("p")
@@ -303,6 +307,6 @@ legend.Draw()
 c1.SetGridx()
 c1.SetGridy()
 
-c1.Print("pmvVsPt_data_z_gj_variousID.eps")
-c1.Print("pmvVsPt_data_z_gj_variousID.C")
+c1.Print("pmvVsEta_data_z_gj_variousID_v2.eps")
+c1.Print("pmvVsEta_data_z_gj_variousID_v2.C")
 

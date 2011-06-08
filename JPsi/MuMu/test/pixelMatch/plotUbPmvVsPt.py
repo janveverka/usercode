@@ -2,7 +2,8 @@ import os
 from ROOT import *
 from array import array
 
-path = "/home/veverka/Work/data/pmv"
+# path = "/home/veverka/Work/data/pmv"
+path = "/raid2/veverka/PMVTrees_v1"
 
 fileName = {
     "data": "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
@@ -15,7 +16,7 @@ fileName = {
 
 weight = {
     "data": 1.,
-    "z"  : 0.030541912803076,
+    "z"  : 0.030541912803076 * 1795714. / 2008540., # Spring11/Summer11
     "qcd": 0.10306919044126,
     "w"  : 0.074139194512438,
     "tt" : 0.005083191122289,
