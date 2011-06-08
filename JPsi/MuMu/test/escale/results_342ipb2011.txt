@@ -1,0 +1,11 @@
+Binned 1/k Fit
+                    Nov4ReReco     Barrel k: 1.0031 +/- 0.0083
+        DYToMuMu_powheg_Fall10     Barrel k: 0.9995 +/- 0.0015
+                relative scale     Barrel %: 0.35 +/- 0.84
+                    Nov4ReReco    Endcaps k: 0.9432 +/- 0.0270
+        DYToMuMu_powheg_Fall10    Endcaps k: 0.9928 +/- 0.0030
+                relative scale    Endcaps %: -4.96 +/- 2.71
+
+JSON & files lumi = 331.6 / pb
+JSON file: lumiCalc_160404-165970_7TeV_PromptReco_Collisions11_JSON.out
+Datasets:
