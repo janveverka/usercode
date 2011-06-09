@@ -3,6 +3,11 @@ import os
 import JPsi.MuMu.common.energyScaleChains as esChains
 from ROOT import *
 
+#ebselection = 'r9 > 0.94'
+#eeselection = 'r9 > 0.95'
+
+ebselection = 'r9 < 0.94'
+eeselection = 'r9 < 0.95'
 
 gROOT.LoadMacro("tdrstyle.C");
 from ROOT import setTDRStyle
@@ -36,7 +41,7 @@ tmc   = chains['z']
 name = '42x data'
 subdet = "Barrel"
 c1 = TCanvas(name + "_" + subdet, name + " " + subdet)
-tdata.Draw("1/k>>ik_data_eb(20,0,2)", "abs(m3-91.2)<4 & isEB")
+tdata.Draw("1/k>>ik_data_eb(20,0,2)", "abs(m3-91.2)<4 & isEB & (%s)" % ebselection)
 histo = gDirectory.Get("ik_data_eb")
 histo.Fit("gaus")
 fit = histo.GetFunction("gaus")
@@ -52,7 +57,7 @@ canvases.append(c1)
 name = '42x MC'
 subdet = "Barrel"
 c1 = TCanvas(name + "_" + subdet, name + " " + subdet)
-tmc.Draw("1/k>>ik_mc_eb(20,0,2)", "(abs(m3-91.2)<4 & isEB) * pileup.weightOOT ")
+tmc.Draw("1/k>>ik_mc_eb(20,0,2)", "(abs(m3-91.2)<4 & isEB & (%s) ) * pileup.weightOOT " % ebselection)
 histo = gDirectory.Get("ik_mc_eb")
 histo.Fit("gaus")
 fit = histo.GetFunction("gaus")
@@ -76,7 +81,7 @@ report.append("%30s %10s %%  : %.2f +/- %.2f" % ("relative scale", subdet, 100*s
 name = '42x data'
 subdet = "Endcaps"
 c1 = TCanvas(name + "_" + subdet, name + " " + subdet)
-tdata.Draw("1/k>>ik_data_ee(20,0,2)", "abs(m3-91.2)<4 & !isEB")
+tdata.Draw("1/k>>ik_data_ee(20,0,2)", "abs(m3-91.2)<4 & !isEB & (%s)" % eeselection)
 histo = gDirectory.Get("ik_data_ee")
 histo.Fit("gaus")
 fit = histo.GetFunction("gaus")
@@ -92,7 +97,7 @@ canvases.append(c1)
 name = '42x MC'
 subdet = "Endcaps"
 c1 = TCanvas(name + "_" + subdet, name + " " + subdet)
-tmc.Draw("1/k>>ik_mc_ee(20,0,2)", "( abs(m3-91.2)<4 & !isEB ) * pileup.weightOOT")
+tmc.Draw("1/k>>ik_mc_ee(20,0,2)", "( abs(m3-91.2)<4 & !isEB & (%s) ) * pileup.weightOOT" % eeselection)
 histo = gDirectory.Get("ik_mc_ee")
 histo.Fit("gaus")
 fit = histo.GetFunction("gaus")
