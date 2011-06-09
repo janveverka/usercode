@@ -19,6 +19,24 @@ zeePrimeTree = cms.EDAnalyzer("ZeePrimeTreeMaker",
       sizeName = cms.untracked.string("uncleanPhoton.size"),
       variables = cms.VPSet(),
   ),
+  ebRechits = cms.PSet(
+      src = cms.InputTag("reducedEcalRecHitsEB"),
+      prefix = cms.untracked.string("ebRechit."),
+      sizeName = cms.untracked.string("ebRechit.size"),
+      variables = cms.VPSet(),
+  ),
+  eeRechits = cms.PSet(
+      src = cms.InputTag("reducedEcalRecHitsEE"),
+      prefix = cms.untracked.string("eeRechit."),
+      sizeName = cms.untracked.string("eeRechit.size"),
+      variables = cms.VPSet(),
+  ),
+  esRechits = cms.PSet(
+      src = cms.InputTag("reducedEcalRecHitsES"),
+      prefix = cms.untracked.string("esRechit."),
+      sizeName = cms.untracked.string("esRechit.size"),
+      variables = cms.VPSet(),
+  ),
 )
 
 def var(iTag, iQuantity):
@@ -35,6 +53,7 @@ kinematicVars = [ ('pt', 'pt'),
 
 ## Photon specific variables
 photonVars = [
+    ('isEB' , 'isEB'),
     ('r9' , 'r9'),
     ('hoe', 'hadronicOverEm'),
 ]
@@ -51,3 +70,24 @@ zeePrimeTree.photons.variables.append(
 zeePrimeTree.uncleanPhotons.variables.append(
     var( 'seedTime', 'userFloat("uncleanPhotonUserData:seedTime")' )
 )
+
+zeePrimeTree.ebRechits.variables.extend([
+    var( 'energy', 'energy'),
+    var( 'time'  , 'time'),
+    var( 'recoFlag', 'recoFlag' ),
+    var( 'id', 'id.rawId' ),
+])
+
+zeePrimeTree.eeRechits.variables.extend([
+    var( 'energy', 'energy'),
+    var( 'time'  , 'time'),
+    var( 'recoFlag', 'recoFlag' ),
+    var( 'id', 'id.rawId' ),
+])
+
+zeePrimeTree.esRechits.variables.extend([
+    var( 'energy', 'energy'),
+    var( 'time'  , 'time'),
+    var( 'recoFlag', 'recoFlag' ),
+    var( 'id', 'id.rawId' ),
+])
