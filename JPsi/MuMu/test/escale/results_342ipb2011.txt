@@ -23,6 +23,23 @@ Binned 1/k Fit
                         42x MC    Endcaps 1/k: 1.0060 +/- 0.0029
                 relative scale    Endcaps %  :  -0.33 +/- 0.64
 
+
+2011 data + MC, with OOT pileup reweighing, R9 > 0.94 (0.95) in EB (EE)
+                      42x data     Barrel 1/k: 0.9882 +/- 0.0042
+                        42x MC     Barrel 1/k: 0.9957 +/- 0.0024
+                relative scale     Barrel %  : -0.74 +/- 0.49
+                      42x data    Endcaps 1/k: 0.9940 +/- 0.0091
+                        42x MC    Endcaps 1/k: 0.9913 +/- 0.0048
+                relative scale    Endcaps %  : 0.27 +/- 1.02
+
+2011 data + MC, with OOT pileup reweighing, R9 < 0.94 (0.95) in EB (EE)
+                      42x data     Barrel 1/k: 1.0112 +/- 0.0042
+                        42x MC     Barrel 1/k: 1.0114 +/- 0.0022
+                relative scale     Barrel %  : -0.01 +/- 0.47
+                      42x data    Endcaps 1/k: 1.0074 +/- 0.0075
+                        42x MC    Endcaps 1/k: 1.0117 +/- 0.0036
+                relative scale    Endcaps %  : -0.43 +/- 0.83
+
 JSON & files lumi = 331.6 / pb
 JSON file: lumiCalc_160404-165970_7TeV_PromptReco_Collisions11_JSON.out
 Datasets:
