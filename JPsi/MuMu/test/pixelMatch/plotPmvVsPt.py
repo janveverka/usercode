@@ -2,8 +2,8 @@ import os
 from ROOT import *
 from array import array
 
-# path = "/home/veverka/Work/data/pmv"
-path = "/raid2/veverka/PMVTrees_v1"
+path = "/home/veverka/Work/data/pmv"
+#path = "/raid2/veverka/PMVTrees_v1"
 
 fileName = {
     "data": "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
