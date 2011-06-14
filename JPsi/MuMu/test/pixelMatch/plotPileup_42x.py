@@ -2,14 +2,15 @@ import os
 from ROOT import *
 from array import array
 
-path = "/raid2/veverka/PMVTrees_v6"
+#path = "/raid2/veverka/PMVTrees_v6"
+path = "/raid2/veverka/esTrees"
 realData = "data"
 mcSamples = "z qcd w tt".split()
 
 fileName = {
     #"data": "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
 #     "data": "pmvTree_ZMu-May10ReReco-42X-v3_V5.root",
-    "data": "pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root",
+    #"data": "pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root",
 
     #"z"   : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v1_V3.root",
     #"z"  : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",
@@ -18,11 +19,16 @@ fileName = {
     #"qcd" : "pmvTree_QCD_Pt-20_MuEnrichedPt-15_Winter10_V3.root",
 
 #     'w': 'pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V5.root',
-    'w'  : 'pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V6.root',
-    'qcd': 'pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V6.root',
-    'tt' : 'pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root',
+    #'w'  : 'pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V6.root',
+    #'qcd': 'pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V6.root',
+    #'tt' : 'pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root',
 #     'z': 'pmvTree_Z-RECO-41X-v2_V5.root',
-    'z'  : 'pmvTree_DYToMuMu_pythia6_AOD-42X-v4_V6.root',
+    #'z'  : 'pmvTree_DYToMuMu_pythia6_AOD-42X-v4_V6.root',
+    'data' : 'esTree_ZMu-May10ReReco_PromptReco-v4_FNAL_42X-v3_V2.root',
+    'z' : 'esTree_DYToMuMu_pythia6_AOD-42X-v4_V2.root',
+    'w' : 'esTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V2.root',
+    'tt' : 'esTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V2.root',
+    'qcd' : 'esTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V2.root',
 
 }
 
@@ -105,7 +111,8 @@ for tag, f in file.items():
 
 #ebSelection = "phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
 #eeSelection = "!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)"
-selection = "scEt > 10 && phoHoE < 0.5"
+#selection = "scEt > 10 && phoHoE < 0.5"
+selection = "scEt > 10 && phoHoE < 0.5 & abs(mmgMass-91.2)<4"
 #selection = 'phoIsEB'
 #selection = '!phoIsEB'
 
@@ -186,7 +193,7 @@ latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 #latexLabel.DrawLatex(0.7, 0.2, "Endcaps")
 latexLabel.DrawLatex(0.2, 0.875, "42X data and MC")
 latexLabel.DrawLatex(0.2, 0.8, "Total events: %d" % (int( hdata.GetEntries() ),) )
-latexLabel.DrawLatex(0.2, 0.725, "L = 241 pb^{-1}")
+latexLabel.DrawLatex(0.2, 0.725, "L = 332 pb^{-1}")
 latexLabel.DrawLatex(0.2, 0.65, "E_{T}^{#gamma} > 10 GeV")
 
 c1.Update()

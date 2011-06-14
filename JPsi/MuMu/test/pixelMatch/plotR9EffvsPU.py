@@ -1,7 +1,7 @@
 import os
 from ROOT import *
 
-infile = TFile("ootpu_500_50bins_EE.root")
+infile = TFile("ootpu.root")
 
 ## Grab the histograms from a file in a dictionary
 hist = {
@@ -10,7 +10,7 @@ hist = {
   'Late'   : {}
 }
 
-puMax = 20
+puMax = 10
 
 for puType in hist.keys():
     for npu in range(puMax):

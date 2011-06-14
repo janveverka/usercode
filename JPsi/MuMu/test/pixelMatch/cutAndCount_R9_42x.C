@@ -5,6 +5,7 @@ gROOT->LoadMacro("../resolutionErrors.C");
 // const char *filenameMC   = "pixelMatch_Powheg_Fall10_v4.dat";
 
 const char *path = "/raid2/veverka/PMVTrees_v6/";
+// const char *path = "/raid2/veverka/pmvTrees/";
 
 /**
     "data": "pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root",
@@ -15,11 +16,20 @@ const char *path = "/raid2/veverka/PMVTrees_v6/";
     'z'  : 'pmvTree_DYToMuMu_pythia6_AOD-42X-v4_V6.root',
 */
 
+
 const char *filenameData = "pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root";
 const char *filenameMC   = "pmvTree_DYToMuMu_pythia6_AOD-42X-v4_V6.root";
 const char *filenameQCD  = "pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V6.root";
 const char *filenameW    = "pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V6.root";
 const char *filenameTT   = "pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root";
+
+
+/// results with 499/pb
+// const char *filenameData = "pmvTree_ZMu-May10ReReco_plus_PromptReco-v4_FNAL_42X-v3_V8.root";
+// const char *filenameMC   = "pmvTree_DYToMuMu_pythia6_v1_plus_v2_RECO-42X-v4_V8.root";
+// const char *filenameQCD  = "pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V6.root";
+// const char *filenameW    = "pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V6.root";
+// const char *filenameTT   = "pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root";
 
 enum mcSample {z=0, qcd, w, tt};
 

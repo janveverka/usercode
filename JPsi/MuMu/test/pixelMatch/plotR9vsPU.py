@@ -2,7 +2,8 @@ import os
 from ROOT import *
 from array import array
 
-path = "/home/veverka/Work/data/pmv"
+#path = "/home/veverka/Work/data/pmv"
+path = "/raid2/veverka/PMVTrees_v7"
 
 fileName = {
     #"data": "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
@@ -13,7 +14,7 @@ fileName = {
     #"qcd" : "",
 #     "gj"  : "pmvTree_GJets_TuneD6T_HT-40To100-madgraph_Winter10_V3.root",
     #"gj"  : "pmvTree_GJets_TuneD6T_HT-40To100-madgraph_Winter10_V3_numEvents40k.root",
-    "gj"  : 'pmvTree_G_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6_Summer11_AOD_42X-v4_V6.root',
+    "gj"  : 'pmvTree_G_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6_Summer11_AOD_42X-v4_V7.root',
     #'gj'  : 'pmvTree_G_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6_Summer11_AOD_42X-v4_V6_numEvent80k.root',
 }
 
@@ -63,7 +64,7 @@ t = PmvTree(pmv)
 
 nbinsFixed = 500
 
-outFile = TFile ('ootpu.root', 'recreate')
+outFile = TFile ('ootpu_EE.root', 'recreate')
 hR9_all = TH1F('hR9_all', 'R9 all', nbinsFixed, 0.1, 1.1)
 hR9_PUInTime, hR9_PUEarly, hR9_PULate = {}, {}, {}
 for npu in range( 20 ):
@@ -84,8 +85,10 @@ for b in '''pileup.bunchCrossing
             '''.split():
     t.fChain.SetBranchStatus(b, 1)
 
+maxEvents = 100000000
+npuInTimeForOOT = 0  ## negative to ignore this
 ## Loop over entries
-for iEntry in range( t.fChain.GetEntriesFast() ):
+for iEntry in range( min(t.fChain.GetEntriesFast(), maxEvents) ):
     t.GetEntry(iEntry)
     ## Get the numbers for early, in-time and late pile-up
     for ibx in range( t.pileup_size ):
@@ -95,6 +98,9 @@ for iEntry in range( t.fChain.GetEntriesFast() ):
             npuInTime = t.pileup_numInteractions[ibx]
         elif t.pileup_bunchCrossing[ibx] == 1:
             npuLate = t.pileup_numInteractions[ibx]
+    if npuInTimeForOOT >= 0 and npuInTimeForOOT != npuInTime:
+        # ignore this event for OOT PU
+        npuEarly = npuLate = 99
     ## Loop over photons
     for iPhoton in range( t.nPhotons ):
         if t.phoMomPdgId[iPhoton] != 22: continue
@@ -118,6 +124,8 @@ for npu in range( 20 ):
                      (hR9_PUInTime_Norm, hR9_PUInTime),
                      (hR9_PULate_Norm  , hR9_PULate  ),]:
         hnorm[npu] = h[npu].Clone( h[npu].GetName() + "_Norm" )
+        if hnorm[npu].Integral() <= 0.001:
+            continue
         hnorm[npu].Sumw2()
         hnorm[npu].Scale( 1./ ( h[npu].Integral() * binWidth ) )
 
@@ -171,6 +179,8 @@ for npu in range( 20 ):
                      (hR9_varBins_PUInTime_Norm, hR9_varBins_PUInTime),
                      (hR9_varBins_PULate_Norm  , hR9_varBins_PULate  ),]:
         hnorm[npu] = h[npu].Clone( h[npu].GetName() + "_Norm" )
+        if hnorm[npu].Integral() <= 0.001:
+            continue
         hnorm[npu].Sumw2()
         hnorm[npu].Scale( 1. / hnorm[npu].Integral() )
         for bin in [i+1 for i in range(hnorm[npu].GetNbinsX())]:
