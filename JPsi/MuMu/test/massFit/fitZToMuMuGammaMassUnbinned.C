@@ -15,7 +15,6 @@
  *    Y. Yang      - Caltech, Pasadena, USA
  *
  */
-
 #include "RooAbsPdf.h"
 #include "RooAddPdf.h"
 #include "RooArgList.h"
@@ -58,29 +57,23 @@ double NormalizedIntegral(RooAbsPdf & function, RooRealVar & integrationVar, dou
 
 }
 
-RooWorkspace fitZToMuMuGammaMassUnbinned(
+RooAddPdf fitZToMuMuGammaMassUnbinned(
+  const char *filename = "ZMuMuGammaMass_36.1ipb_EE.txt",
+//   const char *filename = "ZMuMuGammaMass_2.9ipb_EB.txt",
+//   const char *filename = "ZMuMuGammaMass_2.9ipb_EE.txt",
+//   const char *filename = "ZMuMuGammaMass_Zmumu_Spring10_EB.txt",
 //   const char *filename = "DimuonMass_data_Nov4ReReco.txt",
-  const char *filename = "m3_DYToMuMu_powheg_Fall10_EB.dat",
-//   const char *filename = "m3_DYToMuMu_powheg_Fall10_EE.dat",
-//   const char *filename = "m3_Nov4ReReco_EB.dat",
-//   const char *filename = "m3_Nov4ReReco_EE.dat",
-//   const char *filename = "m3_DYToMuMu_powheg_Winter10_EB.dat",
-//   const char *filename = "m3_DYToMuMu_powheg_Winter10_EE.dat",
-//   const char *filename = "m3_Dec22ReReco_EB.dat",
-//   const char *filename = "m3_Dec22ReReco_EE.dat",
 
   const char* plotOpt = "NEU",
-  const int nbins = 60,
-  const float cbCutValue = -1,
-  const float cbPowerValue = -1
-  )
+  const int nbins = 60)
 {
-
-  RooWorkspace ws("ws", "Z->uuy mass fit");
+  gROOT->ProcessLine(".L tdrstyle.C");
+  setTDRStyle();
+  gStyle->SetPadRightMargin(0.05);
 
   double minMass = 60;
   double maxMass = 120;
-  RooRealVar  mass("mass","m(#mu#mu#gamma)", minMass, maxMass,"GeV");
+  RooRealVar  mass("mass","m(#mu#mu#gamma)", minMass, maxMass,"GeV/c^{2}");
 
   // Read data set
 
@@ -95,28 +88,18 @@ RooWorkspace fitZToMuMuGammaMassUnbinned(
 
 //  Signal p.d.f. parameters
 //  Parameters for a Gaussian and a Crystal Ball Lineshape
-  RooRealVar  cbBias ("#Deltam_{CB}", "CB Bias", 0.05, -2, 2,"GeV");
-  RooRealVar  cbSigma("#sigma_{CB}","CB Width", 1.38, 0.01, 10.0,"GeV");
+  RooRealVar  cbBias ("#Deltam_{CB}", "CB Bias", 0.05, -2, 2,"GeV/c^{2}");
+  RooRealVar  cbSigma("#sigma_{CB}","CB Width", 1.38, 0.01, 10.0,"GeV/c^{2}");
   RooRealVar  cbCut  ("a_{CB}","CB Cut", 1.5, 0.1, 2.0);
   RooRealVar  cbPower("n_{CB}","CB Power", 1.3, 0.1, 20.0);
-
-  if (cbCut.getMin() <= cbCutValue && cbCutValue <= cbCut.getMax()) {
-    cbCut.setVal(cbCutValue);
-    cbCut.setConstant(kTRUE);
-  }
-
-  if (cbPower.getMin() <= cbPowerValue && cbPowerValue <= cbPower.getMax()) {
-    cbPower.setVal(cbPowerValue);
-    cbPower.setConstant(kTRUE);
-  }
 
 //   cbSigma.setConstant(kTRUE);
 //   cbCut.setConstant(kTRUE);
 //   cbPower.setConstant(kTRUE);
 
 //  Parameters for Breit-Wigner
-  RooRealVar bwMean("m_{Z}","BW Mean", 91.1876, "GeV");
-  RooRealVar bwWidth("#Gamma_{Z}", "BW Width", 2.4952, "GeV");
+  RooRealVar bwMean("m_{Z}","BW Mean", 91.1876, "GeV/c^{2}");
+  RooRealVar bwWidth("#Gamma_{Z}", "BW Width", 2.4952, "GeV/c^{2}");
 
   // Keep Breit-Wigner parameters fixed to the PDG values
 //   bwMean.setConstant(kTRUE);
@@ -169,7 +152,7 @@ RooWorkspace fitZToMuMuGammaMassUnbinned(
 
   t.Print() ;
 
-//   TCanvas *c = new TCanvas("c","Unbinned Invariant Mass Fit", 0,0,800,600);
+  TCanvas *c = new TCanvas("c","Unbinned Invariant Mass Fit", 0,0,800,600);
 // Plot the fit results
   RooPlot* plot = mass.frame(Range(minMass,maxMass),Bins(nbins));
 
@@ -247,10 +230,8 @@ RooWorkspace fitZToMuMuGammaMassUnbinned(
 //   ldataB->SetMarkerColor(kRed);
 
 //   leg->Draw();
-  ws.import(*data);
-  ws.import(model);
 
-  return ws;
+  return model;
 
 }
 
