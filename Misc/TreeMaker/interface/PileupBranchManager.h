@@ -24,8 +24,9 @@ namespace cit {
 
       bool doPileupSummaryInfo_;
       bool doWeights_;
- 
+
       edm::InputTag pileupInfoSrc_;
+      edm::InputTag rhoSrc_;
 //       edm::ParameterSet pileupReweightingCfg_;
 
       /// branches
@@ -38,6 +39,7 @@ namespace cit {
       std::vector<Int_t>  bunchCrossing_;
       Float_t weight_;
       Float_t weightOOT_;
+      Float_t rho_;
 
       /// Tool used to calculate the weights
       edm::LumiReWeighting LumiWeights_;
