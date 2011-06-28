@@ -26,6 +26,10 @@ namespace cit {
       iConfig.existsAs<edm::ParameterSet>( "lumiReWeighting", false )
     ),
 
+    doRho_(
+      iConfig.existsAs<edm::InputTag>( "rhoSrc", false )
+    ),
+
     b_numInteractions_(0),
     b_bunchCrossing_(0)
   {
@@ -35,8 +39,10 @@ namespace cit {
       pileupInfoSrc_ =
         iConfig.getUntrackedParameter<InputTag>( "pileupInfoSrc" );
 
-    if ( doWeights_ == true ) {
+    if ( doRho_ == true )
+      rhoSrc_ = iConfig.getUntrackedParameter<InputTag>( "rhoSrc" );
 
+    if ( doWeights_ == true ) {
       ParameterSet cfg =
         iConfig.getUntrackedParameter<ParameterSet>( "lumiReWeighting" );
 
@@ -156,7 +162,14 @@ namespace cit {
       branchName = prefix + "weightOOT";
       leafList = prefix + "weightOOT/F";
       tree.Branch( branchName.c_str(), &weightOOT_, leafList.c_str() );
-    }
+    } // doWeights_ == true
+
+    /// Do we want to store rho from FastJet for pileup subtraction?
+    if ( doRho_ == true ) {
+      branchName = prefix + "rho";
+      leafList = prefix + "rho/F";
+      tree.Branch( branchName.c_str(), &rho_, leafList.c_str() );
+    } // doRho_ == true
 
   } // end of PileupBranchManager::init(TTree & tree) definition
 
@@ -188,9 +201,9 @@ namespace cit {
       } // end of loop over pileup bunch crossings
 
       // Reset the branch addresses, the vectors may have been reallocated.
-      if (b_numInteractions_ != 0) 
+      if (b_numInteractions_ != 0)
         b_numInteractions_->SetAddress( &(numInteractions_[0]) );
-      if (b_bunchCrossing_ != 0) 
+      if (b_bunchCrossing_ != 0)
         b_bunchCrossing_->SetAddress( &(bunchCrossing_[0]) );
 
     } // end of pileup
@@ -200,6 +213,12 @@ namespace cit {
     if ( doWeights_ == true ) {
       weight_    = LumiWeights_.weight   ( iEvent );
       weightOOT_ = LumiWeights_.weightOOT( iEvent );
+    }
+
+    if ( doRho_ == true ) {
+      edm::Handle<double>  rho;
+      iEvent.getByLabel( rhoSrc_, rho);
+      rho_    = *rho;
     }
 
 

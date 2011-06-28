@@ -27,7 +27,10 @@ PmvBranchManager::PmvBranchManager(edm::ParameterSet const& iConfig) :
   b_muNearIEtaX_(0),
   b_muNearIPhiY_(0),
   b_muNearIsEB_(0),
-  b_muNearIndex_(0)
+  b_muNearIndex_(0),
+  b_phoGenE_(0),
+  b_phoGenEt_(0),
+  b_phoGenEta_(0)
 {}
 
 PmvBranchManager::~PmvBranchManager() {}
@@ -67,6 +70,15 @@ PmvBranchManager::init(TTree& tree)
 
   leafList = std::string("muNearIndex") + "[" + sizeName_ + "]/I";
   b_muNearIndex_ = tree.Branch("muNearIndex", &(muNearIndex_[0]), leafList.c_str() );
+
+  leafList = std::string("phoGenE") + "[" + sizeName_ + "]/F";
+  b_phoGenE_ = tree.Branch("phoGenE", &(phoGenE_[0]), leafList.c_str() );
+
+  leafList = std::string("phoGenEt") + "[" + sizeName_ + "]/F";
+  b_phoGenEt_ = tree.Branch("phoGenEt", &(phoGenEt_[0]), leafList.c_str() );
+
+  leafList = std::string("phoGenEta") + "[" + sizeName_ + "]/F";
+  b_phoGenEta_ = tree.Branch("phoGenEta", &(phoGenEta_[0]), leafList.c_str() );
 }
 
 void
@@ -106,10 +118,16 @@ PmvBranchManager::getData( const edm::Event& iEvent,
   muNearIsEB_.reserve( mmgCands->size() );
   muNearIndex_.reserve( mmgCands->size() );
 
+  phoGenE_.reserve( mmgCands->size() );
+  phoGenEt_.reserve( mmgCands->size() );
+  phoGenEta_.reserve( mmgCands->size() );
 
   LogDebug("SegFault") << "loop over candidates ";
   // loop over mmg candidates
   for (size_t i=0; i < mmgCands->size(); ++i) {
+    phoGenE_[i] = -1;
+    phoGenEt_[i] = -1;
+    phoGenEta_[i] = -99;
     LogDebug("SegFault") << "getting photon ";
     const pat::Photon &
     photon = * ((const pat::Photon *)
@@ -128,6 +146,9 @@ PmvBranchManager::getData( const edm::Event& iEvent,
         {
           LogDebug("SegFault") << "Found gen match";
           // found the gen match in gen particles.
+          phoGenE_[i] = genMatch->energy();
+          phoGenEt_[i] = genMatch->pt();
+          phoGenEta_[i] = genMatch->eta();
           if (genMatch->numberOfMothers() > 0) {
               found = true;
 
@@ -220,6 +241,9 @@ PmvBranchManager::getData( const edm::Event& iEvent,
   if (b_muNearIPhiY_ != 0) b_muNearIPhiY_->SetAddress( &(muNearIPhiY_[0]) );
   if (b_muNearIsEB_ != 0) b_muNearIsEB_->SetAddress( &(muNearIsEB_[0]) );
   if (b_muNearIndex_ != 0) b_muNearIndex_->SetAddress( &(muNearIndex_[0]) );
+  if (b_phoGenE_ != 0) b_phoGenE_->SetAddress( &(phoGenE_[0]) );
+  if (b_phoGenEt_ != 0) b_phoGenEt_->SetAddress( &(phoGenEt_[0]) );
+  if (b_phoGenEta_ != 0) b_phoGenEta_->SetAddress( &(phoGenEta_[0]) );
 
   LogDebug("SegFault") << "exitting";
 }

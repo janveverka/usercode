@@ -35,6 +35,9 @@ private:
   TBranch * b_muNearIPhiY_;
   TBranch * b_muNearIsEB_;
   TBranch * b_muNearIndex_;
+  TBranch * b_phoGenE_;
+  TBranch * b_phoGenEt_;
+  TBranch * b_phoGenEta_;
 
   /// leaf variables
   Int_t nVertices_;
@@ -48,6 +51,9 @@ private:
   std::vector<Int_t> muNearIPhiY_;
   std::vector<Int_t> muNearIsEB_;
   std::vector<Int_t> muNearIndex_;
+  std::vector<Float_t> phoGenE_;
+  std::vector<Float_t> phoGenEt_;
+  std::vector<Float_t> phoGenEta_;
 
 }; // end of class PmvBranchManager declaration
 
