@@ -3,7 +3,7 @@ import os
 import socket
 
 _hostname = socket.gethostname()
-if _hostname == 't3-susy':
+if _hostname == 't3-susy.ultralight.org':
     ## Path for the t3-susy
     _path = '/raid2/veverka/esTrees/'
 elif _hostname == 'nbcitjv':
@@ -28,6 +28,9 @@ _files['v2'] = {
             esTree_PromptReco-v4_FNAL_42X-v3_V2.root
             '''.split(),
     'z' : ['esTree_DYToMuMu_pythia6_AOD-42X-v4_V2.root'],
+    'w'    : ['esTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V2.root'],
+    'tt'   : ['esTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V2.root'],
+    'qcd'  : ['esTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V2.root'],
 }
 
 _files['v3'] = {
@@ -39,17 +42,40 @@ _files['v3'] = {
 
 _files['v4'] = {
     'data' : '''
+             esTree_V4_Run2010B-ZMu-Apr21ReReco-v1.root
              esTree_V4_PromptReco-v4_FNAL_42X-v3.root
              esTree_V4_ZMu-May10ReReco-42X-v3.root
              '''.split(),
     'z'    : [ 'esTree_V4_DYToMuMu_pythia6_v2_RECO-42X-v4.root' ],
 }
 
+_files['v5'] = {
+    'z'    : [ 'esTree_V5_DYToMuMu_pythia6_v2_RECO-42X-v4.root' ],
+}
+
+_files['v6'] = {
+    'z'    : [ 'esTree_V6_DYToMuMu_pythia6_v2_RECO-42X-v4.root' ],
+}
+
+_files['v7'] = {
+    'data' : '''
+             esTree_V7_Run2010B-ZMu-Apr21ReReco-v1.root
+             esTree_V7_ZMu-May10ReReco-42X-v3.root
+             esTree_V7_PromptReco-v4_FNAL_42X-v3.root
+             '''.split(),
+    'z'    : [ 'esTree_V7_DYToMuMu_pythia6_v2_RECO-42X-v4.root' ],
+}
+
+
+
 _treeNames = {
     'v1' : 'tree/es',
     'v2' : 'pmvTree/pmv',
     'v3' : 'tree/es',
     'v4' : 'tree/pmv',
+    'v5' : 'tree/pmv',
+    'v6' : 'tree/pmv',
+    'v7' : 'tree/pmv',
 }
 
 

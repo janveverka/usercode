@@ -1,11 +1,16 @@
 #------------------------------------------------------------------------------
 ## Common ROOT objects
+## Globals
 from ROOT import gDirectory, gROOT, gStyle
-from ROOT import TChain, TCanvas, TH1F, THStack, TLegend, TF1, TGraphErrors
+
+## Classes
+from ROOT import TChain, TCanvas, TH1F, THStack, TLegend, TF1, TGraphErrors, \
+                 TTree, Form
 ## Colors
 from ROOT import kBlue, kViolet, kMagenta, kPink, kRed, kOrange, kYellow
 from ROOT import kSpring, kGreen, kTeal, kCyan, kAzure, kWhite, kBlack, kGray
 from ROOT import kTRUE, kFALSE, TLatex
+
 #------------------------------------------------------------------------------
 ## Common RooFit objects
 from ROOT import RooRealVar, RooArgSet, RooArgList, RooDataSet, RooCategory, \
