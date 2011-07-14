@@ -1,7 +1,6 @@
 import os
 import JPsi.MuMu.common.dataset as dataset
 import JPsi.MuMu.common.energyScaleChains as esChains
-import JPsi.MuMu.common.clusterCorrections as clusterCorrs
 
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
@@ -9,14 +8,7 @@ from JPsi.MuMu.common.plotData import PlotData
 
 _chains = esChains.getChains('v7')
 
-for ch in _chains.values():
-    ch.SetAlias( 'phoE', 'phoPt * cosh(phoEta)' )
-    ch.SetAlias( 'brem', 'scPhiWidth / scEtaWidth' )
-    ch.SetAlias( 'rawE', 'scRawE + preshowerE' )
-    ch.SetAlias( 'corrE', 'phoCrackCorr * corrE(rawE, scEta, brem)' )
-    ch.SetAlias( 'newCorrE', 'phoCrackCorr * newCorrE(rawE, scEta, brem)' )
-
-baseCuts = [
+_baseCuts = [
     'abs(1/kRatio - 1) < 0.5',
     'abs(mmgMass-91.2) < 4',
 ]
@@ -24,21 +16,21 @@ baseCuts = [
 ## ----------------------------------------------------------------------------
 ## Customize below
 leftPlot = PlotData(
-    name = 'EB_highR9_data_old',
-    title = 'Barrel, R9 > 0.94, data, default corrections',
-    labels = ['Barrel', 'R9 > 0.94', 'data', 'current corrections'],
+    name = 'EB_lowR9_data_new',
+    title = 'Barrel, R9 < 0.94, data, new corrections',
+    labels = ['Barrel', 'R9 < 0.94', 'data', 'new corr.'],
     source = _chains['data'],
-    expression = '100 * (1/kRatio - 1)',
-    cuts = baseCuts + ['phoIsEB', 'phoR9 > 0.94'],
+    expression = '100 * (1/newCorrKRatio - 1)',
+    cuts = _baseCuts + ['phoIsEB', 'phoR9 < 0.94'],
 )
 
 rightPlot = PlotData(
     name = 'EB_lowR9_data_old',
     title = 'Barrel, R9 < 0.94, data, default corrections',
-    labels = ['Barrel', 'R9 < 0.94', 'data', 'current corrections'],
+    labels = ['Barrel', 'R9 < 0.94', 'data', 'default corr.'],
     source = _chains['data'],
     expression = '100 * (1/kRatio - 1)',
-    cuts = baseCuts + ['phoIsEB', 'phoR9 < 0.94'],
+    cuts = _baseCuts + ['phoIsEB', 'phoR9 < 0.94'],
 )
 
 ws1 = RooWorkspace( 'ws1', 'mmg energy scale' )

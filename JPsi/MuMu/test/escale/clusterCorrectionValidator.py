@@ -1,50 +1,119 @@
 import os
 import JPsi.MuMu.common.dataset as dataset
 import JPsi.MuMu.common.energyScaleChains as esChains
-import JPsi.MuMu.common.clusterCorrections as clusterCorrs
 
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
+from JPsi.MuMu.common.plotData import PlotData
 
+## Get the data
+_chains = esChains.getChains('v7')
+
+## Cuts common to all plots
+_commonCuts = [
+    'abs(1/kRatio - 1) < 0.5',
+    'abs(mmgMass-91.2) < 4',
+]
+
+## Add common data
+class SFitPlotData(PlotData):
+    def __init__(self, name, title, source, expression, cuts, labels):
+        PlotData.__init__(self, name, title, source, expression, cuts, labels)
+        self.xTitle = 's = E_{RECO}/E_{KIN} - 1'
+        self.nBins = 40
+        self.xRange = (-30, 50)
+
+
+## ----------------------------------------------------------------------------
+## Customize below
+_plots = [
+    ## Barrel, Data
+    SFitPlotData(
+        name = 'EB_highR9_data',
+        title = 'Barrel, R9 > 0.94, data',
+        source = _chains['data'],
+        expression = '100 * (1/kRatio - 1)',
+        cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94'],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'L = 750 pb^{-1}' ],
+    ),
+    SFitPlotData(
+        name = 'EB_lowR9_data_default',
+        title = 'Barrel, R9 < 0.94, data, default corrections',
+        source = _chains['data'],
+        expression = '100 * (1/kRatio - 1)',
+        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'L = 750 pb^{-1}',
+                   'Default Corr.' ],
+    ),
+    SFitPlotData(
+        name = 'EB_lowR9_data_default_closure',
+        title = 'Barrel, R9 < 0.94, data, default corrections, closure test',
+        source = _chains['data'],
+        expression = '100 * (1/corrKRatio - 1)',
+        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'L = 750 pb^{-1}',
+                   'Default Corr.', 'Closure Test' ],
+    ),
+    SFitPlotData(
+        name = 'EB_lowR9_data_new',
+        title = 'Barrel, R9 < 0.94, data, new corrections',
+        source = _chains['data'],
+        expression = '100 * (1/newCorrKRatio - 1)',
+        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'L = 750 pb^{-1}',
+                   'New Corr.' ],
+    ),
+
+    ## Barrel, MC
+    SFitPlotData(
+        name = 'EB_highR9_mc',
+        title = 'Barrel, R9 > 0.94, Pythia S3',
+        source = _chains['z'],
+        expression = '100 * (1/kRatio - 1)',
+        cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94'],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'Pythia S3' ],
+    ),
+    SFitPlotData(
+        name = 'EB_lowR9_mc_default',
+        title = 'Barrel, R9 < 0.94, Pythia S3, default corrections',
+        source = _chains['z'],
+        expression = '100 * (1/kRatio - 1)',
+        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Pythia S3',
+                   'Default Corr.' ],
+    ),
+    SFitPlotData(
+        name = 'EB_lowR9_mc_default_closure',
+        title = 'Barrel, R9 < 0.94, Pythia S3, default corrections, closure test',
+        source = _chains['z'],
+        expression = '100 * (1/corrKRatio - 1)',
+        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Pythia S3',
+                   'Default Corr.', 'Closure Test' ],
+    ),
+    SFitPlotData(
+        name = 'EB_lowR9_mc_new',
+        title = 'Barrel, R9 < 0.94, Pythia S3, new corrections',
+        source = _chains['z'],
+        expression = '100 * (1/newCorrKRatio - 1)',
+        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Pythia S3',
+                   'New Corr.' ],
+    ),
+]
+
+
+
+## Define the workspace
 ws1 = RooWorkspace( 'ws1', 'mmg energy scale' )
 
-
+## Define the quantity to be fitted
 x = RooRealVar( 's', '100 * (1/kRatio - 1)', -50, 50, '%' )
-x.setBins(50)
 
 w = RooRealVar( 'w', '1', 0, 99 )
 
 xw = RooArgSet(x, w)
 ws1.Import(xw)
-# label = 'EB_highR9'
-# label = 'EE_highR9'
-# label = 'EB_lowR9'
-# label = 'EE_lowR9'
-label = 'EB'
-# label = 'EE'
-
-## Get data
-selection = [
-    'abs(1/kRatio - 1) < 0.5',
-    'abs(mmgMass-91.2) < 4',
-]
-
-if label == 'EB_highR9':
-    selection.extend( ['phoR9 > 0.94', 'phoIsEB'] )
-elif label == 'EB_lowR9':
-    selection.extend( ['phoR9 < 0.94', 'phoIsEB'] )
-elif label == 'EE_highR9':
-    selection.extend( ['phoR9 > 0.95', '!phoIsEB'] )
-elif label == 'EE_lowR9':
-    selection.extend( ['phoR9 < 0.95', '!phoIsEB'] )
-elif label == 'EB':
-    selection.extend( ['phoIsEB'] )
-    highR9Cut = '(phoR9 > 0.94)'
-elif label == 'EE':
-    selection.extend( ['!phoIsEB'] )
-    highR9Cut = '(phoR9 > 0.95)'
-else:
-    raise RuntimeError, "Unknown label `%s'" % label
 
 model = ws1.factory("""CBShape::crystalBall( s,
                                              #Deltas[0, -50, 50],
@@ -52,90 +121,66 @@ model = ws1.factory("""CBShape::crystalBall( s,
                                              #alpha[-1.5, -10, 0],
                                              n[1.5, 0.1, 10] )""")
 
-_chains = esChains.getChains('v7')
-
-for ch in _chains.values():
-    ch.SetAlias( 'phoE', 'phoPt * cosh(phoEta)' )
-    ch.SetAlias( 'brem', 'scPhiWidth / scEtaWidth' )
-    ch.SetAlias( 'rawE', 'scRawE + preshowerE' )
-    ch.SetAlias( 'corrE', 'phoCrackCorr * corrE(rawE, scEta, brem)' )
-    ch.SetAlias( 'newCorrE', 'phoCrackCorr * newCorrE(rawE, scEta, brem)' )
-
-
-x.SetTitle( '100 * (1/kRatio - 1)' )
-# x.SetTitle( '100 * ( newCorrE / (phoE*kRatio) - 1)' )
-data1 = dataset.get( tree = _chains['data'],
-                     variable = x, weight = w, cuts = selection + [highR9Cut] )
-data1.SetName('data1')
-ws1.Import(data1)
-
-# x.SetTitle( '100 * (1/kRatio - 1)' )
-x.SetTitle( '100 * ( newCorrE / (phoE*kRatio) - 1)' )
-data2 = dataset.get( tree = _chains['data'],
-                     variable = x, weight = w, cuts = selection + ['!' + highR9Cut] )
-data2.SetName('data2')
-ws1.Import(data2)
-
-
 ## Define observables and parameters
 observables = RooArgSet(x)
 parameters = model.getParameters(observables)
 ws1.defineSet("parameters", parameters)
 ws1.saveSnapshot("initial", parameters, True)
 
-## Fit data1
-fitResult1 = model.fitTo( data1, Save(), SumW2Error(kTRUE), PrintLevel(-1) )
-ws1.saveSnapshot( 'data1', parameters, True )
+## Initialize latex label
+latexLabel = TLatex()
+latexLabel.SetNDC()
+latexLabel.SetTextSize(0.045)
 
-f1 = 1 + ws1.var('#Deltas').getVal() / 100
-f1err = ws1.var('#Deltas').getError() / 100
+## Loop over plots
+for plot in _plots:
+    ## Get the RooDataset
+    x.SetTitle( plot.expression )
+    data = dataset.get(
+        tree = plot.source,
+        variable = x,
+        weight = w,
+        cuts = plot.cuts
+    )
+    data.SetName( 'data_' + plot.name )
+    ws1.Import(data)
 
-x.SetTitle('s = E_{RECO}/E_{KIN} - 1')
-x.setBins(40)
-plot = x.frame( Range(-30, 50) )
-data1.SetTitle('data1')
-data1.plotOn(plot)
-model.plotOn(plot)
-model.paramOn( plot,
-               Format('NEU', AutoPrecision(2) ),
-               Parameters(parameters),
-               Layout(.57, 0.92, 0.92) )
+    ## Fit data
+    plot.fitResult = model.fitTo( data, Save(), SumW2Error(kTRUE), PrintLevel(-1) )
+    ws1.saveSnapshot( plot.name, parameters, True )
 
-c1 = TCanvas()
-c1.Divide(2,1)
-c1.cd(1)
-plot.Draw()
+    ## Make a frame
+    x.SetTitle(plot.xTitle)
+    x.setBins(plot.nBins)
+    frame = x.frame( Range( *plot.xRange ) )
 
-## Fit MC
-fitResult2 = model.fitTo( data2, Save(), SumW2Error(kTRUE), PrintLevel(-1) )
-ws1.saveSnapshot( 'MC', parameters, True )
+    ## Add the data and model to the fram
+    data.SetTitle( plot.title )
+    data.plotOn( frame )
+    model.plotOn( frame )
+    model.paramOn( frame,
+                   Format('NEU', AutoPrecision(2) ),
+                   Parameters( parameters ),
+                   Layout(.57, 0.92, 0.92) )
 
-f2 = 1 + ws1.var('#Deltas').getVal() / 100
-f2err = ws1.var('#Deltas').getError() / 100
+    ## Make a canvas
+    plot.canvas = TCanvas( plot.name, plot.title )
+    i = _plots.index( plot )
+    plot.canvas.SetWindowPosition( 20*i, 20*i )
 
-x.setBins(40)
-plot = x.frame( Range(-30, 50) )
-data2.SetTitle('MC')
-data2.plotOn(plot)
-model.plotOn(plot)
-model.paramOn( plot,
-               Format('NEU', AutoPrecision(2) ),
-               Parameters(parameters),
-               Layout(.57, 0.92, 0.92) )
+    ## Customize
+    frame.SetTitle('')
 
-c1.cd(2)
-plot.Draw()
+    ## Draw the frame
+    frame.Draw()
 
-from math import sqrt
-oplus = lambda x,y: sqrt(x*x + y*y)
+    ## Add labels
+    for i in range( len( plot.labels ) ):
+        latexLabel.DrawLatex( 0.59, 0.6 - i * 0.055, plot.labels[i] )
 
-f1over2 = f1 / f2
-f1over2Err = f1over2 * oplus( f1err / f1, f2err / f2 )
+    ## Save the plot
+    plot.canvas.Print( 'sFit_' + plot.name + '.png' )
 
-print "%s left/right: %0.4f +/- %0.4f" % ( label, f1over2, f1over2Err )
-
-# c1.Print( 'sFit_clusterCorrection_newOverReco_data_%s.png' % label )
-c1.Print( 'sFit_newClusterCorrection_highOverLowR9_data_%s.png' % label )
-
+## <-- loop over plots
 
 if __name__ == "__main__": import user
