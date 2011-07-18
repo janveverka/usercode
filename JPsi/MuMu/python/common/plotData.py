@@ -1,3 +1,5 @@
+import copy
+
 '''Holds data specifying a plot based on a TTree'''
 class PlotData:
     def __init__(self, name, title, source, expression, cuts, labels):
@@ -13,3 +15,9 @@ class PlotData:
         self.expression = expression
         ## TTree::Draw selection string applied to data source
         self.cuts = cuts
+
+    def clone(self, **kwargs):
+        newPlot = copy.deepcopy(self)
+        for argName, argValue in kwargs.items():
+            setattr( newPlot, argName, argValue )
+        return newPlot

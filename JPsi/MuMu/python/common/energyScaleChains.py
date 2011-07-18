@@ -1,6 +1,8 @@
-from JPsi.MuMu.common.basicRoot import *
 import os
 import socket
+import JPsi.MuMu.common.clusterCorrections as clusterCorrs
+
+from JPsi.MuMu.common.basicRoot import *
 
 _hostname = socket.gethostname()
 if _hostname == 't3-susy.ultralight.org':
@@ -86,6 +88,17 @@ def getChains(version='v4'):
         for f in flist:
             print "Loading ", name, ":", f
             chains[name].Add( os.path.join(_path, f) )
+
+    ## Set aliases
+    for ch in chains.values():
+        ch.SetAlias( 'phoE', 'phoPt * cosh(phoEta)' )
+        ch.SetAlias( 'brem', 'scPhiWidth / scEtaWidth' )
+        ch.SetAlias( 'rawE', 'scRawE + preshowerE' )
+        ch.SetAlias( 'corrE', 'phoCrackCorr * corrE(rawE, scEta, brem)' )
+        ch.SetAlias( 'newCorrE', 'phoCrackCorr * newCorrE(rawE, scEta, brem)' )
+        ch.SetAlias( 'corrKRatio', 'phoE * kRatio / corrE' )
+        ch.SetAlias( 'newCorrKRatio', 'phoE * kRatio / newCorrE' )
+
     return chains
 
 if __name__ == "__main__": import user
