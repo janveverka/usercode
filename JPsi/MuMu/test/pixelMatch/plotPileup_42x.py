@@ -103,9 +103,21 @@ for tag, name in fileName.items():
     file[tag] = TFile(os.path.join(path, name))
 
 ## get trees
-tree = {}
-for tag, f in file.items():
-    tree[tag] = f.Get("pmvTree/pmv")
+# tree = {}
+# for tag, f in file.items():
+#     tree[tag] = f.Get("pmvTree/pmv")
+# tree1 = {}
+# for tag, f in file.items():
+#     tree1[tag] = f.Get("pmvTree/pmv")
+
+import JPsi.MuMu.common.energyScaleChains as esChains
+tree = esChains.getChains('v4')
+esChainsV2 = esChains.getChains('v2')
+tree['w'] = esChainsV2['w']
+tree['tt'] = esChainsV2['tt']
+tree['qcd'] = esChainsV2['qcd']
+
+# pmv = tree1['gj']
 
 ## make histos of pmv vs mmgMass
 

@@ -99,14 +99,20 @@ latexLabel = TLatex()
 latexLabel.SetNDC()
 
 ## open files
-file = {}
-for tag, name in fileName.items():
-    file[tag] = TFile(os.path.join(path, name))
+# file = {}
+# for tag, name in fileName.items():
+#     file[tag] = TFile(os.path.join(path, name))
 
 ## get trees
 tree = {}
-for tag, f in file.items():
-    tree[tag] = f.Get("pmvTree/pmv")
+# for tag, f in file.items():
+#     tree[tag] = f.Get("pmvTree/pmv")
+import JPsi.MuMu.common.energyScaleChains as esChains
+tree = esChains.getChains('v4')
+esChainsV2 = esChains.getChains('v2')
+tree['w'] = esChainsV2['w']
+tree['tt'] = esChainsV2['tt']
+tree['qcd'] = esChainsV2['qcd']
 
 ## make histos of pmv vs mmgMass
 
@@ -195,7 +201,7 @@ latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 latexLabel.DrawLatex(0.2, 0.875, "42X data and MC")
 latexLabel.DrawLatex(0.2, 0.8, "Total events: %d" % (int( hdata.GetEntries() ),) )
 # latexLabel.DrawLatex(0.2, 0.725, "L = 332 pb^{-1}")
-latexLabel.DrawLatex(0.2, 0.725, "L = 332 pb^{-1}")
+latexLabel.DrawLatex(0.2, 0.725, "L = 715 pb^{-1}")
 latexLabel.DrawLatex(0.2, 0.65, "E_{T}^{#gamma} > 10 GeV")
 
 c1.Update()
