@@ -11,6 +11,9 @@ if _hostname == 't3-susy.ultralight.org':
 elif _hostname == 'nbcitjv':
     ## Path for Jan's Dell Inspiron 6000 laptop
     _path = '/home/veverka/Work/data/esTrees'
+elif _hostname == 'eee.home' or _hostname == 'Jan-Veverkas-MacBook-Pro.local':
+    ## Path for Jan's MacBook Pro
+    _path = '/Users/veverka/Work/Data/esTrees'
 else:
     raise RuntimeError, "Unknown hostname `%s'" % _hostname
 
