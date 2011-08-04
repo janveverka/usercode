@@ -9,8 +9,9 @@ from JPsi.MuMu.common.roofit import *
 #gROOT.LoadMacro("tdrstyle.C");
 #from ROOT import setTDRStyle
 #setTDRStyle()
+gROOT.LoadMacro('energyCorrection.cc+')
 
-gROOT.LoadMacro("CMSStyle.C");
+gROOT.LoadMacro("CMSStyle.C")
 from ROOT import CMSstyle
 CMSstyle()
 
@@ -33,6 +34,11 @@ def customizeModelParamBox(stats):
 canvases = []
 ws1 = RooWorkspace( 'ws1', 'mmg energy scale' )
 x = RooRealVar( 's', '100 * (1/kRatio - 1)', -50, 50, '%' )
+# newCorrE = "newCorrE(scRawE+preshowerE,scEta,scPhiWidth/scEtaWidth)"
+# x = RooRealVar( 's',
+#   '100 * (%s/(phoPt*cosh(phoEta))/kRatio - 1)' % newCorrE,
+#   -50, 50, '%'
+# )
 x.setBins(50)
 xtitle = 's = E_{RECO}/E_{KIN} - 1'
 w = RooRealVar( 'w', '1', 0, 99 )
@@ -41,6 +47,17 @@ ws1.Import(xw)
 fitColor = kAzure - 9
 latexLabel = TLatex()
 latexLabel.SetNDC()
+
+## Define categories
+r9Cat = RooCategory( 'r9', 'isHighR9(phoIsEB, phoR9)' )
+r9Cat.defineType( 'High', 1 )
+r9Cat.defineType( 'Low', 0 )
+
+subdetCat = RooCategory( 'subdet', 'phoIsEB' )
+subdetCat.defineType( 'Barrel' , 1 )
+subdetCat.defineType( 'Endcaps', 0 )
+
+myCategories = [ r9Cat, subdetCat ]
 
 ## Define model
 model = ws1.factory("""CBShape::crystalBall( s,
@@ -60,7 +77,8 @@ catTitleCut = {
 ## Get data
 data = dataset.get( tree = esChains.getChains('v4')['data'],
                     variable = x,
-                    weight = w )
+                    weight = w,
+                    categories = myCategories )
 data.SetName('realData')
 data.SetTitle('scale real data 750/pb')
 ws1.Import(data)
@@ -134,10 +152,10 @@ for name, src in sources.items():
         data.get(0)
         latexLabel.DrawLatex(0.16, 0.96, "CMS Preliminary 2011")
         latexLabel.DrawLatex(0.74, 0.96, "#sqrt{s} = 7 TeV")
-        
+
         latexLabel.DrawLatex(0.2, 0.875, data.get(0).getCatLabel('subdet') )
         latexLabel.DrawLatex(0.2, 0.8, data.get(0).getCatLabel('r9') + ' R_{9}^{#gamma}' )
-        
+
         latexLabel.DrawLatex(0.7, 0.6, "42X " + name )
         #latexLabel.DrawLatex(0.66, 0.45, "E_{T}^{#gamma} > 10 GeV")
         if name == 'Data':
@@ -150,7 +168,7 @@ for name, src in sources.items():
 
 for i in range( len(canvases) ):
     canvases[i].SetWindowPosition(10+20*i, 10+20*i)
-    
+
 def save(ext = 'png', prefix = 'UBML_SFit'):
     for c in canvases:
         c.Print( prefix + '_' + c.GetName() + '.' + ext )

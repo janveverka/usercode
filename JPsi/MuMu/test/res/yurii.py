@@ -7,8 +7,13 @@ rand = TRandom3()
 mcTree = TTree("mcTree", "MC tree")
 dataTree = TTree("dataTree", "tree with real data")
 
-mcTree.ReadFile("yuriisMethod-DYToMuMu_Winter10_Powheg.dat", "m2/F:m3:pt:eta")
-dataTree.ReadFile("yuriisMethod-Dec22ReReco.dat", "m2/F:m3:pt:eta")
+mcTree.ReadFile( "yuriisMethod-DYToMuMu_powheg_Summer11_S4.dat",
+                 "row/i:instance:m2/F:m3:pt:eta" )
+dataTree.ReadFile( "yuriisMethod-July17JSON.dat",
+                   "row/i:instance:m2/F:m3:pt:eta" )
+
+# mcTree.ReadFile("yuriisMethod-DYToMuMu_Winter10_Powheg.dat", "m2/F:m3:pt:eta")
+# dataTree.ReadFile("yuriisMethod-Dec22ReReco.dat", "m2/F:m3:pt:eta")
 # mcTree.ReadFile("yuriisMethod-Powheg_Fall10.txt", "m2/F:m3:pt:eta")
 # dataTree.ReadFile("yuriisMethod-data_Nov4ReReco.txt", "m2/F:m3:pt:eta")
 # mcTree.ReadFile("Selected_MC_1.000_fromOlivier.txt", "m2/F:m3:pt:eta")
@@ -85,7 +90,7 @@ def nllik(scale, res):
         sum -= log(likelihood)
     return sum
 
-def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30):
+def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30, phoEtMin=10):
     """Calculate the negative log likelihood of data with m(uuy) PDF from MC.
     Smear MC with extra gaussian of width res and uniformly shift by scale.
     both res and scale are in %.  Scale of 0% means no shift."""
@@ -111,7 +116,7 @@ def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30):
             sfactor = 1. + scale/100.
         getMcEntry(i)
         ## Apply cuts that depend on the photon scale
-        if sfactor * mcLeafs.pt < 10: continue
+        if sfactor * mcLeafs.pt < phoEtMin: continue
         sm3 = scaledMmgMass3(sfactor, mcLeafs.m3, mcLeafs.m2)
         #if abs(sm3 - 90.) > 30.:
 #         if sm3 < m3min or m3max < sm3:

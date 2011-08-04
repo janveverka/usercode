@@ -4,6 +4,9 @@
 double zMassPdg() { return 91.1876; }
 
 double Oplus(double a, double b) { return TMath::Sqrt(a*a + b*b); }
+double Oplus(double a, double b, double c) {
+    return TMath::Sqrt(a*a + b*b + c*c);
+}
 
 float muonSigmaPtOverPt(float pt, float eta) {
   /// Muon pt relative error sigma(pt_mu)/pt, see fig. 17 of AN2008_097_v3.pdf
@@ -125,5 +128,44 @@ inline double deltaTheta(double eta1, double eta2)
     while (result > M_PI) result -= 2*M_PI;
     while (result <= -M_PI) result += 2*M_PI;
     return result;
+}
+
+
+///----------------------------------------------------------------------------
+/// Run base energy scale correction
+/// See https://twiki.cern.ch/twiki/bin/viewauth/CMS/VGamma2011#Photon_Electron_Energy_Correctio
+double corrByRun(double run, double scEta, double r9)
+{
+   double corr = 1;
+   if ( TMath::Abs(scEta) < 1.5 ) {
+      if ( r9 > 0.94 ) {
+         if ( 160431 <= run && run <= 163869 ) corr = (1. -0.47/100.);
+         if ( 165071 <= run && run <= 165970 ) corr = (1. -0.07/100.);
+         if ( 165971 <= run && run <= 166502 ) corr = (1. +0.03/100.);
+         if ( 166503 <= run && run <= 166861 ) corr = (1. +0.11/100.);
+         if ( 166862 <= run && run <= 167784 ) corr = (1. +0.14/100.);
+      } else { // r9 <= 0.94
+         if ( 160431 <= run && run <= 163869 ) corr = (1. +0.25/100.);
+         if ( 165071 <= run && run <= 165970 ) corr = (1. +0.49/100.);
+         if ( 165971 <= run && run <= 166502 ) corr = (1. +0.67/100.);
+         if ( 166503 <= run && run <= 166861 ) corr = (1. +0.63/100.);
+         if ( 166862 <= run && run <= 167784 ) corr = (1. +0.74/100.);
+      }
+   } else { // |phoSCEta| >= 1.5
+      if ( r9 > 0.94 ) {
+         if ( 160431 <= run && run <= 163869 ) corr = (1. +0.58/100.);
+         if ( 165071 <= run && run <= 165970 ) corr = (1. +2.49/100.);
+         if ( 165971 <= run && run <= 166502 ) corr = (1. +3.76/100.);
+         if ( 166503 <= run && run <= 166861 ) corr = (1. +4.50/100.);
+         if ( 166862 <= run && run <= 167784 ) corr = (1. +5.61/100.);
+      } else { // RHOR9 < 0.94
+         if ( 160431 <= run && run <= 163869 ) corr = (1. -0.10/100.);
+         if ( 165071 <= run && run <= 165970 ) corr = (1. +0.62/100.);
+         if ( 165971 <= run && run <= 166502 ) corr = (1. +1.33/100.);
+         if ( 166503 <= run && run <= 166861 ) corr = (1. +1.78/100.);
+         if ( 166862 <= run && run <= 167784 ) corr = (1. +2.73/100.);
+      }
+   }
+   return corr;
 }
 

@@ -20,7 +20,7 @@ Functions:
   - plot: Plot the dataset on variable's frame.
   - main:
 Takes a tree, a RooRealVar variable, a list of categories and a list of cuts.
-Returns a RooDataSet extracted from the tree given the expressions in 
+Returns a RooDataSet extracted from the tree given the expressions in
 variable and categories titles.
 '''
 
@@ -28,7 +28,7 @@ import os
 import sys
 import ROOT
 import JPsi.MuMu.common.energyScaleChains as esChains
-    
+
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
 
@@ -48,11 +48,14 @@ _subdet = RooCategory( 'subdet', 'phoIsEB' )
 _subdet.defineType( 'Barrel' , 1 )
 _subdet.defineType( 'Endcaps', 0 )
 
-categories = [ _r9, _subdet ]
+# categories = [ _r9, _subdet ]
+categories = []
 
-cuts = [
-    '87.2 < mmgMass && mmgMass < 95.2',
-]
+cuts = []
+
+# cuts = [
+#     '87.2 < mmgMass && mmgMass < 95.2',
+# ]
 
 ## Data extracted from tree
 dataset = RooDataSet()
@@ -90,7 +93,7 @@ def get(**kwargs):
     joinExpressions = lambda(expressions): ":".join( expressions )
 
     ## Get the data from the tree
-    tree.Draw( joinExpressions(varExpressions), andCuts(cuts), 'goff' )
+    tree.Draw( joinExpressions(varExpressions), andCuts(cuts), 'goff para' )
 
     ## Fill the dataset
     for i in range( tree.GetSelectedRows() ):
@@ -117,15 +120,15 @@ def plot():
 #------------------------------------------------------------------------------
 def main():
     'test the get function'
-    global canvases 
+    global canvases
     canvases = []
-    
+
     #gROOT.Set
-    
+
     get()
     canvases.append( TCanvas('s', 's') )
     plot()
-    
+
     get( variable = RooRealVar('k', 'kRatio', 0.5, 1.5) )
     canvases.append( TCanvas('k_noweights', 'k_noweights') )
     frame = plot()
@@ -134,7 +137,7 @@ def main():
     dataset.plotOn( frame, Cut('subdet==subdet::Endcaps'), MarkerColor(kRed),
                     LineColor(kRed) )
     frame.Draw()
-    
+
     canvases.append( TCanvas('k_withweights', 'k_withweights') )
     frame = plot()
     dataset.plotOn( frame, Cut('subdet==subdet::Barrel'), MarkerColor(kBlue),
@@ -142,7 +145,7 @@ def main():
     dataset.plotOn( frame, Cut('subdet==subdet::Endcaps'), MarkerColor(kRed),
                     LineColor(kRed) )
     frame.Draw()
-    
+
     get( variable = RooRealVar('logik', '-log(kRatio)', -0.5, 0.5) )
     canvases.append( TCanvas() )
     frame = plot()

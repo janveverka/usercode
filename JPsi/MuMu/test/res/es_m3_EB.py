@@ -4,11 +4,12 @@ import yurii
 import ROOT
 from ROOT import *
 
-selection = "abs(eta)<1.5 & m2 < 80 & pt > 10"
+selection = "abs(eta)<1.5 & m2 < 80 & pt > 15"
 label = "Barrel"
 #selection = "abs(eta)>1.5 & m2 < 80"
 scale = 1.
-xRange = (-3., 7.) ## Dec22 rereco
+xRange = (-1.5, 0.5) ## 2011A, 715/pb, July17 JSON
+# xRange = (-3., 7.) ## Dec22 rereco
 # xRange = (-6.5, 3.5) ## Jan's data
 # xRange = (-3.5, 6.5) ## Olivier's tight-mass-window data
 yRange = (-3., 13.)
@@ -47,7 +48,11 @@ dx = (xMax - xMin) / (numScanSteps - 1)
 ## Scan the NLL
 for istep in range(numScanSteps):
     xvar.append(xMin + dx * istep)
-    nll.append( yurii.nllm3(scale=xvar[-1], res=0., m3min=87.2, m3max=95.2, nbinsMC=60) )
+    nll.append( yurii.nllm3( scale=xvar[-1],
+                             res=0.,
+                             m3min=87.2,
+                             m3max=95.2,
+                             nbinsMC=120 ) )
 ## Make a graph
 x = array.array("d", xvar)
 y = array.array("d", nll)
