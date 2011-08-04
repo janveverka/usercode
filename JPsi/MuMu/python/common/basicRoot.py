@@ -1,3 +1,11 @@
+### Black Magic to Make RooFit work on MacOS X --------------------------------
+import sys
+if sys.platform == 'darwin':
+    try:
+        import libRooFit
+    except ImportError:
+        pass
+
 #------------------------------------------------------------------------------
 ## Common ROOT objects
 ## Globals
