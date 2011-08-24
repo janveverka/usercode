@@ -8,7 +8,10 @@ from JPsi.MuMu.common.plotData import PlotData
 from JPsi.MuMu.scaleFitter import ScaleFitter
 
 ## Get the data
+## 715/pb for Vg Summer conferences
 _chains = esChains.getChains('v7')
+## 2/fb of LP11 dataset
+# _chains = esChains.getChains('v8')
 
 ## Cuts common to all plots
 _commonCuts = [
@@ -130,40 +133,40 @@ _fits = [
                    'New Corr.' ],
     ),
 
-    ## Encaps, MC
+    ## Endcaps, MC
     ScaleFitter(
         name = 'EE_highR9_mc',
-        title = 'Encaps, R9 > 0.95, Pythia S3',
+        title = 'Endcaps, R9 > 0.95, Pythia S3',
         source = _chains['z'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 > 0.95'],
-        labels = [ 'Encaps', 'R_{9}^{#gamma} > 0.95', 'Pythia S3' ],
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} > 0.95', 'Pythia S3' ],
     ),
     ScaleFitter(
         name = 'EE_lowR9_mc_default',
-        title = 'Encaps, R9 < 0.95, Pythia S3, default corrections',
+        title = 'Endcaps, R9 < 0.95, Pythia S3, default corrections',
         source = _chains['z'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Encaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
                    'Default Corr.' ],
     ),
     ScaleFitter(
         name = 'EE_lowR9_mc_default_closure',
-        title = 'Encaps, R9 < 0.95, Pythia S3, default corrections, closure test',
+        title = 'Endcaps, R9 < 0.95, Pythia S3, default corrections, closure test',
         source = _chains['z'],
         expression = '100 * (1/corrKRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Encaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
                    'Default Corr.', 'Closure Test' ],
     ),
     ScaleFitter(
         name = 'EE_lowR9_mc_new',
-        title = 'Encaps, R9 < 0.95, Pythia S3, new corrections',
+        title = 'Endcaps, R9 < 0.95, Pythia S3, new corrections',
         source = _chains['z'],
         expression = '100 * (1/newCorrKRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Encaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
                    'New Corr.' ],
     ),
 
