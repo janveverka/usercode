@@ -8,6 +8,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/EgammaReco/interface/SuperCluster.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionBaseClass.h"
 
 class PmvBranchManager {
 public:
@@ -16,6 +18,10 @@ public:
   void init(TTree &);
   void getData(const edm::Event&, const edm::EventSetup&);
 private:
+  float getCrackCorrectionFactor( const reco::SuperCluster& ) const;
+
+  EcalClusterFunctionBaseClass* crackCorrector_;
+
   /// input tags
   edm::InputTag src_;
   edm::InputTag genParticleSrc_;
@@ -38,6 +44,7 @@ private:
   TBranch * b_phoGenE_;
   TBranch * b_phoGenEt_;
   TBranch * b_phoGenEta_;
+  TBranch * b_phoCrackCorr_;
 
   /// leaf variables
   Int_t nVertices_;
@@ -54,6 +61,8 @@ private:
   std::vector<Float_t> phoGenE_;
   std::vector<Float_t> phoGenEt_;
   std::vector<Float_t> phoGenEta_;
+  std::vector<Float_t> phoCrackCorr_;
+//   std::vector<Float_t> phoClusterCorr_;
 
 }; // end of class PmvBranchManager declaration
 
