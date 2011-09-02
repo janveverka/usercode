@@ -39,6 +39,8 @@ namespace cit {
       pileupInfoSrc_ =
         iConfig.getUntrackedParameter<InputTag>( "pileupInfoSrc" );
 
+    LogDebug("piluep.rho") << "doRho_: " << doRho_;
+
     if ( doRho_ == true )
       rhoSrc_ = iConfig.getUntrackedParameter<InputTag>( "rhoSrc" );
 
@@ -169,6 +171,7 @@ namespace cit {
       branchName = prefix + "rho";
       leafList = prefix + "rho/F";
       tree.Branch( branchName.c_str(), &rho_, leafList.c_str() );
+      LogDebug("piluep.rho") << "branch: " << leafList;
     } // doRho_ == true
 
   } // end of PileupBranchManager::init(TTree & tree) definition
@@ -219,6 +222,7 @@ namespace cit {
       edm::Handle<double>  rho;
       iEvent.getByLabel( rhoSrc_, rho);
       rho_    = *rho;
+      LogDebug("piluep.rho") << "rho: " << rho_;
     }
 
 

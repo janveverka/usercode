@@ -24,6 +24,7 @@ namespace cit {
 
       bool doPileupSummaryInfo_;
       bool doWeights_;
+      bool doRho_;
 
       edm::InputTag pileupInfoSrc_;
       edm::InputTag rhoSrc_;
