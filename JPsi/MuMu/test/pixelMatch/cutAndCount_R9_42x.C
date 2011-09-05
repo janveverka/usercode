@@ -93,11 +93,11 @@ TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 
 TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & phoPt > 20 && scEt > 10 && phoHoE < 0.5");
 TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & phoPt > 20 && scEt > 10 && phoHoE < 0.5");
 
-// TCut selection = eeSelection;
+TCut selection = eeSelection;
 // TCut selection = ebSelection && highR9;
 // TCut selection = ebSelection && ebLowR9;
 // TCut selection = eeSelection && highR9;
-TCut selection = ebSelection;
+// TCut selection = ebSelection;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;
