@@ -71,7 +71,31 @@ _files['v7'] = {
     'z'    : [ 'esTree_V7_DYToMuMu_pythia6_v2_RECO-42X-v4.root' ],
 }
 
+_files['v8'] = {
+    'data' : '''
+             esTree_V8_05Jul2011ReReco-ECAL-v1_condor_Dimuon_RECO-42X-v9_test.root
+             esTree_V8_DoubleMu_Dimuon_AOD_Aug5rereco.root
+             esTree_V8_DoubleMu_Dimuon_AOD_Prompt_v6.root
+             '''.split(),
+    'z_test'    : '''
+             esTree_V8_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9_job5_of40.root
+             esTree_V8_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9_job16_of40.root
+             esTree_V8_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9_job20_of40.root
+             esTree_V8_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9_job31_of40.root
+             esTree_V8_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9_job39_of40.root
+             '''.split(),
+    'z'    : '''
+             esTree_V8_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root
+             '''.split(),
+}
 
+_files['v10'] = {
+    'data' : '''
+             esTree_V10_DoubleMu_Run2011A-May10ReReco-v1_glite_Dimuon_RECO-42X-v9.root
+             esTree_V10_DoubleMu_Run2011A-PromptReco-v4_glite_Dimuon_RECO-42X-v9.root
+             '''.split(),
+    'z'    : [ 'esTree_V10_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root' ]
+}
 
 _treeNames = {
     'v1' : 'tree/es',
@@ -81,6 +105,8 @@ _treeNames = {
     'v5' : 'tree/pmv',
     'v6' : 'tree/pmv',
     'v7' : 'tree/pmv',
+    'v8' : 'tree/pmv',
+    'v10' : 'tree/pmv',
 }
 
 
