@@ -9,9 +9,9 @@ from JPsi.MuMu.scaleFitter import ScaleFitter
 
 ## Get the data
 ## 715/pb for Vg Summer conferences
-_chains = esChains.getChains('v7')
+# _chains = esChains.getChains('v7')
 ## 2/fb of LP11 dataset
-# _chains = esChains.getChains('v8')
+_chains = esChains.getChains('v8')
 
 ## Cuts common to all plots
 _commonCuts = [
@@ -29,7 +29,7 @@ _fits = [
         source = _chains['data'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'L = 750 pb^{-1}' ],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'L = 2.0 fb^{-1}' ],
     ),
     ScaleFitter(
         name = 'EB_lowR9_data_default',
@@ -37,7 +37,7 @@ _fits = [
         source = _chains['data'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'L = 750 pb^{-1}',
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'L = 2.0 fb^{-1}',
                    'Default Corr.' ],
     ),
     ScaleFitter(
@@ -46,7 +46,7 @@ _fits = [
         source = _chains['data'],
         expression = '100 * (1/corrKRatio - 1)',
         cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'L = 750 pb^{-1}',
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'L = 2.0 fb^{-1}',
                    'Default Corr.', 'Closure Test' ],
     ),
     ScaleFitter(
@@ -55,44 +55,44 @@ _fits = [
         source = _chains['data'],
         expression = '100 * (1/newCorrKRatio - 1)',
         cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'L = 750 pb^{-1}',
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'L = 2.0 fb^{-1}',
                    'New Corr.' ],
     ),
 
     ## Barrel, MC
     ScaleFitter(
         name = 'EB_highR9_mc',
-        title = 'Barrel, R9 > 0.94, Pythia S3',
+        title = 'Barrel, R9 > 0.94, Powheg S4',
         source = _chains['z'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'Pythia S3' ],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'Powheg S4' ],
     ),
     ScaleFitter(
         name = 'EB_lowR9_mc_default',
-        title = 'Barrel, R9 < 0.94, Pythia S3, default corrections',
+        title = 'Barrel, R9 < 0.94, Powheg S4, default corrections',
         source = _chains['z'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Pythia S3',
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Powheg S4',
                    'Default Corr.' ],
     ),
     ScaleFitter(
         name = 'EB_lowR9_mc_default_closure',
-        title = 'Barrel, R9 < 0.94, Pythia S3, default corrections, closure test',
+        title = 'Barrel, R9 < 0.94, Powheg S4, default corrections, closure test',
         source = _chains['z'],
         expression = '100 * (1/corrKRatio - 1)',
         cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Pythia S3',
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Powheg S4',
                    'Default Corr.', 'Closure Test' ],
     ),
     ScaleFitter(
         name = 'EB_lowR9_mc_new',
-        title = 'Barrel, R9 < 0.94, Pythia S3, new corrections',
+        title = 'Barrel, R9 < 0.94, Powheg S4, new corrections',
         source = _chains['z'],
         expression = '100 * (1/newCorrKRatio - 1)',
         cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Pythia S3',
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Powheg S4',
                    'New Corr.' ],
     ),
 
@@ -103,7 +103,7 @@ _fits = [
         source = _chains['data'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 > 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} > 0.95', 'L = 750 pb^{-1}' ],
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} > 0.95', 'L = 2.0 fb^{-1}' ],
     ),
     ScaleFitter(
         name = 'EE_lowR9_data_default',
@@ -111,7 +111,7 @@ _fits = [
         source = _chains['data'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'L = 750 pb^{-1}',
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'L = 2.0 fb^{-1}',
                    'Default Corr.' ],
     ),
     ScaleFitter(
@@ -120,7 +120,7 @@ _fits = [
         source = _chains['data'],
         expression = '100 * (1/corrKRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'L = 750 pb^{-1}',
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'L = 2.0 fb^{-1}',
                    'Default Corr.', 'Closure Test' ],
     ),
     ScaleFitter(
@@ -129,44 +129,44 @@ _fits = [
         source = _chains['data'],
         expression = '100 * (1/newCorrKRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'L = 750 pb^{-1}',
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'L = 2.0 fb^{-1}',
                    'New Corr.' ],
     ),
 
     ## Endcaps, MC
     ScaleFitter(
         name = 'EE_highR9_mc',
-        title = 'Endcaps, R9 > 0.95, Pythia S3',
+        title = 'Endcaps, R9 > 0.95, Powheg S4',
         source = _chains['z'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 > 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} > 0.95', 'Pythia S3' ],
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} > 0.95', 'Powheg S4' ],
     ),
     ScaleFitter(
         name = 'EE_lowR9_mc_default',
-        title = 'Endcaps, R9 < 0.95, Pythia S3, default corrections',
+        title = 'Endcaps, R9 < 0.95, Powheg S4, default corrections',
         source = _chains['z'],
         expression = '100 * (1/kRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Powheg S4',
                    'Default Corr.' ],
     ),
     ScaleFitter(
         name = 'EE_lowR9_mc_default_closure',
-        title = 'Endcaps, R9 < 0.95, Pythia S3, default corrections, closure test',
+        title = 'Endcaps, R9 < 0.95, Powheg S4, default corrections, closure test',
         source = _chains['z'],
         expression = '100 * (1/corrKRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Powheg S4',
                    'Default Corr.', 'Closure Test' ],
     ),
     ScaleFitter(
         name = 'EE_lowR9_mc_new',
-        title = 'Endcaps, R9 < 0.95, Pythia S3, new corrections',
+        title = 'Endcaps, R9 < 0.95, Powheg S4, new corrections',
         source = _chains['z'],
         expression = '100 * (1/newCorrKRatio - 1)',
         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
+        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Powheg S4',
                    'New Corr.' ],
     ),
 
