@@ -8,20 +8,20 @@ from JPsi.MuMu.common.plotData import PlotData
 from JPsi.MuMu.scaleFitterGauss import ScaleFitterGauss
 
 ## Get the data
-_chains = esChains.getChains('v7')
+_chains = esChains.getChains('v8')
 
 ## Cuts common to all plots
 _commonCuts = [
-    'abs(mmgMass-91.2) < 4',
+    'abs(mmgMass-91.2) < 4', '10 < phoPt', 'phoPt < 15',
 ]
 
 defaultFit  = ScaleFitterGauss(
     name = 'dummy',
-    title = 'Barrel, R9 > 0.94, Pythia S3',
+    title = 'Barrel, R9 > 0.94, Powheg S4',
     source = _chains['z'],
     expression = '100 * (phoE/phoGenE - 1)',
     cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94'],
-    labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'Pythia S3' ],
+    labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'Powheg S4' ],
 )
 
 
@@ -30,93 +30,93 @@ defaultFit  = ScaleFitterGauss(
 _fits = [
     ## Barrel, MC
     defaultFit.clone(
-        name = 'EB_highR9_mc',
-        title = 'Barrel, R9 > 0.94, Pythia S3',
+        name = 'strue_EB_highR9_mc',
+        title = 'Barrel, R9 > 0.94, Powheg S4',
         source = _chains['z'],
         expression = '100 * (phoE/phoGenE - 1)',
         cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'Pythia S3' ],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'Powheg S4' ],
         fitRange = (-4, 4),
         xRange = (-30, 50),
     ),
-    defaultFit.clone(
-        name = 'EB_lowR9_mc_default',
-        title = 'Barrel, R9 < 0.94, Pythia S3, default corrections',
-        source = _chains['z'],
-        expression = '100 * (phoE/phoGenE - 1)',
-        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Pythia S3',
-                   'Default Corr.' ],
-        fitRange = (-2, 9),
-        xRange = (-30, 50),
-    ),
-    defaultFit.clone(
-        name = 'EB_lowR9_mc_default_closure',
-        title = 'Barrel, R9 < 0.94, Pythia S3, default corrections, closure test',
-        source = _chains['z'],
-        expression = '100 * (corrE/phoGenE - 1)',
-        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Pythia S3',
-                   'Default Corr.', 'Closure Test' ],
-        fitRange = (-2, 9),
-        xRange = (-30, 50),
-    ),
-    defaultFit.clone(
-        name = 'EB_lowR9_mc_new',
-        title = 'Barrel, R9 < 0.94, Pythia S3, new corrections',
-        source = _chains['z'],
-        expression = '100 * (newCorrE/phoGenE - 1)',
-        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Pythia S3',
-                   'New Corr.' ],
-        fitRange = (-4, 7),
-        xRange = (-30, 50),
-    ),
-
-    ## Endcaps, MC
-    defaultFit.clone(
-        name = 'EE_highR9_mc',
-        title = 'Endcaps, R9 > 0.95, Pythia S3',
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        cuts = _commonCuts + ['!phoIsEB', 'phoR9 > 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} > 0.95', 'Pythia S3' ],
-        xRange = (-30, 50),
-        fitRange = (-15, 10),
-    ),
-    defaultFit.clone(
-        name = 'EE_lowR9_mc_default',
-        title = 'Endcaps, R9 < 0.95, Pythia S3, default corrections',
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
-                   'Default Corr.' ],
-        xRange = (-30, 50),
-        fitRange = (-15, 15),
-    ),
-    defaultFit.clone(
-        name = 'EE_lowR9_mc_default_closure',
-        title = 'Endcaps, R9 < 0.95, Pythia S3, default corrections, closure test',
-        source = _chains['z'],
-        expression = '100 * (1/corrKRatio - 1)',
-        cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
-                   'Default Corr.', 'Closure Test' ],
-        xRange = (-30, 50),
-        fitRange = (-15, 15),
-    ),
-    defaultFit.clone(
-        name = 'EE_lowR9_mc_new',
-        title = 'Endcaps, R9 < 0.95, Pythia S3, new corrections',
-        source = _chains['z'],
-        expression = '100 * (1/newCorrKRatio - 1)',
-        cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
-        labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Pythia S3',
-                   'New Corr.' ],
-        xRange = (-30, 50),
-        fitRange = (-20, 15),
-    ),
+#     defaultFit.clone(
+#         name = 'strue_EB_lowR9_mc_default',
+#         title = 'Barrel, R9 < 0.94, Powheg S4, default corrections',
+#         source = _chains['z'],
+#         expression = '100 * (phoE/phoGenE - 1)',
+#         cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
+#         labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Powheg S4',
+#                    'Default Corr.' ],
+#         fitRange = (-2, 9),
+#         xRange = (-30, 50),
+#     ),
+#     defaultFit.clone(
+#         name = 'strue_EB_lowR9_mc_default_closure',
+#         title = 'Barrel, R9 < 0.94, Powheg S4, default corrections, closure test',
+#         source = _chains['z'],
+#         expression = '100 * (corrE/phoGenE - 1)',
+#         cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
+#         labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Powheg S4',
+#                    'Default Corr.', 'Closure Test' ],
+#         fitRange = (-2, 9),
+#         xRange = (-30, 50),
+#     ),
+#     defaultFit.clone(
+#         name = 'strue_EB_lowR9_mc_new',
+#         title = 'Barrel, R9 < 0.94, Powheg S4, new corrections',
+#         source = _chains['z'],
+#         expression = '100 * (newCorrE/phoGenE - 1)',
+#         cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94'],
+#         labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'Powheg S4',
+#                    'New Corr.' ],
+#         fitRange = (-4, 7),
+#         xRange = (-30, 50),
+#     ),
+#
+#     ## Endcaps, MC
+#     defaultFit.clone(
+#         name = 'strue_EE_highR9_mc',
+#         title = 'Endcaps, R9 > 0.95, Powheg S4',
+#         source = _chains['z'],
+#         expression = '100 * (1/kRatio - 1)',
+#         cuts = _commonCuts + ['!phoIsEB', 'phoR9 > 0.95'],
+#         labels = [ 'Endcaps', 'R_{9}^{#gamma} > 0.95', 'Powheg S4' ],
+#         xRange = (-30, 50),
+#         fitRange = (-15, 10),
+#     ),
+#     defaultFit.clone(
+#         name = 'strue_EE_lowR9_mc_default',
+#         title = 'Endcaps, R9 < 0.95, Powheg S4, default corrections',
+#         source = _chains['z'],
+#         expression = '100 * (1/kRatio - 1)',
+#         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
+#         labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Powheg S4',
+#                    'Default Corr.' ],
+#         xRange = (-30, 50),
+#         fitRange = (-15, 15),
+#     ),
+#     defaultFit.clone(
+#         name = 'strue_EE_lowR9_mc_default_closure',
+#         title = 'Endcaps, R9 < 0.95, Powheg S4, default corrections, closure test',
+#         source = _chains['z'],
+#         expression = '100 * (1/corrKRatio - 1)',
+#         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
+#         labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Powheg S4',
+#                    'Default Corr.', 'Closure Test' ],
+#         xRange = (-30, 50),
+#         fitRange = (-15, 15),
+#     ),
+#     defaultFit.clone(
+#         name = 'strue_EE_lowR9_mc_new',
+#         title = 'Endcaps, R9 < 0.95, Powheg S4, new corrections',
+#         source = _chains['z'],
+#         expression = '100 * (1/newCorrKRatio - 1)',
+#         cuts = _commonCuts + ['!phoIsEB', 'phoR9 < 0.95'],
+#         labels = [ 'Endcaps', 'R_{9}^{#gamma} < 0.95', 'Powheg S4',
+#                    'New Corr.' ],
+#         xRange = (-30, 50),
+#         fitRange = (-20, 15),
+#     ),
 
 ]
 
