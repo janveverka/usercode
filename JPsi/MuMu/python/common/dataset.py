@@ -78,6 +78,10 @@ def get(**kwargs):
     ## Set the title for the dataset
     dataset.SetTitle( '%s for %s' % ( joinExpressions(varExpressions),
                                       andCuts(cuts)                    ) )
+    ## Select only events within the range of variable.
+    ## This is needed to exclude underflows and overflows.
+    cuts.append('%f<%s & %s<%f' % (variable.getMin(), variable.GetTitle(),
+                                   variable.GetTitle(), variable.getMax()))
     ## Get the data from the tree
     tree.Draw( joinExpressions(varExpressions), andCuts(cuts), 'goff para' )
 
