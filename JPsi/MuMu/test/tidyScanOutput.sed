@@ -1,4 +1,4 @@
-#!/bin/sed -f
+#!/usr/bin/sed -f
 ## Usage example:
 ##+ ./tidyScanOutput.sed -i pixelMatch/pixelMatch_data_Nov4ReReco_v3.dat
 
@@ -6,5 +6,5 @@
 s/\*//g
 
 # comment out all lines that are not data
-/^\s*[0-9#]/ !s/^/# /
+/^[[:space:]]*[0-9#]/ !s/^/# /
 

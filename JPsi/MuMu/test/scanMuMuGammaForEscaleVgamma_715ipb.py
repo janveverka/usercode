@@ -8,11 +8,10 @@ sys.argv.append( '-b' )
 import ROOT
 import JPsi.MuMu.common.pmvTrees as pmvTrees
 
-
 ## Configuration
 # sample = "data39x"
-# sample, version = 'z', 'v12'
-sample, version = 'data2011', 'v9'
+sample, version = 'z', 'v12'
+# sample, version = 'data2011', 'v9'
 # sample = "zg"
 # sample = "qcd"
 
@@ -20,14 +19,6 @@ ROOT.gROOT.LoadMacro("resolutionErrors.C++")
 ROOT.gROOT.LoadMacro("res/tools.C++")
 
 chain = pmvTrees.getChains(version)[sample]
-
-outputVars = """
-    mmMass
-    mmgMass
-    phoPt
-    scEta
-    phoR9
-    """.split()
 
 ## Apply run-based energy scale correction to MC
 ## Store the pileup weight for MC, dummy weight for real data
@@ -45,16 +36,13 @@ else:
         mmMass
         mmgMass
         phoPt
-        phoEta
+        scEta
         phoR9
         pileup.weight
         """.split()
 
 outputExpression = ":".join(outputVars)
 
-# scanOption = "col=6d:4d:10ld:6.3f:6.3f:6.3f:7.4f:7.4f:7.4f:7.4f:7.4f:7.4f:6.3f:6.3f:6.3f:6.4f:6.4f:2d:2d:2d:2d:2d:2d:2d:2d:2d"
-# scanOption = "col=6d:4d:10ld:::::::::::::::::2d:2d:2d:2d:2d:2d:2d:2d:2d"
-# scanOption = "col=6d:4d:10ld::::::::::::::"
 scanOption = (len(outputVars) - 1) * ":"
 
 def makeSelection(cuts):

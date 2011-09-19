@@ -7,10 +7,10 @@ rand = TRandom3()
 mcTree = TTree("mcTree", "MC tree")
 dataTree = TTree("dataTree", "tree with real data")
 
-mcTree.ReadFile( "yuriisMethod-DYToMuMu_powheg_Summer11_S4.dat",
-                 "row/i:instance:m2/F:m3:pt:eta" )
-dataTree.ReadFile( "yuriisMethod-July17JSON.dat",
-                   "row/i:instance:m2/F:m3:pt:eta" )
+mcTree.ReadFile( "yuriisMethod-DYToMuMu_powheg_Summer11_S4_full.dat",
+                 "row/i:instance:m2/F:m3:pt:eta:r9:w" )
+dataTree.ReadFile( "yuriisMethod-July17JSON_corrected.dat",
+                   "row/i:instance:m2/F:m3:pt:eta:r9:w" )
 
 # mcTree.ReadFile("yuriisMethod-DYToMuMu_Winter10_Powheg.dat", "m2/F:m3:pt:eta")
 # dataTree.ReadFile("yuriisMethod-Dec22ReReco.dat", "m2/F:m3:pt:eta")
@@ -23,7 +23,7 @@ dataTree.Draw(">>presel", "pt > 10", "entrylist")
 dataTree.SetEntryList(gDirectory.Get("presel"))
 
 ## Make the leaf variables
-gROOT.ProcessLine("struct Leafs {Float_t m2, m3, pt, eta;};")
+gROOT.ProcessLine("struct Leafs {Float_t m2, m3, pt, eta, r9, w;};")
 mcLeafs = ROOT.Leafs()
 dataLeafs = ROOT.Leafs()
 
@@ -32,7 +32,7 @@ hdata = TH1F()
 
 ## Link the leafs with the Branches
 for leafs, tree in [(mcLeafs, mcTree), (dataLeafs, dataTree)]:
-    for xname in "m2 m3 pt eta".split():
+    for xname in "m2 m3 pt eta r9 w".split():
         tree.SetBranchAddress(xname, AddressOf(leafs, xname))
 
 ## To swith between EB and EE efficiently
@@ -74,7 +74,7 @@ def nllik(scale, res):
 
     ## Fit with Gauss; use the fit to get an estimate for the tails where there is no data
     hmc.Fit("gaus", "Q0")
-    fit = hmc.GetFunction("gaus")
+    gaussFit = hmc.GetFunction("gaus")
 
     ## Get the real data
     dataTree.Draw("inverseK(m3, m2) >> hdata(20,0,2)",  "abs(m3 - 91.2) < 4", "goff")
@@ -86,17 +86,19 @@ def nllik(scale, res):
         likelihood = hmc.Interpolate(ik)
         ## Make sure we have a positive likelihood value
         if likelihood <= 0.:
-            likelihood = fit.Eval(ik)
+            likelihood = gaussFit.Eval(ik)
         sum -= log(likelihood)
     return sum
 
-def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30, phoEtMin=10):
+def nllm3( scale, res, m3min=60, m3max=120, nbinsMC=30, 
+           nbinsData=30, phoEtMin=10, phoEtMax=99999, nsmooth=0 ):
     """Calculate the negative log likelihood of data with m(uuy) PDF from MC.
     Smear MC with extra gaussian of width res and uniformly shift by scale.
     both res and scale are in %.  Scale of 0% means no shift."""
     global hmc
     global hdata
     if hmc: hmc.Delete()
+    if gDirectory.Get("hmc"): gDirectory.Get("hmc").Delete()
 #     hmc = TH1F("hmc", "hmc", nbinsMC, m3min, m3max)
     hmc = TH1F("hmc", "hmc", nbinsMC, 60, 120)
     # Check if there is already pre-selection applied
@@ -116,24 +118,29 @@ def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30, phoEtMin=10
             sfactor = 1. + scale/100.
         getMcEntry(i)
         ## Apply cuts that depend on the photon scale
-        if sfactor * mcLeafs.pt < phoEtMin: continue
+        if sfactor * mcLeafs.pt < phoEtMin or \
+           sfactor * mcLeafs.pt > phoEtMax: continue
         sm3 = scaledMmgMass3(sfactor, mcLeafs.m3, mcLeafs.m2)
         #if abs(sm3 - 90.) > 30.:
 #         if sm3 < m3min or m3max < sm3:
 #             continue
-        hmc.Fill(sm3)
+        hmc.Fill(sm3, mcLeafs.w)
 
     ## Normalize area to 1
     hmc.Scale( 1./hmc.Integral() / hmc.GetBinWidth(1) )
 
+    ## Smooth
+    hmc.Smooth(nsmooth)
+
     ## Fit with Gauss; use the fit to get an estimate for the tails where there is no data
     hmc.Fit("gaus", "Q0")
-    fit = hmc.GetFunction("gaus")
+    gaussFit = hmc.GetFunction("gaus")
 
     ## Get the real data
     if hdata: hdata.Delete()
-    hdata = TH1F("hdata", "hdata", nbinsData, m3min, m3max)
-    dataTree.Draw("m3 >> hdata", "%f < m3 & m3 < %f" % (m3min, m3max), "goff")
+    hdata = TH1F("hdata", "hdata", nbinsData, 60, 120)
+    selExpr = "%f < m3 & m3 < %f & %f < pt & pt < %f" % (m3min, m3max, phoEtMin, phoEtMax)
+    dataTree.Draw("m3 >> hdata", selExpr, "goff")
 
     ## Sum the negative log likelihood over all the data
     sum = 0.
@@ -142,7 +149,7 @@ def nllm3(scale, res, m3min=60, m3max=120, nbinsMC=30, nbinsData=30, phoEtMin=10
         likelihood = hmc.Interpolate(x)
         ## Make sure we have a positive likelihood value
         if likelihood <= 0.:
-            likelihood = fit.Eval(x)
+            likelihood = gaussFit.Eval(x)
         sum -= log(likelihood)
     return sum
 
