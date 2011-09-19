@@ -10,7 +10,7 @@ class ScaleFitterGauss(PlotData):
     '''Fits the Crystal Ball line shape to s = Ereco / Ekin - 1'''
     def __init__(self, name, title, source, expression, cuts, labels):
         PlotData.__init__(self, name, title, source, expression, cuts, labels)
-        self.xTitle = 's = E_{RECO}/E_{GEN} - 1'
+        self.xTitle = 's_{true} = E_{RECO}/E_{GEN} - 1'
         self.nBins = 40
         self.xRange = (-20, 30)
         self.fitRange = (-20, 30)
