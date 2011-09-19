@@ -21,6 +21,14 @@ elif _hostname == 'nbcitjv':
         'v11': '/home/veverka/Work/data/pmvTrees',
         'v12': '/home/veverka/Work/data/pmvTrees',
     }
+elif _hostname == 'eee.home' or _hostname == 'Jan-Veverkas-MacBook-Pro.local':
+    ## Path for Jan's MacBook Pro
+    _path = {
+        'v9' : '/Users/veverka/Work/Data/pmvTrees',
+        'v10': '/Users/veverka/Work/Data/pmvTrees',
+        'v11': '/Users/veverka/Work/Data/pmvTrees',
+        'v12': '/Users/veverka/Work/Data/pmvTrees',
+    }
 else:
     raise RuntimeError, "Unknown hostname `%s'" % _hostname
 
@@ -58,8 +66,10 @@ _files['v11'] = {
 }
 
 _files['v12'] = {
-    'z' : [ 'pmvTree_V12_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_' +\
-                'S4-v1_condor_Dimuon_AOD-42X-v9_5.root' ],
+    'z' : ['pmvTree_V12_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_' +\
+           'S4-v1_condor_Dimuon_AOD-42X-v9.root' ],
+    'z1' : ['pmvTree_V12_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_' +\
+           'S4-v1_condor_Dimuon_AOD-42X-v9_1.root' ],
     'gj': [ 'pmvTree_V12_G_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6_' +\
                 'S4-v1_condor_Inclusive_AOD-42X-v9.root' ],
 }
