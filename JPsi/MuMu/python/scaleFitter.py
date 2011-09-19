@@ -1,80 +1,492 @@
 import os
+import math
+import copy
 import JPsi.MuMu.common.dataset as dataset
 import JPsi.MuMu.common.energyScaleChains as esChains
 
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
 from JPsi.MuMu.common.plotData import PlotData
+from JPsi.MuMu.common.padDivider import residPullDivide
+
+#------------------------------------------------------------------------------
+class Def():
+    '''ScaleFitter definition that can act on an instance and modify it's
+    name, title and labels to reflect a fit performed for events
+    in a specific category.  This is a base class for other definitions
+    implementing data source (real data/MC), fittig model and cuts.'''
+    def __init__(self, name, title, labels):
+        self.name, self.title, self.labels = name, title, labels
+
+    def __call__(self, fitter):
+        if fitter.name:
+            fitter.name += '_'
+        fitter.name += self.name
+
+        if fitter.title:
+            fitter.title += ', '
+        fitter.title += self.title
+
+        fitter.labels += self.labels
+
+    def __str__(self):
+        args = []
+        for attr in dir(self):
+            if callable(getattr(self, attr)) or attr[0] == '_':
+                continue
+            value = getattr(self, attr)
+            args.append(''.join([attr, '=', repr(value)]))
+        args = ', '.join(args)
+        return ''.join([self.__class__.__name__, '(', args, ')'])
+## end of class Cut
+
+
+#------------------------------------------------------------------------------
+class Model(Def):
+    '''ScaleFitter model definition that can act on an instance and modify it's
+    name, title, labels and fit model to reflect that the fit is performed
+    using the specified model.'''
+    def __init__(self, name, title, labels, model):
+        Def.__init__(self, name, title, labels)
+        self.model = model
+
+    def __call__(self, fitter):
+        Def.__call__(self, fitter)
+        fitter.pdf = self.model
+## end of class Model
+
+
+#------------------------------------------------------------------------------
+class Source(Def):
+    '''ScaleFitter source definition that can act on an instance and modify it's
+    name, title, labels and data source to reflect that the fit is performed
+    using the specified data source.'''
+    def __init__(self, name, title, labels, source):
+        Def.__init__(self, name, title, labels)
+        self.source = source
+
+    def __call__(self, fitter):
+        Def.__call__(self, fitter)
+        fitter.source = self.source
+## end of class Source
+
+
+#------------------------------------------------------------------------------
+class Cut(Def):
+    '''ScaleFitter cut definition that can act on an instance and modify it's
+    name, title, labels and cuts to reflect a fit performed for events
+    satisfying the cut.'''
+    def __init__(self, name, title, labels, cuts):
+        Def.__init__(self, name, title, labels)
+        self.cuts = cuts
+
+    def __call__(self, fitter):
+        Def.__call__(self, fitter)
+        fitter.cuts += self.cuts
+
+#     def __str__(self):
+#         args = ', '.join(repr(arg) for arg in [self.name, self.title,
+#                                                self.labels, self.cuts,])
+#         return ''.join([self.__class__.__name__, '(', args, ')'])
+## end of class Cut
+
+
+#------------------------------------------------------------------------------
+class PhoEtBin(Cut):
+    '''Can act on a ScaleFitter object and modify it's name,
+    title, labels and cuts to reflect a fit performed for photon within the
+    given Et bin [low,high) GeV.'''
+    def __init__(self, low, high):
+        bin_range = (low, high)
+        self.bin_range = bin_range
+        Cut.__init__(self,
+            name = 'PhoEt%g-%g' % bin_range,
+            title = 'photon Et in [%g, %g) GeV' % bin_range,
+            labels = ['E_{T}^{#gamma} #in [%g, %g) GeV' % bin_range],
+            cuts = ['%g <= phoPt' % low, 'phoPt < %g' % high],
+        )
+
+    def __str__(self):
+        return self.__class__.__name__ + '(%g, %g)' % self.bin_range
+## end of class PhoEtBin
+
+
+#------------------------------------------------------------------------------
+class ICut():
+    '''Iterator over instances of Cut. The constructor arguments are
+      * names - list of strings to form filenames
+      * titles - list of strings for log files and ASCII reports
+      * labels - list of lists of latex strings for canvases and latex reports
+      * cuts - list of lists of TTree::Draw expression strings.'''
+    def __init__(self, names, titles, labels, cuts):
+        self.name, self.title = iter(names), iter(titles)
+        self.labels, self.cuts = iter(labels), iter(cuts)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        return Cut(self.name.next(), self.title.next(),
+                   self.labels.next(), self.cuts.next())
+## end of ICut
+
+
+subdet_r9_categories = ICut(
+    names = 'EB_lowR9 EB_highR9 EE_lowR9 EE_highR9'.split(),
+    titles = ('Barrel, R9 < 0.94',
+              'Barrel, R9 > 0.94',
+              'Endcaps, R9 < 0.95',
+              'Endcaps, R9 > 0.95'),
+    ## For latex labels on plots
+    labels = (('Barrel', 'R_{9}^{#gamma} < 0.94'),
+              ('Barrel', 'R_{9}^{#gamma} > 0.94'),
+              ('Endcaps', 'R_{9}^{#gamma} < 0.95'),
+              ('Endcaps', 'R_{9}^{#gamma} > 0.95'),),
+    ## For TTree selection expressions
+    cuts = (('phoIsEB' , 'phoR9 < 0.94'),
+            ('phoIsEB' , 'phoR9 > 0.94'),
+            ('!phoIsEB' , 'phoR9 < 0.94'),
+            ('!phoIsEB' , 'phoR9 < 0.94'),)
+)
+
 
 class ScaleFitter(PlotData):
     '''Fits the Crystal Ball line shape to s = Ereco / Ekin - 1'''
-    def __init__(self, name, title, source, expression, cuts, labels):
-        PlotData.__init__(self, name, title, source, expression, cuts, labels)
+    #--------------------------------------------------------------------------
+    def __init__( self, name, title, source, expression, cuts, labels,
+                  **kwargs ):
         self.xTitle = 's = E_{RECO}/E_{KIN} - 1'
         self.nBins = 40
         self.xRange = (-30, 50)
-    ## <-- __init__
+        self.fitRange = (-30, 30)
+        self.massWindowScale = 2
+        self.fitResults = []
+        self.canvases = []
+        self.pads = []
+        self.pdf = 'model'
+        self.chi2s = []
+        self.definitions = []
+        PlotData.__init__( self, name, title, source, expression, cuts,
+                           labels, **kwargs )
+    ## <-- __init__ -----------------------------------------------------------
 
-    def fit(self, workspace):
-        ## Pull fitted variable x, its weight w, the model
-        ## and its parameters from the workspace
-        x = workspace.var('s')
-        w = workspace.var('w')
-        model = workspace.pdf('model')
-        parameters = workspace.set('parameters')
+    #--------------------------------------------------------------------------
+    def applyDefinitions(self, definitions=[]):
+        '''Applies definitions.'''
+        self.definitions.extend(definitions)
+        ## The definitions are applied in the same order as they appear in the
+        ## list.  They will be `pop'-ped from the tail of the reversed list.
+        self.definitions.reverse()
+        ## Unfinite loop
+        while True:
+            try:
+                ## Get the next definition and remove it from the list.
+                definition = self.definitions.pop()
+                ## Apply the definition.
+                definition(self)
+            except IndexError:
+                ## The list of definitions is empty.
+                break
+        ## end of unfinite while loop
+        return self
+    ## end of applyDefinitions
+
+    #--------------------------------------------------------------------------
+    def getMassCut(self, workspace):
+        '''Uses the mmg invariant mass distribution to center the invariant
+        mass window and adust its size. Appends the invariant mass cat to
+        the list of cuts.'''
+        mean = 91.2
+        width = 4.
+        mmgMass = workspace.var('mmgMass')
+        mmgMass.SetTitle('mmgMass')
+        data = dataset.get(
+            tree = self.source,
+            variable = mmgMass,
+            weight = workspace.var('w'),
+            cuts = self.cuts
+        )
+        m3Model = workspace.pdf('m3Model')
+        m3Model.fitTo(data, SumW2Error(kTRUE))
+        workspace.saveSnapshot( 'm3_' + self.name,
+                                workspace.set('m3Model_params') )
+        canvas = TCanvas( 'm3_' + self.name, 'Mass fit, ' + self.title )
+        self.canvases.append( canvas )
+        canvas.SetGrid()
+
+        ## Extract the approximate mass cut and append it to the current cuts
+        center = workspace.var('mZ').getVal() + workspace.var('#Deltam').getVal()
+        sigmaCB = workspace.var('#sigmaCB').getVal()
+        sigmaBW = workspace.var('#GammaZ').getVal()
+        oplus = lambda x, y: math.sqrt(x*x + y*y)
+        width = self.massWindowScale * oplus(sigmaCB, sigmaBW)
+
+        ## Tune the position of the mass window by sample the signal pdf
+        nsamples = 1000
+        xlo, dx = center - width, 2*width/(nsamples-1)
+        signal = workspace.pdf('signal')
+        xmax, ymax = -1, -1
+        for x in [xlo + i*dx for i in range(nsamples)]:
+            mmgMass.setVal(x)
+            y = signal.getVal()
+            if y > ymax:
+                xmax, ymax = x, y
+        self.cuts.append( 'abs(mmgMass-%.2f) < %.2f' % (xmax, width) )
+
+        ## Plot the fit result
+        mmgMass.SetTitle('m_{#mu#mu#gamma}')
+        plot = mmgMass.frame(Range(60,120))
+        plot.SetTitle('')
+        data.plotOn(plot)
+        m3Model.paramOn( plot,
+                         Format('NEU', AutoPrecision(2) ),
+                         Layout(.65, 0.92, 0.92) )
+        m3Model.plotOn(plot)
+        plot.Draw()
 
         ## Initialize latex label
         latexLabel = TLatex()
         latexLabel.SetNDC()
-        latexLabel.SetTextSize(0.045)
+        ## Font size in pixels
+        latexLabel.SetTextFont(10*(latexLabel.GetTextFont()/10) + 3)
+        latexLabel.SetTextSize(18)
 
-        x.SetTitle( self.expression )
-        data = dataset.get(
+        ## Add mass window label
+        latexLabel.DrawLatex( 0.65, 0.6 - 5 * 0.055,
+                              '%.2f #pm %.2f GeV' % (xmax, width) )
+
+        ## Plot the mass window
+        canvas.Update()
+        mmgMass.setVal(center)
+        xlo = xmax - width
+        xhi = xmax + width
+        ylo = 0.
+        yhi = 0.8 * canvas.GetY2()
+        line1 = ROOT.TLine(xlo, ylo, xlo, yhi)
+        line2 = ROOT.TLine(xhi, ylo, xhi, yhi)
+        arrow1 = ROOT.TArrow(xlo, 0.5*yhi, xhi, 0.5*yhi, 0.01, '<>')
+        for piece in [line1, line2, arrow1]:
+            try:
+                self.primitives.append(piece)
+            except AttributeError:
+                self.primitives = []
+                self.primitives.append(piece)
+            piece.Draw()
+
+        ## Save the plot
+        if hasattr(self, 'graphicsExtensions'):
+            for ext in self.graphicsExtensions:
+                canvas.Print( 'massFit_' + self.name + '.' + ext )
+    ## <-- getMassCut ---------------------------------------------------------
+
+    #--------------------------------------------------------------------------
+    def getData(self, workspace):
+        '''Gets the data and imports it in the workspace.'''
+        ## Pull fitted variable x, its weight w, the model
+        ## and its parameters from the workspace
+        self.x = workspace.var('s')
+        self.w = workspace.var('w')
+
+        self.x.SetTitle( self.expression )
+        self.data = dataset.get(
             tree = self.source,
-            variable = x,
-            weight = w,
+            variable = self.x,
+            weight = self.w,
             cuts = self.cuts
         )
-        data.SetName( 'data_' + self.name )
-        workspace.Import(data)
+        self.data.SetName( 'data_' + self.name )
+        self.data.SetTitle( self.title )
+        workspace.Import(self.data)
+    ## <-- getData ------------------------------------------------------------
 
+    #--------------------------------------------------------------------------
+    def fitToData(self, workspace, saveName = ''):
+        # print "+++ Entering scaleFitter.fitToData(..)"
+        self.model = workspace.pdf(self.pdf).Clone( 'model_' + self.name )
+        workspace.Import( self.model )
+        self.parameters = workspace.set(self.pdf + '_params')
+        # print "+++ Parameters:"
+        #self.parameters.Print()
         ## Fit data
-        self.fitResult = model.fitTo( data, Save(),
-                                      SumW2Error(kTRUE), PrintLevel(-1) )
-        workspace.saveSnapshot( self.name, parameters, True )
+#         self.x.setRange( 'fitRange_' + self.name, *self.fitRange )
+        self.data.SetName( self.name )
+        #print "+++ fitting"
+        self.fitResults.append(
+            self.model.fitTo( self.data, Save(),
+                              Range(*self.fitRange),
+#                               Range('fitRange_' + self.name),
+                              SumW2Error(kTRUE),
+                              PrintLevel(-1) )
+        )
 
+        if saveName == '':
+            workspace.saveSnapshot('sFit_' + self.name, self.parameters, True)
+        else:
+            workspace.saveSnapshot( saveName, self.parameters, True )
+    ## <-- fitToData ----------------------------------------------------------
+
+    #--------------------------------------------------------------------------
+    def _customizeAxis(self, axis, labelOffset=0.005, titleOffset=1):
+        ## Switch to fixed pixel size fonts
+        precision = axis.GetLabelFont() % 10
+        axis.SetLabelFont( axis.GetLabelFont() - precision + 3 )
+        axis.SetLabelSize(18)
+        precision = axis.GetTitleFont() % 10
+        axis.SetTitleFont( axis.GetTitleFont() - precision + 3)
+        axis.SetTitleSize(18)
+        ## Scale offsets
+        axis.SetLabelOffset( labelOffset )
+        axis.SetTitleOffset( titleOffset )
+    # end of customize axis
+
+    #--------------------------------------------------------------------------
+    def makePlot(self, workspace):
         ## Make a frame
-        x.SetTitle(self.xTitle)
-        x.setBins(self.nBins)
-        frame = x.frame( Range( *self.xRange ) )
+        self.x.SetTitle(self.xTitle)
+        self.x.setBins(self.nBins)
+        self.plot = self.x.frame( Range( *self.xRange ) )
 
         ## Add the data and model to the frame
-        data.SetTitle( self.title )
-        data.plotOn( frame )
-        model.plotOn( frame )
-        model.paramOn( frame,
+        self.data.plotOn( self.plot )
+        self.model.plotOn( self.plot )
+        self.chi2s.append( self.plot.chiSquare( self.parameters.getSize() ) )
+        self.model.paramOn( self.plot,
                       Format('NEU', AutoPrecision(2) ),
-                      Parameters( parameters ),
+                      Parameters( self.parameters ),
                       Layout(.57, 0.92, 0.92) )
 
         ## Make a canvas
-        self.canvas = TCanvas( self.name, self.title )
+        self.canvas = TCanvas( self.name, self.name, 400, 800 )
+        self.canvases.append( self.canvas )
         i = len( gROOT.GetListOfCanvases() )
         self.canvas.SetWindowPosition( 20*i, 20*i )
+        self.pads.extend( residPullDivide(self.canvas) )
+
+        # self.canvas.cd(1)
+
+        ## Get the residual and pull dists
+        hresid = self.plot.residHist()
+        hpull  = self.plot.pullHist()
+        self.plot2 = self.x.frame( Range( *self.xRange ) )
+        self.plot3 = self.x.frame( Range( *self.xRange ) )
+        self.plot2.SetYTitle('#chi^{2} Residuals')
+        self.plot3.SetYTitle('#chi^{2} Pulls')
+        self.plot2.addPlotable(hresid, 'P')
+        self.plot3.addPlotable(hpull, 'P')
 
         ## Customize
-        frame.SetTitle('')
+        self.plot.SetTitle('')
+        self.plot2.SetTitle('')
+        self.plot3.SetTitle('')
 
-        ## Draw the frame
-        frame.Draw()
+        self._customizeAxis( self.plot.GetYaxis(), 0.01, 3 )
+        self._customizeAxis( self.plot2.GetYaxis(), 0.01, 3 )
+        self._customizeAxis( self.plot3.GetYaxis(), 0.01, 3 )
+        self._customizeAxis( self.plot3.GetXaxis(), 0.01, 3.5 )
+
+        ## Draw the frames
+        for pad, plot in [ (self.canvas.cd(1), self.plot),
+                           (self.canvas.cd(2), self.plot2),
+                           (self.canvas.cd(3), self.plot3), ]:
+            pad.cd()
+            pad.SetGrid()
+            plot.GetYaxis().CenterTitle()
+            plot.Draw()
+
+        self.canvas.cd(1)
+
+        ## Save the chi2 and ndof in the workspace
+        if workspace.var('reducedChi2'):
+            reducedChi2 = workspace.var('reducedChi2')
+            ndof = workspace.var('ndof')
+            chi2Prob = workspace.var('chi2Prob')
+        else:
+            reducedChi2 = RooRealVar( 'reducedChi2', 'fit #chi^{2}/ndof', -1 )
+            ndof = RooRealVar( "ndof", "fit n.d.o.f.", -1 )
+            chi2Prob = RooRealVar( 'chi2Prob', '#chi^{2} probability', -1 )
+            workspace.Import(reducedChi2)
+            workspace.Import(ndof)
+            workspace.Import(chi2Prob)
+        reducedChi2.setVal( self.chi2s[-1] )
+        ndof.setVal( self.plot2.getHist().GetN() - self.parameters.getSize() )
+        chi2Prob.setVal( TMath.Prob( reducedChi2.getVal() * ndof.getVal(),
+                                    int( ndof.getVal() ) ) )
+        chi2 = RooArgSet( reducedChi2, ndof, chi2Prob )
+        workspace.saveSnapshot( 'chi2_' + self.name, chi2, True )
+
+        ## Initialize latex label
+        latexLabel = TLatex()
+        latexLabel.SetNDC()
+        ## Font size in pixels
+        latexLabel.SetTextFont( 10*(latexLabel.GetTextFont()/10) + 3)
+        latexLabel.SetTextSize(18)
 
         ## Add labels
         for i in range( len( self.labels ) ):
-            latexLabel.DrawLatex( 0.59, 0.6 - i * 0.055, self.labels[i] )
+            latexLabel.DrawLatex( 0.61, 0.6 - i * 0.055, self.labels[i] )
 
-        ## Save the plot
-        self.canvas.Print( 'sFit_' + self.name + '.png' )
-    ## <-- fit
-## <-- ScaleFitter
+        ## Add the total number of events used
+        numLabels = len( self.labels )
+        latexLabel.DrawLatex( 0.61,
+                              0.6 - numLabels * 0.055,
+                              '%d events' % self.data.numEntries() )
+        ## Add the reduced chi2
+        latexLabel.DrawLatex( 0.61,
+                              0.6 - (numLabels+1) * 0.055,
+                              '#chi^{2}/ndof: %.2g' % reducedChi2.getVal() )
+        ## Add the chi2 and ndof
+        self.canvas.cd(2)
+        chi2Val = reducedChi2.getVal() * ndof.getVal()
+        ndofVal = int( ndof.getVal() )
+        latexLabel.DrawLatex( 0.61, 0.85, '#chi^{2}: %.2g' % chi2Val)
+        latexLabel.DrawLatex( 0.61, 0.75, 'ndof: %d' % ndofVal)
 
-if __name__ == "__main__": import user
+        ## Add the chi2 probability
+        self.canvas.cd(3)
+        latexLabel.DrawLatex(0.61, 0.867, 'Prob: %.2g' % chi2Prob.getVal())
+
+        ## Save the plots
+        if hasattr(self, 'graphicsExtensions'):
+            for ext in self.graphicsExtensions:
+                self.canvas.Print( 'sFit_' + self.name + '.' + ext )
+    ## <-- makePlot -----------------------------------------------------------
+
+    #--------------------------------------------------------------------------
+    def fit(self, workspace, saveName = ''):
+        self.getMassCut(workspace)
+        self.getData(workspace)
+        self.fitToData(workspace, saveName)
+        self.makePlot(workspace)
+    ## <-- fit ----------------------------------------------------------------
+
+## <-- ScaleFitter ------------------------------------------------------------
+
+if __name__ == "__main__":
+    test_fitter = ScaleFitter(
+        name = 's',
+        title = 's-Fit',
+        cuts = ['mmMass < 80'],
+        labels = [],
+        source = '_chains["z"]',
+        expression = '100 * (1/kRatio - 1)',
+        xRange = (-20, 40),
+        nBins = 120,
+        fitRange = (-100, 100),
+        pdf = 'lognormal',
+        graphicsExtensions = [],
+        massWindowScale = 1.5,
+        fitScale = 2.0,
+    )
+
+    print test_fitter.applyDefinitions().pydump()
+
+    eb_lor9, eb_hir9, ee_lor9, ee_hir9 = list(subdet_r9_categories)
+
+    print "Applying", eb_lor9.title
+    print test_fitter.applyDefinitions([eb_lor9]).pydump()
+
+    pt10_15 = PhoEtBin(10, 15)
+    print "Applying", pt10_15.title
+    print test_fitter.applyDefinitions([pt10_15]).pydump()
+
+    import user
