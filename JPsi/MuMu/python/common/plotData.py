@@ -1,8 +1,10 @@
 import copy
 
 '''Holds data specifying a plot based on a TTree'''
+## ----------------------------------------------------------------------------
 class PlotData:
-    def __init__(self, name, title, source, expression, cuts, labels):
+    def __init__( self, name, title, source, expression, cuts, labels,
+                  **kwargs ):
         ## string used as a key in various dictionaries
         self.name = name
         ## string used in human-readable output
@@ -15,9 +17,22 @@ class PlotData:
         self.expression = expression
         ## TTree::Draw selection string applied to data source
         self.cuts = cuts
+        self._configuration = ('name title labels source expression'.split() +
+                               ['cuts'] + kwargs.keys())
+
+        for arg, value in kwargs.items():
+            setattr( self, arg, value )
 
     def clone(self, **kwargs):
         newPlot = copy.deepcopy(self)
         for argName, argValue in kwargs.items():
             setattr( newPlot, argName, argValue )
         return newPlot
+
+    def pydump(self):
+        lines = [self.__class__.__name__ + '(']
+        for field in self._configuration:
+            lines.append("    %s = %s," % (field, repr(getattr(self, field))))
+        lines.append(')')
+        return '\n'.join(lines)
+## end of PlotData
