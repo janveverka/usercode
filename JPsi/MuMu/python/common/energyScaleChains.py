@@ -11,7 +11,9 @@ if _hostname == 't3-susy.ultralight.org':
 elif _hostname == 'nbcitjv':
     ## Path for Jan's Dell Inspiron 6000 laptop
     _path = '/home/veverka/Work/data/esTrees'
-elif _hostname == 'eee.home' or _hostname == 'Jan-Veverkas-MacBook-Pro.local':
+elif (_hostname == 'eee.home' or
+      _hostname == 'Jan-Veverkas-MacBook-Pro.local' or
+      (_hostname[:8] == 'pb-d-128' and _hostname[-8:] == '.cern.ch')):
     ## Path for Jan's MacBook Pro
     _path = '/Users/veverka/Work/Data/esTrees'
 else:
