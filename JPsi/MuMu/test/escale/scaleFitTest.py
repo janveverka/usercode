@@ -1,3 +1,4 @@
+import copy
 import os
 import re
 import JPsi.MuMu.common.dataset as dataset
@@ -6,7 +7,7 @@ import JPsi.MuMu.common.energyScaleChains as esChains
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
 from JPsi.MuMu.common.plotData import PlotData
-from JPsi.MuMu.scaleFitter import ScaleFitter
+from JPsi.MuMu.scaleFitter import ScaleFitter, subdet_r9_categories, PhoEtBin, Model
 from JPsi.MuMu.scaleFitModels import *
 
 gROOT.LoadMacro("CMSStyle.C")
@@ -25,6 +26,24 @@ _commonCuts = [
     'mmMass < 80'
     # 'abs(scEta) < 0.9',
 ]
+
+default_fit = ScaleFitter(
+        name = 's_mc_Gauss_mmMass85',
+        title = 's-Fit, Powheg S4, m(mumu) < 85 GeV',
+        labels = ['Powheg S4', 'Gauss', 'm_{#mu^{+}#mu^{-}} < 85 GeV'],
+        cuts = [],
+        source = _chains['z'],
+        expression = '100 * (1/kRatio - 1)',
+        xRange = (-50, 150),
+        nBins = 200,
+        fitRange = (-100, 100),
+        pdf = 'gauss',
+        graphicsExtensions = ['png'],
+        massWindowScale = 1.5,
+        fitScale = 1.2,
+)
+
+eb_loR9, eb_hiR9, ee_loR9, ee_hiR9 = tuple(subdet_r9_categories)
 
 ## ----------------------------------------------------------------------------
 ## Customize below
@@ -46,11 +65,15 @@ _fits = [
         fitScale = 1.2
     ),
 
+    copy.deepcopy(default_fit).applyDefinitions([
+        Model('gauss'), eb_loR9, PhoEtBin(10,12)
+        ]),
+
     ScaleFitter(
         name = 'EB_lowR9_mc_pt10-12_gauss_mmMass80',
         title = 'Barrel, R9 < 0.94, pt 10-12 GeV, MC, Gauss, m(mm) < 80 GeV',
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'E_{T}^{#gamma} #in [10, 12] GeV', 'Powheg S4', 'Gauss', 'm_{#mu^{+}#mu^{-}} < 80 GeV' ],
-        cuts = ['phoIsEB', 'phoR9 < 0.94', '10 < phoPt', 'phoPt < 12', 'mmMass<80'],
+        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'E_{T}^{#gamma} #in [10, 12) GeV', 'Powheg S4', 'Gauss', 'm_{#mu^{+}#mu^{-}} < 80 GeV' ],
+        cuts = ['phoIsEB', 'phoR9 < 0.94', '10 <= phoPt', 'phoPt < 12', 'mmMass<80'],
         source = _chains['z'],
         expression = '100 * (1/kRatio - 1)',
         xRange = (-50, 150),
@@ -259,7 +282,7 @@ fSigma = 1.5
 pullEpsilon = 0.1
 
 ## Loop over plots
-for fitter in _fits[3:4]:
+for fitter in _fits[:2]:
     fitter.getMassCut(ws1)
     fitter.getData(ws1)
     try:
