@@ -7,8 +7,12 @@ import JPsi.MuMu.common.energyScaleChains as esChains
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
 from JPsi.MuMu.common.plotData import PlotData
-from JPsi.MuMu.scaleFitter import ScaleFitter, subdet_r9_categories, PhoEtBin, Model
-from JPsi.MuMu.scaleFitModels import *
+from JPsi.MuMu.scaleFitter import ScaleFitter
+from JPsi.MuMu.scaleFitter import PhoEtBin
+from JPsi.MuMu.scaleFitter import Model
+from JPsi.MuMu.scaleFitter import DimuonMassMax
+from JPsi.MuMu.scaleFitter import subdet_r9_categories 
+from JPsi.MuMu.scaleFitModels import ws1
 
 gROOT.LoadMacro("CMSStyle.C")
 ROOT.CMSstyle()
@@ -17,264 +21,68 @@ ROOT.CMSstyle()
 ## 715/pb for Vg Summer conferences
 # _chains = esChains.getChains('v7')
 ## 2/fb of LP11 dataset
-_chains = esChains.getChains('v10')
+_chains = esChains.getChains('v11')
 
-## Cuts common to all plots
-_commonCuts = [
-#     'abs(1/kRatio - 1) < 0.5',
-#     'abs(mmgMass-90.0) < 4',
-    'mmMass < 80'
-    # 'abs(scEta) < 0.9',
-]
+## Default fit of s = Ereco / Ekin - 1
+sfit = ScaleFitter(
+    name = 's_mc',
+    title = 's-Fit, Powheg S4',
+    labels = ['Powheg S4'],
+    cuts = [],
+    source = _chains['z'],
+    xName = 's',
+    xTitle = 's = E_{reco}/E_{kin} - 1',
+    xExpression =  '100 * (1/kRatio - 1)',
+    xRange = (-50, 100),
+    xUnit = '%',
+    nBins = 150,
+    fitRange = (-50, 100),
+    pdf = 'gauss',
+    graphicsExtensions = [],
+    massWindowScale = 1.5,
+    fitScale = 1.2,
+    )
 
-default_fit = ScaleFitter(
-        name = 's_mc_Gauss_mmMass85',
-        title = 's-Fit, Powheg S4, m(mumu) < 85 GeV',
-        labels = ['Powheg S4', 'Gauss', 'm_{#mu^{+}#mu^{-}} < 85 GeV'],
-        cuts = [],
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        xRange = (-50, 150),
-        nBins = 200,
-        fitRange = (-100, 100),
-        pdf = 'gauss',
-        graphicsExtensions = ['png'],
-        massWindowScale = 1.5,
-        fitScale = 1.2,
-)
+## Default fit of strue = Ereco / Egen - 1
+struefit = sfit.clone(
+    name = 'strue_mc',
+    title = 'strue-Fit, Powheg S4',
+    xTitle = 's_{true} = E_{reco}/E_{gen} - 1',
+    xExpression = '100 * (phoE/phoGenE - 1)',
+    xRange = (-20, 40),
+    nBins = (120),
+    fitRange = (-20, 40),
+    fitScale = 1.2,
+    cuts = ['isFSR'],
+    )
 
 eb_loR9, eb_hiR9, ee_loR9, ee_hiR9 = tuple(subdet_r9_categories)
 
 ## ----------------------------------------------------------------------------
 ## Customize below
+sfit1 = sfit.clone().applyDefinitions([
+    DimuonMassMax(85),
+    eb_loR9,
+    PhoEtBin(12,15)
+    ])
+
+struefit1 = struefit.clone().applyDefinitions([
+    DimuonMassMax(85),
+    eb_loR9,
+    PhoEtBin(12,15)
+    ])
+
 _fits = [
-
-    ScaleFitter(
-        name = 'EB_lowR9_mc_pt10-12_gauss_mmMass85',
-        title = 'Barrel, R9 < 0.94, pt 10-12 GeV, MC, Gauss, m(mm) < 85 GeV',
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'E_{T}^{#gamma} #in [10, 12] GeV', 'Powheg S4', 'Gauss', 'm_{#mu^{+}#mu^{-}} < 85 GeV' ],
-        cuts = ['phoIsEB', 'phoR9 < 0.94', '10 < phoPt', 'phoPt < 12', 'mmMass<85'],
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        xRange = (-50, 150),
-        nBins = 200,
-        fitRange = (-100, 100),
-        pdf = 'gauss',
-        graphicsExtensions = ['png'],
-        massWindowScale = 1.5,
-        fitScale = 1.2
-    ),
-
-    copy.deepcopy(default_fit).applyDefinitions([
-        Model('gauss'), eb_loR9, PhoEtBin(10,12)
-        ]),
-
-    ScaleFitter(
-        name = 'EB_lowR9_mc_pt10-12_gauss_mmMass80',
-        title = 'Barrel, R9 < 0.94, pt 10-12 GeV, MC, Gauss, m(mm) < 80 GeV',
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'E_{T}^{#gamma} #in [10, 12) GeV', 'Powheg S4', 'Gauss', 'm_{#mu^{+}#mu^{-}} < 80 GeV' ],
-        cuts = ['phoIsEB', 'phoR9 < 0.94', '10 <= phoPt', 'phoPt < 12', 'mmMass<80'],
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        xRange = (-50, 150),
-        nBins = 200,
-        fitRange = (-100, 100),
-        pdf = 'gauss',
-        graphicsExtensions = ['png'],
-        massWindowScale = 1.5,
-        fitScale = 1.2
-    ),
-
-    ScaleFitter(
-        name = 'EB_lowR9_mc_pt10-12_gauss_mmMass75',
-        title = 'Barrel, R9 < 0.94, pt 10-12 GeV, MC, Gauss, m(mm) < 75 GeV',
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'E_{T}^{#gamma} #in [10, 12] GeV', 'Powheg S4', 'Gauss', 'm_{#mu^{+}#mu^{-}} < 75 GeV' ],
-        cuts = ['phoIsEB', 'phoR9 < 0.94', '10 < phoPt', 'phoPt < 12', 'mmMass<75'],
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        xRange = (-50, 150),
-        nBins = 200,
-        fitRange = (-100, 100),
-        pdf = 'gauss',
-        graphicsExtensions = ['png'],
-        massWindowScale = 1.5,
-        fitScale = 1.2
-    ),
-
-    ## Barrel, MC, high R9
-    ScaleFitter(
-        name = 'EB_lowR9_mc_pt30-999_lognormal',
-        title = 'Barrel, R9 < 0.94, pt 30-999 GeV, MC, Lognormal',
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94', '30 < phoPt', 'phoPt < 999'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'E_{T}^{#gamma} > 30 GeV', 'Powheg S4', 'Lognormal' ],
-        xRange = (-20, 50),
-        nBins = 120,
-        fitRange = (-100, 100),
-        pdf = 'lognormal',
-#         graphicsExtensions = ['png', 'eps'],
-        graphicsExtensions = ['png'],
-        massWindowScale = 1.5,
-        fitScale = 1.5
-    ),
-
-    ScaleFitter(
-        name = 'EB_lowR9_mc_pt30-999_bifurGauss',
-        title = 'Barrel, R9 < 0.94, pt 30-999 GeV, MC, Bifur. Gauss',
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94', '30 < phoPt', 'phoPt < 999'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'E_{T}^{#gamma} > 30 GeV', 'Powheg S4', 'Bifur. Gauss' ],
-        xRange = (-20, 40),
-        nBins = 120,
-        fitRange = (-100, 100),
-        pdf = 'bifurGauss',
-#         graphicsExtensions = ['png', 'eps'],
-        graphicsExtensions = ['png'],
-        massWindowScale = 1.5,
-        fitScale = 1.5
-    ),
-
-    ScaleFitter(
-        name = 'EB_lowR9_mc_pt30-999_gauss',
-        title = 'Barrel, R9 < 0.94, pt 30-999 GeV, MC, Gauss',
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94', '30 < phoPt', 'phoPt < 999'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'E_{T}^{#gamma} > 30 GeV', 'Powheg S4', 'Gauss' ],
-        xRange = (-20, 40),
-        nBins = 120,
-        fitRange = (-100, 100),
-        pdf = 'gauss',
-#         graphicsExtensions = ['png', 'eps'],
-        graphicsExtensions = ['png'],
-        massWindowScale = 1.5,
-        fitScale = 1.5
-    ),
-
-    ScaleFitter(
-        name = 'EB_lowR9_mc_pt30-999_cbShape',
-        title = 'Barrel, R9 < 0.94, pt 30-999 GeV, MC, CB',
-        source = _chains['z'],
-        expression = '100 * (1/kRatio - 1)',
-        cuts = _commonCuts + ['phoIsEB', 'phoR9 < 0.94', '30 < phoPt', 'phoPt < 999'],
-        labels = [ 'Barrel', 'R_{9}^{#gamma} < 0.94', 'E_{T}^{#gamma} > 30 GeV', 'Powheg S4', 'Crystal Ball' ],
-        xRange = (-20, 40),
-        nBins = 120,
-        fitRange = (-100, 100),
-        pdf = 'cbShape',
-#         graphicsExtensions = ['png', 'eps'],
-        graphicsExtensions = ['png'],
-        massWindowScale = 1.5,
-        fitScale = 1.5
-    ),
-
-#     ScaleFitter(
-#         name = 'EB_highR9_mc_pt10-15_cbShape',
-#         title = 'Barrel, R9 > 0.94, pt 10-15 GeV, MC, CB',
-#         source = _chains['z'],
-#         expression = '100 * (1/kRatio - 1)',
-#         cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94', '10 < phoPt', 'phoPt < 15'],
-#         labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'E_{T}^{#gamma} #in [10,15] GeV', 'Powheg S4', 'CB' ],
-#         fitRange = (-20, 20),
-#         pdf = 'cbShape',
-#     ),
-#
-#     ScaleFitter(
-#         name = 'EB_highR9_mc_pt10-15_cruijff',
-#         title = 'Barrel, R9 > 0.94, pt 10-15 GeV, MC, Cruijff',
-#         source = _chains['z'],
-#         expression = '100 * (1/kRatio - 1)',
-#         cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94', '10 < phoPt', 'phoPt < 15'],
-#         labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'E_{T}^{#gamma} #in [10,15] GeV', 'Powheg S4', 'Cruijff' ],
-#         fitRange = (-20, 20),
-#         pdf = 'cruijff',
-#     ),
-#
-#     ScaleFitter(
-#         name = 'EB_highR9_mc_pt10-15_bifurGauss',
-#         title = 'Barrel, R9 > 0.94, pt 10-15 GeV, MC, Bifur. Gauss',
-#         source = _chains['z'],
-#         expression = '100 * (1/kRatio - 1)',
-#         cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94', '10 < phoPt', 'phoPt < 15'],
-#         labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'E_{T}^{#gamma} #in [10,15] GeV', 'Powheg S4', 'Bifur. Gaus' ],
-#         fitRange = (-20, 20),
-#         pdf = 'bifurGauss',
-#     ),
-#
-#
-#     ScaleFitter(
-#         name = 'EB_highR9_mc_pt10-15_bifurLogNormal',
-#         title = 'Barrel, R9 > 0.94, pt 10-15 GeV, MC, -log(k)',
-#         source = _chains['z'],
-#         expression = '- 100 * log(kRatio)',
-#         cuts = _commonCuts + ['phoIsEB', 'phoR9 > 0.94', '10 < phoPt', 'phoPt < 15'],
-#         labels = [ 'Barrel', 'R_{9}^{#gamma} > 0.94', 'E_{T}^{#gamma} #in [10,15] GeV', 'Powheg S4', 'Bifur. Log-Normal' ],
-#     ),
-
-    ## Barrel, MC, low R9, old corrections
-#     ScaleFitter(
-#         name = 'EB_lowR9_mc_default_pt10-15',
-#         title = 'Barrel, R9 < 0.94, pt 10-15 GeV, MC, default corrections',
-#         source = _chains['z'],
-#         expression = '100 * (1/kRatio - 1)',
-#         cuts = _commonCuts + [ 'phoIsEB',
-#                                'phoR9 < 0.94',
-#                                '10 < phoPt', 'phoPt < 15' ],
-#         labels = [ 'Barrel',
-#                    'R_{9}^{#gamma} < 0.94',
-#                    'E_{T}^{#gamma} #in [10,15] GeV',
-#                    'Powheg S4',
-#                    'Default Corr.' ],
-#         fitRange = (-30, 30),
-#     ),
-
-#     ScaleFitter(
-#         name = 'EB_lowR9_mc_default_pt10-15_mlogk',
-#         title = 'Barrel, R9 < 0.94, pt 10-15 GeV, MC, default corrections, -log(k)',
-#         source = _chains['z'],
-#         expression = '- 100 * log(kRatio)',
-#         cuts = _commonCuts + [ 'phoIsEB',
-#                                'phoR9 < 0.94',
-#                                '10 < phoPt', 'phoPt < 15' ],
-#         labels = [ 'Barrel',
-#                    'R_{9}^{#gamma} < 0.94',
-#                    'E_{T}^{#gamma} #in [10,15] GeV',
-#                    'Powheg S4',
-#                    'Default Corr.' ],
-#     ),
-
-    ## Barrel, MC, low R9, new corrections
-#     ScaleFitter(
-#         name = 'EB_lowR9_mc_new_pt10-15',
-#         title = 'Barrel, R9 < 0.94, pt 10-15 GeV, MC, new corrections',
-#         source = _chains['z'],
-#         expression = '100 * (1/newCorrKRatio - 1)',
-#         cuts = _commonCuts + [ 'phoIsEB',
-#                                'phoR9 < 0.94',
-#                                '10 < phoPt', 'phoPt < 15' ],
-#         labels = [ 'Barrel',
-#                    'R_{9}^{#gamma} < 0.94',
-#                    'E_{T}^{#gamma} #in [10,15] GeV',
-#                    'Powheg S4',
-#                    'New Corr.' ],
-#     ),
-
-#     ScaleFitter(
-#         name = 'EB_lowR9_mc_new_pt10-15_mlogk',
-#         title = 'Barrel, R9 < 0.94, pt 10-15 GeV, MC, new corrections, -log(k)',
-#         source = _chains['z'],
-#         expression = '- 100 * log(newCorrKRatio)',
-#         cuts = _commonCuts + [ 'phoIsEB',
-#                                'phoR9 < 0.94',
-#                                '10 < phoPt', 'phoPt < 15' ],
-#         labels = [ 'Barrel',
-#                    'R_{9}^{#gamma} < 0.94',
-#                    'E_{T}^{#gamma} #in [10,15] GeV',
-#                    'Powheg S4',
-#                    'New Corr.' ],
-#     ),
+    sfit1.clone().applyDefinitions([Model('gauss')]),
+    sfit1.clone().applyDefinitions([Model('cbShape')]),
+    sfit1.clone().applyDefinitions([Model('lognormal')]),
+    sfit1.clone().applyDefinitions([Model('bifurGauss')]),
+    sfit1.clone().applyDefinitions([Model('gamma')]),
+    struefit1.clone().applyDefinitions([Model('gauss')]),
+    struefit1.clone().applyDefinitions([Model('cbShape')]),
+    struefit1.clone().applyDefinitions([Model('lognormal')]),
+    struefit1.clone().applyDefinitions([Model('bifurGauss')]),
+    struefit1.clone().applyDefinitions([Model('gamma')]),
 ]
 
 maxIterations = 10
@@ -282,7 +90,7 @@ fSigma = 1.5
 pullEpsilon = 0.1
 
 ## Loop over plots
-for fitter in _fits[:2]:
+for fitter in _fits:
     fitter.getMassCut(ws1)
     fitter.getData(ws1)
     try:
@@ -363,6 +171,8 @@ for fitter in _fits[:2]:
 
 ## Print an ASCII report
 print '\nASCII report'
+is_first_sfit = True
+is_first_struefit = True
 for plot in _fits:
     if not hasattr(plot, 'niter'):
         continue
@@ -372,13 +182,27 @@ for plot in _fits:
         bareName = 'sFit_' + m.groups()[0]
     else:
         raise RuntimeError, "Failed to parse fit name `%s'" % plot.name
-    for i in range (plot.niter):
+    for i in range (plot.niter-1, plot.niter):
         ws1.loadSnapshot( bareName + '%d' % i )
+        if 'sfit1' in vars() and sfit1.title in plot.title:
+            if is_first_sfit:
+                is_first_sfit = False
+                print sfit1.title
+        elif 'struefit1' in vars() and struefit1.title in plot.title:
+            if is_first_struefit:
+                is_first_struefit = False
+                print struefit1.title
         print '%6.2f +/- %4.2f' % ( ws1.var('#Deltas').getVal(),
                                     ws1.var('#Deltas').getError() ),
-        print plot.title, i, "%.3g" % plot.chi2s[i]
+        if 'sfit1' in vars() and sfit1.title in plot.title:
+            print plot.title[len(sfit1.title)+2:], i, "%.3g" % plot.chi2s[i]
+        elif 'struefit1' in vars() and struefit1.title in plot.title:
+            print plot.title[len(struefit1.title)+2:], i, "%.3g" % plot.chi2s[i]
+        else:
+            print plot.title, i, "%.3g" % plot.chi2s[i]
 ## <-- loop over plots
 
 ws1.writeToFile('test.root')
 
-if __name__ == "__main__": import user
+if __name__ == "__main__":
+    import user
