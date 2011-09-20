@@ -99,6 +99,14 @@ _files['v10'] = {
     'z'    : [ 'esTree_V10_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root' ]
 }
 
+_files['v11'] = {
+    'data' : '''
+             esTree_V11_DoubleMu_Run2011A-May10ReReco-v1_glite_Dimuon_RECO-42X-v9.root
+             esTree_V11_DoubleMu_Run2011A-PromptReco-v4_glite_Dimuon_RECO-42X-v9.root
+             '''.split(),
+    'z'    : [ 'esTree_V11_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root' ]
+}
+
 _treeNames = {
     'v1' : 'tree/es',
     'v2' : 'pmvTree/pmv',
@@ -109,6 +117,7 @@ _treeNames = {
     'v7' : 'tree/pmv',
     'v8' : 'tree/pmv',
     'v10' : 'tree/pmv',
+    'v11' : 'tree/pmv',
 }
 
 
@@ -132,5 +141,6 @@ def getChains(version='v4'):
 
     return chains
 
-if __name__ == "__main__": import user
+if __name__ == "__main__":
+    import user
 
