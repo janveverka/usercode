@@ -3,7 +3,7 @@ import copy
 '''Holds data specifying a plot based on a TTree'''
 ## ----------------------------------------------------------------------------
 class PlotData:
-    def __init__( self, name, title, source, expression, cuts, labels,
+    def __init__( self, name, title, source, xExpression, cuts, labels,
                   **kwargs ):
         ## string used as a key in various dictionaries
         self.name = name
@@ -13,11 +13,11 @@ class PlotData:
         self.labels = labels
         ## TTree providing source of data
         self.source = source
-        ## TTree::Draw expression string of variable subject to fittin
-        self.expression = expression
+        ## TTree::Draw xExpression string of variable subject to fittin
+        self.xExpression = xExpression
         ## TTree::Draw selection string applied to data source
         self.cuts = cuts
-        self._configuration = ('name title labels source expression'.split() +
+        self._configuration = ('name title labels source xExpression'.split() +
                                ['cuts'] + kwargs.keys())
 
         for arg, value in kwargs.items():
