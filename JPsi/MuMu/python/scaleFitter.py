@@ -11,10 +11,10 @@ from JPsi.MuMu.common.padDivider import residPullDivide
 
 #------------------------------------------------------------------------------
 class Def():
-    '''ScaleFitter definition that can act on an instance and modify it's
+    """ScaleFitter definition that can act on an instance and modify it's
     name, title and labels to reflect a fit performed for events
     in a specific category.  This is a base class for other definitions
-    implementing data source (real data/MC), fittig model and cuts.'''
+    implementing data source (real data/MC), fittig model and cuts."""
     def __init__(self, name, title, labels):
         self.name, self.title, self.labels = name, title, labels
 
@@ -43,24 +43,32 @@ class Def():
 
 #------------------------------------------------------------------------------
 class Model(Def):
-    '''ScaleFitter model definition that can act on an instance and modify it's
+    """ScaleFitter model definition that can act on an instance and modify it's
     name, title, labels and fit model to reflect that the fit is performed
-    using the specified model.'''
-    def __init__(self, name, title, labels, model):
-        Def.__init__(self, name, title, labels)
-        self.model = model
+    using the specified model."""
+    def __init__(self, name):
+        if name == 'gauss':
+            Def.__init__(self, name, 'Gauss', ['Gaussian'])
+            self.model = 'gauss'
+        elif name == 'lognormal':
+            Def.__init__(self, name, 'Lognormal', ['Lognormal'])
+            self.model = 'lognormal'
+        ## elif name == '':
+        ##     Def.__init__(self, name, '', [''])
+        ##     self.model = ''
+        else:
+            raise ValueError, 'model %s not supperted!' % name
 
     def __call__(self, fitter):
         Def.__call__(self, fitter)
         fitter.pdf = self.model
 ## end of class Model
 
-
 #------------------------------------------------------------------------------
 class Source(Def):
-    '''ScaleFitter source definition that can act on an instance and modify it's
+    """ScaleFitter source definition that can act on an instance and modify it's
     name, title, labels and data source to reflect that the fit is performed
-    using the specified data source.'''
+    using the specified data source."""
     def __init__(self, name, title, labels, source):
         Def.__init__(self, name, title, labels)
         self.source = source
@@ -73,9 +81,9 @@ class Source(Def):
 
 #------------------------------------------------------------------------------
 class Cut(Def):
-    '''ScaleFitter cut definition that can act on an instance and modify it's
+    """ScaleFitter cut definition that can act on an instance and modify it's
     name, title, labels and cuts to reflect a fit performed for events
-    satisfying the cut.'''
+    satisfying the cut."""
     def __init__(self, name, title, labels, cuts):
         Def.__init__(self, name, title, labels)
         self.cuts = cuts
@@ -93,9 +101,9 @@ class Cut(Def):
 
 #------------------------------------------------------------------------------
 class PhoEtBin(Cut):
-    '''Can act on a ScaleFitter object and modify it's name,
+    """Can act on a ScaleFitter object and modify it's name,
     title, labels and cuts to reflect a fit performed for photon within the
-    given Et bin [low,high) GeV.'''
+    given Et bin [low,high) GeV."""
     def __init__(self, low, high):
         bin_range = (low, high)
         self.bin_range = bin_range
@@ -113,11 +121,11 @@ class PhoEtBin(Cut):
 
 #------------------------------------------------------------------------------
 class ICut():
-    '''Iterator over instances of Cut. The constructor arguments are
+    """Iterator over instances of Cut. The constructor arguments are
       * names - list of strings to form filenames
       * titles - list of strings for log files and ASCII reports
       * labels - list of lists of latex strings for canvases and latex reports
-      * cuts - list of lists of TTree::Draw expression strings.'''
+      * cuts - list of lists of TTree::Draw expression strings."""
     def __init__(self, names, titles, labels, cuts):
         self.name, self.title = iter(names), iter(titles)
         self.labels, self.cuts = iter(labels), iter(cuts)
@@ -131,27 +139,8 @@ class ICut():
 ## end of ICut
 
 
-subdet_r9_categories = ICut(
-    names = 'EB_lowR9 EB_highR9 EE_lowR9 EE_highR9'.split(),
-    titles = ('Barrel, R9 < 0.94',
-              'Barrel, R9 > 0.94',
-              'Endcaps, R9 < 0.95',
-              'Endcaps, R9 > 0.95'),
-    ## For latex labels on plots
-    labels = (('Barrel', 'R_{9}^{#gamma} < 0.94'),
-              ('Barrel', 'R_{9}^{#gamma} > 0.94'),
-              ('Endcaps', 'R_{9}^{#gamma} < 0.95'),
-              ('Endcaps', 'R_{9}^{#gamma} > 0.95'),),
-    ## For TTree selection expressions
-    cuts = (('phoIsEB' , 'phoR9 < 0.94'),
-            ('phoIsEB' , 'phoR9 > 0.94'),
-            ('!phoIsEB' , 'phoR9 < 0.94'),
-            ('!phoIsEB' , 'phoR9 < 0.94'),)
-)
-
-
 class ScaleFitter(PlotData):
-    '''Fits the Crystal Ball line shape to s = Ereco / Ekin - 1'''
+    """Fits the Crystal Ball line shape to s = Ereco / Ekin - 1"""
     #--------------------------------------------------------------------------
     def __init__( self, name, title, source, expression, cuts, labels,
                   **kwargs ):
@@ -172,7 +161,7 @@ class ScaleFitter(PlotData):
 
     #--------------------------------------------------------------------------
     def applyDefinitions(self, definitions=[]):
-        '''Applies definitions.'''
+        """Applies definitions."""
         self.definitions.extend(definitions)
         ## The definitions are applied in the same order as they appear in the
         ## list.  They will be `pop'-ped from the tail of the reversed list.
@@ -193,9 +182,9 @@ class ScaleFitter(PlotData):
 
     #--------------------------------------------------------------------------
     def getMassCut(self, workspace):
-        '''Uses the mmg invariant mass distribution to center the invariant
+        """Uses the mmg invariant mass distribution to center the invariant
         mass window and adust its size. Appends the invariant mass cat to
-        the list of cuts.'''
+        the list of cuts."""
         mean = 91.2
         width = 4.
         mmgMass = workspace.var('mmgMass')
@@ -281,7 +270,7 @@ class ScaleFitter(PlotData):
 
     #--------------------------------------------------------------------------
     def getData(self, workspace):
-        '''Gets the data and imports it in the workspace.'''
+        """Gets the data and imports it in the workspace."""
         ## Pull fitted variable x, its weight w, the model
         ## and its parameters from the workspace
         self.x = workspace.var('s')
@@ -460,6 +449,31 @@ class ScaleFitter(PlotData):
     ## <-- fit ----------------------------------------------------------------
 
 ## <-- ScaleFitter ------------------------------------------------------------
+
+subdet_r9_categories = ICut(
+    names = 'EB_lowR9 EB_highR9 EE_lowR9 EE_highR9'.split(),
+    titles = ('Barrel, R9 < 0.94',
+              'Barrel, R9 > 0.94',
+              'Endcaps, R9 < 0.95',
+              'Endcaps, R9 > 0.95'),
+    ## For latex labels on plots
+    labels = (('Barrel', 'R_{9}^{#gamma} < 0.94'),
+              ('Barrel', 'R_{9}^{#gamma} > 0.94'),
+              ('Endcaps', 'R_{9}^{#gamma} < 0.95'),
+              ('Endcaps', 'R_{9}^{#gamma} > 0.95'),),
+    ## For TTree selection expressions
+    cuts = (('phoIsEB' , 'phoR9 < 0.94'),
+            ('phoIsEB' , 'phoR9 > 0.94'),
+            ('!phoIsEB' , 'phoR9 < 0.94'),
+            ('!phoIsEB' , 'phoR9 < 0.94'),)
+)
+
+## model_names = 'gauss cbShape lognormal curijff gamma'.split()
+## model_titles = 'Gauss CB Lognaormal Cruijff Gamma'.split()
+## model_labels = [[i] for i in model_titles]
+## models = {}
+## for args in zip(model_names, model_titles, model_labels, model_names):
+##     models[ars[0]] = Model(*args)
 
 if __name__ == "__main__":
     test_fitter = ScaleFitter(
