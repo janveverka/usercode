@@ -48,16 +48,22 @@ class Model(Def):
     using the specified model."""
     def __init__(self, name):
         if name == 'gauss':
-            Def.__init__(self, name, 'Gauss', ['Gaussian'])
+            Def.__init__(self, name, 'Gauss', ['Gaussian Fit'])
             self.model = 'gauss'
         elif name == 'lognormal':
-            Def.__init__(self, name, 'Lognormal', ['Lognormal'])
+            Def.__init__(self, name, 'Lognormal', ['Lognormal Fit'])
             self.model = 'lognormal'
-        ## elif name == '':
-        ##     Def.__init__(self, name, '', [''])
-        ##     self.model = ''
+        elif name == 'bifurGauss':
+            Def.__init__(self, name, 'Bifur.-Gauss', ['Bifur. Gaussian Fit'])
+            self.model = 'bifurGauss'
+        elif name == 'cbShape':
+            Def.__init__(self, name, 'CB', ['Crystal Ball Fit'])
+            self.model = 'cbShape'
+        elif name == 'gamma':
+            Def.__init__(self, name, 'Gamma', ['Gamma Fit'])
+            self.model = 'gamma'
         else:
-            raise ValueError, 'model %s not supperted!' % name
+            raise ValueError, 'model %s not supported!' % name
 
     def __call__(self, fitter):
         Def.__call__(self, fitter)
@@ -120,6 +126,25 @@ class PhoEtBin(Cut):
 
 
 #------------------------------------------------------------------------------
+class DimuonMassMax(Cut):
+    """Can act on a ScaleFitter object and modify it's name,
+    title, labels and cuts to reflect a fit performed for dimuons below the
+    given mass in GeV."""
+    def __init__(self, max):
+        self.max = max
+        Cut.__init__(self,
+            name = 'mmMass%g' % max,
+            title = 'mmMass < %g GeV' % max,
+            labels = ['m_{#mu^{+}#mu^{-}} < %g GeV' % max],
+            cuts = ['mmMass <= %g' % max],
+        )
+
+    def __str__(self):
+        return self.__class__.__name__ + '(%g)' % self.max
+## end of class PhoEtBin
+
+
+#------------------------------------------------------------------------------
 class ICut():
     """Iterator over instances of Cut. The constructor arguments are
       * names - list of strings to form filenames
@@ -142,11 +167,13 @@ class ICut():
 class ScaleFitter(PlotData):
     """Fits the Crystal Ball line shape to s = Ereco / Ekin - 1"""
     #--------------------------------------------------------------------------
-    def __init__( self, name, title, source, expression, cuts, labels,
+    def __init__( self, name, title, source, xExpression, cuts, labels,
                   **kwargs ):
+        self.xName = 's'
         self.xTitle = 's = E_{RECO}/E_{KIN} - 1'
         self.nBins = 40
         self.xRange = (-30, 50)
+        self.xUnit = '%'
         self.fitRange = (-30, 30)
         self.massWindowScale = 2
         self.fitResults = []
@@ -155,7 +182,7 @@ class ScaleFitter(PlotData):
         self.pdf = 'model'
         self.chi2s = []
         self.definitions = []
-        PlotData.__init__( self, name, title, source, expression, cuts,
+        PlotData.__init__( self, name, title, source, xExpression, cuts,
                            labels, **kwargs )
     ## <-- __init__ -----------------------------------------------------------
 
@@ -201,6 +228,8 @@ class ScaleFitter(PlotData):
                                 workspace.set('m3Model_params') )
         canvas = TCanvas( 'm3_' + self.name, 'Mass fit, ' + self.title )
         self.canvases.append( canvas )
+        i = len(gROOT.GetListOfCanvases())
+        canvas.SetWindowPosition(20*(i%50), 20*(i%5))        
         canvas.SetGrid()
 
         ## Extract the approximate mass cut and append it to the current cuts
@@ -273,10 +302,11 @@ class ScaleFitter(PlotData):
         """Gets the data and imports it in the workspace."""
         ## Pull fitted variable x, its weight w, the model
         ## and its parameters from the workspace
-        self.x = workspace.var('s')
+        self.x = workspace.var(self.xName)
+        self.x.Print()
         self.w = workspace.var('w')
 
-        self.x.SetTitle( self.expression )
+        self.x.SetTitle( self.xExpression )
         self.data = dataset.get(
             tree = self.source,
             variable = self.x,
@@ -348,7 +378,7 @@ class ScaleFitter(PlotData):
         self.canvas = TCanvas( self.name, self.name, 400, 800 )
         self.canvases.append( self.canvas )
         i = len( gROOT.GetListOfCanvases() )
-        self.canvas.SetWindowPosition( 20*i, 20*i )
+        self.canvas.SetWindowPosition(20*(i%50), 20*(i%5))
         self.pads.extend( residPullDivide(self.canvas) )
 
         # self.canvas.cd(1)
@@ -482,7 +512,7 @@ if __name__ == "__main__":
         cuts = ['mmMass < 80'],
         labels = [],
         source = '_chains["z"]',
-        expression = '100 * (1/kRatio - 1)',
+        xExpression = '100 * (1/kRatio - 1)',
         xRange = (-20, 40),
         nBins = 120,
         fitRange = (-100, 100),
