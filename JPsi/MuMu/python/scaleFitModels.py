@@ -1,4 +1,4 @@
-'''Defines PDF's for the energy scale extraction from fit to s = E_reco/E_kin
+"""Defines PDF's for the energy scale extraction from fit to s = E_reco/E_kin
 using the Z->mumugamma FSR events.  Models are stored in a workspace together
 with argument lists of observables (only s), parameters and snapshots of
 their initial values. Supported models (instance names in brackets):
@@ -14,7 +14,8 @@ is the name used above.
 
 Plan to implement, Log-Normal, Bifurcated Log-Normal and Gamma
 distributions.
-'''
+"""
+
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
 
@@ -27,7 +28,8 @@ ws1 = RooWorkspace( 'ws1', 'mmg energy scale' )
 ## Define the quantity to be fitted and the event weight
 s = RooRealVar( 's', '100 * (1/kRatio - 1)', -100, 100, '%' )
 mmgMass = RooRealVar( 'mmgMass', 'mmgMass', 60, 120, 'GeV' )
-w = RooRealVar( 'w', 'pileup.weight', 0, 99 )
+# w = RooRealVar( 'w', 'pileup.weight', 0, 99 )
+w = RooRealVar( 'w', '1', 0, 99 )
 
 smw = RooArgSet(s, mmgMass, w)
 ws1.Import(smw)
@@ -62,8 +64,10 @@ sModels = [
     ws1.factory('Lognormal::lognormal(ik, m0, k)'),
     ws1.factory('BifurGauss::model(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('CBShape::cbShape(s, #Deltas, #sigma, #alpha, n)'),
-    ws1.factory('''RooCruijff::cruijff(s, #Deltas, #sigmaL, #sigmaR, #alphaL,
-                                       #alphaR)'''),
+    ## Didn't figure out how to compile new models in FWLite yet.
+    ## Comment this out to be able to run on FWLite
+    # ws1.factory('''RooCruijff::cruijff(s, #Deltas, #sigmaL, #sigmaR, #alphaL,
+    #                                    #alphaR)'''),
     ws1.factory('BifurGauss::bifurGauss(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('Gamma::gamma(ik_gamma, #gamma, #beta, #mu)'),
 ] ## end of models definition
@@ -105,4 +109,5 @@ for x, models in [ (sObservables, sModels),
         ws1.defineSet(m.GetName() + '_params', parameters)
         ws1.saveSnapshot(m.GetName() + '_init', parameters, True)
 
-if __name__ == '__main__': import user
+if __name__ == '__main__':
+    import user
