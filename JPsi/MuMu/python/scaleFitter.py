@@ -62,6 +62,9 @@ class Model(Def):
         elif name == 'gamma':
             Def.__init__(self, name, 'Gamma', ['Gamma Fit'])
             self.model = 'gamma'
+        elif name == 'cruijff':
+            Def.__init__(self, name, 'Cruijff', ['Cruijff Fit'])
+            self.model = 'cruijff'
         else:
             raise ValueError, 'model %s not supported!' % name
 
@@ -175,6 +178,7 @@ class ScaleFitter(PlotData):
         self.xRange = (-30, 50)
         self.xUnit = '%'
         self.fitRange = (-30, 30)
+        self.massWindow = None
         self.massWindowScale = 2
         self.fitResults = []
         self.canvases = []
@@ -210,8 +214,18 @@ class ScaleFitter(PlotData):
     #--------------------------------------------------------------------------
     def getMassCut(self, workspace):
         """Uses the mmg invariant mass distribution to center the invariant
-        mass window and adust its size. Appends the invariant mass cat to
+        mass window and adust its size. Appends the invariant mass cut to
         the list of cuts."""
+
+        ## Check if mass window is explicitly given
+        if self.massWindow:
+            ## Append the given mass window to the list of cuts
+            mean = 0.5 * (self.massWindow[0] + self.massWindow[1])
+            width = 0.5 * (self.massWindow[1] - self.massWindow[0])
+            self.cuts.append( 'abs(mmgMass-%.2f) < %.2f' % (mean, width) )
+            ## Return without making the fit
+            return
+
         mean = 91.2
         width = 4.
         mmgMass = workspace.var('mmgMass')
@@ -229,7 +243,7 @@ class ScaleFitter(PlotData):
         canvas = TCanvas( 'm3_' + self.name, 'Mass fit, ' + self.title )
         self.canvases.append( canvas )
         i = len(gROOT.GetListOfCanvases())
-        canvas.SetWindowPosition(20*(i%50), 20*(i%5))        
+        canvas.SetWindowPosition(20*(i%50), 20*(i%5))
         canvas.SetGrid()
 
         ## Extract the approximate mass cut and append it to the current cuts
@@ -250,6 +264,7 @@ class ScaleFitter(PlotData):
             if y > ymax:
                 xmax, ymax = x, y
         self.cuts.append( 'abs(mmgMass-%.2f) < %.2f' % (xmax, width) )
+        self.massWindow = (xmax - width, xmax + width)
 
         ## Plot the fit result
         mmgMass.SetTitle('m_{#mu#mu#gamma}')
