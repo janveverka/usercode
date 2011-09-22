@@ -6,9 +6,11 @@ import JPsi.MuMu.common.canvases as canvases
 import JPsi.MuMu.escale.fitRangeIterationPlotter as frip
 
 canvases.next()
-frip.filename = 'test.root'
+frip.filename = 'mc_mmMass85_EB_lowR9_PhoEt12-15.root'
 frip.wsname = 'ws1'
-frip.fit = 'EB_lowR9_mc_pt10-12_cbShape'
+frip.snapshot = 'sFit_strue_mc_mmMass85_EB_lowR9_PhoEt12-15_gamma'
+frip.variable = '#Deltas'
+frip.ytitle = '#Deltas'
 frip.main()
 
 canvases.next()
