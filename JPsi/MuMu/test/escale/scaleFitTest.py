@@ -7,13 +7,15 @@ import JPsi.MuMu.common.energyScaleChains as esChains
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
 from JPsi.MuMu.common.plotData import PlotData
+from JPsi.MuMu.common.binedges import BinEdges
 from JPsi.MuMu.scaleFitter import ScaleFitter
 from JPsi.MuMu.scaleFitter import PhoEtBin
 from JPsi.MuMu.scaleFitter import Model
 from JPsi.MuMu.scaleFitter import DimuonMassMax
-from JPsi.MuMu.scaleFitter import subdet_r9_categories 
+from JPsi.MuMu.scaleFitter import subdet_r9_categories
 from JPsi.MuMu.scaleFitModels import ws1
 
+gROOT.LoadMacro('tools.C+');
 gROOT.LoadMacro("CMSStyle.C")
 ROOT.CMSstyle()
 
@@ -24,74 +26,122 @@ ROOT.CMSstyle()
 _chains = esChains.getChains('v11')
 
 ## Default fit of s = Ereco / Ekin - 1
-sfit = ScaleFitter(
-    name = 's_mc',
-    title = 's-Fit, Powheg S4',
+srecofit = ScaleFitter(
+    name = 'sreco_mc',
+    title = 'sreco-Fit, Powheg S4',
     labels = ['Powheg S4'],
     cuts = [],
     source = _chains['z'],
     xName = 's',
-    xTitle = 's = E_{reco}/E_{kin} - 1',
+    xTitle = 's_{reco} = E^{#gamma}_{reco}/E^{kin}_{reco} - 1',
     xExpression =  '100 * (1/kRatio - 1)',
     xRange = (-50, 100),
     xUnit = '%',
     nBins = 150,
     fitRange = (-50, 100),
     pdf = 'gauss',
+#     graphicsExtensions = ['png'],
     graphicsExtensions = [],
     massWindowScale = 1.5,
     fitScale = 1.2,
     )
 
 ## Default fit of strue = Ereco / Egen - 1
-struefit = sfit.clone(
+struefit = srecofit.clone(
     name = 'strue_mc',
     title = 'strue-Fit, Powheg S4',
-    xTitle = 's_{true} = E_{reco}/E_{gen} - 1',
+    xTitle = 's_{true} = E^{#gamma}_{reco}/E^{#gamma}_{gen} - 1',
     xExpression = '100 * (phoE/phoGenE - 1)',
     xRange = (-20, 40),
     nBins = (120),
     fitRange = (-20, 40),
     fitScale = 1.2,
-    cuts = ['isFSR'],
+    cuts = ['isFSR', 'phoGenE > 0'],
+    )
+
+## Default fit of sgeb = Egen / Ekingen - 1
+mu1 = 'mu1Pt,mu1Eta,mu1Phi,0.1056'
+mu2 = 'mu2Pt,mu2Eta,mu2Phi,0.1056'
+mu1gen = 'mu1GenPt,mu1GenEta,mu1GenPhi,0.1056'
+mu2gen = 'mu2GenPt,mu2GenEta,mu2GenPhi,0.1056'
+phogen = 'phoGenEt,phoGenEta,phoGenPhi,0'
+mmMassGen = 'twoBodyMass({mu1}, {mu2})'.format(mu1=mu1gen, mu2=mu2gen)
+mmgMassGen = 'threeBodyMass({mu1}, {mu2}, {pho})'.format(mu1=mu1gen,
+                                                         mu2=mu2gen,
+                                                         pho=phogen)
+mmgMassHybrid = 'threeBodyMass({mu1}, {mu2}, {pho})'.format(mu1=mu1,
+                                                            mu2=mu2,
+                                                            pho=phogen)
+kRatioGen = 'kRatio({mmgMass}, {mmMass})'.format(mmgMass=mmgMassGen,
+                                                 mmMass=mmMassGen)
+
+kRatioHybrid = 'kRatio({mmgMass}, {mmMass})'.format(mmgMass=mmgMassHybrid,
+                                                    mmMass='mmMass')
+
+sgenfit = srecofit.clone(
+    name = 'sgen_mc',
+    title = 'sgen-Fit, Powheg S4',
+    xTitle = 's_{gen} = E^{#gamma}_{gen}/E^{kin}_{gen} - 1',
+    xExpression = '100 * (1/{k} - 1)'.format(k=kRatioGen),
+    cuts = ['isFSR', 'mu1GenPt > 0', 'mu2GenPt > 0', 'phoGenEt > 0'],
+    )
+
+shybfit = srecofit.clone(
+    name = 'shyb_mc',
+    title = 'shyb-Fit, Powheg S4',
+    xTitle = 's_{hyb} = E^{#gamma}_{gen}/E^{kin}_{reco} - 1',
+    xExpression = '100 * (1/{k} - 1)'.format(k=kRatioHybrid),
+    cuts = ['isFSR', 'phoGenEt > 0'],
     )
 
 eb_loR9, eb_hiR9, ee_loR9, ee_hiR9 = tuple(subdet_r9_categories)
 
 ## ----------------------------------------------------------------------------
 ## Customize below
-sfit1 = sfit.clone().applyDefinitions([
-    DimuonMassMax(85),
-    eb_loR9,
-    PhoEtBin(12,15)
-    ])
 
-struefit1 = struefit.clone().applyDefinitions([
-    DimuonMassMax(85),
-    eb_loR9,
-    PhoEtBin(12,15)
-    ])
+# defaultfits = [srecofit]
+defaultfits = [struefit, sgenfit, shybfit, srecofit]
 
-_fits = [
-    sfit1.clone().applyDefinitions([Model('gauss')]),
-    sfit1.clone().applyDefinitions([Model('cbShape')]),
-    sfit1.clone().applyDefinitions([Model('lognormal')]),
-    sfit1.clone().applyDefinitions([Model('bifurGauss')]),
-    sfit1.clone().applyDefinitions([Model('gamma')]),
-    struefit1.clone().applyDefinitions([Model('gauss')]),
-    struefit1.clone().applyDefinitions([Model('cbShape')]),
-    struefit1.clone().applyDefinitions([Model('lognormal')]),
-    struefit1.clone().applyDefinitions([Model('bifurGauss')]),
-    struefit1.clone().applyDefinitions([Model('gamma')]),
-]
+for fit in defaultfits:
+    fit.applyDefinitions([
+        DimuonMassMax(85),
+        eb_loR9,
+        Model('cbShape')
+        ])
 
-maxIterations = 10
+srecofits, shybfits, sgenfits, struefits = [], [], [], []
+
+for lo, hi in BinEdges([10, 12, 15, 20, 25, 30, 100]):
+# for lo, hi in BinEdges([10, 12, 15, 20]):
+    fit = srecofit.clone().applyDefinitions([PhoEtBin(lo, hi)])
+    fit.getMassCut(ws1)
+    mw = fit.massWindow
+    srecofits.append(fit)
+    for ftemplate, flist in [(shybfit, shybfits),
+                             (sgenfit, sgenfits),
+                             (struefit, struefits)]:
+        fit = ftemplate.clone(massWindow=mw)
+        fit.applyDefinitions([PhoEtBin(lo, hi)])
+        flist.append(fit)
+
+_fits = srecofits + shybfits + sgenfits + struefits
+
+maxIterations = 2
 fSigma = 1.5
 pullEpsilon = 0.1
+mwindows = {}
 
 ## Loop over plots
 for fitter in _fits:
+    ## Get mass window, only perform fit once for a given selection and
+    cutsav = ' & '.join(fitter.cuts)
+    if not fitter.massWindow:
+        fitter.massWindow = mwindows.get(cutsav)
     fitter.getMassCut(ws1)
+    ## Store the resulting mass window in mwindows
+    mwindows[cutsav] = fitter.massWindow
+
+    ## Get the data
     fitter.getData(ws1)
     try:
         fitScale = fitter.fitScale
@@ -140,6 +190,10 @@ for fitter in _fits:
             if abs(pull) < pullEpsilon:
                 break
     fitter.niter = iteration + 1
+    ws1.saveSnapshot('sFit_' + name, fitter.parameters, True)
+    if hasattr(fitter, 'graphicsExtensions'):
+        for ext in fitter.graphicsExtensions:
+            fitter.canvas.Print('sFit_' + name + '.' + ext)
 
 #     fitter.fitRange = ( ws1.var('#Deltas').getVal() - 20,
 #                         ws1.var('#Deltas').getVal() + 20 )
@@ -171,8 +225,11 @@ for fitter in _fits:
 
 ## Print an ASCII report
 print '\nASCII report'
-is_first_sfit = True
+is_first_srecofit = True
 is_first_struefit = True
+is_first_sgenfit = True
+is_first_shybfit = True
+
 for plot in _fits:
     if not hasattr(plot, 'niter'):
         continue
@@ -184,25 +241,46 @@ for plot in _fits:
         raise RuntimeError, "Failed to parse fit name `%s'" % plot.name
     for i in range (plot.niter-1, plot.niter):
         ws1.loadSnapshot( bareName + '%d' % i )
-        if 'sfit1' in vars() and sfit1.title in plot.title:
-            if is_first_sfit:
-                is_first_sfit = False
-                print sfit1.title
-        elif 'struefit1' in vars() and struefit1.title in plot.title:
+        if 'srecofit' in vars() and srecofit.title in plot.title:
+            if is_first_srecofit:
+                is_first_srecofit = False
+                print srecofit.title
+        elif 'struefit' in vars() and struefit.title in plot.title:
             if is_first_struefit:
                 is_first_struefit = False
-                print struefit1.title
+                print struefit.title
+        elif 'sgenfit' in vars() and sgenfit.title in plot.title:
+            if is_first_sgenfit:
+                is_first_sgenfit = False
+                print sgenfit.title
+        elif 'shybfit' in vars() and shybfit.title in plot.title:
+            if is_first_shybfit:
+                is_first_shybfit = False
+                print shybfit.title
+
         print '%6.2f +/- %4.2f' % ( ws1.var('#Deltas').getVal(),
                                     ws1.var('#Deltas').getError() ),
-        if 'sfit1' in vars() and sfit1.title in plot.title:
-            print plot.title[len(sfit1.title)+2:], i, "%.3g" % plot.chi2s[i]
-        elif 'struefit1' in vars() and struefit1.title in plot.title:
-            print plot.title[len(struefit1.title)+2:], i, "%.3g" % plot.chi2s[i]
+
+        if 'srecofit' in vars() and srecofit.title in plot.title:
+            print plot.title[len(srecofit.title)+2:],
+        elif 'struefit' in vars() and struefit.title in plot.title:
+            print plot.title[len(struefit.title)+2:],
+        elif 'sgenfit' in vars() and sgenfit.title in plot.title:
+            print plot.title[len(sgenfit.title)+2:],
+        elif 'shybfit' in vars() and shybfit.title in plot.title:
+            print plot.title[len(shybfit.title)+2:],
         else:
-            print plot.title, i, "%.3g" % plot.chi2s[i]
+            print plot.title,
+
+        print  i, "%.3g" % plot.chi2s[i]
 ## <-- loop over plots
 
-ws1.writeToFile('test.root')
+# ws1.writeToFile('test.root')
+ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt_cbShape.root')
+# ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt15-20.root')
+# ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt20-25.root')
+# ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt25-30.root')
+# ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt30-100.root')
 
 if __name__ == "__main__":
     import user
