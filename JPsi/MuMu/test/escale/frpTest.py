@@ -3,7 +3,7 @@ Facilitates the plotting of variables versus the the fit range iteration.
     Usage: python -i plotScaleVsFitRangeIter.py
 '''
 import JPsi.MuMu.common.canvases as canvases
-import JPsi.MuMu.escale.fitResultPlotter as frp
+from JPsi.MuMu.escale.fitResultPlotter import FitResultPlotter
 from JPsi.MuMu.common.binedges import BinEdges
 
 canvases.wwidth = 400
@@ -11,70 +11,81 @@ canvases.wheight = 400
 canvases.yperiod = 10
 
 ## Configuration for plots vs Pt
-binedges = list(BinEdges([12, 15, 20, 25, 30, 100]))
-bincenters = [0.5*(lo + hi) for lo, hi in binedges]
-binhalfwidths = [0.5*(hi - lo) for lo, hi in binedges]
+binedges = list(BinEdges([10, 12, 15, 20, 25, 30, 100]))
+bincenters = [0.5*(lo + hi)
+              for lo, hi in BinEdges([10, 12, 15, 20, 25, 30, 50])]
+binhalfwidths = [0.5*(hi - lo)
+                 for lo, hi in BinEdges([10, 12, 15, 20, 25, 30, 50])]
 n = len(binedges)
 
-frp.filenames = ['mc_mmMass85_EB_lowR9_PhoEt_cbShape.root'] * n
-frp.wsnames = ('ws1',) * n
 
-frp.xtitle = 'E_{T}^{#gamma} (GeV)'
-frp.xdata = [0.5*(lo + hi) for lo, hi in binedges]
-frp.exdata = [0.5*(hi - lo) for lo, hi in binedges]
-
+filenames = ['mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root'] * n
+wsnames = ('ws1',) * n
 ## MC truth scale
-frp.snapshots = ['sFit_strue_mc_mmMass85_EB_lowR9_cbShape_PhoEt%d-%d' % (lo, hi)
-                 for lo, hi in binedges]
-frp.yname = '#Deltas'
-frp.ytitle = 's_{true} = E^{#gamma}_{reco}/E^{#gamma}_{gen} - 1 (%)'
+strue_snapshots = ['sFit_strue_mc_mmMass80_EB_lowR9_cbShape_PhoEt%d-%d_iter0' % (lo, hi)
+                   for lo, hi in binedges]
+sreco_snapshots = ['sFit_sreco_mc_mmMass80_EB_lowR9_cbShape_PhoEt%d-%d_iter0' % (lo, hi)
+                   for lo, hi in binedges]
+shyb_snapshots = ['sFit_shyb_mc_mmMass80_EB_lowR9_cbShape_PhoEt%d-%d_iter0' % (lo, hi)
+                   for lo, hi in binedges]
+sgen_snapshots = ['sFit_sgen_mc_mmMass80_EB_lowR9_cbShape_PhoEt%d-%d_iter0' % (lo, hi)
+                   for lo, hi in binedges]
 
-sources = zip(frp.filenames, frp.wsnames, frp.snapshots)
-data = frp.getData(
-    sources, (
-        lambda ws: ws.var('#Deltas').getVal(),
-        lambda ws: ws.var('#Deltas').getError(),
-        lambda ws, i = iter(bincenters): i.next(),
-        lambda ws, i = iter(binhalfwidths): i.next(),
+def var_vs_pt(name):
+    """Returns functions that take a workspaces ws and return
+    x, y, ex, ey where y and ey correspond to workspace
+    variable of a given name and x and ex are pt bins."""
+    return (
+        lambda ws, i = iter(bincenters): i.next(),    # x
+        lambda ws: ws.var(name).getVal(),             # y
+        lambda ws, i = iter(binhalfwidths): i.next(), # ex
+        lambda ws: ws.var(name).getError(),           # ey
     )
+frp = FitResultPlotter(
+    sources = zip(filenames, wsnames, strue_snapshots),
+    getters = var_vs_pt('#Deltas'),
+    xtitle = 'E_{T}^{#gamma} (GeV)',
+    ytitle = 's_{true} = E^{#gamma}_{reco}/E^{#gamma}_{gen} - 1 (%)'
 )
 
-y, ey, x, ex = zip(*data)
-from array import array
-y, ey, x, ex = [array('d', l) for l in (y, ey, x, ex)]
-# canvases.next()
-# frp.main()
-# frp.dump(frp.graph)
+canvases.next()
+frp.main()
+print frp.ytitle
+frp.dump()
+print
 
 ## MC truth resolution
 # canvases.next()
-# frp.yname = '#sigma'
-# frp.ytitle = '#sigma(E^{#gamma}_{reco}/E^{#gamma}_{gen})'
-# frp.main()
+# frp.main(getters = var_vs_pt('#sigma'),
+#          ytitle = '#sigma(E^{#gamma}_{reco}/E^{#gamma}_{gen})')
+# frp.dump()
 
 ## Scale from mmg
-# frp.snapshots = ['sFit_sreco_mc_mmMass85_EB_lowR9_PhoEt%d-%d_cbShape' % (lo, hi)
-#                  for lo, hi in binedges]
-# frp.ytitle = 's_{reco} = E^{#gamma}_{reco}/E^{kin}_{reco} - 1 (%)'
-# canvases.next()
-# frp.main()
-# frp.dump(frp.graph)
-#
-# ## Scale from mmg photon-only gen-level
-# frp.snapshots = ['sFit_shyb_mc_mmMass85_EB_lowR9_PhoEt%d-%d_cbShape' % (lo, hi)
-#                  for lo, hi in binedges]
-# frp.ytitle = 's_{gen} = E^{#gamma}_{gen}/E^{kin}_{reco} - 1 (%)'
-# canvases.next()
-# frp.main()
-# frp.dump(frp.graph)
-#
-# ## Scale from mmg gen-level
-# frp.snapshots = ['sFit_sgen_mc_mmMass85_EB_lowR9_PhoEt%d-%d_cbShape' % (lo, hi)
-#                  for lo, hi in binedges]
-# frp.ytitle = 's_{gen} = E^{#gamma}_{gen}/E^{kin}_{gen} - 1 (%)'
-# canvases.next()
-# frp.main()
-# frp.dump(frp.graph)
+canvases.next()
+frp.main(sources = zip(filenames, wsnames, sreco_snapshots),
+         getters = var_vs_pt('#Deltas'),
+         ytitle = 's_{reco} = E^{#gamma}_{reco}/E^{kin}_{reco} - 1 (%)')
+print frp.ytitle
+frp.dump()
+print
+
+## Scale from mmg photon-only gen-level
+canvases.next()
+frp.main(sources = zip(filenames, wsnames, shyb_snapshots),
+         getters = var_vs_pt('#Deltas'),
+         ytitle = 's_{hyb} = E^{#gamma}_{gen}/E^{kin}_{reco} - 1 (%)')
+print frp.ytitle
+frp.dump()
+print
+
+## Scale from mmg gen-level
+canvases.next()
+frp.main(sources = zip(filenames, wsnames, sgen_snapshots),
+         getters = var_vs_pt('#Deltas'),
+         ytitle = 's_{gen} = E^{#gamma}_{gen}/E^{kin}_{gen} - 1 (%)')
+print frp.ytitle
+frp.dump()
+print
 
 if __name__ == '__main__':
     import user
