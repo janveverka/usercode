@@ -43,6 +43,7 @@ srecofit = ScaleFitter(
 #     graphicsExtensions = ['png'],
     graphicsExtensions = [],
     massWindowScale = 1.5,
+    massWindow = (87.2, 95.2),
     fitScale = 1.2,
     )
 
@@ -104,8 +105,8 @@ defaultfits = [struefit, sgenfit, shybfit, srecofit]
 
 for fit in defaultfits:
     fit.applyDefinitions([
-        DimuonMassMax(85),
-        eb_loR9,
+        DimuonMassMax(80),
+        ee_hiR9,
         Model('cbShape')
         ])
 
@@ -276,7 +277,8 @@ for plot in _fits:
 ## <-- loop over plots
 
 # ws1.writeToFile('test.root')
-ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt_cbShape.root')
+# ws1.writeToFile('mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
+ws1.writeToFile('mc_mmMass80_EE_highR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt15-20.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt20-25.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt25-30.root')
