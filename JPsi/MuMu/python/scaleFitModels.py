@@ -66,8 +66,8 @@ sModels = [
     ws1.factory('CBShape::cbShape(s, #Deltas, #sigma, #alpha, n)'),
     ## Didn't figure out how to compile new models in FWLite yet.
     ## Comment this out to be able to run on FWLite
-    # ws1.factory('''RooCruijff::cruijff(s, #Deltas, #sigmaL, #sigmaR, #alphaL,
-    #                                    #alphaR)'''),
+    ws1.factory('''RooCruijff::cruijff(s, #Deltas, #sigmaL, #sigmaR, #alphaL,
+                                       #alphaR)'''),
     ws1.factory('BifurGauss::bifurGauss(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('Gamma::gamma(ik_gamma, #gamma, #beta, #mu)'),
 ] ## end of models definition
