@@ -509,8 +509,8 @@ subdet_r9_categories = ICut(
     ## For TTree selection expressions
     cuts = (('phoIsEB' , 'phoR9 < 0.94'),
             ('phoIsEB' , 'phoR9 > 0.94'),
-            ('!phoIsEB' , 'phoR9 < 0.94'),
-            ('!phoIsEB' , 'phoR9 < 0.94'),)
+            ('!phoIsEB' , 'phoR9 < 0.95'),
+            ('!phoIsEB' , 'phoR9 > 0.95'),)
 )
 
 ## model_names = 'gauss cbShape lognormal curijff gamma'.split()
