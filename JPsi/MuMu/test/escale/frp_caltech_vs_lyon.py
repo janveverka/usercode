@@ -95,7 +95,6 @@ frp.title = 'MC Truth E_{reco}/E_{gen}'
 frp.getdata()
 frp.makegraph()
 
-
 ## Compare Caltech, Lyon and MC truth scale
 canvases.next().SetGrid()
 frp.plotall(title = 'Barrel, R_{9} < 0.94, Baseline Selection, POWHEG S4',
@@ -129,12 +128,11 @@ frp.getdata()
 frp.makegraph()
 
 ## Compare Caltech and Lyon scale
-canvases.next()
+canvases.next().SetGrid()
 frp.plotall(title = 'Barrel, R_{9} < 0.94, Baseline Selection, POWHEG S4',
             styles = [20, 25])
 
 plotters.append(frp)
-
 
 
 ###############################################################################
@@ -156,7 +154,7 @@ wsnames = ('ws1',) * n
 ## MC truth scale
 sreco_snapshots = ['sFit_sreco_mc_mmMass80_EB_highR9_cbShape_PhoEt%d-%d_iter0' % (lo, hi)
                    for lo, hi in binedges]
-strue_snapshots = ['sFit_strue_mc_mmMass80_EB_highR9_cbShape_PhoEt%d-%d_iter0' % (lo, hi)
+strue_snapshots = ['sFit_strue_mc_mmMass80_EB_highR9_cbShape_PhoEt%d-%d' % (lo, hi)
                    for lo, hi in binedges]
 
 def var_vs_pt(name):
@@ -194,8 +192,15 @@ frp.title = 'Caltech'
 frp.getdata()
 frp.makegraph()
 
+## True
+frp.sources = zip(filenames, wsnames, strue_snapshots)
+frp.getters = var_vs_pt('#Deltas')
+frp.title = 'MC Truth E_{reco}/E_{gen}'
+frp.getdata()
+frp.makegraph()
+
 ## Compare Caltech and Lyon scale
-canvases.next()
+canvases.next().SetGrid()
 frp.plotall(title = 'Barrel, R_{9} > 0.94, Baseline Selection, POWHEG S4',
             styles = [20, 25, 22],
             color = [kBlue, kRed, kBlack])
@@ -227,7 +232,7 @@ frp.getdata()
 frp.makegraph()
 
 ## Compare Caltech and Lyon scale
-canvases.next()
+canvases.next().SetGrid()
 frp.plotall(title = 'Barrel, R_{9} > 0.94, Baseline Selection, POWHEG S4',
             styles = [20, 25])
 
@@ -253,6 +258,8 @@ filenames = ['mc_mmMass80_EE_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root'] * n
 wsnames = ('ws1',) * n
 ## MC truth scale
 sreco_snapshots = ['sFit_sreco_mc_mmMass80_EE_lowR9_cbShape_PhoEt%d-%d_iter0' % (lo, hi)
+                   for lo, hi in binedges]
+strue_snapshots = ['sFit_strue_mc_mmMass80_EE_lowR9_cbShape_PhoEt%d-%d' % (lo, hi)
                    for lo, hi in binedges]
 
 def var_vs_pt(name):
@@ -290,10 +297,18 @@ frp.title = 'Caltech'
 frp.getdata()
 frp.makegraph()
 
-## Compare Caltech and Lyon scale
-canvases.next()
+## True
+frp.sources = zip(filenames, wsnames, strue_snapshots)
+frp.getters = var_vs_pt('#Deltas')
+frp.title = 'MC Truth E_{reco}/E_{gen}'
+frp.getdata()
+frp.makegraph()
+
+## Compare Caltech, Lyon and MC truth scale
+canvases.next().SetGrid()
 frp.plotall(title = 'Endcaps, R_{9} < 0.95, Baseline Selection, POWHEG S4',
-            styles = [20, 25])
+            styles = [20, 25, 22],
+            color = [kBlue, kRed, kBlack])
 
 plotters.append(frp)
 
@@ -324,6 +339,111 @@ frp.makegraph()
 ## Compare Caltech and Lyon scale
 canvases.next().SetGrid()
 frp.plotall(title = 'Endcap, R_{9} < 0.95, Baseline Selection, POWHEG S4',
+            styles = [20, 25])
+
+plotters.append(frp)
+
+
+
+###############################################################################
+## EE, R9 > 0.95, mmMass < 80 GeV, mmgMass in [87.2, 95.2]
+sreco_lyon_data = (
+    ## s, es, sigma, esigma
+    (-5.009,  0.413, 12.440,  0.292),
+    (-2.474,  0.319, 12.173,  0.225),
+    (-0.647,  0.235, 10.601,  0.166),
+    (-0.410,  0.223,  8.445,  0.159),
+    (-0.329,  0.224,  7.095,  0.158),
+    ( 0.075,  0.231,  6.674,  0.167),
+)
+
+sreco_lyon, esreco_lyon, sigma_lyon, esigma_lyon = zip(*sreco_lyon_data)
+
+filenames = ['mc_mmMass80_EE_highR9_PhoEt_mmgMass87.2-95.2_cbShape.root'] * n
+wsnames = ('ws1',) * n
+## MC truth scale
+sreco_snapshots = ['sFit_sreco_mc_mmMass80_EE_highR9_cbShape_PhoEt%d-%d_iter0' % (lo, hi)
+                   for lo, hi in binedges]
+strue_snapshots = ['sFit_strue_mc_mmMass80_EE_highR9_cbShape_PhoEt%d-%d' % (lo, hi)
+                   for lo, hi in binedges]
+
+def var_vs_pt(name):
+    """Returns functions that take a workspaces ws and return
+    x, y, ex, ey where y and ey correspond to workspace
+    variable of a given name and x and ex are pt bins."""
+    return (
+        lambda ws, i = iter(bincenters): i.next(),    # x
+        lambda ws: ws.var(name).getVal(),             # y
+        lambda ws, i = iter(binhalfwidths): i.next(), # ex
+        lambda ws: ws.var(name).getError(),           # ey
+    )
+
+#------------------------------------------------------------------------------
+## Scale Comparison
+## Lyon
+frp = FitResultPlotter(
+    sources = zip(filenames, wsnames, sreco_snapshots),
+    getters = (
+        lambda ws, i = iter(bincenters): i.next(),    # x
+        lambda ws, i = iter(sreco_lyon): i.next(),    # y
+        lambda ws, i = iter(binhalfwidths): i.next(), # ex
+        lambda ws, i = iter(esreco_lyon): i.next(),   # ey
+        ),
+    xtitle = 'E_{T}^{#gamma} (GeV)',
+    ytitle = 's_{reco} = E^{#gamma}_{reco}/E^{kin}_{reco} - 1 (%)',
+    title = 'Lyon',
+    )
+frp.getdata()
+frp.makegraph()
+
+## Caltech
+frp.getters = var_vs_pt('#Deltas')
+frp.title = 'Caltech'
+frp.getdata()
+frp.makegraph()
+
+## True
+frp.sources = zip(filenames, wsnames, strue_snapshots)
+frp.getters = var_vs_pt('#Deltas')
+frp.title = 'MC Truth E_{reco}/E_{gen}'
+frp.getdata()
+frp.makegraph()
+
+## Compare Caltech, Lyon and MC truth scale
+canvases.next().SetGrid()
+frp.plotall(title = 'Endcaps, R_{9} > 0.95, Baseline Selection, POWHEG S4',
+            styles = [20, 25, 22],
+            color = [kBlue, kRed, kBlack])
+
+plotters.append(frp)
+
+#------------------------------------------------------------------------------
+## S width Comparison
+## Lyon
+frp = FitResultPlotter(
+    sources = zip(filenames, wsnames, sreco_snapshots),
+    getters = (
+        lambda ws, i = iter(bincenters): i.next(),    # x
+        lambda ws, i = iter(sigma_lyon): i.next(),    # y
+        lambda ws, i = iter(binhalfwidths): i.next(), # ex
+        lambda ws, i = iter(esigma_lyon): i.next(),   # ey
+        ),
+    xtitle = 'E_{T}^{#gamma} (GeV)',
+    ytitle = '#sigma(s_{reco}) (%)',
+    title = 'Lyon',
+    )
+frp.getdata()
+frp.makegraph()
+
+## Caltech
+frp.getters = var_vs_pt('#sigma')
+frp.title = 'Caltech'
+frp.getdata()
+frp.makegraph()
+
+## Compare Caltech and Lyon scale
+canvases.next().SetGrid()
+frp.plotall(title = 'Endcap, R_{9} > 0.95, Baseline Selection, POWHEG S4',
             styles = [20, 25])
 
 plotters.append(frp)
