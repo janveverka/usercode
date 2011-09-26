@@ -40,8 +40,8 @@ srecofit = ScaleFitter(
     nBins = 150,
     fitRange = (-50, 100),
     pdf = 'gauss',
-#     graphicsExtensions = ['png'],
-    graphicsExtensions = [],
+    graphicsExtensions = ['png'],
+#     graphicsExtensions = [],
     massWindowScale = 1.5,
     massWindow = (87.2, 95.2),
     fitScale = 1.2,
@@ -106,7 +106,7 @@ defaultfits = [struefit, sgenfit, shybfit, srecofit]
 for fit in defaultfits:
     fit.applyDefinitions([
         DimuonMassMax(80),
-        ee_hiR9,
+        ee_loR9,
         Model('cbShape')
         ])
 
@@ -127,13 +127,18 @@ for lo, hi in BinEdges([10, 12, 15, 20, 25, 30, 100]):
 
 _fits = srecofits + shybfits + sgenfits + struefits
 
-maxIterations = 2
+maxIterations = 10
 fSigma = 1.5
 pullEpsilon = 0.1
 mwindows = {}
 
 ## Loop over plots
 for fitter in _fits:
+    ## Log the current fit configuration
+    print "++ Processing", fitter.title
+    print "++ Configuration:"
+    fitter.pydump()
+
     ## Get mass window, only perform fit once for a given selection and
     cutsav = ' & '.join(fitter.cuts)
     if not fitter.massWindow:
@@ -278,7 +283,7 @@ for plot in _fits:
 
 # ws1.writeToFile('test.root')
 # ws1.writeToFile('mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
-ws1.writeToFile('mc_mmMass80_EE_highR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
+ws1.writeToFile('mc_mmMass80_EE_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt15-20.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt20-25.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt25-30.root')
