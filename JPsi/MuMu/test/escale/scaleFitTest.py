@@ -137,7 +137,7 @@ for fitter in _fits:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
-    fitter.pydump()
+    print fitter.pydump()
 
     ## Get mass window, only perform fit once for a given selection and
     cutsav = ' & '.join(fitter.cuts)
