@@ -38,7 +38,7 @@ srecofit = ScaleFitter(
     xRange = (-50, 100),
     xUnit = '%',
     nBins = 150,
-    fitRange = (-50, 100),
+#     fitRange = (-50, 100),
     pdf = 'gauss',
     graphicsExtensions = ['png'],
 #     graphicsExtensions = [],
@@ -106,7 +106,7 @@ defaultfits = [struefit, sgenfit, shybfit, srecofit]
 for fit in defaultfits:
     fit.applyDefinitions([
         DimuonMassMax(80),
-        ee_loR9,
+        eb_hiR9,
         Model('cbShape')
         ])
 
@@ -127,13 +127,13 @@ for lo, hi in BinEdges([10, 12, 15, 20, 25, 30, 100]):
 
 _fits = srecofits + shybfits + sgenfits + struefits
 
-maxIterations = 10
+maxIterations = 1
 fSigma = 1.5
 pullEpsilon = 0.1
 mwindows = {}
 
 ## Loop over plots
-for fitter in _fits:
+for fitter in _fits[:1]:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
@@ -165,8 +165,20 @@ for fitter in _fits:
     for iteration in range(maxIterations):
         print "++ begin iteration", iteration
         if iteration == 0:
-            if not hasattr(fitter, 'fitRange'):
-                fitter.fitRange = (-30, 30)
+#             pass
+            ## Set the fit range automatically to include all data
+            xlo = fitter.data.tree().GetMinimum(fitter.x.GetName())
+            xhi = fitter.data.tree().GetMaximum(fitter.x.GetName())
+
+            xbinning = fitter.x.getBinning()
+            ilo = xbinning.binNumber(xlo)
+            ihi = xbinning.binNumber(xhi)
+
+            ## Take one extra bin on each side
+            ilo = max(0, ilo - 1)
+            ihi = min(ihi + 1, fitter.x.getBins() - 1)
+
+            fitter.fitRange = (xbinning.binLow(ilo), xbinning.binHigh(ihi))
         else:
             if fitter.pdf in ['model', 'cbShape', 'gauss']:
                 fitter.fitRange = ( Deltas.getVal() - fitScale * sigma.getVal(),
@@ -283,7 +295,7 @@ for plot in _fits:
 
 # ws1.writeToFile('test.root')
 # ws1.writeToFile('mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
-ws1.writeToFile('mc_mmMass80_EE_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
+ws1.writeToFile('mc_mmMass80_EB_highR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt15-20.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt20-25.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt25-30.root')
