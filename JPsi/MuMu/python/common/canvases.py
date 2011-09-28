@@ -28,3 +28,14 @@ def next(name=None, title=None):
     canvases.append(c1)
     return c1
 ## end of next()
+
+#______________________________________________________________________________
+def make_plots(graphics_extensions = ['png']):
+    for c in canvases:
+        if not c:
+            continue
+        for ext in graphics_extensions:
+            c.Print(''.join([c.GetName(), '.', ext]))
+        ## end of loop over graphics_extensions
+    ## end of loop over canvases
+## end of print()
