@@ -5,7 +5,7 @@
 #include <iostream>
 #include <math.h>
 
-#include "PhysicsTools/TagAndProbe/interface/RooCruijff.h"
+#include "JPsi/MuMu/interface/RooCruijff.h"
 
 ClassImp(RooCruijff)
 
