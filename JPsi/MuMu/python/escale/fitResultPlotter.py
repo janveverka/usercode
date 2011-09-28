@@ -178,7 +178,8 @@ class FitResultPlotter():
                 graph.Draw("p")
 
         ## Make the legend
-        self.legend = legend = TLegend(0.6, 0.3, 0.9, 0.45)
+        self.legend = legend = TLegend(0.6, 0.3 + 0.075 * len(self.graphs),
+                                       0.9, 0.3)
         legend.SetFillColor(0)
         legend.SetShadowColor(0)
         legend.SetBorderSize(0)
