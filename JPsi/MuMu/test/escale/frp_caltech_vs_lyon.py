@@ -8,6 +8,7 @@ from JPsi.MuMu.escale.fitResultPlotter import FitResultPlotter
 from JPsi.MuMu.common.binedges import BinEdges
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
+from JPsi.MuMu.escale.lyondata import sreco_2011_09_23_confID155805 as lyondata
 
 gStyle.SetPadTopMargin(0.1)
 canvases.wwidth = 400
@@ -39,7 +40,7 @@ sreco_lyon_data = (
     ( 2.123, 0.111,  6.214, 0.079),
 )
 
-sreco_lyon, esreco_lyon, sigma_lyon, esigma_lyon = zip(*sreco_lyon_data)
+sreco_lyon, esreco_lyon, sigma_lyon, esigma_lyon = zip(*lyondata['mc']['EB_lowR9'])
 
 filenames = ['mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root'] * n
 wsnames = ('ws1',) * n
