@@ -1,6 +1,6 @@
 '''
-Facilitates the plotting of variables versus the the fit range iteration.
-    Usage: python -i <filename>
+Plot mean and width of s vs pt for Lyon and Caltech MC and MC truth
+    Usage: python -i frp_caltech_vs_lyon.py
 '''
 
 import JPsi.MuMu.common.canvases as canvases
