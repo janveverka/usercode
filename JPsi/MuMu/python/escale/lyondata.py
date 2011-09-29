@@ -1,7 +1,8 @@
 ## Source: Olivier's talk from 23-09-2011
 ## https://indico.cern.ch/conferenceDisplay.py?confId=155805
-sreco_2011_09_23_confID155805 = {}
-sreco_2011_09_23_confID155805['mc'] = {
+data_2011_09_23_confID155805 = {}
+data_2011_09_23_confID155805['mc'] = {
+    ## s, es, sigma, esigma
     'EB_lowR9':  ((-1.811, 0.170, 13.279, 0.120),
                   ( 2.075, 0.130, 12.612, 0.092),
                   ( 2.398, 0.101, 10.628, 0.071),
@@ -27,3 +28,11 @@ sreco_2011_09_23_confID155805['mc'] = {
                   (-0.329,  0.224,  7.095,  0.158),
                   ( 0.075,  0.231,  6.674,  0.167),),
 }
+
+## Turn tuples of tuples into dictionaries of tuples
+for src, data in data_2011_09_23_confID155805.items():
+    for cat, tuples in data.items():
+        data_2011_09_23_confID155805[src][cat] = {}
+        for i, x in enumerate('sreco esreco sigma esigma'.split()):
+            ## Yack.  This looks aweful.
+            data_2011_09_23_confID155805[src][cat][x] = zip(*tuples)[i]
