@@ -4,8 +4,10 @@ various fiducial flags of gaps between modules and super modules:
 isNextToEtaBoundary and isNextToPhiBoundary.
 """
 import ROOT
-
-ROOT.gSystem.Load('libDataFormatsEcalDetId')
+print "Loading FWLite library..."
+ROOT.gSystem.Load("libFWCoreFWLite")
+ROOT.AutoLibraryLoader.enable()
+#ROOT.gSystem.Load('libDataFormatsEcalDetId')
 
 def get_tree():
     ROOT.gROOT.ProcessLine(
