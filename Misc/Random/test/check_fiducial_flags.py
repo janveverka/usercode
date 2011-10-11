@@ -5,6 +5,8 @@ isNextToEtaBoundary and isNextToPhiBoundary.
 """
 import ROOT
 
+ROOT.gSystem.Load('libDataFormatsEcalDetId')
+
 def get_tree():
     ROOT.gROOT.ProcessLine(
         "struct FlagVars {"
