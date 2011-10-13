@@ -21,7 +21,7 @@ RooSechPdf::RooSechPdf(const char *name, const char *title,
 RooSechPdf::RooSechPdf(const RooSechPdf& other, const char* name) :
   RooAbsPdf(other, name),
   x("x", this, other.x),
-  mean("mean", this, other.m0),
+  mean("mean", this, other.mean),
   sigma("sigma", this, other.sigma)
 {
 }
@@ -30,7 +30,8 @@ Double_t RooSechPdf::evaluate() const
 {
   // build the functional form
   double dx = (x - mean) / sigma;
-  // TODO: FINISH THIS
-  // dummy
-  return 1;;
+  // argument of the sech function
+  double arg = 0.5 * TMath::Pi() * dx;
+  // 0.5 * sech(arg)
+  return 1. / (TMath::Exp(arg) + TMath::Exp(-arg));
 }
