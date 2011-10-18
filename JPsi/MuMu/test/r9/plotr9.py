@@ -59,13 +59,13 @@ legend.Draw()
 latex = ROOT.TLatex()
 latex.SetNDC()
 ## Font size in pixels
-latex.SetTextFont( 10*(latex.GetTextFont()/10) + 3)
+latex.SetTextFont(10*(latex.GetTextFont()/10) + 3)
 latex.SetTextSize(18)
 
 ## Add labels
 while '' in labels:
     labels.remove('')
-    
+
 for i, label in enumerate(labels):
     latex.DrawLatex(0.25, 0.6 - i * 0.055, label)
 
