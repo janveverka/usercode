@@ -70,6 +70,7 @@ sModels = [
                                        #alphaR)'''),
     ws1.factory('BifurGauss::bifurGauss(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('Gamma::gamma(ik_gamma, #gamma, #beta, #mu)'),
+    ws1.factory('RooSechPdf::sech(s, #Deltas, #sigma)')
 ] ## end of models definition
 
 massModels = [
