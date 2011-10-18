@@ -60,9 +60,9 @@ srawfit = ScaleFitter(
     xUnit = '%',
     nBins = 120,
     fitRange = (-20, 40),
-    pdf = 'cbShape',
-    graphicsExtensions = ['png'],
-#     graphicsExtensions = [],
+    pdf = 'sech',
+#     graphicsExtensions = ['png'],
+    graphicsExtensions = [],
     )
 
 ## ----------------------------------------------------------------------------
@@ -78,12 +78,12 @@ for geant in 'g93p01 g94p02 g94cms'.split():
         _fits.append(fit)
 
 maxIterations = 10
-fSigma = 1.5
-pullEpsilon = 0.1
+fSigma = 2.0
+pullEpsilon = 0.01
 mwindows = {}
 
 ## Loop over plots
-for fitter in _fits:
+for fitter in _fits[:4]:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
@@ -122,7 +122,7 @@ for fitter in _fits:
 #
 #             fitter.fitRange = (xbinning.binLow(ilo), xbinning.binHigh(ihi))
         else:
-            if fitter.pdf in ['model', 'cbShape', 'gauss']:
+            if fitter.pdf in ['model', 'cbShape', 'gauss', 'sech']:
                 fitter.fitRange = ( Deltas.getVal() - fitScale * sigma.getVal(),
                                     Deltas.getVal() + fitScale * sigma.getVal() )
             elif fitter.pdf in ['cruijff', 'bifurGauss']:
@@ -185,7 +185,7 @@ for fitter in _fits:
 
 ## Print an ASCII report
 print '\nASCII report'
-is_first_srawfit = True
+report = []
 
 for plot in _fits:
     if not hasattr(plot, 'niter'):
@@ -197,26 +197,24 @@ for plot in _fits:
     else:
         raise RuntimeError, "Failed to parse fit name `%s'" % plot.name
     for i in range (plot.niter-1, plot.niter):
-        ws1.loadSnapshot( bareName + '%d' % i )
-        if 'srawfit' in vars() and srawfit.title in plot.title:
-            if is_first_srawfit:
-                is_first_srecofit = False
-                print srawfit.title
+        ws1.loadSnapshot(bareName + '%d' % i)
+        report.append([
+            '%6.2f +/- %4.2f' % ( ws1.var('#Deltas').getVal(),
+                                  ws1.var('#Deltas').getError() ),
 
-        print '%6.2f +/- %4.2f' % ( ws1.var('#Deltas').getVal(),
-                                    ws1.var('#Deltas').getError() ),
+            plot.title,
+            str(i),
+            "%.3g" % plot.chi2s[i]
+            ])
 
-        if 'srawfit' in vars() and srawfit.title in plot.title:
-            print plot.title[len(srawfit.title)+2:],
-        else:
-            print plot.title,
+for line in report:
+    print ', '.join(line)
 
-        print  i, "%.3g" % plot.chi2s[i]
 ## <-- loop over plots
 
 # ws1.writeToFile('test.root')
 # ws1.writeToFile('mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
-# ws1.writeToFile('test.root')
+ws1.writeToFile('geant_versions.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt15-20.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt20-25.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt25-30.root')
