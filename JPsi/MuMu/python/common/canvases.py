@@ -23,7 +23,7 @@ def next(name=None, title=None):
         c1 = ROOT.TCanvas()
 
     c1.SetWindowPosition(wtopx, wtopy)
-    c1.SetWindowSize(wheight, wwidth)
+    c1.SetWindowSize(wwidth, wheight)
 
     canvases.append(c1)
     return c1
