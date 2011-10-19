@@ -29,9 +29,9 @@ RooSechPdf::RooSechPdf(const RooSechPdf& other, const char* name) :
 Double_t RooSechPdf::evaluate() const
 {
   // build the functional form
-  double dx = (x - mean) / sigma;
+  double xstar = (x - mean) / sigma;
   // argument of the sech function
-  double arg = 0.5 * TMath::Pi() * dx;
+  double arg = 0.5 * TMath::Pi() * xstar;
   // 0.5 * sech(arg)
   return 1. / (TMath::Exp(arg) + TMath::Exp(-arg));
 }
