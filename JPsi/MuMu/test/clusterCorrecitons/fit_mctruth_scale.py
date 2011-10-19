@@ -50,7 +50,8 @@ srawfit = ScaleFitter(
     title = 'sraw-Fit, Powheg S4',
     labels = ['Flat-pt #gamma gun',
               '#eta_{SC} #in [1.16,1.44]',
-              '#phi cracks removed'],
+              '#phi cracks removed',
+              'GSH fit'],
     cuts = ['!isEBEtaGap & !isEBPhiGap & 1.16 < abs(scEta) & abs(scEta) < 1.44'],
     source = _chains['g93p01'],
     xName = 's',
@@ -60,7 +61,7 @@ srawfit = ScaleFitter(
     xUnit = '%',
     nBins = 120,
     fitRange = (-20, 40),
-    pdf = 'sech',
+    pdf = 'gsh',
 #     graphicsExtensions = ['png'],
     graphicsExtensions = [],
     )
@@ -122,7 +123,7 @@ for fitter in _fits[:4]:
 #
 #             fitter.fitRange = (xbinning.binLow(ilo), xbinning.binHigh(ihi))
         else:
-            if fitter.pdf in ['model', 'cbShape', 'gauss', 'sech']:
+            if fitter.pdf in ['model', 'cbShape', 'gauss', 'sech', 'gsh']:
                 fitter.fitRange = ( Deltas.getVal() - fitScale * sigma.getVal(),
                                     Deltas.getVal() + fitScale * sigma.getVal() )
             elif fitter.pdf in ['cruijff', 'bifurGauss']:
