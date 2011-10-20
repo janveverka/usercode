@@ -33,6 +33,6 @@ Double_t RooGshPdf::evaluate() const
 {
   // build the functional form
   double dx = (x - mean) / sigma;
-  return cit::math::gsh(dx, t);
+  return cit::math::gsh(dx, t) / sigma;
 }
 
