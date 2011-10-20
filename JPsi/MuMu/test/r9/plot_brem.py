@@ -1,9 +1,7 @@
 import os
 import ROOT
-
-ROOT.gROOT.LoadMacro(os.path.join(os.environ['CMSSW_BASE'],
-                                  'src/JPsi/MuMu/test/CMSStyle.C'))
-ROOT.CMSstyle()
+import JPsi.MuMu.common.r9Chains as chains
+import JPsi.MuMu.common.cmsstyle as cmsstyle
 
 labels = """
 Endcaps
@@ -11,17 +9,7 @@ Flat p_{T} gun
 E^{#gamma}_{T} #in [10, 100] GeV
 """.split('\n')
 
-path = ("/Users/veverka/Work/Data/r9Trees/SingleGammaFlatPt10To100_"
-        "GEN_SIM_DIGI_L1_DIGI2RAW_HLT_RAW2DIGI_L1Reco_noPU_noOOTPU")
-
-filenames = """
-    r9Tree_V1_g93p01.root
-    r9Tree_V1_g94cms.root
-    r9Tree_V1_g94p02.root
-    """.split()
-
-files = [ROOT.TFile.Open(os.path.join(path, f)) for f in filenames]
-trees = [f.Get("r9Tree/tree") for f in files]
+trees = [chains.getChains('v1')[i] for i in 'g93p01 g94cms g94p02'.split()]
 
 for i, t in enumerate(trees):
     t.SetAlias('brem', 'scPhiWidth/scEtaWidth')
@@ -66,7 +54,7 @@ latex.SetTextSize(18)
 ## Add labels
 while '' in labels:
     labels.remove('')
-    
+
 for i, label in enumerate(labels):
     latex.DrawLatex(0.25, 0.6 - i * 0.055, label)
 
