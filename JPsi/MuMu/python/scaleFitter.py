@@ -186,6 +186,8 @@ class ScaleFitter(PlotData):
         self.pdf = 'model'
         self.chi2s = []
         self.definitions = []
+        self.paramLayout = (.57, 0.92, 0.92)
+        self.labelsLayout = (0.61, 0.6)
         PlotData.__init__( self, name, title, source, xExpression, cuts,
                            labels, **kwargs )
     ## <-- __init__ -----------------------------------------------------------
@@ -387,7 +389,7 @@ class ScaleFitter(PlotData):
         self.model.paramOn( self.plot,
                       Format('NEU', AutoPrecision(2) ),
                       Parameters( self.parameters ),
-                      Layout(.57, 0.92, 0.92) )
+                      Layout(*self.paramLayout) )
 
         ## Make a canvas
         self.canvas = TCanvas( self.name, self.name, 400, 800 )
@@ -457,27 +459,28 @@ class ScaleFitter(PlotData):
 
         ## Add labels
         for i in range( len( self.labels ) ):
-            latexLabel.DrawLatex( 0.61, 0.6 - i * 0.055, self.labels[i] )
+            latexLabel.DrawLatex(self.labelsLayout[0],
+                                 self.labelsLayout[1] - i*0.055, self.labels[i])
 
         ## Add the total number of events used
         numLabels = len( self.labels )
-        latexLabel.DrawLatex( 0.61,
-                              0.6 - numLabels * 0.055,
+        latexLabel.DrawLatex( self.labelsLayout[0],
+                              self.labelsLayout[1] - numLabels * 0.055,
                               '%d events' % self.data.numEntries() )
         ## Add the reduced chi2
-        latexLabel.DrawLatex( 0.61,
-                              0.6 - (numLabels+1) * 0.055,
+        latexLabel.DrawLatex( self.labelsLayout[0],
+                              self.labelsLayout[1] - (numLabels+1) * 0.055,
                               '#chi^{2}/ndof: %.2g' % reducedChi2.getVal() )
         ## Add the chi2 and ndof
         self.canvas.cd(2)
         chi2Val = reducedChi2.getVal() * ndof.getVal()
         ndofVal = int( ndof.getVal() )
-        latexLabel.DrawLatex( 0.61, 0.85, '#chi^{2}: %.2g' % chi2Val)
-        latexLabel.DrawLatex( 0.61, 0.75, 'ndof: %d' % ndofVal)
+        latexLabel.DrawLatex( self.labelsLayout[0], 0.85, '#chi^{2}: %.2g' % chi2Val)
+        latexLabel.DrawLatex( self.labelsLayout[0], 0.75, 'ndof: %d' % ndofVal)
 
         ## Add the chi2 probability
         self.canvas.cd(3)
-        latexLabel.DrawLatex(0.61, 0.867, 'Prob: %.2g' % chi2Prob.getVal())
+        latexLabel.DrawLatex(self.labelsLayout[0], 0.867, 'Prob: %.2g' % chi2Prob.getVal())
 
         ## Save the plots
         if hasattr(self, 'graphicsExtensions'):
