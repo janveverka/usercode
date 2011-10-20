@@ -16,16 +16,16 @@
   Communications in Statistics - Theory and Methods, Volume 31, Issue 2, 2002
   http://www.tandfonline.com/doi/abs/10.1081/STA-120002647
 */
-double cit::math::gsh(double x, double t) {
+void cit::math::gsh_a_c1_c2(double t, double &a, double &c1, double &c2) {
   static const double pi = TMath::Pi();
   static const double pi2 = pi*pi;
   /// Avoid dividing by x if |x| is smaller than epsilon.
   static const double epsilon = 100. * FLT_EPSILON;
 
   if (t <= -pi)
-    return 0.;
+    return;
 
-  double a, c1, c2, t2 = t*t;
+  double t2 = t*t;
   if (t <= 0.) {
     /// t in (-pi, 0]
     a  = cos(t);
@@ -51,7 +51,12 @@ double cit::math::gsh(double x, double t) {
       c1 = c2 * sinh(t) / t;
     }
   }
+}
 
+
+double cit::math::gsh(double x, double t) {
+  double a, c1, c2;
+  cit::math::gsh_a_c1_c2(t, a, c1, c2);
   /// voila!
   return c1 / (exp(c2*x) + 2.*a + exp(-c2*x));
 }
