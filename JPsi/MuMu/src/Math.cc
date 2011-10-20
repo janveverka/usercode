@@ -16,8 +16,6 @@
   http://www.tandfonline.com/doi/abs/10.1081/STA-120002647
 */
 double cit::math::gsh(double x, double t) {
-  // dummy returning the Gaussian for now
-  // TODO: implement the meat
   static const double pi = TMath::Pi();
   static const double pi2 = pi*pi;
   /// Avoid dividing by x if |x| is smaller than epsilon.
