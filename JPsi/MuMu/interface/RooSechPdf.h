@@ -2,14 +2,26 @@
 /*
 Author: Jan Veverka, Caltech
 
-Based on Wikipedia's Hyperbolic secant distribution:
+The Hyperbolic Secant Distribution PDF
+Based on Wikipedia's article:
 http://en.wikipedia.org/wiki/Hyperbolic_secant_distribution
 
                                  1           pi * (x - mean)
 The form is basically f(x) = --------- sech( --------------- )
                              2 * sigma          2 * sigma
 
-where mean and sigma are the mean and sigma is the sqrt(variance).
+where the parameters mean and sigma are the mean and is the square root 
+of the variance of the distribution.
+
+The hyperbolic secant function is defined as:
+              1
+sech(x) = ---------
+           cosh(x)
+
+and the hyperboli cosine function as:
+           1       
+cosh(x) = --- [exp(x) + exp(-x)]
+           2
 */
 #ifndef JPSI_MUMU_ROOSECHPDF_H
 #define JPSI_MUMU_ROOSECHPDF_H
