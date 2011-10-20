@@ -1,6 +1,7 @@
 /// C++ math functions
 #include <math.h>
 #include <cfloat>
+#include <stdio>
 
 /// ROOT's math functions
 #include "TMath.h"
@@ -52,5 +53,5 @@ double cit::math::gsh(double x, double t) {
   }
 
   /// voila!
-  return c1 / (exp(c2*x) + a + exp(-c2*x));
+  return c1 / (exp(c2*x) + 2.*a + exp(-c2*x));
 }
