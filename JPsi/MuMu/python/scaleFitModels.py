@@ -72,6 +72,7 @@ sModels = [
     ws1.factory('BifurGauss::bifurGauss(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('Gamma::gamma(ik_gamma, #gamma, #beta, #mu)'),
     ws1.factory('RooSechPdf::sech(s, #Deltas, #sigma)'),
+    ws1.factory('RooBifurSechPdf::bifurSech(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('RooGshPdf::gsh(s, #Deltas, #sigma, t)'),
 ] ## end of models definition
 

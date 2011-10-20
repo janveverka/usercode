@@ -57,13 +57,15 @@ srawfit = ScaleFitter(
     xName = 's',
     xTitle = 's_{true} = E^{SC}_{raw}/E^{#gamma}_{gen} - 1',
     xExpression =  '100 * (scRawE/genE - 1)',
-    xRange = (-20, 40),
+    xRange = (-10, 5),
     xUnit = '%',
     nBins = 120,
-    fitRange = (-20, 40),
-    pdf = 'gsh',
+    fitRange = (-10, 5),
+    pdf = 'bifurSech',
 #     graphicsExtensions = ['png'],
     graphicsExtensions = [],
+    paramLayout = (.25, 0.55, 0.92), # x1, x2, y1
+    labelsLayout = (.25, 0.6), # x1, y1
     )
 
 ## ----------------------------------------------------------------------------
@@ -126,7 +128,7 @@ for fitter in _fits[:4]:
             if fitter.pdf in ['model', 'cbShape', 'gauss', 'sech', 'gsh']:
                 fitter.fitRange = ( Deltas.getVal() - fitScale * sigma.getVal(),
                                     Deltas.getVal() + fitScale * sigma.getVal() )
-            elif fitter.pdf in ['cruijff', 'bifurGauss']:
+            elif fitter.pdf in ['cruijff', 'bifurGauss', 'bifurSech']:
                 fitter.fitRange = ( Deltas.getVal() - fitScale * sigmaL.getVal(),
                                     Deltas.getVal() + fitScale * sigmaR.getVal() )
             elif fitter.pdf == 'lognormal':
