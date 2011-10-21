@@ -188,8 +188,17 @@ class ScaleFitter(PlotData):
         self.definitions = []
         self.paramLayout = (.57, 0.92, 0.92)
         self.labelsLayout = (0.61, 0.6)
+
+        ## Chi2 statistic follows the chi2 PDF (and one can trust the p-value
+        ## from ROOT if int(f(x), x in bin_i) = nu_i > 5, see explanation
+        ## near (33.34) on page 13 of the 2011 PDG Statistics Review
+        ## http://pdg.lbl.gov/2011/reviews/rpp2011-rev-statistics.pdf
+        ## Use bin content n_i >= 10 to be on the safe side (nu_i != n_i)
+        self.binContentMin = 10
+
         PlotData.__init__( self, name, title, source, xExpression, cuts,
                            labels, **kwargs )
+
     ## <-- __init__ -----------------------------------------------------------
 
     #--------------------------------------------------------------------------
@@ -376,20 +385,88 @@ class ScaleFitter(PlotData):
     # end of customize axis
 
     #--------------------------------------------------------------------------
-    def makePlot(self, workspace):
-        ## Make a frame
-        self.x.SetTitle(self.xTitle)
-        self.x.setBins(self.nBins)
-        self.plot = self.x.frame( Range( *self.xRange ) )
+    def _getBinning(self):
+        'Get bins with more than self.binContentMin. Useful for chi2 statistic'
+        'that obeys the chi2 PDF.'
 
+        ## Histogram the data
+        self.x.setBins(self.nBins)
+        self.x.SetTitle(self.xTitle)
+
+        plot = self.x.frame(Range(*self.xRange))
+        self.data.plotOn(plot)
+        hist = plot.getHist()
+
+        ## Determine the range of the binning
+        xstart, xstop = self.xRange
+
+        ## Create the target binning
+        bins = ROOT.RooBinning(xstart, xstop)
+        bins.Print()
+        boundaries = []
+        contents = []
+        
+        ## Loop over all the default bins forward, copy to the new binning,
+        ## merge them if needed.
+        binContent = 0.
+        for i in range(hist.GetN()):
+            xlo = hist.GetX()[i] - hist.GetErrorXlow(i)
+            xhi = hist.GetX()[i] + hist.GetErrorXhigh(i)
+            binContent += hist.GetY()[i]
+
+            ## Only consider bins inside of the range
+            if xlo < xstart or xstop < xhi:
+                continue
+
+            if binContent >= self.binContentMin:
+                if bins.hasBoundary(xhi):
+                    continue
+                boundaries.append(xhi)
+                contents.append(binContent)
+                binContent = 0.
+            ## End of forward loop over bins
+
+        ## The last bin may have too low content. Walk over the new bins
+        ## backward and remove boundaries as needed.
+        ## Create a new histogram with the new bins
+        boundaries.reverse()
+        contents.reverse()
+        for boundary, content in zip(boundaries, contents):
+            if binContent >= self.binContentMin:
+                break
+            binContent += content
+            boundaries.remove(boundary)
+        ## End of backward loop over the new boundaries
+
+        for boundary in boundaries:
+            bins.addBoundary(boundary)
+            
+        return bins
+    ## end of _getBinning
+
+                
+    #--------------------------------------------------------------------------
+    def makePlot(self, workspace):
+        ## Get custom binning with at least self.binContentMin events per bin.
+        self.bins = self._getBinning()
+
+        self.x.SetTitle(self.xTitle)
+        self.x.setBinning(self.bins)
+        ## Make a frame
+        self.plot = self.x.frame()
+ 
         ## Add the data and model to the frame
-        self.data.plotOn( self.plot )
-        self.model.plotOn( self.plot )
+        self.data.plotOn(self.plot, Binning(self.bins))
+        self.model.plotOn(self.plot,
+                          Normalization(
+                              float(self.bins.numBins()) / self.nBins
+                              )
+                          )
         self.chi2s.append( self.plot.chiSquare( self.parameters.getSize() ) )
         self.model.paramOn( self.plot,
-                      Format('NEU', AutoPrecision(2) ),
-                      Parameters( self.parameters ),
-                      Layout(*self.paramLayout) )
+                            Format('NEU', AutoPrecision(2) ),
+                            Parameters( self.parameters ),
+                            Layout(*self.paramLayout) )
 
         ## Make a canvas
         self.canvas = TCanvas( self.name, self.name, 400, 800 )
@@ -400,6 +477,9 @@ class ScaleFitter(PlotData):
 
         # self.canvas.cd(1)
 
+        ## To get a well defined chi2 statistics, merge bins
+        ## with less than 10 events.
+        
         ## Get the residual and pull dists
         hresid = self.plot.residHist()
         hpull  = self.plot.pullHist()
