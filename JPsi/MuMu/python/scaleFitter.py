@@ -189,7 +189,7 @@ class ScaleFitter(PlotData):
         self.paramLayout = (.57, 0.92, 0.92)
         self.labelsLayout = (0.61, 0.6)
         self.canvasStyle = 'compact'
-
+        
         ## Chi2 statistic follows the chi2 PDF (and one can trust the p-value
         ## from ROOT if int(f(x), x in bin_i) = nu_i > 5, see explanation
         ## near (33.34) on page 13 of the 2011 PDG Statistics Review
@@ -199,6 +199,14 @@ class ScaleFitter(PlotData):
 
         PlotData.__init__( self, name, title, source, xExpression, cuts,
                            labels, **kwargs )
+
+        ## Initialize latex label
+        latexLabel = TLatex()
+        latexLabel.SetNDC()
+        ## Font size in pixels
+        latexLabel.SetTextFont( 10*(latexLabel.GetTextFont()/10) + 3)
+        latexLabel.SetTextSize(18)
+        self.latex = latexLabel
 
     ## <-- __init__ -----------------------------------------------------------
 
@@ -447,6 +455,55 @@ class ScaleFitter(PlotData):
 
 
     #--------------------------------------------------------------------------
+    def _makeCompactCanvas(self):
+        ## Make a canvas
+        canvas = TCanvas( self.name, self.name, 400, 800 )
+        latexLabel = self.latex
+        self.pads.extend( residPullDivide(canvas) )
+        self.model.paramOn(self.plot,
+                           Format('NEU', AutoPrecision(2)),
+                           Parameters(self.parameters),
+                           Layout(*self.paramLayout))
+        ## Draw the frames
+        for pad, plot in [(canvas.cd(1), self.plot),
+                          (canvas.cd(2), self.residPlot),
+                          (canvas.cd(3), self.pullPlot),]:
+            pad.cd()
+            pad.SetGrid()
+            plot.GetYaxis().CenterTitle()
+            plot.Draw()
+
+        ## Add labels
+        canvas.cd(1)
+        for i in range( len( self.labels ) ):
+            latexLabel.DrawLatex(self.labelsLayout[0],
+                                 self.labelsLayout[1] - i*0.055, self.labels[i])
+
+        ## Add the total number of events used
+        numLabels = len( self.labels )
+        latexLabel.DrawLatex( self.labelsLayout[0],
+                              self.labelsLayout[1] - numLabels * 0.055,
+                              '%d events' % self.data.numEntries() )
+        ## Add the reduced chi2
+        latexLabel.DrawLatex( self.labelsLayout[0],
+                              self.labelsLayout[1] - (numLabels+1) * 0.055,
+                              '#chi^{2}/ndof: %.2g' % self.reducedChi2.getVal() )
+        ## Add the chi2 and ndof
+        canvas.cd(2)
+        chi2Val = self.reducedChi2.getVal() * self.ndof.getVal()
+        ndofVal = int( self.ndof.getVal() )
+        latexLabel.DrawLatex( self.labelsLayout[0], 0.85, '#chi^{2}: %.2g' % chi2Val)
+        latexLabel.DrawLatex( self.labelsLayout[0], 0.75, 'ndof: %d' % ndofVal)
+
+        ## Add the chi2 probability
+        canvas.cd(3)
+        latexLabel.DrawLatex(self.labelsLayout[0], 0.867,
+                             'Prob: %.2g' % self.chi2Prob.getVal())
+        return canvas
+    ## end of makeCompactCanvas
+
+
+    #--------------------------------------------------------------------------
     def makePlot(self, workspace):
         ## Get custom binning with at least self.binContentMin events per bin.
         self.bins = self._getBinning()
@@ -463,52 +520,26 @@ class ScaleFitter(PlotData):
         self.model.plotOn(self.plot)
 #         self.model.plotOn(self.plot, Normalization(scale))
         self.chi2s.append( self.plot.chiSquare( self.parameters.getSize() ) )
-        self.model.paramOn( self.plot,
-                            Format('NEU', AutoPrecision(2) ),
-                            Parameters( self.parameters ),
-                            Layout(*self.paramLayout) )
-
-        ## Make a canvas
-        if self.canvasStyle == 'compact':
-            self.canvas = TCanvas( self.name, self.name, 400, 800 )
-            self.pads.extend( residPullDivide(self.canvas) )
-        else:
-            raise RuntimeError, "Illegal canvasStyle `'!" % self.canvasStyle
-
-        self.canvases.append( self.canvas )
-        i = len( gROOT.GetListOfCanvases() )
-        self.canvas.SetWindowPosition(20*(i%50), 20*(i%5))
 
         ## Get the residual and pull dists
         hresid = self.plot.residHist()
         hpull  = self.plot.pullHist()
-        self.plot2 = self.x.frame( Range( *self.xRange ) )
-        self.plot3 = self.x.frame( Range( *self.xRange ) )
-        self.plot2.SetYTitle('#chi^{2} Residuals')
-        self.plot3.SetYTitle('#chi^{2} Pulls')
-        self.plot2.addPlotable(hresid, 'P')
-        self.plot3.addPlotable(hpull, 'P')
+        self.residPlot = self.x.frame( Range( *self.xRange ) )
+        self.pullPlot = self.x.frame( Range( *self.xRange ) )
+        self.residPlot.SetYTitle('#chi^{2} Residuals')
+        self.pullPlot.SetYTitle('#chi^{2} Pulls')
+        self.residPlot.addPlotable(hresid, 'P')
+        self.pullPlot.addPlotable(hpull, 'P')
 
         ## Customize
         self.plot.SetTitle('')
-        self.plot2.SetTitle('')
-        self.plot3.SetTitle('')
+        self.residPlot.SetTitle('')
+        self.pullPlot.SetTitle('')
 
         self._customizeAxis( self.plot.GetYaxis(), 0.01, 3 )
-        self._customizeAxis( self.plot2.GetYaxis(), 0.01, 3 )
-        self._customizeAxis( self.plot3.GetYaxis(), 0.01, 3 )
-        self._customizeAxis( self.plot3.GetXaxis(), 0.01, 3.5 )
-
-        ## Draw the frames
-        for pad, plot in [ (self.canvas.cd(1), self.plot),
-                           (self.canvas.cd(2), self.plot2),
-                           (self.canvas.cd(3), self.plot3), ]:
-            pad.cd()
-            pad.SetGrid()
-            plot.GetYaxis().CenterTitle()
-            plot.Draw()
-
-        self.canvas.cd(1)
+        self._customizeAxis( self.residPlot.GetYaxis(), 0.01, 3 )
+        self._customizeAxis( self.pullPlot.GetYaxis(), 0.01, 3 )
+        self._customizeAxis( self.pullPlot.GetXaxis(), 0.01, 3.5 )
 
         ## Save the chi2 and ndof in the workspace
         if workspace.var('reducedChi2'):
@@ -523,44 +554,26 @@ class ScaleFitter(PlotData):
             workspace.Import(ndof)
             workspace.Import(chi2Prob)
         reducedChi2.setVal( self.chi2s[-1] )
-        ndof.setVal( self.plot2.getHist().GetN() - self.parameters.getSize() )
+        ndof.setVal( self.residPlot.getHist().GetN() - self.parameters.getSize() )
         chi2Prob.setVal( TMath.Prob( reducedChi2.getVal() * ndof.getVal(),
                                     int( ndof.getVal() ) ) )
         chi2 = RooArgSet( reducedChi2, ndof, chi2Prob )
         workspace.saveSnapshot( 'chi2_' + self.name, chi2, True )
 
-        ## Initialize latex label
-        latexLabel = TLatex()
-        latexLabel.SetNDC()
-        ## Font size in pixels
-        latexLabel.SetTextFont( 10*(latexLabel.GetTextFont()/10) + 3)
-        latexLabel.SetTextSize(18)
+        ## Attach chi2 and ndof to self
+        self.reducedChi2 = reducedChi2
+        self.ndof = ndof
+        self.chi2Prob = chi2Prob
+        
+        ## Make the canvas
+        if self.canvasStyle == 'compact':
+            self.canvas = self._makeCompactCanvas()
+        else:
+            raise RuntimeError, "Illegal canvasStyle `'!" % self.canvasStyle
 
-        ## Add labels
-        for i in range( len( self.labels ) ):
-            latexLabel.DrawLatex(self.labelsLayout[0],
-                                 self.labelsLayout[1] - i*0.055, self.labels[i])
-
-        ## Add the total number of events used
-        numLabels = len( self.labels )
-        latexLabel.DrawLatex( self.labelsLayout[0],
-                              self.labelsLayout[1] - numLabels * 0.055,
-                              '%d events' % self.data.numEntries() )
-        ## Add the reduced chi2
-        latexLabel.DrawLatex( self.labelsLayout[0],
-                              self.labelsLayout[1] - (numLabels+1) * 0.055,
-                              '#chi^{2}/ndof: %.2g' % reducedChi2.getVal() )
-        ## Add the chi2 and ndof
-        self.canvas.cd(2)
-        chi2Val = reducedChi2.getVal() * ndof.getVal()
-        ndofVal = int( ndof.getVal() )
-        latexLabel.DrawLatex( self.labelsLayout[0], 0.85, '#chi^{2}: %.2g' % chi2Val)
-        latexLabel.DrawLatex( self.labelsLayout[0], 0.75, 'ndof: %d' % ndofVal)
-
-        ## Add the chi2 probability
-        self.canvas.cd(3)
-        latexLabel.DrawLatex(self.labelsLayout[0], 0.867, 'Prob: %.2g' % chi2Prob.getVal())
-
+        self.canvases.append(self.canvas)
+        i = len( gROOT.GetListOfCanvases() )
+        self.canvas.SetWindowPosition(20*(i%50), 20*(i%5))
         self.canvas.Update()
 
         ## Save the plots
