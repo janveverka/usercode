@@ -2,10 +2,11 @@
 // #include "PhysicsTools/TagAndProbe/interface/RooCBExGaussShape.h"
 // #include "PhysicsTools/TagAndProbe/interface/ZGeneratorLineShape.h"
 // #include "PhysicsTools/TagAndProbe/interface/RooCMSShape.h"
-#include "JPsi/MuMu/interface/RooCruijff.h"
-#include "JPsi/MuMu/interface/RooSechPdf.h"
+#include "JPsi/MuMu/interface/RooBifurGshPdf.h"
 #include "JPsi/MuMu/interface/RooBifurSechPdf.h"
+#include "JPsi/MuMu/interface/RooCruijff.h"
 #include "JPsi/MuMu/interface/RooGshPdf.h"
+#include "JPsi/MuMu/interface/RooSechPdf.h"
 #include "TVirtualFFT.h"
 
 #ifdef __CINT__
@@ -20,13 +21,13 @@
 // #pragma link C++ class RooCBExGaussShape;
 // #pragma link C++ class ZGeneratorLineShape;
 // #pragma link C++ class RooCMSShape;
-#pragma link C++ class RooCruijff;
-#pragma link C++ class RooSechPdf;
+#pragma link C++ class RooBifurGshPdf;
 #pragma link C++ class RooBifurSechPdf;
+#pragma link C++ class RooCruijff;
 #pragma link C++ class RooGshPdf;
+#pragma link C++ class RooSechPdf;
 
 #pragma link C++ global gROOT;
 #pragma link C++ global gEnv;
-
 
 #endif

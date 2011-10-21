@@ -45,7 +45,9 @@ ws1.factory('''{
     #alphaR[10, 0.0, 100],
     n[1.5, 0.1, 10],
     ln#gamma[3,0.001,20],
-    t[-1.5,-3.1415926535897931,999]
+    t[-1.5,-3.1415926535897931,999],
+    tL[-1.5,-3.1415926535897931,999],
+    tR[-1.5,-3.1415926535897931,999]
 }''')
 
 ## Functions for models of s
@@ -71,9 +73,11 @@ sModels = [
                                        #alphaR)'''),
     ws1.factory('BifurGauss::bifurGauss(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('Gamma::gamma(ik_gamma, #gamma, #beta, #mu)'),
-    ws1.factory('RooSechPdf::sech(s, #Deltas, #sigma)'),
+    ## Custom PDF's
+    ws1.factory('RooBifurGshPdf::bifurGsh(s, #Deltas, #sigmaL, tL, #sigmaR, tR)'),
     ws1.factory('RooBifurSechPdf::bifurSech(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('RooGshPdf::gsh(s, #Deltas, #sigma, t)'),
+    ws1.factory('RooSechPdf::sech(s, #Deltas, #sigma)'),
 ] ## end of models definition
 
 massModels = [

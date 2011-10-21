@@ -46,12 +46,12 @@ class BremBin(Cut):
 
 ## Default fit of sraw = Eraw / Egen - 1
 sfit = ScaleFitter(
-    name = 'strue_mc',
+    name = 'strue_mc_modulep4',
     title = 'strue-Fit, Powheg S4',
     labels = ['Flat-pt #gamma gun',
               '#eta_{SC} #in [1.16,1.44]',
               '#phi cracks removed',
-              'GSH fit'],
+              'Bifur. GSH fit'],
     cuts = ['!isEBEtaGap & !isEBPhiGap & 1.16 < abs(scEta) & abs(scEta) < 1.44'],
     source = _chains['g93p01'],
     xName = 's',
@@ -61,32 +61,38 @@ sfit = ScaleFitter(
     xUnit = '%',
     nBins = 120,
     fitRange = (-10, 20),
-    pdf = 'gsh',
+    pdf = 'bifurGsh',
 #     graphicsExtensions = ['png'],
     graphicsExtensions = [],
-    paramLayout = (.55, 0.55, 0.92), # x1, x2, y1
-    labelsLayout = (.55, 0.6), # x1, y1
+    paramLayout = (.55, 0.92, 0.92), # x1, x2, y1
+    labelsLayout = (.55, 0.55), # x1, y1
+    # In order to define chi2 well    
+    binContentMin = 10, 
     )
 
 ## ----------------------------------------------------------------------------
 ## Customize below
 _fits = []
-for geant in 'g93p01 g94p02 g94cms'.split():
-    for lo, hi in BinEdges([0.8,1.2,1.5,2,2.5,3,3.5,4,5,10]):
-        fit = sfit.clone(source = _chains[geant])
-        fit.name = '_'.join([fit.name, geant])
-        fit.title = ', '.join([fit.title, geant])
-        fit.labels.append(geant)
-        fit.applyDefinitions([BremBin(lo, hi)])
-        _fits.append(fit)
+pdfs = [ROOT.TNamed('bifurGsh', 'Bifur. GSH'),
+        ROOT.TNamed('cbShape', 'Crystal Ball'),]
 
-maxIterations = 2
+for geant in 'g93p01 g94p02 g94cms'.split():
+    for pdf in pdfs:
+        for lo, hi in BinEdges([0.8,1.2,1.5,2,2.5,3,3.5,4,5,10]):
+            fit = sfit.clone(source = _chains[geant], pdf = pdf.GetName())
+            fit.name = '_'.join([fit.name, geant, fit.pdf])
+            fit.title = ', '.join([fit.title, geant, pdf.GetTitle()])
+            fit.labels.extend([geant, pdf.GetTitle()])
+            fit.applyDefinitions([BremBin(lo, hi)])
+            _fits.append(fit)
+    
+maxIterations = 1
 fSigma = 2.0
 pullEpsilon = 0.01
 mwindows = {}
 
 ## Loop over plots
-for fitter in _fits[:4]:
+for fitter in _fits:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
@@ -128,7 +134,7 @@ for fitter in _fits[:4]:
             if fitter.pdf in ['model', 'cbShape', 'gauss', 'sech', 'gsh']:
                 fitter.fitRange = ( Deltas.getVal() - fitScale * sigma.getVal(),
                                     Deltas.getVal() + fitScale * sigma.getVal() )
-            elif fitter.pdf in ['cruijff', 'bifurGauss', 'bifurSech']:
+            elif fitter.pdf in ['cruijff', 'bifurGauss', 'bifurSech', 'bifurGsh']:
                 fitter.fitRange = ( Deltas.getVal() - fitScale * sigmaL.getVal(),
                                     Deltas.getVal() + fitScale * sigmaR.getVal() )
             elif fitter.pdf == 'lognormal':
