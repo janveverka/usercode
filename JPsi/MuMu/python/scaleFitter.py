@@ -188,6 +188,7 @@ class ScaleFitter(PlotData):
         self.definitions = []
         self.paramLayout = (.57, 0.92, 0.92)
         self.labelsLayout = (0.61, 0.6)
+        self.canvasStyle = 'compact'
 
         ## Chi2 statistic follows the chi2 PDF (and one can trust the p-value
         ## from ROOT if int(f(x), x in bin_i) = nu_i > 5, see explanation
@@ -405,7 +406,7 @@ class ScaleFitter(PlotData):
         bins.Print()
         boundaries = []
         contents = []
-        
+
         ## Loop over all the default bins forward, copy to the new binning,
         ## merge them if needed.
         binContent = 0.
@@ -440,28 +441,27 @@ class ScaleFitter(PlotData):
 
         for boundary in boundaries:
             bins.addBoundary(boundary)
-            
+
         return bins
     ## end of _getBinning
 
-                
+
     #--------------------------------------------------------------------------
     def makePlot(self, workspace):
         ## Get custom binning with at least self.binContentMin events per bin.
         self.bins = self._getBinning()
+        self.bins.SetName('chi2')
 
         self.x.SetTitle(self.xTitle)
-        self.x.setBinning(self.bins)
+        self.x.setBins(self.nBins)
         ## Make a frame
-        self.plot = self.x.frame()
- 
+        self.plot = self.x.frame(Range(*self.xRange))
+
         ## Add the data and model to the frame
+        self.data.plotOn(self.plot, Invisible())
         self.data.plotOn(self.plot, Binning(self.bins))
-        self.model.plotOn(self.plot,
-                          Normalization(
-                              float(self.bins.numBins()) / self.nBins
-                              )
-                          )
+        self.model.plotOn(self.plot)
+#         self.model.plotOn(self.plot, Normalization(scale))
         self.chi2s.append( self.plot.chiSquare( self.parameters.getSize() ) )
         self.model.paramOn( self.plot,
                             Format('NEU', AutoPrecision(2) ),
@@ -469,17 +469,16 @@ class ScaleFitter(PlotData):
                             Layout(*self.paramLayout) )
 
         ## Make a canvas
-        self.canvas = TCanvas( self.name, self.name, 400, 800 )
+        if self.canvasStyle == 'compact':
+            self.canvas = TCanvas( self.name, self.name, 400, 800 )
+            self.pads.extend( residPullDivide(self.canvas) )
+        else:
+            raise RuntimeError, "Illegal canvasStyle `'!" % self.canvasStyle
+
         self.canvases.append( self.canvas )
         i = len( gROOT.GetListOfCanvases() )
         self.canvas.SetWindowPosition(20*(i%50), 20*(i%5))
-        self.pads.extend( residPullDivide(self.canvas) )
 
-        # self.canvas.cd(1)
-
-        ## To get a well defined chi2 statistics, merge bins
-        ## with less than 10 events.
-        
         ## Get the residual and pull dists
         hresid = self.plot.residHist()
         hpull  = self.plot.pullHist()
@@ -561,6 +560,8 @@ class ScaleFitter(PlotData):
         ## Add the chi2 probability
         self.canvas.cd(3)
         latexLabel.DrawLatex(self.labelsLayout[0], 0.867, 'Prob: %.2g' % chi2Prob.getVal())
+
+        self.canvas.Update()
 
         ## Save the plots
         if hasattr(self, 'graphicsExtensions'):
