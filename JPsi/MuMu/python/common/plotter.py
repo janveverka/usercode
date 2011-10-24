@@ -32,6 +32,7 @@ class Plotter:
         self.drawopts = [''] * n
         self.markerstyles = [range(20, 20+n)]
         self.legendkwargs = dict(position = (0.7, 0.95, 0.95, 0.8))
+        self.labels_layout = (0.2, 0.9)
         ## Apply optional configuration from ctor kwargs
         for attr, val in kwargs.items():
             setattr(self, attr, val)
@@ -90,7 +91,7 @@ class Plotter:
         legend = Legend(self.histos, self.ltitles, **self.legendkwargs)
         legend.draw()
         ## Add latex labels
-        latex = Latex(self.labels, (0.2, 0.9))
+        latex = Latex(self.labels, self.labels_layout)
         latex.draw()
 
     def clone(self, **kwargs):
