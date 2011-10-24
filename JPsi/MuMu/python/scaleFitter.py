@@ -394,6 +394,14 @@ class ScaleFitter(PlotData):
     # end of customize axis
 
     #--------------------------------------------------------------------------
+    def _updateXRange(self):
+        plot = self.x.frame(AutoRange(self.data))
+        xlo = plot.GetXaxis().GetXmin()
+        xhi = plot.GetXaxis().GetXmax()
+        self.xRange = (max(xlo, self.xRange[0]), min(xhi, self.xRange[1]))
+    # end of _updateXRange
+
+    #--------------------------------------------------------------------------
     def _getBinning(self):
         'Get bins with more than self.binContentMin. Useful for chi2 statistic'
         'that obeys the chi2 PDF.'
@@ -402,7 +410,9 @@ class ScaleFitter(PlotData):
         self.x.setBins(self.nBins)
         self.x.SetTitle(self.xTitle)
 
-        plot = self.x.frame(Range(*self.xRange))
+        self._updateXRange()
+        plot = self.x.frame(*self.xRange)
+        
         self.data.plotOn(plot)
         hist = plot.getHist()
 
@@ -504,6 +514,52 @@ class ScaleFitter(PlotData):
 
 
     #--------------------------------------------------------------------------
+    def _makeExtendedCanvas(self):
+        ## Make a canvas
+        canvas = TCanvas( self.name, self.name, 800, 900 )
+        canvas.Divide(2,3)
+        self.pads.extend([canvas.cd(i) for i in range(1,6)])
+        canvas.cd(1).SetLogy()
+        
+        self.model.paramOn(self.plot,
+                           Format('NEU', AutoPrecision(2)),
+                           Parameters(self.parameters),
+                           Layout(*self.paramLayout))
+        
+        ## Draw the frames
+        for pad, plot in [(canvas.cd(1), self.plot),
+                          (canvas.cd(2), self.plot),
+                          (canvas.cd(3), self.residPlot),
+                          (canvas.cd(4), self.pullDistPlot),
+                          (canvas.cd(5), self.pullPlot),]:
+            pad.cd()
+            pad.SetGrid()
+            #plot.GetYaxis().CenterTitle()
+            plot.Draw()
+
+        ## Extend labels to include more information
+        chi2Val = self.reducedChi2.getVal() * self.ndof.getVal()
+        ndofVal = int(self.ndof.getVal())
+        labels = self.labels
+        ## Add the total number of events used
+        labels.append('%d events' % self.data.numEntries())
+        ## Add the reduced chi2
+        #labels.append('#chi^{2}/ndof: %.2g' % self.reducedChi2.getVal())
+        ## Add the chi2 and ndof
+        labels.append('#chi^{2}/ndof: %.3g/%d' % (chi2Val, ndofVal))
+        ## Add the chi2 probability
+        labels.append('p-value: %.2g' % self.chi2Prob.getVal())
+            
+        ## Draw labels
+        canvas.cd(6)
+        for index, label in enumerate(labels):
+            self.latex.DrawLatex(0.1, 0.9 - index*0.065, label)
+
+        return canvas
+    ## end of makeExtendedCanvas
+
+
+    #--------------------------------------------------------------------------
     def makePlot(self, workspace):
         ## Get custom binning with at least self.binContentMin events per bin.
         self.bins = self._getBinning()
@@ -513,6 +569,7 @@ class ScaleFitter(PlotData):
         self.x.setBins(self.nBins)
         ## Make a frame
         self.plot = self.x.frame(Range(*self.xRange))
+        #self.plot = self.x.frame(AutoRange(self.data))
 
         ## Add the data and model to the frame
         self.data.plotOn(self.plot, Invisible())
@@ -530,6 +587,24 @@ class ScaleFitter(PlotData):
         self.pullPlot.SetYTitle('#chi^{2} Pulls')
         self.residPlot.addPlotable(hresid, 'P')
         self.pullPlot.addPlotable(hpull, 'P')
+
+        ## Plot the pull spectrum
+        standardNormal = workspace.pdf('standardNormal')
+        if not standardNormal:
+            standardNormal = workspace.factory(
+                'Gaussian::standardNormal(pull[-5,5],zero[0],unit[1])'
+                )
+        pull = workspace.var('pull')
+        pull.SetTitle('#chi^{2} Pulls')
+        pull.setBins(10)
+        self.pullDistPlot = pull.frame()
+        self.pullDistPlot.SetYTitle('Bins')
+        pulldata = RooDataSet('pulldata', 'pulldata', RooArgSet(pull))
+        for i in range(hpull.GetN()):
+            pull.setVal(hpull.GetY()[i])
+            pulldata.add(RooArgSet(pull))
+        pulldata.plotOn(self.pullDistPlot)
+        standardNormal.plotOn(self.pullDistPlot)#, Normalization(hpull.GetN()))
 
         ## Customize
         self.plot.SetTitle('')
@@ -568,6 +643,8 @@ class ScaleFitter(PlotData):
         ## Make the canvas
         if self.canvasStyle == 'compact':
             self.canvas = self._makeCompactCanvas()
+        elif self.canvasStyle == 'extended':
+            self.canvas = self._makeExtendedCanvas()
         else:
             raise RuntimeError, "Illegal canvasStyle `'!" % self.canvasStyle
 

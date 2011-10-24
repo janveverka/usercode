@@ -50,24 +50,24 @@ sfit = ScaleFitter(
     title = 'strue-Fit, Powheg S4',
     labels = ['Flat-pt #gamma gun',
               '#eta_{SC} #in [1.16,1.44]',
-              '#phi cracks removed',
-              'Bifur. GSH fit'],
+              '#eta/#phi cracks removed',],
     cuts = ['!isEBEtaGap & !isEBPhiGap & 1.16 < abs(scEta) & abs(scEta) < 1.44'],
     source = _chains['g93p01'],
     xName = 's',
     xTitle = 's_{true} = E^{SC}_{corr}/E^{#gamma}_{gen} - 1',
     xExpression =  '100 * (scE/genE - 1)',
-    xRange = (-10, 20),
+    xRange = (-50, 50),
     xUnit = '%',
     nBins = 120,
-    fitRange = (-10, 20),
+    fitRange = (-49, 49),
     pdf = 'bifurGsh',
 #     graphicsExtensions = ['png'],
     graphicsExtensions = [],
     paramLayout = (.55, 0.92, 0.92), # x1, x2, y1
     labelsLayout = (.55, 0.55), # x1, y1
     # In order to define chi2 well    
-    binContentMin = 10, 
+    binContentMin = 10,
+    canvasStyle = 'extended',
     )
 
 ## ----------------------------------------------------------------------------
@@ -92,7 +92,7 @@ pullEpsilon = 0.01
 mwindows = {}
 
 ## Loop over plots
-for fitter in _fits:
+for fitter in _fits[:3]:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
