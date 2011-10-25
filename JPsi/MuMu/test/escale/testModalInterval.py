@@ -1,18 +1,16 @@
 import array
 import ROOT
-ROOT.gSystem.Load('libJPsiMuMu')
-ROOT.gROOT.ProcessLine('#include "JPsi/MuMu/interface/ModalInterval.h"')
+from JPsi.MuMu.common.modalinterval import ModalInterval, VDouble
 
 ## Get some toy data
-n = 10000
-ROOT.gROOT.ProcessLine('vector<double> data')
-data = ROOT.data
+n = 100000
+data = VDouble()
 data.reserve(n)
 for i in range(n):
   data.push_back(ROOT.gRandom.Gaus(0,1))
 
 ## Create the ModalInterval object
-mi = ROOT.cit.ModalInterval(data.begin(), data.end(), 1)
+mi = ModalInterval(data.begin(), data.end(), 1)
 
 ## Pring the full range of toy data
 print "[", mi.getLowBound(), ",", mi.getHighBound(), "]"
