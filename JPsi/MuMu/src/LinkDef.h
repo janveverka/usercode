@@ -2,6 +2,7 @@
 // #include "PhysicsTools/TagAndProbe/interface/RooCBExGaussShape.h"
 // #include "PhysicsTools/TagAndProbe/interface/ZGeneratorLineShape.h"
 // #include "PhysicsTools/TagAndProbe/interface/RooCMSShape.h"
+#include "JPsi/MuMu/interface/ModalInterval.h"
 #include "JPsi/MuMu/interface/RooBifurGshPdf.h"
 #include "JPsi/MuMu/interface/RooBifurSechPdf.h"
 #include "JPsi/MuMu/interface/RooCruijff.h"
@@ -21,6 +22,7 @@
 // #pragma link C++ class RooCBExGaussShape;
 // #pragma link C++ class ZGeneratorLineShape;
 // #pragma link C++ class RooCMSShape;
+#pragma link C++ class cit::ModalInterval;
 #pragma link C++ class RooBifurGshPdf;
 #pragma link C++ class RooBifurSechPdf;
 #pragma link C++ class RooCruijff;

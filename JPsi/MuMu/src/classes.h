@@ -1,3 +1,4 @@
+#include "JPsi/MuMu/interface/ModalInterval.h"
 #include "JPsi/MuMu/interface/RooBifurGshPdf.h"
 #include "JPsi/MuMu/interface/RooBifurSechPdf.h"
 #include "JPsi/MuMu/interface/RooCruijff.h"
@@ -6,6 +7,8 @@
 
 namespace jpsimumu {
   struct dictionary {
+    cit::ModalInterval   _mi;
+
     RooBifurGshPdf  _bgsh;
     RooBifurSechPdf _bsech;
     RooCruijff      _cruijff;
