@@ -40,6 +40,16 @@ ModalInterval::ModalInterval(size_t n, double* first, double fraction) :
 
 
 ///----------------------------------------------------------------------------
+ModalInterval::ModalInterval(std::vector<double> const& data, double fraction) :
+  fraction_(fraction),
+  updated_(false),
+  x_(0)
+{
+  readData(data);
+}
+
+
+///----------------------------------------------------------------------------
 ModalInterval::~ModalInterval(){}
 
 
@@ -153,5 +163,12 @@ ModalInterval::setFraction(double fraction) {
 void
 ModalInterval::readData(size_t n, double* first) {
   readData(first, first + n);
+}
+
+
+///----------------------------------------------------------------------------
+void
+ModalInterval::readData(std::vector<double> const& data) {
+  readData(data.begin(), data.end());
 }
 

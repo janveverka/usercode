@@ -10,7 +10,7 @@ for i in range(n):
   data.push_back(ROOT.gRandom.Gaus(0,1))
 
 ## Create the ModalInterval object
-mi = ModalInterval(data.begin(), data.end(), 1)
+mi = ModalInterval(data, 1)
 
 ## Pring the full range of toy data
 print "[", mi.getLowerBound(), ",", mi.getUpperBound(), "]"

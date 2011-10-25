@@ -22,7 +22,8 @@ namespace cit {
     ModalInterval();
     ModalInterval(const_iterator first, const_iterator last,
                   double fraction = 1.);
-    ModalInterval(size_t n, double* first, double fraction);
+    ModalInterval(size_t n, double* first, double fraction = 1.);
+    ModalInterval(std::vector<double> const& data, double fraction = 1.);
     virtual ~ModalInterval();
 
     void   getInterval(double& lower, double& upper);
@@ -57,6 +58,7 @@ namespace cit {
     }
 //     void readData(const_iterator first, const_iterator last);
     void readData(size_t n, double* first);
+    void readData(std::vector<double> const& data);
     void setFraction(double fraction);
 
   protected:
