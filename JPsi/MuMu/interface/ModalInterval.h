@@ -9,6 +9,9 @@
 #ifndef JPSI_MUMU_MODALINTERVAL_H
 #define JPSI_MUMU_MODALINTERVAL_H
 
+#include <algorithm>
+#include <vector>
+
 #include "TObject.h"
 
 namespace cit {
@@ -17,15 +20,43 @@ namespace cit {
   public:
     typedef std::vector<double>::const_iterator const_iterator;
     ModalInterval();
-    ModalInterval(const_iterator first, const_iterator last, double fraction);
+    ModalInterval(const_iterator first, const_iterator last,
+                  double fraction = 1.);
+    ModalInterval(size_t n, double* first, double fraction);
     virtual ~ModalInterval();
 
-    void   getInterval(double& low, double& high);
-    double getLowBound();
-    double getHighBound();
+    void   getInterval(double& lower, double& upper);
+    double getLowerBound();
+    double getUpperBound();
     double getSize();
 
-    void readData(const_iterator first, const_iterator last);
+    template<typename T>
+    void
+    readData(T first, T last) {
+      updated_  = false;
+
+      /// Check if [first, last) is not empty.
+      if (first >= last) {
+        /// There is no data available.
+        x_.resize(0);
+        initBounds();
+        updated_ = true;
+        return;
+      }
+
+      x_.resize(last - first);
+
+      /// Set the first and last to include the left-most interval
+      initBounds();
+
+      /// Copy the source data to a new vector to sort it
+      std::copy(first, last, x_.begin());
+
+      /// Sort the data
+      std::sort(x_.begin(), x_.end());
+    }
+//     void readData(const_iterator first, const_iterator last);
+    void readData(size_t n, double* first);
     void setFraction(double fraction);
 
   protected:
@@ -41,8 +72,8 @@ namespace cit {
     /// Sorted copy of the input data.
     std::vector<double> x_;
     /// Interval lower und upper bounds as pointers to elements of x_.
-    const_iterator first_;
-    const_iterator last_;
+    const_iterator lower_;
+    const_iterator upper_;
 
     ClassDef(ModalInterval,0)
 

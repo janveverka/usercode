@@ -1,6 +1,3 @@
-#include <algorithm>
-#include <vector>
-
 #include "TMath.h"
 
 #include "JPsi/MuMu/interface/ModalInterval.h"
@@ -16,8 +13,8 @@ ModalInterval::ModalInterval() :
   updated_(false),
   x_(0)
 {
-  first_ = x_.begin();
-  last_  = x_.end() - 1;
+  lower_ = x_.begin();
+  upper_ = x_.end() - 1;
 }
 
 
@@ -33,16 +30,26 @@ ModalInterval::ModalInterval(const_iterator first, const_iterator last,
 
 
 ///----------------------------------------------------------------------------
+ModalInterval::ModalInterval(size_t n, double* first, double fraction) :
+  fraction_(fraction),
+  updated_(false),
+  x_(0)
+{
+  readData(n, first);
+}
+
+
+///----------------------------------------------------------------------------
 ModalInterval::~ModalInterval(){}
 
 
 ///----------------------------------------------------------------------------
 void
-ModalInterval::getInterval(double& low, double& high)
+ModalInterval::getInterval(double& lower, double& upper)
 {
   get();
-  low  = *first_;
-  high = *last_;
+  lower = *lower_;
+  upper = *upper_;
   return;
 }
 
@@ -61,8 +68,8 @@ ModalInterval::get()
   if (fraction_ >= 1.) {
     /// The fraction is greater or equal to one.  We return an interval
     /// containing all the data.
-    first_ = x_.begin();
-    last_  = x_.end() - 1;
+    lower_ = x_.begin();
+    upper_  = x_.end() - 1;
     updated_ = true;
     return;
   }
@@ -73,19 +80,19 @@ ModalInterval::get()
   initBounds();
 
   /// Calculate the size of the default interval.
-  double dx = *last_ - *first_;
+  double dx = *upper_ - *lower_;
 
   /// Find the smallest interval containing at least fraction of the
   /// total entries. Loop over all intervals.
-  for (std::vector<double>::const_iterator first = first_, last  = last_;
+  for (std::vector<double>::const_iterator first = lower_, last  = upper_;
        last < x_.end(); ++first, ++last)
   {
     /// Compare the size of the defoult interval with the current one.
     if (*last - *first < dx) {
       /// Found new shortest interval.  Store its bounds and size.
-      first_ = first;
-      last_  = last;
-      dx = *last_ - *first_;
+      lower_ = first;
+      upper_  = last;
+      dx = *upper_ - *lower_;
     }
   } /// End of loop over all intervals.
 
@@ -96,17 +103,17 @@ ModalInterval::get()
 
 ///----------------------------------------------------------------------------
 double
-ModalInterval::getLowBound() {
+ModalInterval::getLowerBound() {
   get();
-  return *first_;
+  return *lower_;
 }
 
 
 ///----------------------------------------------------------------------------
 double
-ModalInterval::getHighBound() {
+ModalInterval::getUpperBound() {
   get();
-  return *last_;
+  return *upper_;
 }
 
 
@@ -114,7 +121,7 @@ ModalInterval::getHighBound() {
 double
 ModalInterval::getSize() {
   get();
-  return *last_ - *first_;
+  return *upper_ - *lower_;
 }
 
 
@@ -126,8 +133,8 @@ ModalInterval::initBounds() {
   size_t interval_entries = TMath::Ceil(fraction_ * x_.size());
 
   /// Update the bounds.
-  first_ = x_.begin();
-  last_  = x_.begin() + interval_entries - 1;
+  lower_ = x_.begin();
+  upper_  = x_.begin() + interval_entries - 1;
 
   updated_  = false;
 }
@@ -144,27 +151,7 @@ ModalInterval::setFraction(double fraction) {
 
 ///----------------------------------------------------------------------------
 void
-ModalInterval::readData(const_iterator first, const_iterator last) {
-  updated_  = false;
-
-  /// Check if [first, last) is not empty.
-  if (first >= last) {
-    /// There is no data available.
-    x_.resize(0);
-    initBounds();
-    updated_ = true;
-    return;
-  }
-
-  x_.resize(last - first);
-
-  /// Set the first and last to include the left-most interval
-  initBounds();
-
-  /// Copy the source data to a new vector to sort it
-  std::copy(first, last, x_.begin());
-
-  /// Sort the data
-  std::sort(x_.begin(), x_.end());
+ModalInterval::readData(size_t n, double* first) {
+  readData(first, first + n);
 }
 
