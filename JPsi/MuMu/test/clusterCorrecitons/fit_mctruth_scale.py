@@ -4,6 +4,7 @@ import re
 import ROOT
 import JPsi.MuMu.common.dataset as dataset
 import JPsi.MuMu.common.r9Chains as r9Chains
+import JPsi.MuMu.common.cmsstyle as cmsstyle
 
 # from JPsi.MuMu.common.basicRoot import *
 # from JPsi.MuMu.common.roofit import *
@@ -18,8 +19,6 @@ from JPsi.MuMu.scaleFitter import subdet_r9_categories
 from JPsi.MuMu.scaleFitModels import ws1
 
 ROOT.gROOT.LoadMacro('tools.C+');
-ROOT.gROOT.LoadMacro('CMSStyle.C')
-ROOT.CMSstyle()
 
 ## Get the data
 ## Private production of various Geant version with 424p2
