@@ -4,6 +4,7 @@ import re
 import ROOT
 import JPsi.MuMu.common.dataset as dataset
 import JPsi.MuMu.common.r9Chains as r9Chains
+import JPsi.MuMu.common.cmsstyle as cmsstyle
 
 # from JPsi.MuMu.common.basicRoot import *
 # from JPsi.MuMu.common.roofit import *
@@ -18,8 +19,6 @@ from JPsi.MuMu.scaleFitter import subdet_r9_categories
 from JPsi.MuMu.scaleFitModels import ws1
 
 ROOT.gROOT.LoadMacro('tools.C+');
-ROOT.gROOT.LoadMacro('CMSStyle.C')
-ROOT.CMSstyle()
 
 ## Get the data
 ## Private production of various Geant version with 424p2
@@ -65,7 +64,7 @@ sfit = ScaleFitter(
     graphicsExtensions = [],
     paramLayout = (.55, 0.92, 0.92), # x1, x2, y1
     labelsLayout = (.55, 0.55), # x1, y1
-    # In order to define chi2 well    
+    # In order to define chi2 well
     binContentMin = 10,
     canvasStyle = 'extended',
     )
@@ -85,7 +84,7 @@ for geant in 'g93p01 g94p02 g94cms'.split():
             fit.labels.extend([geant, pdf.GetTitle()])
             fit.applyDefinitions([BremBin(lo, hi)])
             _fits.append(fit)
-    
+
 maxIterations = 1
 fSigma = 2.0
 pullEpsilon = 0.01
