@@ -17,6 +17,5 @@ print "[", mi.getLowerBound(), ",", mi.getUpperBound(), "]"
 
 ## Print the range corresponding to n effective sigma
 nsigma = 0.5
-fraction = 1 - ROOT.TMath.Prob(nsigma*nsigma, 1)
-mi.setFraction(fraction)
+mi.setSigmaLevel(nsigma)
 print "[", mi.getLowerBound(), ",", mi.getUpperBound(), "]"

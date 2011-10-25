@@ -1,5 +1,5 @@
 //--*-C++-*--
-/*
+/**
   Author: Jan Veverka
 
   Calculates the shortest interval (x_lo, x_hi) containing at least the given
@@ -60,6 +60,7 @@ namespace cit {
     void readData(size_t n, double* first);
     void readData(std::vector<double> const& data);
     void setFraction(double fraction);
+    void setSigmaLevel(double nsigma);
 
   protected:
     /// Calculates the interval.

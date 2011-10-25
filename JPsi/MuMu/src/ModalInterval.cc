@@ -152,15 +152,6 @@ ModalInterval::initBounds() {
 
 ///----------------------------------------------------------------------------
 void
-ModalInterval::setFraction(double fraction) {
-  fraction_ = fraction;
-  initBounds();
-  updated_  = false;
-}
-
-
-///----------------------------------------------------------------------------
-void
 ModalInterval::readData(size_t n, double* first) {
   readData(first, first + n);
 }
@@ -170,5 +161,25 @@ ModalInterval::readData(size_t n, double* first) {
 void
 ModalInterval::readData(std::vector<double> const& data) {
   readData(data.begin(), data.end());
+}
+
+
+///----------------------------------------------------------------------------
+void
+ModalInterval::setFraction(double fraction) {
+  fraction_ = fraction;
+  initBounds();
+  updated_  = false;
+}
+
+
+///----------------------------------------------------------------------------
+/// Set the fraction of the events in terms of nsigma such that it is same as 
+/// for a Gaussian distribution in mean +/- nsigma * sigma
+void
+ModalInterval::setSigmaLevel(double nsigma) {
+  fraction_ = 1 - TMath::Prob(nsigma*nsigma, 1);
+  initBounds();
+  updated_  = false;
 }
 
