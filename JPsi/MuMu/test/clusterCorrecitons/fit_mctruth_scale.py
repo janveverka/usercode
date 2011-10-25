@@ -51,7 +51,7 @@ srawfit = ScaleFitter(
     labels = ['Flat-pt #gamma gun',
               '#eta_{SC} #in [1.16,1.44]',
               '#phi cracks removed',
-              'GSH fit'],
+              'sech fit'],
     cuts = ['!isEBEtaGap & !isEBPhiGap & 1.16 < abs(scEta) & abs(scEta) < 1.44'],
     source = _chains['g93p01'],
     xName = 's',
@@ -61,7 +61,7 @@ srawfit = ScaleFitter(
     xUnit = '%',
     nBins = 120,
     fitRange = (-10, 5),
-    pdf = 'bifurSech',
+    pdf = 'sech',
 #     graphicsExtensions = ['png'],
     graphicsExtensions = [],
     paramLayout = (.25, 0.55, 0.92), # x1, x2, y1
