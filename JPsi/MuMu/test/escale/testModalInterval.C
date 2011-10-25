@@ -8,7 +8,7 @@
     data.push_back(gRandom->Gaus(0,1));
   }
   cit::ModalInterval mi(data.begin(), data.end(), 1);
-  cout << "[" << mi.getLowBound() << ", " << mi.getHighBound() << "]" << endl;
+  cout << "[" << mi.getLowerBound() << ", " << mi.getUpperBound() << "]" << endl;
   mi.setFraction(1 - TMath::Prob(pow(0.05,2), 1));
-  cout << "[" << mi.getLowBound() << ", " << mi.getHighBound() << "]" << endl;
+  cout << "[" << mi.getLowerBound() << ", " << mi.getUpperBound() << "]" << endl;
 }
