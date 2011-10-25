@@ -13,10 +13,10 @@ for i in range(n):
 mi = ModalInterval(data.begin(), data.end(), 1)
 
 ## Pring the full range of toy data
-print "[", mi.getLowBound(), ",", mi.getHighBound(), "]"
+print "[", mi.getLowerBound(), ",", mi.getUpperBound(), "]"
 
 ## Print the range corresponding to n effective sigma
 nsigma = 0.5
 fraction = 1 - ROOT.TMath.Prob(nsigma*nsigma, 1)
 mi.setFraction(fraction)
-print "[", mi.getLowBound(), ",", mi.getHighBound(), "]"
+print "[", mi.getLowerBound(), ",", mi.getUpperBound(), "]"
