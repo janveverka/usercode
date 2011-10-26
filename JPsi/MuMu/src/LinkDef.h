@@ -2,6 +2,7 @@
 // #include "PhysicsTools/TagAndProbe/interface/RooCBExGaussShape.h"
 // #include "PhysicsTools/TagAndProbe/interface/ZGeneratorLineShape.h"
 // #include "PhysicsTools/TagAndProbe/interface/RooCMSShape.h"
+#include "JPsi/MuMu/interface/DummyRootClass.h"
 #include "JPsi/MuMu/interface/DataDrivenBinning.h"
 #include "JPsi/MuMu/interface/ModalInterval.h"
 #include "JPsi/MuMu/interface/RooBifurGshPdf.h"
@@ -20,11 +21,11 @@
 //#pragma GCC diagnostic ignored "-Wformat"
 // #pragma GCC diagnostic warning "-Wwrite-strings"
 
-// #pragma link C++ class RooCBExGaussShape;
-// #pragma link C++ class ZGeneratorLineShape;
-// #pragma link C++ class RooCMSShape;
+#pragma link C++ class cit::DummyRootClass;
+
 #pragma link C++ class cit::DataDrivenBinning;
 #pragma link C++ class cit::ModalInterval;
+
 #pragma link C++ class RooBifurGshPdf;
 #pragma link C++ class RooBifurSechPdf;
 #pragma link C++ class RooCruijff;

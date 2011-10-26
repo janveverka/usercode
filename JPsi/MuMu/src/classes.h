@@ -1,3 +1,4 @@
+#include "JPsi/MuMu/interface/DummyRootClass.h"
 #include "JPsi/MuMu/interface/DataDrivenBinning.h"
 #include "JPsi/MuMu/interface/ModalInterval.h"
 #include "JPsi/MuMu/interface/RooBifurGshPdf.h"
@@ -10,7 +11,9 @@ namespace jpsimumu {
   struct toolDict {
     cit::DataDrivenBinning _ddb;
     cit::ModalInterval     _mi;
+    cit::DummyRootClass _drc;
   };
+
   struct pdfDict {
     RooBifurGshPdf  _bgsh;
     RooBifurSechPdf _bsech;
