@@ -140,8 +140,8 @@ std::vector<double>
 ModalInterval::range() {
   get();
   std::vector<double> bounds(2);
-  bounds.push_back(*lower_);
-  bounds.push_back(*upper_);
+  bounds[0] = *lower_;
+  bounds[1] = *upper_;
   return bounds;
 }
 
