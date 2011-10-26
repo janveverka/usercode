@@ -46,13 +46,17 @@ namespace cit {
     std::vector<double> const &
     binMedians() const {return medians_;}
 
+    double getNiceBinWidth(double maxBinWidth) const;
+
   protected:
     virtual void get();
+    void initNiceNumbers();
 
     size_t minBinContent_;
     size_t maxBinContent_;
     std::vector<double> boundaries_;
     std::vector<double> medians_;
+    std::vector<double> niceNumbers_;
 
     /// Make this a ROOT class.
     ClassDef(DataDrivenBinning,0)
