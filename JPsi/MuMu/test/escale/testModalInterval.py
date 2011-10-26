@@ -1,21 +1,30 @@
-import array
 import ROOT
-from JPsi.MuMu.common.modalinterval import ModalInterval, VDouble
+from JPsi.MuMu.common.modalinterval import ModalInterval
+from JPsi.MuMu.vector import vector
+
+## Configuration
+nSigmaCoverage = 1.
+mean = 0.
+sigma = 1.
+n = 100000
 
 ## Get some toy data
-n = 100000
-data = VDouble()
+print ("Sampling Gaussian PDF with mean=%g and sigma=%g "
+       "%d times..." % (mean, sigma, n))
+data = vector('double')()
 data.reserve(n)
 for i in range(n):
   data.push_back(ROOT.gRandom.Gaus(0,1))
 
 ## Create the ModalInterval object
-mi = ModalInterval(data, 1)
+mi = ModalInterval(data)
 
 ## Pring the full range of toy data
-print "[", mi.getLowerBound(), ",", mi.getUpperBound(), "]"
+mi.setFraction(1.)
+print "\nShortest interval covering all data:"
+print "[%f, %f]" % tuple(mi.bounds())
 
 ## Print the range corresponding to n effective sigma
-nsigma = 0.5
-mi.setSigmaLevel(nsigma)
-print "[", mi.getLowerBound(), ",", mi.getUpperBound(), "]"
+print "\nRange corresponding to +/-%g effective sigma:" % nSigmaCoverage
+mi.setSigmaLevel(nSigmaCoverage)
+print "[%f, %f]" % tuple(mi.bounds())
