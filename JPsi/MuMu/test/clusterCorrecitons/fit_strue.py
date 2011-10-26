@@ -62,11 +62,17 @@ sfit = ScaleFitter(
     pdf = 'bifurGsh',
 #     graphicsExtensions = ['png'],
     graphicsExtensions = [],
-    paramLayout = (.55, 0.92, 0.92), # x1, x2, y1
+    paramLayout = (.2, 0.52, 0.92), # x1, x2, y1
     labelsLayout = (.55, 0.55), # x1, y1
     # In order to define chi2 well
     binContentMin = 10,
     canvasStyle = 'extended',
+    doAutoXRange = True,
+    doAutoXRangeZoom = True,
+    doAutoFitRange = True,
+    xRangeSigmaLevel = 5,
+    xRangeSigmaLevelZoom = 2,
+    fitRangeSigmaLevel = 3,
     )
 
 ## ----------------------------------------------------------------------------

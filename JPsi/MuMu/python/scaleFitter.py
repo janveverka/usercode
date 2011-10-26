@@ -8,6 +8,7 @@ from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
 from JPsi.MuMu.common.plotData import PlotData
 from JPsi.MuMu.common.padDivider import residPullDivide
+from JPsi.MuMu.common.modalinterval import ModalInterval
 
 #------------------------------------------------------------------------------
 class Def():
@@ -175,7 +176,9 @@ class ScaleFitter(PlotData):
         self.xName = 's'
         self.xTitle = 's = E_{RECO}/E_{KIN} - 1'
         self.nBins = 40
+        self.nBinsZoom = 20
         self.xRange = (-30, 50)
+        self.xRangeZoom = (-10, 10)
         self.xUnit = '%'
         self.fitRange = (-30, 30)
         self.massWindow = None
@@ -196,6 +199,13 @@ class ScaleFitter(PlotData):
         ## http://pdg.lbl.gov/2011/reviews/rpp2011-rev-statistics.pdf
         ## Use bin content n_i >= 10 to be on the safe side (nu_i != n_i)
         self.binContentMin = 10
+        self.binContentMax = 100
+        self.xRangeSigmaLevel = 5
+        self.xRangeSigmaLevelZoom = 2
+        self.fitRangeSigmaLevel = 5
+        self.doAutoXRanges = False
+        self.doAutoXRangeZoom = False
+        self.doAutoFitRange = False
 
         PlotData.__init__( self, name, title, source, xExpression, cuts,
                            labels, **kwargs )
@@ -355,6 +365,7 @@ class ScaleFitter(PlotData):
 
     #--------------------------------------------------------------------------
     def fitToData(self, workspace, saveName = ''):
+        self._updateRanges()
         # print "+++ Entering scaleFitter.fitToData(..)"
         self.model = workspace.pdf(self.pdf).Clone( 'model_' + self.name )
         workspace.Import( self.model )
@@ -394,30 +405,130 @@ class ScaleFitter(PlotData):
     # end of customize axis
 
     #--------------------------------------------------------------------------
-    def _updateXRange(self):
-        plot = self.x.frame(AutoRange(self.data))
-        xlo = plot.GetXaxis().GetXmin()
-        xhi = plot.GetXaxis().GetXmax()
-        self.xRange = (max(xlo, self.xRange[0]), min(xhi, self.xRange[1]))
-    # end of _updateXRange
+    def _updateRanges(self):
+        tree = self.data.tree()
+        n = tree.Draw(self.x.GetName(), '', 'goff')
+        mi = ModalInterval(n, tree.GetV1())
+        if self.doAutoXRange:
+            ## Determine the range as a modal interval
+            mi.setSigmaLevel(self.xRangeSigmaLevel)
+            xmargin = 0.1 * mi.getSize()
+            self.xRange = (mi.getLowerBound() - xmargin,
+                           mi.getUpperBound() + xmargin)
+        else:
+            ## If possible, shrink the range to cover the data plus a margin
+            mi.setFraction(1.)
+            xlo = mi.getLowerBound()
+            xhi = mi.getUpperBound()
+            xmargin = 0.1 * mi.getSize()
+            self.xRange = (max(xlo - xmargin, self.xRange[0]),
+                           min(xhi + xmargin, self.xRange[1]))
+
+        if self.doAutoXRangeZoom:
+            mi.setSigmaLevel(self.xRangeSigmaLevelZoom)
+            self.xRangeZoom = (mi.getLowerBound(), mi.getUpperBound())
+
+        if self.doAutoFitRange:
+            mi.setSigmaLevel(self.fitRangeSigmaLevel)
+            self.fitRange =  (mi.getLowerBound(), mi.getUpperBound())
+    # end of _updateRanges
+    
 
     #--------------------------------------------------------------------------
     def _getBinning(self):
-        'Get bins with more than self.binContentMin. Useful for chi2 statistic'
-        'that obeys the chi2 PDF.'
+        'Get binning that guaranties at least self.binContentMin events'
+        'per bin. This is done by merging neighboring bins with too few evetns.'
+        'The obtained binning is useful for calculation of chi2 statistic'
+        'that obeys the chi2 PDF, see the PDG chapter on Statistics.'
 
         ## Histogram the data
         self.x.setBins(self.nBins)
         self.x.SetTitle(self.xTitle)
 
-        self._updateXRange()
+        plot = self.x.frame(*self.xRange)
+        
+        ## Plot the data to obtain the bin frequencies for uniform binning.
+        self.data.plotOn(plot)
+        hist = plot.getHist()
+
+        ## Determine the range of the binning.
+        xstart, xstop = self.xRange
+        
+        ## Create the target binning with the merged bins.
+        bins = ROOT.RooBinning(xstart, xstop)
+        bins.Print()
+        boundaries = []
+        contents = []
+
+        ## Loop over all the uniform bins forward, copy to the new binning,
+        ## merge them if needed.
+        binContent = 0.
+        for i in range(hist.GetN()):
+            xlo = hist.GetX()[i] - hist.GetErrorXlow(i)
+            xhi = hist.GetX()[i] + hist.GetErrorXhigh(i)
+            binContent += hist.GetY()[i]
+
+            ## Only consider bins inside of the range
+            if xlo < xstart or xstop < xhi:
+                continue
+
+            if binContent >= self.binContentMin:
+                if bins.hasBoundary(xhi):
+                    continue
+                boundaries.append(xhi)
+                contents.append(binContent)
+                binContent = 0.
+            ## End of forward loop over bins
+
+        ## The last bin may have too low content. Walk over the new bins
+        ## backward and remove boundaries as needed.
+        ## Create a new histogram with the new bins
+        boundaries.reverse()
+        contents.reverse()
+        for boundary, content in zip(boundaries, contents):
+            if binContent >= self.binContentMin:
+                break
+            binContent += content
+            boundaries.remove(boundary)
+        ## End of backward loop over the new boundaries
+
+        for boundary in boundaries:
+            bins.addBoundary(boundary)
+
+        return bins
+    ## end of _getBinning
+
+
+    #--------------------------------------------------------------------------
+    def _getBinning2(self):
+        'Get bins with more than self.binContentMin. Useful for chi2 statistic'
+        'that obeys the chi2 PDF.'
+
+        entries = self.data.tree().Draw(self.x.GetName(), '', 'goff')
+        mi = ModalInterval(entries, self.data.tree().GetV1())
+        mi.setSigmaLevel(self.nSigmaCoverage)
+        xstart, xstop = mi.getLowerBound(), mi.getUpperBound()
+        ## Add 0.1 margin
+        dx = xstop - xstart
+        xmean = 0.5 * (xstart + xstop)
+        xstart = xmean - 0.6 * dx
+        xstop = xmean + 0.6 * dx
+        self.xRange = (xstart, xstop)
+
+        ## Adjust the number of bins to guarantie binContentMax
+        mi.setFraction(float(self.binContentMax) / entries)
+        binWidthMax = mi.getUpperBound() - mi.getLowerBound()
+        self.x.setBins(int(math.ceil(dx/binWidthMax)))
+
+        ## Histogram the data
+        #self.x.setBins(self.nBins)
+        self.x.SetTitle(self.xTitle)
+
+        #self._updateRanges()
         plot = self.x.frame(*self.xRange)
         
         self.data.plotOn(plot)
         hist = plot.getHist()
-
-        ## Determine the range of the binning
-        xstart, xstop = self.xRange
 
         ## Create the target binning
         bins = ROOT.RooBinning(xstart, xstop)
@@ -461,7 +572,7 @@ class ScaleFitter(PlotData):
             bins.addBoundary(boundary)
 
         return bins
-    ## end of _getBinning
+    ## end of _getBinning2
 
 
     #--------------------------------------------------------------------------
@@ -528,10 +639,10 @@ class ScaleFitter(PlotData):
         
         ## Draw the frames
         for pad, plot in [(canvas.cd(1), self.plot),
-                          (canvas.cd(2), self.plot),
-                          (canvas.cd(3), self.residPlot),
-                          (canvas.cd(4), self.pullDistPlot),
-                          (canvas.cd(5), self.pullPlot),]:
+                          (canvas.cd(2), self.plotZoom),
+                          (canvas.cd(3), self.pullPlot),
+                          (canvas.cd(4), self.residPlot),
+                          (canvas.cd(5), self.pullDistPlot),]:
             pad.cd()
             pad.SetGrid()
             #plot.GetYaxis().CenterTitle()
@@ -553,7 +664,9 @@ class ScaleFitter(PlotData):
         ## Draw labels
         canvas.cd(6)
         for index, label in enumerate(labels):
-            self.latex.DrawLatex(0.1, 0.9 - index*0.065, label)
+            self.latex.DrawLatex(gStyle.GetPadLeftMargin(),
+                                 1. - gStyle.GetPadTopMargin() - index*0.08,
+                                 label)
 
         return canvas
     ## end of makeExtendedCanvas
@@ -561,28 +674,48 @@ class ScaleFitter(PlotData):
 
     #--------------------------------------------------------------------------
     def makePlot(self, workspace):
+        self._updateRanges()
+        
         ## Get custom binning with at least self.binContentMin events per bin.
         self.bins = self._getBinning()
         self.bins.SetName('chi2')
 
         self.x.SetTitle(self.xTitle)
         self.x.setBins(self.nBins)
-        ## Make a frame
+
+        ## Make frames
         self.plot = self.x.frame(Range(*self.xRange))
-        #self.plot = self.x.frame(AutoRange(self.data))
+        self.pullPlot = self.x.frame(Range(*self.xRange))
+
+        ## Make zoom frames
+        self.x.setBins(int (self.nBins *
+                            (self.xRangeZoom[1] - self.xRangeZoom[0]) /
+                            (self.xRange[1] - self.xRange[0])))
+        self.plotZoom = self.x.frame(Range(*self.xRangeZoom))
+        self.residPlot = self.x.frame(Range(*self.xRangeZoom))
 
         ## Add the data and model to the frame
-        self.data.plotOn(self.plot, Invisible())
-        self.data.plotOn(self.plot, Binning(self.bins))
-        self.model.plotOn(self.plot)
+        for p in [self.plot, self.plotZoom]:
+            self.data.plotOn(p, Invisible())
+            self.data.plotOn(p, Binning(self.bins))
+            self.model.plotOn(p)
+
+        ## Adjust the y range of the plot
+        hist = self.plot.getHist('h_' + self.data.GetName())
+        irange = range(hist.GetN())
+        ymax = max([hist.GetY()[i] + hist.GetErrorYhigh(i) for i in irange])
+        ymin = min([hist.GetY()[i] - hist.GetErrorYlow(i) for i in irange])
+        if ymin < 0:
+            ymin = 0.1
+        ymarginf = pow(ymax / ymin, 0.1)
+        self.plot.GetYaxis().SetRangeUser(ymin / ymarginf, ymax * ymarginf)
+        
 #         self.model.plotOn(self.plot, Normalization(scale))
         self.chi2s.append( self.plot.chiSquare( self.parameters.getSize() ) )
 
         ## Get the residual and pull dists
-        hresid = self.plot.residHist()
+        hresid = self.plotZoom.residHist()
         hpull  = self.plot.pullHist()
-        self.residPlot = self.x.frame( Range( *self.xRange ) )
-        self.pullPlot = self.x.frame( Range( *self.xRange ) )
         self.residPlot.SetYTitle('#chi^{2} Residuals')
         self.pullPlot.SetYTitle('#chi^{2} Pulls')
         self.residPlot.addPlotable(hresid, 'P')
@@ -592,13 +725,13 @@ class ScaleFitter(PlotData):
         standardNormal = workspace.pdf('standardNormal')
         if not standardNormal:
             standardNormal = workspace.factory(
-                'Gaussian::standardNormal(pull[-5,5],zero[0],unit[1])'
+                'Gaussian::standardNormal(pull[-6,6],zero[0],unit[1])'
                 )
         pull = workspace.var('pull')
         pull.SetTitle('#chi^{2} Pulls')
         pull.setBins(10)
         self.pullDistPlot = pull.frame()
-        self.pullDistPlot.SetYTitle('Bins')
+        self.pullDistPlot.SetYTitle('Bins of %s' % self.xTitle)
         pulldata = RooDataSet('pulldata', 'pulldata', RooArgSet(pull))
         for i in range(hpull.GetN()):
             pull.setVal(hpull.GetY()[i])
@@ -606,14 +739,12 @@ class ScaleFitter(PlotData):
         pulldata.plotOn(self.pullDistPlot)
         standardNormal.plotOn(self.pullDistPlot)#, Normalization(hpull.GetN()))
 
-        ## Customize
-        self.plot.SetTitle('')
-        self.residPlot.SetTitle('')
-        self.pullPlot.SetTitle('')
-
-        self._customizeAxis( self.plot.GetYaxis(), 0.01, 3 )
-        self._customizeAxis( self.residPlot.GetYaxis(), 0.01, 3 )
-        self._customizeAxis( self.pullPlot.GetYaxis(), 0.01, 3 )
+        ## Customize plot titles and axis
+        for p in [self.plot, self.plotZoom, self.residPlot, self.pullPlot,
+                  self.pullDistPlot]:
+            p.SetTitle('')
+            self._customizeAxis(p.GetYaxis(), 0.01, 3)
+        ## end of loop over plots
         self._customizeAxis( self.pullPlot.GetXaxis(), 0.01, 3.5 )
 
         ## Save the chi2 and ndof in the workspace
@@ -663,6 +794,7 @@ class ScaleFitter(PlotData):
     def fit(self, workspace, saveName = ''):
         self.getMassCut(workspace)
         self.getData(workspace)
+        self._updateRanges()
         self.fitToData(workspace, saveName)
         self.makePlot(workspace)
     ## <-- fit ----------------------------------------------------------------
