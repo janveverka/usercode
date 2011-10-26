@@ -63,10 +63,11 @@ namespace cit {
     void readData(std::vector<double> const& data);
     void setFraction(double fraction);
     void setSigmaLevel(double nsigma);
+    void setNumberOfEntriesToCover(size_t entries);
 
   protected:
     /// Calculates the interval.
-    void get();
+    virtual void get();
     /// Sets the interval bounds to the left most interval.
     void initBounds();
 

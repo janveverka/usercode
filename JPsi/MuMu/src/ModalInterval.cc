@@ -194,3 +194,15 @@ ModalInterval::setSigmaLevel(double nsigma) {
   updated_  = false;
 }
 
+
+///----------------------------------------------------------------------------
+/// Set the number of the data entries that the interval must cover
+void
+ModalInterval::setNumberOfEntriesToCover(size_t entries) {
+  /// The '-0.5' compensates for rounding upward when calculating the 
+  /// number of entries in the interval
+  fraction_ = (entries - 0.5) / x_.size();
+  initBounds();
+  updated_  = false;
+}
+

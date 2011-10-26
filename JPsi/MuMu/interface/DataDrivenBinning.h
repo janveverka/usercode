@@ -1,8 +1,9 @@
 /**
   * Takes ubinned univariate data and calculates bin boundaries and
   * bin medians based on the data such that:
-  *   o Number of data entries per bin is in a given rane [min, max].
-  *     5 <= min is desireable to obtain a chi2 statistic that follows
+  *   o Number of data entries per bin is in a given range 
+  *     [minBinContent, maxBinContent].
+  *     5 <= minBinContent is desireable to obtain a chi2 statistic that follows
   *     the chi2 PDF and thus can be used to estimate the p-value,
   *     see the PDG review on Statistics. Some maxixmum is desirable
   *     to visualize the details of the shape in the peak area.
@@ -21,64 +22,35 @@
 #include <vector>
 #include <algorithm>
 
-#include "TObject.h"
+#include "JPsi/MuMu/interface/ModalInterval.h"
 
 // TODO : make this a derived class of the ModalInterval.
 namespace cit {
-  class DataDrivenBinning : public TObject {
+  class DataDrivenBinning : public ModalInterval {
 
   public:
-    typedef std::vector<double>::const_iterator const_iterator;
     DataDrivenBinning();
     DataDrivenBinning(const_iterator first, const_iterator last,
-                      size_t min = 10, size_t max = 100);
+                      size_t minBinContent = 10, size_t maxBinContent = 100);
     DataDrivenBinning(size_t n, double *first,
-                      size_t min = 10, size_t max = 100);
+                      size_t minBinContent = 10, size_t maxBinContent = 100);
     DataDrivenBinning(std::vector<double> const & data,
-                      size_t min = 10, size_t max = 100);
+                      size_t minBinContent = 10, size_t maxBinContent = 100);
     virtual ~DataDrivenBinning();
 
     inline
     std::vector<double> const &
-    boundaries() const {return boundaries_;}
+    binBoundaries() const {return boundaries_;}
 
     inline
     std::vector<double> const &
-    medians() const {return medians_;}
-
-    ///------------------------------------------------------------------------
-    template<typename T>
-    void
-    readData(T first, T last) {
-      updated_  = false;
-
-      /// Check if [first, last) is not empty.
-      if (first >= last) {
-        /// There is no data available.
-        x_.resize(0);
-        updated_ = true;
-        return;
-      }
-
-      x_.resize(last - first);
-
-      /// Copy the source data to a new vector to sort it
-      std::copy(first, last, x_.begin());
-
-      /// Sort the data
-      std::sort(x_.begin(), x_.end());
-    } /// end of template<...> readData(...)
-
-    void readData(size_t n, double* first);
-    void readData(std::vector<double> const& data);
+    binMedians() const {return medians_;}
 
   protected:
-    void get();
+    virtual void get();
 
-    bool updated_;
-    std::vector<double> x_;
-    size_t min_;
-    size_t max_;
+    size_t minBinContent_;
+    size_t maxBinContent_;
     std::vector<double> boundaries_;
     std::vector<double> medians_;
 
