@@ -20,27 +20,48 @@ DataDrivenBinning::DataDrivenBinning()
 ///----------------------------------------------------------------------------
 DataDrivenBinning::DataDrivenBinning(const_iterator first, const_iterator last,
                                      size_t min, size_t max) :
-  x_(last - first), min_(min), max_(max), boundaries_(0), medians_(0)
-{}
+  updated_(false), x_(first <= last ? last - first : 0), min_(min), max_(max),
+  boundaries_(0), medians_(0)
+{
+  readData(first, last);
+}
 
 
 ///----------------------------------------------------------------------------
 DataDrivenBinning::DataDrivenBinning(size_t n, double* first,
                                      size_t min, size_t max) :
-  x_(n), min_(min), max_(max), boundaries_(0), medians_(0)
-{}
+  updated_(false), x_(n), min_(min), max_(max), boundaries_(0), medians_(0)
+{
+  readData(first, first+n);
+}
 
 
 ///----------------------------------------------------------------------------
 DataDrivenBinning::DataDrivenBinning(std::vector<double> const & data,
                                      size_t min, size_t max) :
-  x_(data), min_(min), max_(max), boundaries_(0), medians_(0)
-{}
+  updated_(false), x_(data), min_(min), max_(max), boundaries_(0), medians_(0)
+{
+  std::sort(x_.begin(), x_.end());
+}
 
 
 ///----------------------------------------------------------------------------
 DataDrivenBinning::~DataDrivenBinning()
 {}
+
+
+///----------------------------------------------------------------------------
+void
+DataDrivenBinning::readData(size_t n, double* first) {
+  readData(first, first + n);
+}
+
+
+///----------------------------------------------------------------------------
+void
+DataDrivenBinning::readData(std::vector<double> const& data) {
+  readData(data.begin(), data.end());
+}
 
 
 ///----------------------------------------------------------------------------

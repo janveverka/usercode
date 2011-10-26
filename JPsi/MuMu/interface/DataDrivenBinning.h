@@ -19,43 +19,71 @@
 #define JPSI_MUMU_DATADRIVENBINNING_H
 
 #include <vector>
+#include <algorithm>
 
 #include "TObject.h"
 
-
+// TODO : make this a derived class of the ModalInterval.
 namespace cit {
   class DataDrivenBinning : public TObject {
 
-    public:
-      typedef std::vector<double>::const_iterator const_iterator;
-      DataDrivenBinning();
-      DataDrivenBinning(const_iterator first, const_iterator last,
-                        size_t min = 10, size_t max = 100);
-      DataDrivenBinning(size_t n, double *first,
-                        size_t min = 10, size_t max = 100);
-      DataDrivenBinning(std::vector<double> const & data,
-                        size_t min = 10, size_t max = 100);
-      virtual ~DataDrivenBinning();
+  public:
+    typedef std::vector<double>::const_iterator const_iterator;
+    DataDrivenBinning();
+    DataDrivenBinning(const_iterator first, const_iterator last,
+                      size_t min = 10, size_t max = 100);
+    DataDrivenBinning(size_t n, double *first,
+                      size_t min = 10, size_t max = 100);
+    DataDrivenBinning(std::vector<double> const & data,
+                      size_t min = 10, size_t max = 100);
+    virtual ~DataDrivenBinning();
 
-      inline
-      std::vector<double> const &
-      boundaries() const {return boundaries_;}
+    inline
+    std::vector<double> const &
+    boundaries() const {return boundaries_;}
 
-      inline
-      std::vector<double> const &
-      medians() const {return medians_;}
+    inline
+    std::vector<double> const &
+    medians() const {return medians_;}
 
-    protected:
-      void get();
+    ///------------------------------------------------------------------------
+    template<typename T>
+    void
+    readData(T first, T last) {
+      updated_  = false;
 
-      std::vector<double> x_;
-      size_t min_;
-      size_t max_;
-      std::vector<double> boundaries_;
-      std::vector<double> medians_;
+      /// Check if [first, last) is not empty.
+      if (first >= last) {
+        /// There is no data available.
+        x_.resize(0);
+        updated_ = true;
+        return;
+      }
 
-      /// Make this a ROOT class.
-      ClassDef(DataDrivenBinning,0)
+      x_.resize(last - first);
+
+      /// Copy the source data to a new vector to sort it
+      std::copy(first, last, x_.begin());
+
+      /// Sort the data
+      std::sort(x_.begin(), x_.end());
+    } /// end of template<...> readData(...)
+
+    void readData(size_t n, double* first);
+    void readData(std::vector<double> const& data);
+
+  protected:
+    void get();
+
+    bool updated_;
+    std::vector<double> x_;
+    size_t min_;
+    size_t max_;
+    std::vector<double> boundaries_;
+    std::vector<double> medians_;
+
+    /// Make this a ROOT class.
+    ClassDef(DataDrivenBinning,0)
 
   };  /// end of declaration of class DataDrivenBinning
 } /// end of namespace cit
