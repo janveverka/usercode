@@ -50,7 +50,10 @@ sfit = ScaleFitter(
     labels = ['Flat-pt #gamma gun',
               '#eta_{SC} #in [1.16,1.44]',
               '#eta/#phi cracks removed',],
-    cuts = ['!isEBEtaGap & !isEBPhiGap & 1.16 < abs(scEta) & abs(scEta) < 1.44'],
+    cuts = ['!isEBEtaGap & !isEBPhiGap',
+            '1.16 < abs(scEta) & abs(scEta) < 1.44',
+            'scE > 0',
+            'genE > 0',],
     source = _chains['g93p01'],
     xName = 's',
     xTitle = 's_{true} = E^{SC}_{corr}/E^{#gamma}_{gen} - 1',
@@ -60,7 +63,6 @@ sfit = ScaleFitter(
     nBins = 120,
     fitRange = (-49, 49),
     pdf = 'bifurGsh',
-#     graphicsExtensions = ['png'],
     graphicsExtensions = [],
     paramLayout = (.2, 0.52, 0.92), # x1, x2, y1
     labelsLayout = (.55, 0.55), # x1, y1
@@ -72,7 +74,7 @@ sfit = ScaleFitter(
     doAutoFitRange = True,
     xRangeSigmaLevel = 5,
     xRangeSigmaLevelZoom = 2,
-    fitRangeSigmaLevel = 3,
+    fitRangeSigmaLevel = 5,
     )
 
 ## ----------------------------------------------------------------------------
