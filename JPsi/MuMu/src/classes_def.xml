@@ -1,3 +1,4 @@
 <lcgdict>
-   <class name="jpsimumu::dictionary"/>
+   <class name="jpsimumu::toolDict"/>
+   <class name="jpsimumu::pdfDict"/>
 </lcgdict>
