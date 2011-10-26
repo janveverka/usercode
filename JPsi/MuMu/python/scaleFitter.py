@@ -204,7 +204,7 @@ class ScaleFitter(PlotData):
         self.xRangeSigmaLevel = 5
         self.xRangeSigmaLevelZoom = 2
         self.fitRangeSigmaLevel = 5
-        self.doAutoXRanges = False
+        self.doAutoXRange = False
         self.doAutoXRangeZoom = False
         self.doAutoFitRange = False
 
@@ -427,11 +427,11 @@ class ScaleFitter(PlotData):
 
         if self.doAutoXRangeZoom:
             mi.setSigmaLevel(self.xRangeSigmaLevelZoom)
-            self.xRangeZoom = (mi.lowerBound(), mi.upperBound())
+            self.xRangeZoom = tuple(mi.bounds())
 
         if self.doAutoFitRange:
             mi.setSigmaLevel(self.fitRangeSigmaLevel)
-            self.fitRange =  (mi.lowerBound(), mi.upperBound())
+            self.fitRange =  tuple(mi.bounds())
     # end of _updateRanges
 
 
@@ -514,7 +514,7 @@ class ScaleFitter(PlotData):
         entries = self.data.tree().Draw(self.x.GetName(), '', 'goff')
         mi = ModalInterval(entries, self.data.tree().GetV1())
         mi.setSigmaLevel(self.nSigmaCoverage)
-        xstart, xstop = mi.lowerBound(), mi.upperBound()
+        xstart, xstop = mi.bounds()
         ## Add 0.1 margin
         dx = xstop - xstart
         xmean = 0.5 * (xstart + xstop)
@@ -524,7 +524,7 @@ class ScaleFitter(PlotData):
 
         ## Adjust the number of bins to guarantie binContentMax
         mi.setFraction(float(self.binContentMax) / entries)
-        binWidthMax = mi.upperBound() - mi.lowerBound()
+        binWidthMax = mi.length()
         self.x.setBins(int(math.ceil(dx/binWidthMax)))
 
         ## Histogram the data

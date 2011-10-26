@@ -30,7 +30,7 @@ namespace cit {
     double              length();
     double              lowerBound();
     double              upperBound();
-    std::vector<double> range();
+    std::vector<double> bounds();
 
     template<typename T>
     void

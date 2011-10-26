@@ -137,7 +137,7 @@ ModalInterval::length() {
 
 ///----------------------------------------------------------------------------
 std::vector<double>
-ModalInterval::range() {
+ModalInterval::bounds() {
   get();
   std::vector<double> bounds(2);
   bounds[0] = *lower_;
