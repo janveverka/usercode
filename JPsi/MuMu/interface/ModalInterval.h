@@ -32,6 +32,7 @@ namespace cit {
     double              upperBound();
     std::vector<double> bounds();
 
+    ///------------------------------------------------------------------------
     template<typename T>
     void
     readData(T first, T last) {
@@ -56,8 +57,8 @@ namespace cit {
 
       /// Sort the data
       std::sort(x_.begin(), x_.end());
-    }
-//     void readData(const_iterator first, const_iterator last);
+    } /// end of template<...> readData(...)
+
     void readData(size_t n, double* first);
     void readData(std::vector<double> const& data);
     void setFraction(double fraction);
