@@ -26,10 +26,11 @@ namespace cit {
     ModalInterval(std::vector<double> const& data, double fraction = 1.);
     virtual ~ModalInterval();
 
-    void   getInterval(double& lower, double& upper);
-    double getLowerBound();
-    double getUpperBound();
-    double getSize();
+    void                getInterval(double& lower, double& upper);
+    double              length();
+    double              lowerBound();
+    double              upperBound();
+    std::vector<double> range();
 
     template<typename T>
     void

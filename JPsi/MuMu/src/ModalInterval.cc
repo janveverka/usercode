@@ -113,7 +113,7 @@ ModalInterval::get()
 
 ///----------------------------------------------------------------------------
 double
-ModalInterval::getLowerBound() {
+ModalInterval::lowerBound() {
   get();
   return *lower_;
 }
@@ -121,7 +121,7 @@ ModalInterval::getLowerBound() {
 
 ///----------------------------------------------------------------------------
 double
-ModalInterval::getUpperBound() {
+ModalInterval::upperBound() {
   get();
   return *upper_;
 }
@@ -129,9 +129,20 @@ ModalInterval::getUpperBound() {
 
 ///----------------------------------------------------------------------------
 double
-ModalInterval::getSize() {
+ModalInterval::length() {
   get();
   return *upper_ - *lower_;
+}
+
+
+///----------------------------------------------------------------------------
+std::vector<double>
+ModalInterval::range() {
+  get();
+  std::vector<double> bounds(2);
+  bounds.push_back(*lower_);
+  bounds.push_back(*upper_);
+  return bounds;
 }
 
 
@@ -174,7 +185,7 @@ ModalInterval::setFraction(double fraction) {
 
 
 ///----------------------------------------------------------------------------
-/// Set the fraction of the events in terms of nsigma such that it is same as 
+/// Set the fraction of the events in terms of nsigma such that it is same as
 /// for a Gaussian distribution in mean +/- nsigma * sigma
 void
 ModalInterval::setSigmaLevel(double nsigma) {

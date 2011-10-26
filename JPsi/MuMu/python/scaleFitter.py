@@ -192,7 +192,7 @@ class ScaleFitter(PlotData):
         self.paramLayout = (.57, 0.92, 0.92)
         self.labelsLayout = (0.61, 0.6)
         self.canvasStyle = 'compact'
-        
+
         ## Chi2 statistic follows the chi2 PDF (and one can trust the p-value
         ## from ROOT if int(f(x), x in bin_i) = nu_i > 5, see explanation
         ## near (33.34) on page 13 of the 2011 PDG Statistics Review
@@ -200,6 +200,7 @@ class ScaleFitter(PlotData):
         ## Use bin content n_i >= 10 to be on the safe side (nu_i != n_i)
         self.binContentMin = 10
         self.binContentMax = 100
+        self.doAutoBinning = True
         self.xRangeSigmaLevel = 5
         self.xRangeSigmaLevelZoom = 2
         self.fitRangeSigmaLevel = 5
@@ -412,27 +413,27 @@ class ScaleFitter(PlotData):
         if self.doAutoXRange:
             ## Determine the range as a modal interval
             mi.setSigmaLevel(self.xRangeSigmaLevel)
-            xmargin = 0.1 * mi.getSize()
-            self.xRange = (mi.getLowerBound() - xmargin,
-                           mi.getUpperBound() + xmargin)
+            xmargin = 0.1 * mi.length()
+            self.xRange = (mi.lowerBound() - xmargin,
+                           mi.upperBound() + xmargin)
         else:
             ## If possible, shrink the range to cover the data plus a margin
             mi.setFraction(1.)
-            xlo = mi.getLowerBound()
-            xhi = mi.getUpperBound()
-            xmargin = 0.1 * mi.getSize()
+            xlo = mi.lowerBound()
+            xhi = mi.upperBound()
+            xmargin = 0.1 * mi.length()
             self.xRange = (max(xlo - xmargin, self.xRange[0]),
                            min(xhi + xmargin, self.xRange[1]))
 
         if self.doAutoXRangeZoom:
             mi.setSigmaLevel(self.xRangeSigmaLevelZoom)
-            self.xRangeZoom = (mi.getLowerBound(), mi.getUpperBound())
+            self.xRangeZoom = (mi.lowerBound(), mi.upperBound())
 
         if self.doAutoFitRange:
             mi.setSigmaLevel(self.fitRangeSigmaLevel)
-            self.fitRange =  (mi.getLowerBound(), mi.getUpperBound())
+            self.fitRange =  (mi.lowerBound(), mi.upperBound())
     # end of _updateRanges
-    
+
 
     #--------------------------------------------------------------------------
     def _getBinning(self):
@@ -446,14 +447,14 @@ class ScaleFitter(PlotData):
         self.x.SetTitle(self.xTitle)
 
         plot = self.x.frame(*self.xRange)
-        
+
         ## Plot the data to obtain the bin frequencies for uniform binning.
         self.data.plotOn(plot)
         hist = plot.getHist()
 
         ## Determine the range of the binning.
         xstart, xstop = self.xRange
-        
+
         ## Create the target binning with the merged bins.
         bins = ROOT.RooBinning(xstart, xstop)
         bins.Print()
@@ -500,14 +501,20 @@ class ScaleFitter(PlotData):
 
 
     #--------------------------------------------------------------------------
-    def _getBinning2(self):
-        'Get bins with more than self.binContentMin. Useful for chi2 statistic'
-        'that obeys the chi2 PDF.'
+    def _getAutoBinning(self):
+        'Get binning that is uniform around that peak area and non-uniform\n'
+        'in the tails.  It guaranties that the number of entries per bin is\n'
+        'in a given range [minEntriesPerBin, maxEntriesPerBin] by merging\n'
+        'neighboring bins in the tails. This is useful for calculation of\n'
+        'chi2 statistic that obeys the chi2 PDF.\n'
+        'Optional features:\n'
+        '  * the bin width is a pretty number, e.g. 1, 0.5, 0.2, etc.\n'
+        '  * calculate the median for each bin. (->better looking plot)\n'
 
         entries = self.data.tree().Draw(self.x.GetName(), '', 'goff')
         mi = ModalInterval(entries, self.data.tree().GetV1())
         mi.setSigmaLevel(self.nSigmaCoverage)
-        xstart, xstop = mi.getLowerBound(), mi.getUpperBound()
+        xstart, xstop = mi.lowerBound(), mi.upperBound()
         ## Add 0.1 margin
         dx = xstop - xstart
         xmean = 0.5 * (xstart + xstop)
@@ -517,7 +524,7 @@ class ScaleFitter(PlotData):
 
         ## Adjust the number of bins to guarantie binContentMax
         mi.setFraction(float(self.binContentMax) / entries)
-        binWidthMax = mi.getUpperBound() - mi.getLowerBound()
+        binWidthMax = mi.upperBound() - mi.lowerBound()
         self.x.setBins(int(math.ceil(dx/binWidthMax)))
 
         ## Histogram the data
@@ -526,7 +533,7 @@ class ScaleFitter(PlotData):
 
         #self._updateRanges()
         plot = self.x.frame(*self.xRange)
-        
+
         self.data.plotOn(plot)
         hist = plot.getHist()
 
@@ -631,12 +638,12 @@ class ScaleFitter(PlotData):
         canvas.Divide(2,3)
         self.pads.extend([canvas.cd(i) for i in range(1,6)])
         canvas.cd(1).SetLogy()
-        
+
         self.model.paramOn(self.plot,
                            Format('NEU', AutoPrecision(2)),
                            Parameters(self.parameters),
                            Layout(*self.paramLayout))
-        
+
         ## Draw the frames
         for pad, plot in [(canvas.cd(1), self.plot),
                           (canvas.cd(2), self.plotZoom),
@@ -660,7 +667,7 @@ class ScaleFitter(PlotData):
         labels.append('#chi^{2}/ndof: %.3g/%d' % (chi2Val, ndofVal))
         ## Add the chi2 probability
         labels.append('p-value: %.2g' % self.chi2Prob.getVal())
-            
+
         ## Draw labels
         canvas.cd(6)
         for index, label in enumerate(labels):
@@ -675,7 +682,7 @@ class ScaleFitter(PlotData):
     #--------------------------------------------------------------------------
     def makePlot(self, workspace):
         self._updateRanges()
-        
+
         ## Get custom binning with at least self.binContentMin events per bin.
         self.bins = self._getBinning()
         self.bins.SetName('chi2')
@@ -709,7 +716,7 @@ class ScaleFitter(PlotData):
             ymin = 0.1
         ymarginf = pow(ymax / ymin, 0.1)
         self.plot.GetYaxis().SetRangeUser(ymin / ymarginf, ymax * ymarginf)
-        
+
 #         self.model.plotOn(self.plot, Normalization(scale))
         self.chi2s.append( self.plot.chiSquare( self.parameters.getSize() ) )
 
@@ -770,7 +777,7 @@ class ScaleFitter(PlotData):
         self.reducedChi2 = reducedChi2
         self.ndof = ndof
         self.chi2Prob = chi2Prob
-        
+
         ## Make the canvas
         if self.canvasStyle == 'compact':
             self.canvas = self._makeCompactCanvas()
