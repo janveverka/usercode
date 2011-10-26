@@ -1,6 +1,6 @@
 {
   /// Configuration
-  double nSigmaCovarage = 1;
+  double nSigmaCoverage = 1;
   double mean = 0;
   double sigma = 1;
   size_t n = 10000;
@@ -28,8 +28,8 @@
        << "[" << mi.lowerBound() << ", " << mi.upperBound() << "]" << endl;
 
   /// Get the interval to cover mean +/- nsigma * sigma
-  mi.setSigmaLevel(nSigmaCovarage);
+  mi.setSigmaLevel(nSigmaCoverage);
   cout << "Shortest interval covering same fraction of data as mean +/- "
-       << nSigmaCovarage << " sigma for a Gaussian: " << endl
+       << nSigmaCoverage << " sigma for a Gaussian: " << endl
        << "[" << mi.lowerBound() << ", " << mi.upperBound() << "]" << endl;
 }
