@@ -142,13 +142,13 @@ DataDrivenBinning::updateBoundaries()
   // std::cout << "maxBinWidth: " << maxBinWidth << std::endl;
 
   /// Find the greatest "nice looking" bin width smaller than the max.
-  double binWidth = getNiceBinWidth(maxBinWidth);
-  // std::cout << "binWidth: " << binWidth << std::endl;
+  binWidth_ = getNiceBinWidth(maxBinWidth);
+  // std::cout << "binWidth_: " << binWidth_ << std::endl;
 
-  /// Increase the range so that bounds are multiples of (nice) binWidth
-  xstart = TMath::Floor(xstart / binWidth) * binWidth;
-  xstop  = TMath::Ceil(xstop / binWidth) * binWidth;
-  size_t nbins = (size_t) ((xstop - xstart) / binWidth);
+  /// Increase the range so that bounds are multiples of (nice) binWidth_
+  xstart = TMath::Floor(xstart / binWidth_) * binWidth_;
+  xstop  = TMath::Ceil(xstop / binWidth_) * binWidth_;
+  size_t nbins = (size_t) ((xstop - xstart) / binWidth_);
   // std::cout << "range: " << xstart << ", " << xstop << std::endl;
   // std::cout << "n bins: " << nbins << std::endl;
 
@@ -172,7 +172,7 @@ DataDrivenBinning::updateBoundaries()
     binContent += hist->GetBinContent(bin);
     // std::cout << "bin " << bin << ", content: " << binContent << std::endl;
     if (binContent >= minBinContent_) {
-      double newBoundary = hist->GetBinLowEdge(bin) + binWidth;
+      double newBoundary = hist->GetBinLowEdge(bin) + binWidth_;
       /// Check if the new boundary is already in the vector.
       std::vector<double>::const_iterator it;
       it = std::find(boundaries_.begin(), boundaries_.end(), newBoundary);
@@ -284,6 +284,7 @@ DataDrivenBinning::updateBinningRange()
   }
 
   /// Use the base class method to update the binning range.
+  setFraction(1);
   updateIntervalBounds();
 }
 
@@ -303,5 +304,62 @@ DataDrivenBinning::binMedians()
 {
   updateMedians();
   return medians_;
+}
+
+
+///----------------------------------------------------------------------------
+RooBinning &
+DataDrivenBinning::binning(RooBinning & bins)
+{
+  updateBoundaries();
+
+  /// Reset the given binning.
+  bins = RooBinning(boundaries_.front(), boundaries_.back(), bins.GetName());
+
+  /// Insert all the boundaries except for the first and the last one.
+  for (const_iterator b = boundaries_.begin() + 1;
+       b < boundaries_.end() - 1; ++b) {
+    bins.addBoundary(*b);
+  }
+
+  return bins;
+}
+
+
+///----------------------------------------------------------------------------
+RooUniformBinning &
+DataDrivenBinning::uniformBinning(RooUniformBinning & bins)
+{
+  updateBoundaries();
+
+  /// Reset the given binning.
+  double xlo = boundaries_.front();
+  double xhi = boundaries_.back();
+  size_t nbins = (xhi - xlo) / binWidth_;
+
+  bins = RooUniformBinning(xlo, xhi, nbins, bins.GetName());
+  return bins;
+}
+
+
+///----------------------------------------------------------------------------
+RooHist &
+DataDrivenBinning::applyTo(RooHist& hist)
+{
+  updateMedians();
+
+  for (size_t i=0; i < boundaries_.size() - 1 &&
+                   i < medians_.size() &&
+                   i < (size_t) hist.GetN(); ++i) {
+    double x = medians_[i];
+    double y = hist.GetY()[i];
+    double xlow = boundaries_[i];
+    double xhigh = boundaries_[i+1];
+    hist.SetPoint(i, x, y);
+    hist.SetPointEXlow (i, x - xlow);
+    hist.SetPointEXhigh(i, xhigh - x);
+
+  }
+  return hist;
 }
 

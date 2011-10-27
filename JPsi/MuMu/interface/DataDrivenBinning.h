@@ -19,8 +19,13 @@
 #ifndef JPSI_MUMU_DATADRIVENBINNING_H
 #define JPSI_MUMU_DATADRIVENBINNING_H
 
-#include <vector>
 #include <algorithm>
+#include <vector>
+#include <memory>
+
+#include "RooBinning.h"
+#include "RooHist.h"
+#include "RooUniformBinning.h"
 
 #include "JPsi/MuMu/interface/ModalInterval.h"
 
@@ -40,6 +45,9 @@ namespace cit {
 
     std::vector<double> const & binBoundaries();
     std::vector<double> const & binMedians();
+    RooBinning& binning(RooBinning& bins);
+    RooUniformBinning& uniformBinning(RooUniformBinning& bins);
+    RooHist& applyTo(RooHist& hist);
     double getNiceBinWidth(double maxBinWidth) const;
     size_t minBinContent() const {return minBinContent_;}
     size_t maxBinContent() const {return maxBinContent_;}
@@ -59,6 +67,7 @@ namespace cit {
     std::vector<double> boundaries_;
     std::vector<double> medians_;
     std::vector<double> niceNumbers_;
+    double binWidth_;
 
     /// Make this a ROOT class.
     ClassDef(DataDrivenBinning,0)
