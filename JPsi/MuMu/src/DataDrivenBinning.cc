@@ -220,7 +220,7 @@ DataDrivenBinning::getMedians()
 
 ///----------------------------------------------------------------------------
 void
-DataDrivenBinning::get()
+DataDrivenBinning::getBinning()
 {
   if (updated_) 
     return;
@@ -236,7 +236,7 @@ DataDrivenBinning::get()
 std::vector<double> const & 
 DataDrivenBinning::binBoundaries()
 {
-  get();
+  getBinning();
   return boundaries_;
 }
 
@@ -245,7 +245,7 @@ DataDrivenBinning::binBoundaries()
 std::vector<double> const & 
 DataDrivenBinning::binMedians()
 {
-  get();
+  getBinning();
   return medians_;
 }
 

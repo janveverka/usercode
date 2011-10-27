@@ -43,7 +43,7 @@ namespace cit {
     double getNiceBinWidth(double maxBinWidth) const;
 
   protected:
-    void get();
+    void getBinning();
     void getBoundaries();
     void getMedians();
     void initNiceNumbers();
