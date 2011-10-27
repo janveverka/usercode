@@ -38,18 +38,14 @@ namespace cit {
                       size_t minBinContent = 10, size_t maxBinContent = 100);
     virtual ~DataDrivenBinning();
 
-    inline
-    std::vector<double> const &
-    binBoundaries() const {return boundaries_;}
-
-    inline
-    std::vector<double> const &
-    binMedians() const {return medians_;}
-
+    std::vector<double> const & binBoundaries();
+    std::vector<double> const & binMedians();
     double getNiceBinWidth(double maxBinWidth) const;
 
   protected:
-    virtual void get();
+    void get();
+    void getBoundaries();
+    void getMedians();
     void initNiceNumbers();
 
     size_t minBinContent_;
