@@ -41,6 +41,10 @@ namespace cit {
     std::vector<double> const & binBoundaries();
     std::vector<double> const & binMedians();
     double getNiceBinWidth(double maxBinWidth) const;
+    size_t minBinContent() const {return minBinContent_;}
+    size_t maxBinContent() const {return maxBinContent_;}
+    void setMinBinContent(size_t min) {minBinContent_ = min;}
+    void setMaxBinContent(size_t max) {maxBinContent_ = max;}
 
   protected:
     void initNiceNumbers();

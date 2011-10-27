@@ -124,7 +124,7 @@ DataDrivenBinning::getNiceBinWidth(double maxBinWidth) const
 void
 DataDrivenBinning::updateBoundaries()
 {
-  std::cout << "Entering DataDrivenBinning::updateBoundaries()...\n";
+  // std::cout << "Entering DataDrivenBinning::updateBoundaries()...\n";
   /// Check if the result is already cahed
   if (updatedBoundaries_) {
     /// We are done.
@@ -139,18 +139,18 @@ DataDrivenBinning::updateBoundaries()
   /// Get the maximum bin width given by maxBinContent
   setNumberOfEntriesToCover(maxBinContent_);
   double maxBinWidth = length();
-  std::cout << "maxBinWidth: " << maxBinWidth << std::endl;
+  // std::cout << "maxBinWidth: " << maxBinWidth << std::endl;
 
   /// Find the greatest "nice looking" bin width smaller than the max.
   double binWidth = getNiceBinWidth(maxBinWidth);
-  std::cout << "binWidth: " << binWidth << std::endl;
+  // std::cout << "binWidth: " << binWidth << std::endl;
 
   /// Increase the range so that bounds are multiples of (nice) binWidth
   xstart = TMath::Floor(xstart / binWidth) * binWidth;
   xstop  = TMath::Ceil(xstop / binWidth) * binWidth;
   size_t nbins = (size_t) ((xstop - xstart) / binWidth);
-  std::cout << "range: " << xstart << ", " << xstop << std::endl;
-  std::cout << "n bins: " << nbins << std::endl;
+  // std::cout << "range: " << xstart << ", " << xstop << std::endl;
+  // std::cout << "n bins: " << nbins << std::endl;
 
   /// TODO: Use the fact that we already have sorted data and
   /// simplify the code bellow so that it doesn't need the TH1F.
@@ -166,16 +166,19 @@ DataDrivenBinning::updateBoundaries()
 
   /// Merge bins with low frequencies.  Store bin boundaries.  Loop over
   /// the uniform bins forward.
-  size_t binContent = 0.;
+  size_t binContent = 0;
+  boundaries_.push_back(xstart);
   for (size_t bin = 1; bin <= nbins; ++bin) {
     binContent += hist->GetBinContent(bin);
+    // std::cout << "bin " << bin << ", content: " << binContent << std::endl;
     if (binContent >= minBinContent_) {
-      double newBoundary = hist->GetBinLowEdge(bin);
+      double newBoundary = hist->GetBinLowEdge(bin) + binWidth;
       /// Check if the new boundary is already in the vector.
       std::vector<double>::const_iterator it;
       it = std::find(boundaries_.begin(), boundaries_.end(), newBoundary);
       if (it == boundaries_.end()) {
 	/// Didn't find the new boundary in the vector. Let's include it.
+        // std::cout << "New boundary: " << newBoundary << std::endl;
 	boundaries_.push_back(newBoundary);
 	contents.push_back(binContent);
 	binContent = 0;
@@ -183,18 +186,21 @@ DataDrivenBinning::updateBoundaries()
     } // End of check of the bin contents.
   } // End of forward loop over bins
 
+  /// The last bin stays "open".
+
   /// The last bin may have too few entries.  Walk over the boundaries
   /// backward and remove them as needed
   std::vector<double>::const_reverse_iterator content  = contents.rbegin();
-  for (binContent = 0; content != contents.rend(); ++content) {
-    binContent += *content;
+  for (; content != contents.rend(); ++content) {
     if (binContent >= minBinContent_) {
       /// We are done!
       break;
-    } else {
-      /// Remove the boundary
-      boundaries_.pop_back();
     }
+    /// Remove the boundary
+    // std::cout << "last bin content: " << binContent << std::endl;
+    // std::cout << "removing boundary: " << boundaries_.back() << std::endl;
+    boundaries_.pop_back();
+    binContent += *content;
   } // End of backward loop over the bin contents.
 
   /// Add the last upper boundary of the binning.
@@ -213,6 +219,7 @@ DataDrivenBinning::updateBoundaries()
 void
 DataDrivenBinning::updateMedians()
 {
+  // std::cout << "Entering DataDrivenBinning::updateMedians\n";
   /// Check if the result is already cahed
   if (updatedMedians_) {
     /// We are done.
@@ -239,6 +246,10 @@ DataDrivenBinning::updateMedians()
     } /// End of loop over data.
   } /// End of loop over boundaries.
 
+/*  for (size_t i=0; i < binsFirstEntries.size(); ++i) {
+    std::cout << "bin " << i << " first entry: "
+              << *binsFirstEntries[i] << std::endl;
+  }*/
   /// Add the end of the data
   binsFirstEntries.push_back(x_.end());
 
@@ -249,7 +260,7 @@ DataDrivenBinning::updateMedians()
   for (; iix + 1 < binsFirstEntries.end(); ++iix) {
     const_iterator ifirst = *iix;
     const_iterator ilast  = *(iix + 1);
-    double median = TMath::Median( ilast - ifirst, &(*ilast) );
+    double median = TMath::Median( ilast - ifirst, &(*ifirst) );
     medians_.push_back(median);
   } /// End of loop over the first entries per bin.
 
