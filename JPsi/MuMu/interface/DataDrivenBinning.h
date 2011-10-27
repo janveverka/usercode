@@ -1,7 +1,7 @@
 /**
   * Takes ubinned univariate data and calculates bin boundaries and
   * bin medians based on the data such that:
-  *   o Number of data entries per bin is in a given range 
+  *   o Number of data entries per bin is in a given range
   *     [minBinContent, maxBinContent].
   *     5 <= minBinContent is desireable to obtain a chi2 statistic that follows
   *     the chi2 PDF and thus can be used to estimate the p-value,
@@ -43,11 +43,13 @@ namespace cit {
     double getNiceBinWidth(double maxBinWidth) const;
 
   protected:
-    void getBinning();
-    void getBoundaries();
-    void getMedians();
     void initNiceNumbers();
+    void updateBinningRange();
+    void updateBoundaries();
+    void updateMedians();
 
+    bool updatedBoundaries_;
+    bool updatedMedians_;
     size_t minBinContent_;
     size_t maxBinContent_;
     std::vector<double> boundaries_;

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <list>
+#include <iostream>
 
 #include "TError.h"
 #include "TH1I.h"
@@ -27,8 +28,14 @@ DataDrivenBinning::DataDrivenBinning()
 DataDrivenBinning::DataDrivenBinning(const_iterator first, const_iterator last,
                                      size_t minBinContent,
 				     size_t maxBinContent) :
-  ModalInterval(first, last, 1.), minBinContent_(minBinContent),
-  maxBinContent_(maxBinContent), boundaries_(0), medians_(0), niceNumbers_(0)
+  ModalInterval(first, last, 1.),
+  updatedBoundaries_(false),
+  updatedMedians_(false),
+  minBinContent_(minBinContent),
+  maxBinContent_(maxBinContent),
+  boundaries_(0),
+  medians_(0),
+  niceNumbers_(0)
 {
   initNiceNumbers();
 }
@@ -38,8 +45,14 @@ DataDrivenBinning::DataDrivenBinning(const_iterator first, const_iterator last,
 DataDrivenBinning::DataDrivenBinning(size_t n, double* first,
                                      size_t minBinContent,
 				     size_t maxBinContent) :
-  ModalInterval(n, first, 1.), minBinContent_(minBinContent),
-  maxBinContent_(maxBinContent), boundaries_(0), medians_(0), niceNumbers_(0)
+  ModalInterval(n, first, 1.),
+  updatedBoundaries_(false),
+  updatedMedians_(false),
+  minBinContent_(minBinContent),
+  maxBinContent_(maxBinContent),
+  boundaries_(0),
+  medians_(0),
+  niceNumbers_(0)
 {
   initNiceNumbers();
 }
@@ -47,9 +60,16 @@ DataDrivenBinning::DataDrivenBinning(size_t n, double* first,
 
 ///----------------------------------------------------------------------------
 DataDrivenBinning::DataDrivenBinning(std::vector<double> const & data,
-                                     size_t minBinContent, 
+                                     size_t minBinContent,
 				     size_t maxBinContent) :
-  ModalInterval(data, 1.), minBinContent_(minBinContent),			  maxBinContent_(maxBinContent), boundaries_(0), medians_(0), niceNumbers_(0) 
+  ModalInterval(data, 1.),
+  updatedBoundaries_(false),
+  updatedMedians_(false),
+  minBinContent_(minBinContent),
+  maxBinContent_(maxBinContent),
+  boundaries_(0),
+  medians_(0),
+  niceNumbers_(0)
 {
   initNiceNumbers();
 }
@@ -68,7 +88,7 @@ DataDrivenBinning::initNiceNumbers()
   niceNumbers_.push_back(2);
   niceNumbers_.push_back(2.5);
   niceNumbers_.push_back(5);
-  
+
   std::sort(niceNumbers_.begin(), niceNumbers_.end());
 }
 
@@ -79,7 +99,7 @@ DataDrivenBinning::getNiceBinWidth(double maxBinWidth) const
 {
   /// Find a, n such that maxBinWidth = a * 10^n with a in [1, 10), n integer.
   double n = floor(log10(maxBinWidth));
-  double a = maxBinWidth * pow(10, -n);  
+  double a = maxBinWidth * pow(10, -n);
 
   /// Find greatest nice number smaller or equal to a.  Nice numbers are
   /// sorted in ascending order. Loop over them backwards, from the greatest
@@ -102,29 +122,35 @@ DataDrivenBinning::getNiceBinWidth(double maxBinWidth) const
 ///----------------------------------------------------------------------------
 /// The MEAT.
 void
-DataDrivenBinning::getBoundaries()
+DataDrivenBinning::updateBoundaries()
 {
-  /// Get a range to caver all data and store it
-  ModalInterval::get();
-  double xstart = lowerBound();
-  double xstop  = upperBound();
+  std::cout << "Entering DataDrivenBinning::updateBoundaries()...\n";
+  /// Check if the result is already cahed
+  if (updatedBoundaries_) {
+    /// We are done.
+    return;
+  }
+
+  /// Get a range to cover all data and store it.
+  double xstart, xstop;
+  setFraction(1.);
+  getBounds(xstart, xstop);
 
   /// Get the maximum bin width given by maxBinContent
   setNumberOfEntriesToCover(maxBinContent_);
   double maxBinWidth = length();
+  std::cout << "maxBinWidth: " << maxBinWidth << std::endl;
 
   /// Find the greatest "nice looking" bin width smaller than the max.
   double binWidth = getNiceBinWidth(maxBinWidth);
+  std::cout << "binWidth: " << binWidth << std::endl;
 
-  /// Get the minimum number of bins given the range of data and maximum
-  /// bin content.
-  size_t nbins = TMath::Ceil((xstop - xstart) / binWidth);
-
-  /// Ancrease the range symmetrically to correspond to an integer number
-  /// of bins.
-  double margin = nbins * binWidth - (xstop - xstart);
-  xstart -= 0.5 * margin;
-  xstop  += 0.5 * margin;
+  /// Increase the range so that bounds are multiples of (nice) binWidth
+  xstart = TMath::Floor(xstart / binWidth) * binWidth;
+  xstop  = TMath::Ceil(xstop / binWidth) * binWidth;
+  size_t nbins = (size_t) ((xstop - xstart) / binWidth);
+  std::cout << "range: " << xstart << ", " << xstop << std::endl;
+  std::cout << "n bins: " << nbins << std::endl;
 
   /// TODO: Use the fact that we already have sorted data and
   /// simplify the code bellow so that it doesn't need the TH1F.
@@ -138,13 +164,13 @@ DataDrivenBinning::getBoundaries()
   /// Store the bincontents.
   std::vector<double> contents;
 
-  /// Merge bins with low frequencies.  Store bin boundaries.  Loop over 
-  /// the uniform bins forward.  
+  /// Merge bins with low frequencies.  Store bin boundaries.  Loop over
+  /// the uniform bins forward.
   size_t binContent = 0.;
   for (size_t bin = 1; bin <= nbins; ++bin) {
     binContent += hist->GetBinContent(bin);
     if (binContent >= minBinContent_) {
-      double newBoundary = hist->GetBinLowEdge(bin) + binWidth;
+      double newBoundary = hist->GetBinLowEdge(bin);
       /// Check if the new boundary is already in the vector.
       std::vector<double>::const_iterator it;
       it = std::find(boundaries_.begin(), boundaries_.end(), newBoundary);
@@ -169,30 +195,42 @@ DataDrivenBinning::getBoundaries()
       /// Remove the boundary
       boundaries_.pop_back();
     }
-  } // End of backward loop over the bin contents.  
+  } // End of backward loop over the bin contents.
 
   /// Add the last upper boundary of the binning.
   boundaries_.push_back(xstop);
 
+  /// Set the flag that the bin boundaries are up to date.
+  updatedBoundaries_ = true;
+  updatedMedians_ = false;
+
   /// Cleanup allocated memory
-  delete hist;  
+  delete hist;
 }
 
 
 ///----------------------------------------------------------------------------
 void
-DataDrivenBinning::getMedians()
+DataDrivenBinning::updateMedians()
 {
+  /// Check if the result is already cahed
+  if (updatedMedians_) {
+    /// We are done.
+    return;
+  }
+
+  updateBoundaries();
+
   std::vector<const_iterator> binsFirstEntries;
   binsFirstEntries.reserve(boundaries_.size() + 1);
 
   /// The index of the first entry in the first bin is 0.
   binsFirstEntries.push_back(x_.begin());
   /// Loop over the bin boundaries.
-  for (const_iterator ib = boundaries_.begin() + 1; 
+  for (const_iterator ib = boundaries_.begin() + 1;
        ib != boundaries_.end(); ++ib) {
-    /// Loop over the data. Find the first entry with x > boundary. 
-    for (const_iterator ix = binsFirstEntries.back() + 1; 
+    /// Loop over the data. Find the first entry with x > boundary.
+    for (const_iterator ix = binsFirstEntries.back() + 1;
 	 ix < x_.end(); ++ix) {
       if (*ix < *ib) continue;
       /// ix points to the first entry in bin with low edge *ib.
@@ -214,38 +252,45 @@ DataDrivenBinning::getMedians()
     double median = TMath::Median( ilast - ifirst, &(*ilast) );
     medians_.push_back(median);
   } /// End of loop over the first entries per bin.
-} /// End of getMedians(...)
+
+  /// Set the flag that the bin medians are up to date.
+  updatedMedians_ = true;
+
+} /// End of updateMedians(...)
 
 
 
 ///----------------------------------------------------------------------------
 void
-DataDrivenBinning::getBinning()
+DataDrivenBinning::updateBinningRange()
 {
-  if (updated_) 
-    return;
+  /// Check if the range of the binning given by the modal interval is
+  /// up to date.
+  if (!updatedIntervalBounds_) {
+    /// The binning range may have to be updated and so will the bin
+    /// boundaries and medians.
+    updatedMedians_ = updatedBoundaries_ = false;
+  }
 
-  getBoundaries();
-  getMedians();
-
-  updated_ = true;
+  /// Use the base class method to update the binning range.
+  updateIntervalBounds();
 }
 
 
 ///----------------------------------------------------------------------------
-std::vector<double> const & 
+std::vector<double> const &
 DataDrivenBinning::binBoundaries()
 {
-  getBinning();
+  updateBoundaries();
   return boundaries_;
 }
 
 
 ///----------------------------------------------------------------------------
-std::vector<double> const & 
+std::vector<double> const &
 DataDrivenBinning::binMedians()
 {
-  getBinning();
+  updateMedians();
   return medians_;
 }
 
