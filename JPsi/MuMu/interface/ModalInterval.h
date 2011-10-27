@@ -26,7 +26,7 @@ namespace cit {
     ModalInterval(std::vector<double> const& data, double fraction = 1.);
     virtual ~ModalInterval();
 
-    void                getInterval(double& lower, double& upper);
+    void                getBounds(double& lower, double& upper);
     double              length();
     double              lowerBound();
     double              upperBound();
@@ -36,14 +36,14 @@ namespace cit {
     template<typename T>
     void
     readData(T first, T last) {
-      updated_  = false;
+      updatedIntervalBounds_  = false;
 
       /// Check if [first, last) is not empty.
       if (first >= last) {
         /// There is no data available.
         x_.resize(0);
         initBounds();
-        updated_ = true;
+        updatedIntervalBounds_ = true;
         return;
       }
 
@@ -67,14 +67,14 @@ namespace cit {
 
   protected:
     /// Calculates the interval.
-    virtual void get();
+    virtual void updateIntervalBounds();
     /// Sets the interval bounds to the left most interval.
     void initBounds();
 
     /// Interval contains at least fraction_ of the total entries.
     double fraction_;
-    /// Has the interval been calculated?
-    bool   updated_;
+    /// Have the interval bounds been calculated?
+    bool   updatedIntervalBounds_;
     /// Sorted copy of the input data.
     std::vector<double> x_;
     /// Interval lower und upper bounds as pointers to elements of x_.

@@ -10,7 +10,7 @@ ClassImp(ModalInterval)
 /// Default constructor.
 ModalInterval::ModalInterval() :
   fraction_(1.),
-  updated_(false),
+  updatedIntervalBounds_(false),
   x_(0)
 {
   lower_ = x_.begin();
@@ -22,7 +22,7 @@ ModalInterval::ModalInterval() :
 ModalInterval::ModalInterval(const_iterator first, const_iterator last,
                              double fraction) :
   fraction_(fraction),
-  updated_(false),
+  updatedIntervalBounds_(false),
   x_(0)
 {
   readData(first, last);
@@ -32,7 +32,7 @@ ModalInterval::ModalInterval(const_iterator first, const_iterator last,
 ///----------------------------------------------------------------------------
 ModalInterval::ModalInterval(size_t n, double* first, double fraction) :
   fraction_(fraction),
-  updated_(false),
+  updatedIntervalBounds_(false),
   x_(0)
 {
   readData(n, first);
@@ -42,7 +42,7 @@ ModalInterval::ModalInterval(size_t n, double* first, double fraction) :
 ///----------------------------------------------------------------------------
 ModalInterval::ModalInterval(std::vector<double> const& data, double fraction) :
   fraction_(fraction),
-  updated_(false),
+  updatedIntervalBounds_(false),
   x_(0)
 {
   readData(data);
@@ -55,9 +55,9 @@ ModalInterval::~ModalInterval(){}
 
 ///----------------------------------------------------------------------------
 void
-ModalInterval::getInterval(double& lower, double& upper)
+ModalInterval::getBounds(double& lower, double& upper)
 {
-  get();
+  updateIntervalBounds();
   lower = *lower_;
   upper = *upper_;
   return;
@@ -66,10 +66,10 @@ ModalInterval::getInterval(double& lower, double& upper)
 
 ///----------------------------------------------------------------------------
 void
-ModalInterval::get()
+ModalInterval::updateIntervalBounds()
 {
   /// Check if we need to update the calculation
-  if (updated_ == true) {
+  if (updatedIntervalBounds_ == true) {
     /// Cached values are up to date. No need to carry on.
     return;
   }
@@ -80,7 +80,7 @@ ModalInterval::get()
     /// containing all the data.
     lower_ = x_.begin();
     upper_  = x_.end() - 1;
-    updated_ = true;
+    updatedIntervalBounds_ = true;
     return;
   }
 
@@ -106,7 +106,7 @@ ModalInterval::get()
     }
   } /// End of loop over all intervals.
 
-  updated_ = true;
+  updatedIntervalBounds_ = true;
   return;
 }
 
@@ -114,7 +114,7 @@ ModalInterval::get()
 ///----------------------------------------------------------------------------
 double
 ModalInterval::lowerBound() {
-  get();
+  updateIntervalBounds();
   return *lower_;
 }
 
@@ -122,7 +122,7 @@ ModalInterval::lowerBound() {
 ///----------------------------------------------------------------------------
 double
 ModalInterval::upperBound() {
-  get();
+  updateIntervalBounds();
   return *upper_;
 }
 
@@ -130,7 +130,7 @@ ModalInterval::upperBound() {
 ///----------------------------------------------------------------------------
 double
 ModalInterval::length() {
-  get();
+  updateIntervalBounds();
   return *upper_ - *lower_;
 }
 
@@ -138,7 +138,7 @@ ModalInterval::length() {
 ///----------------------------------------------------------------------------
 std::vector<double>
 ModalInterval::bounds() {
-  get();
+  updateIntervalBounds();
   std::vector<double> bounds(2);
   bounds[0] = *lower_;
   bounds[1] = *upper_;
@@ -157,7 +157,7 @@ ModalInterval::initBounds() {
   lower_ = x_.begin();
   upper_  = x_.begin() + interval_entries - 1;
 
-  updated_  = false;
+  updatedIntervalBounds_  = false;
 }
 
 
@@ -180,7 +180,7 @@ void
 ModalInterval::setFraction(double fraction) {
   fraction_ = fraction;
   initBounds();
-  updated_  = false;
+  updatedIntervalBounds_  = false;
 }
 
 
@@ -191,7 +191,7 @@ void
 ModalInterval::setSigmaLevel(double nsigma) {
   fraction_ = 1 - TMath::Prob(nsigma*nsigma, 1);
   initBounds();
-  updated_  = false;
+  updatedIntervalBounds_  = false;
 }
 
 
@@ -199,10 +199,10 @@ ModalInterval::setSigmaLevel(double nsigma) {
 /// Set the number of the data entries that the interval must cover
 void
 ModalInterval::setNumberOfEntriesToCover(size_t entries) {
-  /// The '-0.5' compensates for rounding upward when calculating the 
+  /// The '-0.5' compensates for rounding upward when calculating the
   /// number of entries in the interval
   fraction_ = (entries - 0.5) / x_.size();
   initBounds();
-  updated_  = false;
+  updatedIntervalBounds_  = false;
 }
 
