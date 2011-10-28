@@ -125,6 +125,8 @@ void
 DataDrivenBinning::updateBoundaries()
 {
   // std::cout << "Entering DataDrivenBinning::updateBoundaries()...\n";
+  updateBinningRange();
+
   /// Check if the result is already cahed
   if (updatedBoundaries_) {
     /// We are done.
@@ -220,13 +222,13 @@ void
 DataDrivenBinning::updateMedians()
 {
   // std::cout << "Entering DataDrivenBinning::updateMedians\n";
+  updateBoundaries();
+
   /// Check if the result is already cahed
   if (updatedMedians_) {
     /// We are done.
     return;
   }
-
-  updateBoundaries();
 
   std::vector<const_iterator> binsFirstEntries;
   binsFirstEntries.reserve(boundaries_.size() + 1);
