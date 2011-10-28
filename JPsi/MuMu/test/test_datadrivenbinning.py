@@ -1,17 +1,15 @@
 import array
 import ROOT
-import JPsi.MuMu.common.canvases as canvases
-from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
-from JPsi.MuMu.vector import vector
 
+## This is needed to make RooFit work in PyROOT on MacOS X
+import JPsi.MuMu.common.basicRoot
+
+from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
 
 nbins = 100
 nentries = 5000
 minBinContent = 5
 maxBinContent = 500
-
-canvases.wwidth = 400
-canvases.wheight = 800
 
 ## Define a workspace
 ws = ROOT.RooWorkspace('ws', 'test data-driven binning')
@@ -32,9 +30,9 @@ data.plotOn(plot)
 model.plotOn(plot)
 
 ## Display the plot
-c1 = canvases.next('DataDrivenBinning')
+c1 = ROOT.TCanvas('Linear_Scale', 'Linear_Scale', 400, 800)
 c1.Divide(1,2)
-c1.cd(1).SetLogy()
+c1.cd(1)
 plot.Draw()
 
 ## Create the DataDrivenBinning object
@@ -63,6 +61,11 @@ bins.applyTo(hist)
 model.plotOn(plot2)
 
 ## Display the plot with the data-driven binning.
-c1.cd(2).SetLogy()
+c1.cd(2)
 plot2.Draw()
 c1.Update()
+
+c2 = c1.Clone('Log_Scale')
+c2.cd(1).SetLogy()
+c2.cd(2).SetLogy()
+
