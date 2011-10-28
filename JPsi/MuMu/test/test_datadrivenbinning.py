@@ -1,15 +1,18 @@
-import array
 import ROOT
 
 ## This is needed to make RooFit work in PyROOT on MacOS X
 import JPsi.MuMu.common.basicRoot
 
+import JPsi.MuMu.common.canvases as canvases
 from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
 
 nbins = 100
 nentries = 5000
 minBinContent = 5
 maxBinContent = 500
+
+canvases.wwidth = 400
+canvases.wheight = 800
 
 ## Define a workspace
 ws = ROOT.RooWorkspace('ws', 'test data-driven binning')
@@ -30,7 +33,7 @@ data.plotOn(plot)
 model.plotOn(plot)
 
 ## Display the plot
-c1 = ROOT.TCanvas('Linear_Scale', 'Linear_Scale', 400, 800)
+c1 = canvases.next('Linear_Scale')
 c1.Divide(1,2)
 c1.cd(1)
 plot.Draw()
@@ -65,7 +68,10 @@ c1.cd(2)
 plot2.Draw()
 c1.Update()
 
-c2 = c1.Clone('Log_Scale')
+## Display the same on log-scale
+c2 = canvases.next('Log_Scale')
+c2.Divide(1,2)
 c2.cd(1).SetLogy()
+plot.Draw()
 c2.cd(2).SetLogy()
-
+plot2.Draw()
