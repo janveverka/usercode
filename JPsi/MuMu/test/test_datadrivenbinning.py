@@ -11,7 +11,7 @@ nentries = 5000
 minBinContent = 5
 maxBinContent = 500
 
-canvases.wwidth = 400
+canvases.wwidth = 800
 canvases.wheight = 800
 
 ## Define a workspace
@@ -33,9 +33,9 @@ data.plotOn(plot)
 model.plotOn(plot)
 
 ## Display the plot
-c1 = canvases.next('Linear_Scale')
-c1.Divide(1,2)
-c1.cd(1)
+canvas1 = canvases.next('Data_Driven_Binning')
+canvas1.Divide(2,2)
+canvas1.cd(1)
 plot.Draw()
 
 ## Create the DataDrivenBinning object
@@ -64,14 +64,13 @@ bins.applyTo(hist)
 model.plotOn(plot2)
 
 ## Display the plot with the data-driven binning.
-c1.cd(2)
+canvas1.cd(3)
 plot2.Draw()
-c1.Update()
+canvas1.Update()
 
 ## Display the same on log-scale
-c2 = canvases.next('Log_Scale')
-c2.Divide(1,2)
-c2.cd(1).SetLogy()
+canvas1.cd(2).SetLogy()
 plot.Draw()
-c2.cd(2).SetLogy()
+canvas1.cd(4).SetLogy()
 plot2.Draw()
+canvas1.Update()
