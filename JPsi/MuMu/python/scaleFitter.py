@@ -9,6 +9,7 @@ from JPsi.MuMu.common.roofit import *
 from JPsi.MuMu.common.plotData import PlotData
 from JPsi.MuMu.common.padDivider import residPullDivide
 from JPsi.MuMu.common.modalinterval import ModalInterval
+from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
 
 #------------------------------------------------------------------------------
 class Def():
@@ -511,75 +512,15 @@ class ScaleFitter(PlotData):
         '  * the bin width is a pretty number, e.g. 1, 0.5, 0.2, etc.\n'
         '  * calculate the median for each bin. (->better looking plot)\n'
 
+        ## Get the data as an array of doubles pointed by a tree
         entries = self.data.tree().Draw(self.x.GetName(), '', 'goff')
-        mi = ModalInterval(entries, self.data.tree().GetV1())
-        mi.setSigmaLevel(self.nSigmaCoverage)
-        xstart, xstop = mi.bounds()
-        ## Add 0.1 margin
-        dx = xstop - xstart
-        xmean = 0.5 * (xstart + xstop)
-        xstart = xmean - 0.6 * dx
-        xstop = xmean + 0.6 * dx
-        self.xRange = (xstart, xstop)
 
-        ## Adjust the number of bins to guarantie binContentMax
-        mi.setFraction(float(self.binContentMax) / entries)
-        binWidthMax = mi.length()
-        self.x.setBins(int(math.ceil(dx/binWidthMax)))
-
-        ## Histogram the data
-        #self.x.setBins(self.nBins)
-        self.x.SetTitle(self.xTitle)
-
-        #self._updateRanges()
-        plot = self.x.frame(*self.xRange)
-
-        self.data.plotOn(plot)
-        hist = plot.getHist()
-
-        ## Create the target binning
-        bins = ROOT.RooBinning(xstart, xstop)
-        bins.Print()
-        boundaries = []
-        contents = []
-
-        ## Loop over all the default bins forward, copy to the new binning,
-        ## merge them if needed.
-        binContent = 0.
-        for i in range(hist.GetN()):
-            xlo = hist.GetX()[i] - hist.GetErrorXlow(i)
-            xhi = hist.GetX()[i] + hist.GetErrorXhigh(i)
-            binContent += hist.GetY()[i]
-
-            ## Only consider bins inside of the range
-            if xlo < xstart or xstop < xhi:
-                continue
-
-            if binContent >= self.binContentMin:
-                if bins.hasBoundary(xhi):
-                    continue
-                boundaries.append(xhi)
-                contents.append(binContent)
-                binContent = 0.
-            ## End of forward loop over bins
-
-        ## The last bin may have too low content. Walk over the new bins
-        ## backward and remove boundaries as needed.
-        ## Create a new histogram with the new bins
-        boundaries.reverse()
-        contents.reverse()
-        for boundary, content in zip(boundaries, contents):
-            if binContent >= self.binContentMin:
-                break
-            binContent += content
-            boundaries.remove(boundary)
-        ## End of backward loop over the new boundaries
-
-        for boundary in boundaries:
-            bins.addBoundary(boundary)
+        ## Create the DataDrivenBinning object
+        bins = DataDrivenBinning(entries, self.data.tree().GetV1(),
+                                 self.binContentMin, self.binContentMax)
 
         return bins
-    ## end of _getBinning2
+    ## end of _getAutoBinning
 
 
     #--------------------------------------------------------------------------
@@ -683,9 +624,16 @@ class ScaleFitter(PlotData):
     def makePlot(self, workspace):
         self._updateRanges()
 
+        ## Get the DataDrivenBinning object
+        ddbins = self._getAutoBinning()
+
         ## Get custom binning with at least self.binContentMin events per bin.
-        self.bins = self._getBinning()
+        self.bins = ddbins.binning(ROOT.RooBinning())
         self.bins.SetName('chi2')
+
+        ## Get the corresponding unfiorm binning that is it's smallest superset
+        self.uniformBins = ddbins.uniformBinning(ROOT.RooUniformBinning())
+        self.uniformBins.SetName('chi2')
 
         self.x.SetTitle(self.xTitle)
         self.x.setBins(self.nBins)
@@ -695,16 +643,24 @@ class ScaleFitter(PlotData):
         self.pullPlot = self.x.frame(Range(*self.xRange))
 
         ## Make zoom frames
-        self.x.setBins(int (self.nBins *
-                            (self.xRangeZoom[1] - self.xRangeZoom[0]) /
-                            (self.xRange[1] - self.xRange[0])))
+#         self.x.setBins(int (self.nBins *
+#                             (self.xRangeZoom[1] - self.xRangeZoom[0]) /
+#                             (self.xRange[1] - self.xRange[0])))
         self.plotZoom = self.x.frame(Range(*self.xRangeZoom))
         self.residPlot = self.x.frame(Range(*self.xRangeZoom))
 
         ## Add the data and model to the frame
         for p in [self.plot, self.plotZoom]:
-            self.data.plotOn(p, Invisible())
+            ## This is hack to make RooFit use a nice normaliztion.
+            ## First plot the data with uniform binning but don't display it.
+            self.data.plotOn(p, Binning(self.uniformBins), Invisible())
+            ## Then plot the data with the non-uniform binning.
             self.data.plotOn(p, Binning(self.bins))
+            ## Get the histogram of data and set the bin centers equal
+            ## to per-bin medians.
+            hist = p.getHist('h_' + self.data.GetName())
+            ddbins.applyTo(hist)
+            ## Finally, overlay the fit.
             self.model.plotOn(p)
 
         ## Adjust the y range of the plot
@@ -743,7 +699,12 @@ class ScaleFitter(PlotData):
         for i in range(hpull.GetN()):
             pull.setVal(hpull.GetY()[i])
             pulldata.add(RooArgSet(pull))
-        pulldata.plotOn(self.pullDistPlot)
+        entries = pulldata.tree().Draw('pull', '', 'goff')
+        pullbins = DataDrivenBinning(entries, pulldata.tree().GetV1(), 5, 20)
+        binning = pullbins.binning(ROOT.RooBinning())
+        uniformBinning = pullbins.uniformBinning(ROOT.RooUniformBinning())
+        pulldata.plotOn(self.pullDistPlot, Binning(uniformBinning), Invisible())
+        pulldata.plotOn(self.pullDistPlot, Binning(binning))
         standardNormal.plotOn(self.pullDistPlot)#, Normalization(hpull.GetN()))
 
         ## Customize plot titles and axis

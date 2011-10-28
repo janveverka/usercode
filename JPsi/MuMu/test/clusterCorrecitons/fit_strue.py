@@ -63,11 +63,12 @@ sfit = ScaleFitter(
     nBins = 120,
     fitRange = (-49, 49),
     pdf = 'bifurGsh',
-    graphicsExtensions = [],
+    graphicsExtensions = ['png'],
     paramLayout = (.2, 0.52, 0.92), # x1, x2, y1
     labelsLayout = (.55, 0.55), # x1, y1
     # In order to define chi2 well
     binContentMin = 10,
+    binContentMax = 100,
     canvasStyle = 'extended',
     doAutoXRange = True,
     doAutoXRangeZoom = True,
