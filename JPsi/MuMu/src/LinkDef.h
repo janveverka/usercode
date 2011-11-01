@@ -7,6 +7,7 @@
 #include "JPsi/MuMu/interface/ModalInterval.h"
 #include "JPsi/MuMu/interface/RooBifurGshPdf.h"
 #include "JPsi/MuMu/interface/RooBifurSechPdf.h"
+#include "JPsi/MuMu/interface/RooChi2Calculator.h"
 #include "JPsi/MuMu/interface/RooCruijff.h"
 #include "JPsi/MuMu/interface/RooGshPdf.h"
 #include "JPsi/MuMu/interface/RooSechPdf.h"
@@ -25,6 +26,7 @@
 
 #pragma link C++ class cit::DataDrivenBinning;
 #pragma link C++ class cit::ModalInterval;
+#pragma link C++ class cit::RooChi2Calculator;
 
 #pragma link C++ class RooBifurGshPdf;
 #pragma link C++ class RooBifurSechPdf;

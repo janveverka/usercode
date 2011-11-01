@@ -13,6 +13,7 @@ fileName = {
 #     "data": "pmvTree_ZMu-May10ReReco-42X-v3_V5.root",
 #     "data" : "pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root",
     'data' : 'pmvTree_ZMu-May10ReReco_plus_PromptReco-v4_FNAL_42X-v3_V8.root',
+    'data' : 'pmvTree_V14_DoubleMu_Run2011A-PromptReco-v1_condor_Dimuon_AOD-42X-v9.root',
 
     #"z"   : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v1_V3.root",
     #"z"  : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",

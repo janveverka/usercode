@@ -34,7 +34,7 @@ w = RooRealVar( 'w', '1', 0, 99 )
 smw = RooArgSet(s, mmgMass, w)
 ws1.Import(smw)
 
-## Variables for models of s
+## Variables for models of s and mass
 ws1.factory('''{
     #Deltas[0, -50, 50],
     #sigma[20, 0.001, 100],
@@ -47,7 +47,10 @@ ws1.factory('''{
     ln#gamma[3,0.001,20],
     t[-1.5,-3.1415,10],
     tL[-1.5,-3.1415,10],
-    tR[-1.5,-3.1415,10]
+    tR[-1.5,-3.1415,10],
+    Ns[100, 0.1, 9999999],
+    Nb[100, 0.1, 9999999],
+    N[100, 0.1, 9999999]
 }''')
 
 ## Functions for models of s
@@ -78,6 +81,8 @@ sModels = [
     ws1.factory('RooBifurSechPdf::bifurSech(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('RooGshPdf::gsh(s, #Deltas, #sigma, t)'),
     ws1.factory('RooSechPdf::sech(s, #Deltas, #sigma)'),
+    ## TODO: finish the extended bifur. GSH
+    ws1.factory('ExtendPdf::eBifurGsh(bifurGsh, N)'),
 ] ## end of models definition
 
 massModels = [
@@ -97,8 +102,8 @@ massModels = [
         Exponential::background( mmgMass, #alphaB[-0.1, -10, 1] )
     '''),
     ws1.factory('''
-        SUM::m3Model( Ns[100, 0.1, 9999999] * signal,
-                      Nb[0, 0, 9999999] * background )
+        SUM::m3Model( Ns * signal,
+                      Nb * background )
     '''),
 
 ]

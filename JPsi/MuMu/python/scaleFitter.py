@@ -633,7 +633,7 @@ class ScaleFitter(PlotData):
 
         ## Get the corresponding unfiorm binning that is it's smallest superset
         self.uniformBins = ddbins.uniformBinning(ROOT.RooUniformBinning())
-        self.uniformBins.SetName('chi2')
+        self.uniformBins.SetName('normalization')
 
         self.x.SetTitle(self.xTitle)
         self.x.setBins(self.nBins)
@@ -662,6 +662,9 @@ class ScaleFitter(PlotData):
             ddbins.applyTo(hist)
             ## Finally, overlay the fit.
             self.model.plotOn(p)
+
+        self.plotCurve = self.plot.getCurve()
+        self.plotCurve = self.plot.getCurve()
 
         ## Adjust the y range of the plot
         hist = self.plot.getHist('h_' + self.data.GetName())
@@ -700,7 +703,7 @@ class ScaleFitter(PlotData):
             pull.setVal(hpull.GetY()[i])
             pulldata.add(RooArgSet(pull))
         entries = pulldata.tree().Draw('pull', '', 'goff')
-        pullbins = DataDrivenBinning(entries, pulldata.tree().GetV1(), 5, 20)
+        pullbins = DataDrivenBinning(entries, pulldata.tree().GetV1(), 5, 10)
         binning = pullbins.binning(ROOT.RooBinning())
         uniformBinning = pullbins.uniformBinning(ROOT.RooUniformBinning())
         pulldata.plotOn(self.pullDistPlot, Binning(uniformBinning), Invisible())
