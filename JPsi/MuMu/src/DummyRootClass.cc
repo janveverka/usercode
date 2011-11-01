@@ -12,12 +12,21 @@ using namespace cit;
 /// Make this a ROOT class
 ClassImp(DummyRootClass)
 
+///----------------------------------------------------------------------------
+/// Constructor
 DummyRootClass::DummyRootClass()
 {}
 
+
+///----------------------------------------------------------------------------
+/// Destructor
 DummyRootClass::~DummyRootClass()
 {}
 
+
+///----------------------------------------------------------------------------
+/// Example method. Prints some information about adding new classes to ROOT
+/// in the standard output.
 void
 DummyRootClass::about()
 {
@@ -39,4 +48,4 @@ DummyRootClass::about()
     "To print this message in PyROOT, you can do:\n"
     "  from JPsi.MuM.dummyrootclass import DummyRootClass\n"
     "  DummyRootClass().about()\n";
-}
+} /// end of about()
