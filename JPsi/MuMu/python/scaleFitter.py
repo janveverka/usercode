@@ -10,6 +10,7 @@ from JPsi.MuMu.common.plotData import PlotData
 from JPsi.MuMu.common.padDivider import residPullDivide
 from JPsi.MuMu.common.modalinterval import ModalInterval
 from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
+from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 
 #------------------------------------------------------------------------------
 class Def():
@@ -208,6 +209,7 @@ class ScaleFitter(PlotData):
         self.doAutoXRange = False
         self.doAutoXRangeZoom = False
         self.doAutoFitRange = False
+        self.useCustomChi2Calculator = False
 
         PlotData.__init__( self, name, title, source, xExpression, cuts,
                            labels, **kwargs )
@@ -663,9 +665,6 @@ class ScaleFitter(PlotData):
             ## Finally, overlay the fit.
             self.model.plotOn(p)
 
-        self.plotCurve = self.plot.getCurve()
-        self.plotCurve = self.plot.getCurve()
-
         ## Adjust the y range of the plot
         hist = self.plot.getHist('h_' + self.data.GetName())
         irange = range(hist.GetN())
@@ -677,11 +676,21 @@ class ScaleFitter(PlotData):
         self.plot.GetYaxis().SetRangeUser(ymin / ymarginf, ymax * ymarginf)
 
 #         self.model.plotOn(self.plot, Normalization(scale))
-        self.chi2s.append( self.plot.chiSquare( self.parameters.getSize() ) )
 
-        ## Get the residual and pull dists
-        hresid = self.plotZoom.residHist()
-        hpull  = self.plot.pullHist()
+        if (hasattr(self, "useCustomChi2Calculator") and
+            self.useCustomChi2Calculator == True):
+            plotChi2 = RooChi2Calculator(self.plot)
+            plotZoomChi2 = RooChi2Calculator(self.plotZoom)
+            self.chi2s.append(plotChi2.chiSquare(self.parameters.getSize()))
+            ## Get the residual and pull dists
+            hresid = plotZoomChi2.residHist()
+            hpull = plotChi2.pullHist()
+        else:
+            self.chi2s.append( self.plot.chiSquare( self.parameters.getSize() ) )
+            ## Get the residual and pull dists
+            hresid = self.plotZoom.residHist()
+            hpull  = self.plot.pullHist()
+            
         self.residPlot.SetYTitle('#chi^{2} Residuals')
         self.pullPlot.SetYTitle('#chi^{2} Pulls')
         self.residPlot.addPlotable(hresid, 'P')

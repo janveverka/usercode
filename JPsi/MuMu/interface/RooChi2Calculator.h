@@ -26,7 +26,14 @@ namespace cit {
 
       RooHist* pullHist(const char* histname = 0,
                         const char* pdfname = 0) const
-      { return residHist(histname, pdfname, true); }
+        { return residHist(histname, pdfname, true); }
+
+      Double_t chiSquare(int nFitParam = 0) const { 
+	return chiSquare(0, 0, nFitParam); 
+      }      
+
+      Double_t chiSquare(const char* pdfname, const char* histname,
+                         int nFitParam = 0) const;
 
     private:
       RooPlot const* plot_;

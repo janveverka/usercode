@@ -8,6 +8,7 @@
 
 #include "RooCurve.h"
 #include "RooMsgService.h"
+#include "TMath.h"
 
 using namespace cit;
 using namespace std;
@@ -42,8 +43,8 @@ const
   RooCurve* curve = (RooCurve*) plot_->findObject(curvename,
                                                   RooCurve::Class());
   if (!curve) {
-    coutE(InputArguments) << "RooPlot::residHist(" << plot_->GetName()
-                          << ") cannot find curve" << endl ;
+    coutE(InputArguments) << "cit::RooChi2Calculator(plotname=" << plot_->GetName()
+                          << ")::residHist(..) cannot find curve" << endl ;
     return 0 ;
   }
 
@@ -51,8 +52,8 @@ const
   RooHist* hist = (RooHist*) plot_->findObject(histname,
                                                RooHist::Class()) ;
   if (!hist) {
-    coutE(InputArguments) << "RooPlot::residHist(" << GetName()
-                          << ") cannot find histogram" << endl ;
+    coutE(InputArguments) << "cit::RooChi2Calculator(plotname=" << plot_->GetName()
+                          << ")::residHist(..) cannot find histogram" << endl ;
     return 0 ;
   }
 
@@ -93,26 +94,119 @@ const
 
     Double_t xl = x - hist->GetErrorXlow(i);
     Double_t xh = x + hist->GetErrorXhigh(i);
-    Double_t yy = point - curve->average(xl, xh);
-    Double_t dyl = hist->GetErrorYlow(i) ;
-    Double_t dyh = hist->GetErrorYhigh(i) ;
+    Double_t norm = (xh - xl) / plot_->getFitRangeBinW();
+    point *= norm;
+    Double_t yexpected = curve->average(xl, xh) * norm;
+    Double_t yy = point - yexpected;
+    // Normalize to the number of events per bin taking into account
+    // variable bin width.
+    Double_t dy = TMath::Sqrt(yexpected);
     if (normalize) {
-        Double_t norm = (yy>0?dyl:dyh);
-	if (norm==0.) {
-	  coutW(Plotting) << "cit::RooChi2Calculator::resisHist(histname ="
+	if (dy==0.) {
+	  coutW(Plotting) << "cit::RooChi2Calculator::residHist(histname ="
                           << hist->GetName() << ", ...) WARNING: point "
                           << i << " has zero error, setting residual to zero"
                           << endl ;
 	  yy=0 ;
-	  dyh=0 ;
-	  dyl=0 ;
+	  dy=0 ;
 	} else {
-	  yy   /= norm;
-	  dyh /= norm;
-	  dyl /= norm;
+	  yy /= dy;
+	  dy = 1.;
 	}
     }
-    ret->addBinWithError(x,yy,dyl,dyh);
+    // cout << "cit::RooChi2Calculator::residHist  adding bin with error: ";
+    // printf("n=%g nu=%g x=%g y=%g +/- %g\n", 
+    //       point, yexpected, x, yy, dy );
+    ret->addBinWithError(x,yy,dy,dy);
   }
   return ret;
+}
+
+
+///----------------------------------------------------------------------------
+Double_t
+RooChi2Calculator::chiSquare(const char* pdfname, const char* histname,
+			     int nFitParam) const
+{
+  // Calculate the chi^2/NDOF of this curve with respect to the histogram
+  // 'hist' accounting nFitParam floating parameters in case the curve
+  // was the result of a fit
+
+  // Find curve object
+  RooCurve* curve = (RooCurve*) plot_->findObject(pdfname,
+                                                  RooCurve::Class());
+  if (!curve) {
+    coutE(InputArguments) << "cit::RooChi2Calculator(plotname=" << plot_->GetName()
+                          << ")::chiSquare(..) cannot find curve" << endl ;
+    return 0 ;
+  }
+
+  // Find histogram object
+  RooHist* hist = (RooHist*) plot_->findObject(histname,
+                                               RooHist::Class()) ;
+  if (!hist) {
+    coutE(InputArguments) << "cit::RooChi2Calculator(plotname=" << plot_->GetName()
+                          << ")::chiSquare(..) cannot find histogram" << endl ;
+    return 0 ;
+  }
+
+
+  Int_t i,np = hist->GetN() ;
+  Double_t x,y,/*eyl,eyh,*/ exl,exh ;
+
+  // Find starting and ending bin of histogram based on range of RooCurve
+  Double_t xstart,xstop ;
+
+#if ROOT_VERSION_CODE >= ROOT_VERSION(4,0,1)
+  hist->GetPoint(0,xstart,y) ;
+  hist->GetPoint(curve->GetN()-1,xstop,y) ;
+#else
+  const_cast<RooCurve*>(curve)->GetPoint(0,xstart,y) ;
+  const_cast<RooCurve*>(curve)->GetPoint(curve->GetN() - 1,xstop,y) ;
+#endif
+
+  Int_t nbin(0) ;
+
+  Double_t chisq(0) ;
+  for (i=0 ; i<np ; i++) {   
+
+    // Retrieve histogram contents
+    hist->GetPoint(i,x,y) ;
+
+    // Check if point is in range of curve
+    if (x<xstart || x>xstop) continue ;
+
+    nbin++ ;
+    // eyl = hist->GetEYlow()[i] ;
+    // eyh = hist->GetEYhigh()[i] ;
+    exl = hist->GetEXlow()[i] ;
+    exh = hist->GetEXhigh()[i] ;
+
+    // Integrate function over this bin
+    Double_t avg = curve->average(x-exl,x+exh) ;
+
+    // JV: Adjust observed and expected number of events for bin width to represent
+    // number of events.
+    Double_t norm = (exl + exh) / plot_->getFitRangeBinW();
+    y *= norm;
+    avg *= norm;
+
+    if (avg < 5.) {
+      coutW(InputArguments) << "cit::RooChi2Calculator(plotname=" << plot_->GetName()
+			    << ")::chiSquare(..) expectation in bin "
+			    << i << " is " << avg << " < 5!" << endl ;
+    }
+
+    // JV: Use the expected number of events for the y uncertainty,
+    // See (33.34) of http://pdg.lbl.gov/2011/reviews/rpp2011-rev-statistics.pdf
+
+    // Add pull^2 to chisq
+    if (avg!=0) {      
+      Double_t resid = (y - avg) ;
+      chisq += (resid * resid / avg) ;
+    }
+  }
+
+  // Return chisq/nDOF 
+  return chisq / (nbin - nFitParam) ;
 }

@@ -62,8 +62,8 @@ sfit = ScaleFitter(
     xUnit = '%',
     nBins = 120,
     fitRange = (-49, 49),
-    pdf = 'bifurGsh',
-    graphicsExtensions = ['png'],
+    pdf = 'cruijff',
+    graphicsExtensions = [],
     paramLayout = (.2, 0.52, 0.92), # x1, x2, y1
     labelsLayout = (.55, 0.55), # x1, y1
     # In order to define chi2 well
@@ -75,14 +75,19 @@ sfit = ScaleFitter(
     doAutoFitRange = True,
     xRangeSigmaLevel = 5,
     xRangeSigmaLevelZoom = 2,
-    fitRangeSigmaLevel = 5,
+    fitRangeSigmaLevel = 1,
+    useCustomChi2Calculator = False,
     )
 
 ## ----------------------------------------------------------------------------
 ## Customize below
 _fits = []
-pdfs = [ROOT.TNamed('bifurGsh', 'Bifur. GSH'),
-        ROOT.TNamed('cbShape', 'Crystal Ball'),]
+pdfs = [#ROOT.TNamed('bifurGsh', 'Bifur. GSH'),
+        #ROOT.TNamed('gsh', 'GSH'),
+        ROOT.TNamed('sech', 'Hyperbolic Secant'),
+        #ROOT.TNamed('cruijff', 'Cruijff'),
+        #ROOT.TNamed('cbShape', 'Crystal Ball'),
+        ROOT.TNamed('gauss', 'Gaussian'),]
 
 for geant in 'g93p01 g94p02 g94cms'.split():
     for pdf in pdfs:
@@ -100,7 +105,7 @@ pullEpsilon = 0.01
 mwindows = {}
 
 ## Loop over plots
-for fitter in _fits[:3]:
+for fitter in _fits[:9]:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
