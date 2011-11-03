@@ -79,6 +79,14 @@ const
   const_cast<RooCurve&>(curve).GetPoint(0, xstart, y) ;
   const_cast<RooCurve&>(curve).GetPoint(curve->GetN()-1, xstop, y) ;
 #endif
+  // cout << "cit::RooChi2Calculator::residHist dumping curve:\n";
+  // for (int i=0; i<curve->GetN(); ++i){
+  //   Double_t xi, yi;
+  //   curve->GetPoint(i, xi, yi);
+  //   printf("i=%d x,y: %.3g, %.3g\n", i, xi, yi);
+  // }
+
+  // cout << "cit::RooChi2Calculator::residHist  adding bins with error:\n";
 
   // Add histograms, calculate Poisson confidence interval on sum value
   for(Int_t i=0 ; i < hist->GetN() ; i++) {
@@ -88,15 +96,32 @@ const
 #else
     const_cast<RooHist&>(hist).GetPoint(i,x,point) ;
 #endif
-
-    // Only calculate pull for bins inside curve range
-    if (x<xstart || x>xstop) continue ;
-
     Double_t xl = x - hist->GetErrorXlow(i);
     Double_t xh = x + hist->GetErrorXhigh(i);
+
+    // Only calculate pull for bins inside curve range
+    if (xl < xstart || xstop < xh) continue ;
+
     Double_t norm = (xh - xl) / plot_->getFitRangeBinW();
     point *= norm;
-    Double_t yexpected = curve->average(xl, xh) * norm;
+
+    // Start a hack to work around a bug in RooCurve::interpolate
+    // that sometimes gives a wrong result.
+    Double_t avg = curve->average(xl, xh);
+    Double_t avg2 = 0.5 * (curve->average(xl, x) + curve->average(x, xh));
+    Double_t yexpected;
+    if (avg + avg2 > 0 &&
+	(avg2 - avg) / (avg2 + avg) > 0.1) {
+      yexpected = curve->interpolate(x);
+    } else {
+      yexpected = avg;
+    }
+    // End of hack around the bug in RooCurve::interpolate
+
+    // Correct the expected number of events in this bin for the non-uniform
+    // bin width.
+    yexpected *= norm;
+
     Double_t yy = point - yexpected;
     // Normalize to the number of events per bin taking into account
     // variable bin width.
@@ -114,9 +139,8 @@ const
 	  dy = 1.;
 	}
     }
-    // cout << "cit::RooChi2Calculator::residHist  adding bin with error: ";
-    // printf("n=%g nu=%g x=%g y=%g +/- %g\n", 
-    //       point, yexpected, x, yy, dy );
+    // printf("bin=%3d n=%5.3g nu=%5.3g x=%5.3g .. %5.3g y=%5.3g +/- %5.3g "
+    //	   "norm=%5.3g\n", i, point, yexpected, xl, xh, yy, dy, norm);
     ret->addBinWithError(x,yy,dy,dy);
   }
   return ret;
@@ -152,14 +176,14 @@ RooChi2Calculator::chiSquare(const char* pdfname, const char* histname,
 
 
   Int_t i,np = hist->GetN() ;
-  Double_t x,y,/*eyl,eyh,*/ exl,exh ;
+  Double_t x,y,/*eyl,eyh,*/ xl,xh ;
 
   // Find starting and ending bin of histogram based on range of RooCurve
   Double_t xstart,xstop ;
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(4,0,1)
-  hist->GetPoint(0,xstart,y) ;
-  hist->GetPoint(curve->GetN()-1,xstop,y) ;
+  curve->GetPoint(0,xstart,y) ;
+  curve->GetPoint(curve->GetN()-1,xstop,y) ;
 #else
   const_cast<RooCurve*>(curve)->GetPoint(0,xstart,y) ;
   const_cast<RooCurve*>(curve)->GetPoint(curve->GetN() - 1,xstop,y) ;
@@ -172,22 +196,30 @@ RooChi2Calculator::chiSquare(const char* pdfname, const char* histname,
 
     // Retrieve histogram contents
     hist->GetPoint(i,x,y) ;
-
-    // Check if point is in range of curve
-    if (x<xstart || x>xstop) continue ;
-
-    nbin++ ;
+    xl = x - hist->GetEXlow()[i] ;
+    xh = x + hist->GetEXhigh()[i] ;
     // eyl = hist->GetEYlow()[i] ;
     // eyh = hist->GetEYhigh()[i] ;
-    exl = hist->GetEXlow()[i] ;
-    exh = hist->GetEXhigh()[i] ;
 
-    // Integrate function over this bin
-    Double_t avg = curve->average(x-exl,x+exh) ;
+    // Check if the whole bin is in range of curve
+    if (xl < xstart || xstop < xh) continue ;
+
+    nbin++ ;
+
+    // Integrate function over this bin.
+    // Start a hack to work around a bug in RooCurve::interpolate
+    // that sometimes gives a wrong result.
+    Double_t avg = curve->average(xl, xh);
+    Double_t avg2 = 0.5 * (curve->average(xl, x) + curve->average(x, xh));
+    if (avg + avg2 > 0 &&
+	(avg2 - avg) / (avg2 + avg) > 0.1) {
+      avg = curve->interpolate(x);
+    }
+    // End of hack around the bug in RooCurve::interpolate
 
     // JV: Adjust observed and expected number of events for bin width to represent
     // number of events.
-    Double_t norm = (exl + exh) / plot_->getFitRangeBinW();
+    Double_t norm = (xh - xl) / plot_->getFitRangeBinW();
     y *= norm;
     avg *= norm;
 
@@ -201,8 +233,8 @@ RooChi2Calculator::chiSquare(const char* pdfname, const char* histname,
     // See (33.34) of http://pdg.lbl.gov/2011/reviews/rpp2011-rev-statistics.pdf
 
     // Add pull^2 to chisq
-    if (avg!=0) {      
-      Double_t resid = (y - avg) ;
+    if (avg != 0) {      
+      Double_t resid = y - avg;
       chisq += (resid * resid / avg) ;
     }
   }
