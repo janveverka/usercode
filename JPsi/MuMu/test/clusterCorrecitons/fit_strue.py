@@ -63,7 +63,7 @@ sfit = ScaleFitter(
     nBins = 120,
     fitRange = (-49, 49),
     pdf = 'cruijff',
-    graphicsExtensions = [],
+    graphicsExtensions = ['png'],
     paramLayout = (.2, 0.52, 0.92), # x1, x2, y1
     labelsLayout = (.55, 0.55), # x1, y1
     # In order to define chi2 well
@@ -75,16 +75,16 @@ sfit = ScaleFitter(
     doAutoFitRange = True,
     xRangeSigmaLevel = 5,
     xRangeSigmaLevelZoom = 2,
-    fitRangeSigmaLevel = 1,
+    fitRangeSigmaLevel = 1.5,
     useCustomChi2Calculator = False,
     )
 
 ## ----------------------------------------------------------------------------
 ## Customize below
 _fits = []
-pdfs = [#ROOT.TNamed('bifurGsh', 'Bifur. GSH'),
+pdfs = [ROOT.TNamed('bifurGsh', 'Bifur. GSH'),
         #ROOT.TNamed('gsh', 'GSH'),
-        ROOT.TNamed('sech', 'Hyperbolic Secant'),
+        #ROOT.TNamed('sech', 'Hyperbolic Secant'),
         #ROOT.TNamed('cruijff', 'Cruijff'),
         #ROOT.TNamed('cbShape', 'Crystal Ball'),
         ROOT.TNamed('gauss', 'Gaussian'),]
