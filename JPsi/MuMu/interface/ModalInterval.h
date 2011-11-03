@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "TObject.h"
+#include "RooDataSet.h"
 
 namespace cit {
   class ModalInterval : public TObject {
@@ -24,6 +25,7 @@ namespace cit {
                   double fraction = 1.);
     ModalInterval(size_t n, double* first, double fraction = 1.);
     ModalInterval(std::vector<double> const& data, double fraction = 1.);
+    // ModalInterval(RooAbsReal& x, RooDataSet const& data, double fraction = 1.);
     virtual ~ModalInterval();
 
     void                getBounds(double& lower, double& upper);
@@ -61,6 +63,7 @@ namespace cit {
 
     void readData(size_t n, double* first);
     void readData(std::vector<double> const& data);
+    // void readData(RooAbsReal& x, RooDataSet const& data);
     void setFraction(double fraction);
     void setSigmaLevel(double nsigma);
     void setNumberOfEntriesToCover(size_t entries);

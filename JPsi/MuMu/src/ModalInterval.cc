@@ -1,4 +1,9 @@
+#include <algorithm>
+
 #include "TMath.h"
+#include "TTree.h"
+#include "RooArgSet.h"
+#include "RooAbsArg.h"
 
 #include "JPsi/MuMu/interface/ModalInterval.h"
 
@@ -48,6 +53,18 @@ ModalInterval::ModalInterval(std::vector<double> const& data, double fraction) :
   readData(data);
 }
 
+
+///----------------------------------------------------------------------------
+/*
+ModalInterval::ModalInterval(RooAbsReal& x, RooDataSet const& data, 
+			     double fraction) :
+  fraction_(fraction),
+  updatedIntervalBounds_(false),
+  x_(0)
+{
+  readData(x, data);
+}
+*/
 
 ///----------------------------------------------------------------------------
 ModalInterval::~ModalInterval(){}
@@ -174,6 +191,31 @@ ModalInterval::readData(std::vector<double> const& data) {
   readData(data.begin(), data.end());
 }
 
+
+///----------------------------------------------------------------------------
+/*
+void
+ModalInterval::readData(RooAbsReal& x, RooDataSet const& data) {
+  updatedIntervalBounds_ = false;
+
+  /// Make sure this is a univariate dataset.
+  assert(data.get()->getSize() == 1);
+
+  const Long64_t nentries = data.tree()->GetEntries();
+  x_.clear();
+  x_.reserve(nentries);
+
+  /// Loop over all the entries and fill the values in the internal cache
+  for (Int_t i=0; i < nentries; ++i) {
+    // RooAbsReal *xx = (RooAbsReal*)data.get(i)->first();
+    data.get(i);
+    x_.push_back(x.getVal());
+  }
+  
+  /// Sort the data
+  std::sort(x_.begin(), x_.end());
+}
+*/
 
 ///----------------------------------------------------------------------------
 void

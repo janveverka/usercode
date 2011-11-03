@@ -76,6 +76,25 @@ DataDrivenBinning::DataDrivenBinning(std::vector<double> const & data,
 
 
 ///----------------------------------------------------------------------------
+/*
+DataDrivenBinning::DataDrivenBinning(RooAbsReal& x, 
+				     RooDataSet const& data,
+                                     size_t minBinContent,
+				     size_t maxBinContent) :
+  ModalInterval(x, data, 1.),
+  updatedBoundaries_(false),
+  updatedMedians_(false),
+  minBinContent_(minBinContent),
+  maxBinContent_(maxBinContent),
+  boundaries_(0),
+  medians_(0),
+  niceNumbers_(0)
+{
+  initNiceNumbers();
+}
+*/
+
+///----------------------------------------------------------------------------
 DataDrivenBinning::~DataDrivenBinning()
 {}
 
