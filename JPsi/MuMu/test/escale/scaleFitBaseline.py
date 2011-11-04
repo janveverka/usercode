@@ -39,11 +39,19 @@ srecofit = ScaleFitter(
     xUnit = '%',
     nBins = 150,
     pdf = 'gauss',
-    graphicsExtensions = ['png'],
+    graphicsExtensions = [],
     massWindowScale = 1.5,
     massWindow = (87.2, 95.2),
     fitScale = 1.2,
     fitRange = (-50,100),
+    doAutoBinning = True,
+    binContentMax = 200,
+    binContentMin = 35,
+    canvasStyle = 'extended',
+    doAutoXRange = False,
+    doAutoXRangeZoom = True,
+    xRangeSigmaLevelZoom = 5,
+    paramLayout = (.45, 0.75, 0.5)
     )
 
 ## Default fit of strue = Ereco / Egen - 1
@@ -56,6 +64,13 @@ struefit = srecofit.clone(
     nBins = (120),
     fitScale = 1.2,
     cuts = ['isFSR', 'phoGenE > 0'],
+    doAutoXRange = True,
+    doAutoXRangeZoom = True,
+    doAutoFitRange = True,
+    xRangeSigmaLevel = 5,
+    xRangeSigmaLevelZoom = 2,
+    fitRangeSigmaLevel = 1.5,
+    paramLayout = (0.57, 0.92, 0.92),
     )
 
 ## Default fit of sgen = Egen / Ekingen - 1
@@ -74,19 +89,20 @@ kRatioGen = 'kRatio({mmgMass}, {mmMass})'.format(mmgMass=mmgMassGen,
 ## ----------------------------------------------------------------------------
 ## Customize below
 
+#struefit.applyDefinitions([Model('bifurGsh')])
+struefit.applyDefinitions([Model('bw')])
+srecofit.applyDefinitions([Model('cbShape')])
 defaultfits = [struefit, srecofit]
 
 for fit in defaultfits:
-    fit.applyDefinitions([
-        DimuonMassMax(80),
-        Model('cbShape')
-        ])
+    fit.applyDefinitions([DimuonMassMax(80)])
+
 
 srecofits, struefits =[], []
 
 for subdet_r9_cat in subdet_r9_categories:
-#    for lo, hi in BinEdges([10, 12, 15, 20, 25, 30, 100]):
-    for lo, hi in BinEdges([10, 12, 15]):
+    for lo, hi in BinEdges([10, 12, 15, 20, 25, 30, 100]):
+##    for lo, hi in BinEdges([10, 12, 15]):
         srecofit_cat = srecofit.clone().applyDefinitions([subdet_r9_cat,
                                                           PhoEtBin(lo, hi)])
         struefit_cat = struefit.clone().applyDefinitions([subdet_r9_cat,
@@ -102,7 +118,7 @@ pullEpsilon = 0.1
 mwindows = {}
 
 ## Loop over plots
-for fitter in _fits[:2]:
+for fitter in _fits[8:]:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
