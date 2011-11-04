@@ -39,7 +39,7 @@ srecofit = ScaleFitter(
     xUnit = '%',
     nBins = 150,
     pdf = 'gauss',
-    graphicsExtensions = [],
+    graphicsExtensions = ['png'],
     massWindowScale = 1.5,
     massWindow = (87.2, 95.2),
     fitScale = 1.2,
@@ -51,26 +51,50 @@ srecofit = ScaleFitter(
     doAutoXRange = False,
     doAutoXRangeZoom = True,
     xRangeSigmaLevelZoom = 5,
-    paramLayout = (.45, 0.75, 0.5)
+    paramLayout = (.45, 0.75, 0.5),
+    useCustomChi2Calculator = True,
     )
 
 ## Default fit of strue = Ereco / Egen - 1
 struefit = srecofit.clone(
     name = 'strue_mc',
     title = 'strue-Fit, Powheg S4',
+    labels = ['Powheg S4'],
+
+    source = _chains['z'],
+    xName = 's',
     xTitle = 's_{true} = E^{#gamma}_{reco}/E^{#gamma}_{gen} - 1',
     xExpression = '100 * (phoE/phoGenE - 1)',
-    xRange = (-20, 40),
-    nBins = (120),
-    fitScale = 1.2,
     cuts = ['isFSR', 'phoGenE > 0'],
+    xRange = (-50, 100),
+    xUnit = '%',
+    nBins = 150,
+    pdf = 'gauss',
+    graphicsExtensions = ['png'],
+    massWindowScale = 1.5,
+    massWindow = (87.2, 95.2),
+    fitScale = 1.2,
+    fitRange = (-50,100),
+
+    doAutoBinning = True,
+    binContentMax = 200,
+    binContentMin = 35,
+    canvasStyle = 'extended',
+
     doAutoXRange = True,
     doAutoXRangeZoom = True,
     doAutoFitRange = True,
+
     xRangeSigmaLevel = 5,
     xRangeSigmaLevelZoom = 2,
-    fitRangeSigmaLevel = 1.5,
+
+    fitRangeMode = 'Fraction',
+    fitRangeSigmaLevel = 2.0,
+    fitRangeNumberOfEntries = 3000,
+    fitRangeFraction = 0.68,
     paramLayout = (0.57, 0.92, 0.92),
+
+    useCustomChi2Calculator = True,
     )
 
 ## Default fit of sgen = Egen / Ekingen - 1
@@ -89,8 +113,7 @@ kRatioGen = 'kRatio({mmgMass}, {mmMass})'.format(mmgMass=mmgMassGen,
 ## ----------------------------------------------------------------------------
 ## Customize below
 
-#struefit.applyDefinitions([Model('bifurGsh')])
-struefit.applyDefinitions([Model('bw')])
+struefit.applyDefinitions([Model('bifurGauss')])
 srecofit.applyDefinitions([Model('cbShape')])
 defaultfits = [struefit, srecofit]
 
@@ -107,6 +130,16 @@ for subdet_r9_cat in subdet_r9_categories:
                                                           PhoEtBin(lo, hi)])
         struefit_cat = struefit.clone().applyDefinitions([subdet_r9_cat,
                                                           PhoEtBin(lo, hi)])
+
+        if 'EB_lowR9_PhoEt10-12' in struefit_cat.name:
+            struefit_cat.fitRangeFraction -= 0.2
+
+        if 'EB_lowR9_PhoEt12-15' in struefit_cat.name:
+            struefit_cat.fitRangeFraction -= 0.2
+
+        if 'EE' in struefit_cat.name:
+            struefit_cat.fitRangeFraction += 0.1
+            struefit_cat.binContentMax = 100
         srecofits.append(srecofit_cat)
         struefits.append(struefit_cat)
 
@@ -118,7 +151,7 @@ pullEpsilon = 0.1
 mwindows = {}
 
 ## Loop over plots
-for fitter in _fits[8:]:
+for fitter in _fits[:]:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
@@ -284,7 +317,7 @@ for plot in _fits:
 
 # ws1.writeToFile('test.root')
 # ws1.writeToFile('mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
-ws1.writeToFile('mc_mmMass80_EB_highR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
+ws1.writeToFile('mc_sreco_strue_Baseline.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt15-20.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt20-25.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt25-30.root')
