@@ -37,12 +37,16 @@ ws1.Import(smw)
 ## Variables for models of s and mass
 ws1.factory('''{
     #Deltas[0, -50, 50],
-    #sigma[20, 0.001, 100],
-    #sigmaL[20, 0.001, 100],
-    #sigmaR[20, 0.001, 100],
+    #Deltas2[0, -50, 50],
+    #Deltas3[0, -50, 50],
+    #sigma[20, 0.1, 100],
+    #sigma2[30, 0.1, 100],
+    #sigma3[40, 0.1, 100],
+    #sigmaL[20, 0.2, 100],
+    #sigmaR[20, 0.2, 100],
     #alpha[-1.5, -10, 0],
-    #alphaL[10, 0.0, 100],
-    #alphaR[10, 0.0, 100],
+    #alphaL[10, 0.2, 100],
+    #alphaR[10, 0.2, 100],
     n[1.5, 0.1, 10],
     ln#gamma[3,0.001,20],
     t[-1.5,-3.1415,10],
@@ -50,6 +54,9 @@ ws1.factory('''{
     tR[-1.5,-3.1415,10],
     Ns[100, 0.1, 9999999],
     Nb[100, 0.1, 9999999],
+    N1[100, 0.1, 9999999],
+    N2[100, 0.1, 9999999],
+    N3[100, 0.1, 9999999],
     N[100, 0.1, 9999999]
 }''')
 
@@ -67,6 +74,8 @@ ws1.factory('''{
 sModels = [
     ## For backward compatibility
     ws1.factory('Gaussian::gauss(s, #Deltas, #sigma)'),
+    ws1.factory('Gaussian::gauss2(s, #Deltas2, #sigma2)'),
+    ws1.factory('Gaussian::gauss3(s, #Deltas3, #sigma3)'),
     ws1.factory('Lognormal::lognormal(ik, m0, k)'),
     ws1.factory('BifurGauss::model(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('CBShape::cbShape(s, #Deltas, #sigma, #alpha, n)'),
@@ -81,17 +90,23 @@ sModels = [
     ws1.factory('RooBifurSechPdf::bifurSech(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('RooGshPdf::gsh(s, #Deltas, #sigma, t)'),
     ws1.factory('RooSechPdf::sech(s, #Deltas, #sigma)'),
+    ws1.factory('BreitWigner::bw(s, #Deltas, #sigma)'),
     ## TODO: finish the extended bifur. GSH
     ws1.factory('ExtendPdf::eBifurGsh(bifurGsh, N)'),
+    ## Sum models
+    ws1.factory('SUM::sumGaussGauss(N1*gauss, N2*gauss2)'),
+    ws1.factory('SUM::sumCruijffGauss(N1*cruijff, N2*gauss2)'),
+    ws1.factory('SUM::sumBwGauss(N1*bw, N2*gauss2)'),
+    ws1.factory('SUM::sumGauss3(N1*gauss, N2*gauss2, N3*gauss3)'),
 ] ## end of models definition
 
 massModels = [
     ## PDF's for invariant mass fit
     ws1.factory('''
         FCONV::signal( mmgMass,
-                       BreitWigner::bw( mmgMass,
-                                        mZ[91.1876],
-                                        #GammaZ[2.4952] ),
+                       BreitWigner::zlinebw( mmgMass,
+                                             mZ[91.1876],
+                                             #GammaZ[2.4952] ),
                        CBShape::cb( mmgMass,
                                     #Deltam[0, -10, 10],
                                     #sigmaCB[1.5, 0.1, 10],
