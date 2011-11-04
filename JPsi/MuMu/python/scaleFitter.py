@@ -68,6 +68,27 @@ class Model(Def):
         elif name == 'cruijff':
             Def.__init__(self, name, 'Cruijff', ['Cruijff Fit'])
             self.model = 'cruijff'
+        elif name == 'bifurGsh':
+            Def.__init__(self, name, 'Bifur.-GSH', ['Bifur. GSH Fit'])
+            self.model = 'bifurGsh'
+        elif name == 'gsh':
+            Def.__init__(self, name, 'GSH', ['GSH Fit'])
+            self.model = 'gsh'
+        elif name == 'bw':
+            Def.__init__(self, name, 'Breit-Wigner', ['Breit-Wigner Fit'])
+            self.model = 'bw'
+        elif name == 'sumGaussGauss':
+            Def.__init__(self, name, 'Gauss + Gauss', ['Gauss + Gauss Fit'])
+            self.model = name        
+        elif name == 'sumCruijffGauss':
+            Def.__init__(self, name, 'Cruijff + Gauss', ['Cruijff + Gauss Fit'])
+            self.model = name        
+        elif name == 'sumBwGauss':
+            Def.__init__(self, name, 'BW + Gauss', ['BW + Gauss Fit'])
+            self.model = name        
+        elif name == 'sumGauss3':
+            Def.__init__(self, name, 'Sum of 3 Gaussians', ['#Sigma of 3 Gaussians'])
+            self.model = name
         else:
             raise ValueError, 'model %s not supported!' % name
 
@@ -202,13 +223,27 @@ class ScaleFitter(PlotData):
         ## Use bin content n_i >= 10 to be on the safe side (nu_i != n_i)
         self.binContentMin = 10
         self.binContentMax = 100
-        self.doAutoBinning = True
+        self.doAutoBinning = False
+        
+        self.xRangeMode = 'SigmaLevel'
         self.xRangeSigmaLevel = 5
+        self.xRangeFraction = 1.
+        self.xRangeNumberOfEntries = 5000
+
+        self.xRangeModeZoom = 'SigmaLevel'
         self.xRangeSigmaLevelZoom = 2
+        self.xRangeFractionZoom = .9
+        self.xRangeNumberOfEntries = 5000
+
+        self.fitRangeMode = 'SigmaLevel'
         self.fitRangeSigmaLevel = 5
+        self.fitRangeFraction = 1.
+        self.fitRangeNumberOfEntries = 5000
+        
         self.doAutoXRange = False
         self.doAutoXRangeZoom = False
         self.doAutoFitRange = False
+
         self.useCustomChi2Calculator = False
 
         PlotData.__init__( self, name, title, source, xExpression, cuts,
@@ -388,6 +423,12 @@ class ScaleFitter(PlotData):
                               PrintLevel(-1) )
         )
 
+        ## Get the number of events in the fit range from the dataset
+        expr = self.x.GetName()
+        sel = "%f <= %s & %s < %f" % (self.fitRange[0], expr,
+                                      expr, self.fitRange[1])
+        self.fitRangeNumEvents = self.data.tree().Draw(expr, sel, 'goff')
+
         if saveName == '':
             workspace.saveSnapshot('sFit_' + self.name, self.parameters, True)
         else:
@@ -415,7 +456,15 @@ class ScaleFitter(PlotData):
         mi = ModalInterval(n, tree.GetV1())
         if self.doAutoXRange:
             ## Determine the range as a modal interval
-            mi.setSigmaLevel(self.xRangeSigmaLevel)
+            if self.xRangeMode == 'SigmaLevel':
+                mi.setSigmaLevel(self.xRangeSigmaLevel)
+            elif self.xRangeMode == 'Fraction':
+                mi.setFraction(self.xRangeFraction)
+            elif self.xRangeMode == 'NumberOfEntries':
+                mi.setNumberOfEntriesToCover(self.xRangeNumberOfEntries)
+            else:
+                message = "Illegal xRangeMode = '%s'" % self.xRangeMode
+                raise RuntimeError, message
             xmargin = 0.1 * mi.length()
             self.xRange = (mi.lowerBound() - xmargin,
                            mi.upperBound() + xmargin)
@@ -433,7 +482,17 @@ class ScaleFitter(PlotData):
             self.xRangeZoom = tuple(mi.bounds())
 
         if self.doAutoFitRange:
-            mi.setSigmaLevel(self.fitRangeSigmaLevel)
+            ## Determine the range as a modal interval
+            if self.fitRangeMode == 'SigmaLevel':
+                mi.setSigmaLevel(self.fitRangeSigmaLevel)
+            elif self.fitRangeMode == 'Fraction':
+                mi.setFraction(self.fitRangeFraction)
+            elif self.fitRangeMode == 'NumberOfEntries':
+                mi.setNumberOfEntriesToCover(self.fitRangeNumberOfEntries)
+                print "setting fit range number of entries:", mi.bounds()
+            else:
+                message = "Illegal fitRangeMode = '%s'" % self.fitRangeMode
+                raise RuntimeError, message
             self.fitRange =  tuple(mi.bounds())
     # end of _updateRanges
 
@@ -626,17 +685,22 @@ class ScaleFitter(PlotData):
     def makePlot(self, workspace):
         self._updateRanges()
 
-        ## Get the DataDrivenBinning object
-        ddbins = self._getAutoBinning()
+        if self.doAutoBinning:
+            ## Get the DataDrivenBinning object
+            ddbins = self._getAutoBinning()
 
-        ## Get custom binning with at least self.binContentMin events per bin.
-        self.bins = ddbins.binning(ROOT.RooBinning())
-        self.bins.SetName('chi2')
+            ## Get custom binning with at least self.binContentMin events per bin.
+            self.bins = ddbins.binning(ROOT.RooBinning())
+            self.bins.SetName('chi2')
 
-        ## Get the corresponding unfiorm binning that is it's smallest superset
-        self.uniformBins = ddbins.uniformBinning(ROOT.RooUniformBinning())
-        self.uniformBins.SetName('normalization')
-
+            ## Get the corresponding unfiorm binning that is it's smallest superset
+            self.uniformBins = ddbins.uniformBinning(ROOT.RooUniformBinning())
+            self.uniformBins.SetName('normalization')
+        else:
+            self.uniformBins = ROOT.RooUniformBinning(self.xRange[0],
+                                                      self.xRange[1],
+                                                      self.nBins)
+            self.bins = self.uniformBins
         self.x.SetTitle(self.xTitle)
         self.x.setBins(self.nBins)
 
@@ -653,24 +717,39 @@ class ScaleFitter(PlotData):
 
         ## Add the data and model to the frame
         for p in [self.plot, self.plotZoom]:
-            ## This is hack to make RooFit use a nice normaliztion.
-            ## First plot the data with uniform binning but don't display it.
-            self.data.plotOn(p, Binning(self.uniformBins), Invisible())
+            if self.doAutoBinning:
+                ## This is hack to make RooFit use a nice normaliztion.
+                ## First plot the data with uniform binning but don't display it.
+                self.data.plotOn(p, Binning(self.uniformBins), Invisible())
             ## Then plot the data with the non-uniform binning.
             self.data.plotOn(p, Binning(self.bins))
-            ## Get the histogram of data and set the bin centers equal
-            ## to per-bin medians.
-            hist = p.getHist('h_' + self.data.GetName())
-            ddbins.applyTo(hist)
+            if self.doAutoBinning:
+                ## Get the histogram of data and set the bin centers equal
+                ## to per-bin medians.
+                hist = p.getHist('h_' + self.data.GetName())
+                ddbins.applyTo(hist)
+            ## ## Find normalization range defined by bin boundaries
+            ## xlo, xhi = self.fitRange
+            ## binIndexes = range(self.bins.numBins())
+            ## for b in binIndexes:
+            ##     if self.bins.binLow(b) >= xlo:
+            ##         xlo = self.bins.binLow(b)
+            ## binIndexes.reverse()
+            ## for b in binIndexes:
+            ##     if self.bins.binHigh(b) <= xhi:
+            ##         xhi = self.bins.binHigh(b)
+            ## self.x.setRange('FitNormRange', xlo, xhi)
+            
             ## Finally, overlay the fit.
-            self.model.plotOn(p)
+            self.model.plotOn(p, Normalization(self.fitRangeNumEvents,
+                                               ROOT.RooAbsReal.NumEvent))
 
         ## Adjust the y range of the plot
         hist = self.plot.getHist('h_' + self.data.GetName())
         irange = range(hist.GetN())
         ymax = max([hist.GetY()[i] + hist.GetErrorYhigh(i) for i in irange])
         ymin = min([hist.GetY()[i] - hist.GetErrorYlow(i) for i in irange])
-        if ymin < 0:
+        if ymin <= 0.:
             ymin = 0.1
         ymarginf = pow(ymax / ymin, 0.1)
         self.plot.GetYaxis().SetRangeUser(ymin / ymarginf, ymax * ymarginf)
@@ -711,12 +790,13 @@ class ScaleFitter(PlotData):
         for i in range(hpull.GetN()):
             pull.setVal(hpull.GetY()[i])
             pulldata.add(RooArgSet(pull))
-        entries = pulldata.tree().Draw('pull', '', 'goff')
-        pullbins = DataDrivenBinning(entries, pulldata.tree().GetV1(), 5, 10)
-        binning = pullbins.binning(ROOT.RooBinning())
-        uniformBinning = pullbins.uniformBinning(ROOT.RooUniformBinning())
-        pulldata.plotOn(self.pullDistPlot, Binning(uniformBinning), Invisible())
-        pulldata.plotOn(self.pullDistPlot, Binning(binning))
+        ## entries = pulldata.tree().Draw('pull', '', 'goff')
+        ## pullbins = DataDrivenBinning(entries, pulldata.tree().GetV1(), 5, 10)
+        ## binning = pullbins.binning(ROOT.RooBinning())
+        ## uniformBinning = pullbins.uniformBinning(ROOT.RooUniformBinning())
+        ## pulldata.plotOn(self.pullDistPlot, Binning(uniformBinning), Invisible())
+        ## pulldata.plotOn(self.pullDistPlot, Binning(binning))
+        pulldata.plotOn(self.pullDistPlot)
         standardNormal.plotOn(self.pullDistPlot)#, Normalization(hpull.GetN()))
 
         ## Customize plot titles and axis
