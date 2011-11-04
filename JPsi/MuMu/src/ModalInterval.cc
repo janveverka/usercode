@@ -221,6 +221,10 @@ ModalInterval::readData(RooAbsReal& x, RooDataSet const& data) {
 void
 ModalInterval::setFraction(double fraction) {
   fraction_ = fraction;
+  if (fraction_ > 1.)
+    fraction_ = 1.;
+  if (fraction_ < 0.)
+    fraction_ = 0.;
   initBounds();
   updatedIntervalBounds_  = false;
 }
@@ -244,6 +248,10 @@ ModalInterval::setNumberOfEntriesToCover(size_t entries) {
   /// The '-0.5' compensates for rounding upward when calculating the
   /// number of entries in the interval
   fraction_ = (entries - 0.5) / x_.size();
+  if (fraction_ > 1.)
+    fraction_ = 1.;
+  if (fraction_ < 0.)
+    fraction_ = 0.;
   initBounds();
   updatedIntervalBounds_  = false;
 }
