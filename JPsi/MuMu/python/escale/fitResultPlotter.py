@@ -132,8 +132,18 @@ class FitResultPlotter():
     ## end of plot()
 
     #--------------------------------------------------------------------------
-    def plotall(self, **kwargs):
+    def plotall(self, logy = False, **kwargs):
         '''Plots the current graphs with appropriate ranges and labels.'''
+
+        ## Calculate the range of the y axis depending on the logy flag.
+        ## Add a 10% margin on top of the (min, max) range.
+        if logy:
+            yrange = lambda ymin, ymax: (ymin / pow(ymax / ymin, 0.1),
+                                         ymax * pow(ymax / ymin, 0.1))
+        else:        
+            yrange = lambda ymin, ymax: (ymin - 0.1 * (ymax - ymin),
+                                         ymax + 0.1 * (ymax - ymin))
+            
 
         ## Use optional arguments to update instance data
         for name, value in kwargs.items():
@@ -154,13 +164,16 @@ class FitResultPlotter():
         ymin, ymax = min(ylo), max(yhi)
 
         dx = xmax - xmin
-        dy = ymax - ymin
+        # dy = ymax - ymin
+
+        ## Add the margin to the y axis range
+        ymin, ymax = yrange(ymin, ymax)
 
         graph = self.graphs[0]
         graph.SetTitle('%s;%s;%s' % (self.title, self.xtitle, self.ytitle))
         graph.GetXaxis().SetLimits(xmin - 0.1 * dx, xmax + 0.1 * dx)
-        graph.GetHistogram().SetMinimum(ymin - 0.1 * dy)
-        graph.GetHistogram().SetMaximum(ymax + 0.1 * dy)
+        graph.GetHistogram().SetMinimum(ymin)
+        graph.GetHistogram().SetMaximum(ymax)
 
         ## Draw the graphs
         for i, graph in enumerate(self.graphs):
@@ -226,6 +239,24 @@ class FitResultPlotter():
             print '%10.3g' % graph.GetEX()[i],
             print '%10.3g' % graph.GetY()[i],
             print '%10.3g' % graph.GetEY()[i]
+    ## end of dump()
+
+    #------------------------------------------------------------------------------
+    def histogramall(self,
+                     name = 'h_yvalues',
+                     title = ';graph y values; Entries',
+                     nbins = 5, xlow = 0, xhigh = 1,
+                     getter = lambda graph, i: graph.GetY()[i]):
+        if '%s' in title:
+            title = title % self.title
+        hist = ROOT.TH1F(name, title, nbins, xlow, xhigh)
+        for g in self.graphs:
+            for i in range(g.GetN()):
+                hist.Fill(getter(g, i))
+        hist.SetStats(0)
+        hist.SetMinimum()
+        return hist
+    ## end of histogramall                
 
     #------------------------------------------------------------------------------
     def main(self, **kwargs):
