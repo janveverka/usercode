@@ -9,6 +9,7 @@ from JPsi.MuMu.common.binedges import BinEdges
 from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
 from JPsi.MuMu.escale.lyondata import data_2011_09_23_confID155805 as lyon
+from JPsi.MuMu.scaleFitter import subdet_r9_categories
 
 gStyle.SetPadTopMargin(0.1)
 canvases.wwidth = 400
@@ -16,6 +17,7 @@ canvases.wheight = 400
 canvases.yperiod = 10
 
 filename = '/raid2/veverka/esFitResults/mc_sreco_strue_Baseline_V1.root'
+filename = '/Users/veverka/Work/Talks/11-11-04/mc_sreco_strue_Baseline_V1.root'
 
 plotters = []
 
@@ -184,6 +186,86 @@ for cfg in cfgs:
 
     plotters.append(frp)
 ## end of loop over cfgs
+
+
+
+################################################################################
+## Plot the p-values of the MC true fits
+filenames = [filename] * n
+workspaces = ['ws1'] * n
+snapshot = 'chi2_strue_mc_bifurGauss_mmMass80_%s_PhoEt%d-%d_iter0'
+cats = list(subdet_r9_categories)
+
+frp = FitResultPlotter(
+    sources = zip([filename] * n,
+                  ['ws1'] * n,
+                  [snapshot % ('EB_highR9', lo, hi) for lo, hi in binedges]),
+    getters =  var_vs_pt('chi2Prob'),
+    xtitle = 'E_{T}^{#gamma} (GeV)',
+    ytitle = 'p-value',
+    title = 'Barrel, R_{9}^{#gamma} < 0.94',
+    )
+
+for icat in cats:
+    frp.sources = zip(filenames, workspaces,
+                      [snapshot % (icat.name, lo, hi) for lo, hi in binedges])
+    frp.getters = var_vs_pt('chi2Prob')
+    frp.title = ', '.join(icat.labels)
+    frp.getdata()
+    frp.makegraph()
+
+canvases.next('strue_pvalues_vs_phoEt')
+frp.plotall(title = 'MC Truth Fits')
+plotters.append(frp)
+
+## Make the distribution of the p-values
+hist = frp.histogramall(
+    name = 'h_strue_pvalues',
+    title = 's_{true} = E^{#gamma}_{reco}/E^{#gamma}_{gen};p-value;Fits',
+    nbins = 5, xlow = 0, xhigh = 1
+    )
+canvases.next('strue_pvalues_distro')
+hist.Draw('e0')
+plotters.append(hist)
+
+################################################################################
+## Plot the p-values of the reco s-Fits fits
+filenames = [filename] * n
+workspaces = ['ws1'] * n
+snapshot = 'chi2_sreco_mc_cbShape_mmMass80_%s_PhoEt%d-%d_iter0'
+
+frp = FitResultPlotter(
+    sources = zip([filename] * n,
+                  ['ws1'] * n,
+                  [snapshot % ('EB_highR9', lo, hi) for lo, hi in binedges]),
+    getters =  var_vs_pt('chi2Prob'),
+    xtitle = 'E_{T}^{#gamma} (GeV)',
+    ytitle = 'p-value',
+    title = 'Barrel, R_{9}^{#gamma} > 0.94',
+    )
+
+for icat in cats:
+    frp.sources = zip(filenames, workspaces,
+                      [snapshot % (icat.name, lo, hi) for lo, hi in binedges])
+    frp.getters = var_vs_pt('chi2Prob')
+    frp.title = ', '.join(icat.labels)
+    frp.getdata()
+    frp.makegraph()
+
+canvases.next('sreco_pvalues_vs_phoEt').SetLogy()
+frp.plotall(logy = True, title = 's_{reco} Fits')
+
+## Make the distribution of the p-values
+hist = frp.histogramall(
+    name = 'h_sreco_pvalues',
+    title = 's_{reco} = E^{#gamma}_{reco}/E^{#gamma}_{kin};p-value;Fits',
+    nbins = 5, xlow = 0, xhigh = 1
+    )
+c1 = canvases.next('sreco_pvalues_distro')
+hist.Draw('e0')
+plotters.append(hist)
+
+c1.Update()
 
 if __name__ == '__main__':
     import user
