@@ -5,6 +5,7 @@ import math
 #sys.argv.append("-b")
 
 import ROOT
+from JPsi.MuMu.common.roofit import *
 
 def usingNamespaceRooFit():
     return """
@@ -21,28 +22,32 @@ for method in dir(ROOT.RooFit):
 
 setattr(ROOT.RooWorkspace, "Import", getattr(ROOT.RooWorkspace, "import"))
 
-def buildModel(ws):
-    cb1 = ws.factory("""CBShape::cb1(
+def buildModel(workspace):
+    cb1 = workspace.factory("""CBShape::cb1(
         mass[60, 120],
         cbBias[0, -10, 10],
         cbSigma[0.7, 0.001, 10],
         cbCut[1.5, 0, 10],
         cbPower[1.5, 0.1, 10])""")
-    cb2 = ws.factory("""CBShape::cb2(
+    cb2 = workspace.factory("""CBShape::cb2(
         mass[60, 120],
         cbBias[0, -10, 10],
         cbSigma[0.7, 0.001, 10],
         cbCut[1.5, 0, 10],
         cbPower[1.5, 0.1, 10])""")
-    bw = ws.factory("""BreitWigner::bw(
+    bw = workspace.factory("""BreitWigner::bw(
         mass,
         bwMean[91.19],
         bwWidth[2.5])""")
-    ws.var("mass").setBins(100000, "fft")
-    BWxCB1 = ws.factory("FFTConvPdf::BWxCB1(mass,bw,cb1)")
-    return ws.factory("FFTConvPdf::BWxCB1xCB2(mass,BWxCB1,cb2)")
+    workspace.var("mass").setBins(100000, "fft")
+    BWxCB1 = workspace.factory("FFTConvPdf::BWxCB1(mass,bw,cb1)")
+    BWxCB1.setBufferFraction(0.5)
+    BWxCB1xCB2 = workspace.factory("FFTConvPdf::BWxCB1xCB2(mass,BWxCB1,cb2)")
+    BWxCB1xCB2.setBufferFraction(0.5)
+    return BWxCB1xCB2
 
-def getData(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents = 10000):
+def getData(workspace, bias = 1., sigma = 0.01, cut = 1.5,
+            power = 1.5, nevents = 10000):
     w = ROOT.RooWorkspace("w")
     cb = w.factory("""CBShape::cbTrue(
         res[0, 2],
@@ -51,7 +56,7 @@ def getData(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents = 10000
         cut[%f],
         power[%f])""" % (bias, sigma, cut, power)
         )
-    ws.Import(cb, RenameAllVariables("True"))
+    workspace.Import(cb, RenameAllVariables("True"))
     bw = w.factory("""BreitWigner::bw(
         m[50,130],
         mean[91.12],
@@ -72,20 +77,19 @@ def getData(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents = 10000
         leafVars.mass = m*math.sqrt(res1*res2)
         if 60. < leafVars.mass and leafVars.mass < 120.:
             t1.Fill()
-    mass = ws.var("mass")
+    mass = workspace.var("mass")
     if not mass:
-        mass = ws.factory("mass[60,120]")
+        mass = workspace.factory("mass[60,120]")
     data = ROOT.RooDataSet("data", "toy reco Z->ll mass", t1, ROOT.RooArgSet(mass))
-    ws.Import(data)
+    workspace.Import(data)
     return data
 
-def getFitPlot(ws):
-    plot = ws.var("mass").frame()
-    ws.data("data").plotOn(plot)
-    model = ws.pdf("BWxCB1xCB2")
-    paramsToShow = ROOT.RooArgSet(
-        *[ws.var(x) for x in "cbBias cbSigma cbCut cbPower".split()]
-        )
+def getFitPlot(workspace):
+    plot = workspace.var("mass").frame()
+    workspace.data("data").plotOn(plot)
+    model = workspace.pdf("BWxCB1xCB2")
+    paramsToShow = ROOT.RooArgSet(*[workspace.var(x) for x in
+                                    "cbBias cbSigma cbCut cbPower".split()])
     model.paramOn(plot,
         Format("NEU", AutoPrecision(2)),
         Parameters(paramsToShow),
@@ -95,74 +99,83 @@ def getFitPlot(ws):
     return plot
 
 def test():
-    ws = ROOT.RooWorkspace("testws")
-    buildModel(ws)
-    getData(ws)
-    ws.Print()
-    mass = ws.var("mass")
+    workspace = ROOT.RooWorkspace("testworkspace")
+    buildModel(workspace)
+    getData(workspace)
+    workspace.Print()
+    mass = workspace.var("mass")
     mframe = mass.frame()
     #c1 = ROOT.TCanvas()
     #c1.Divide(2,2)
     #c1.cd(1)
     mframe.Draw()
     #c1.cd(2)
-    ws.data("data").plotOn(mframe)
-    BWxCB = ws.pdf("BWxCB")
-    BWxCB.fitTo(ws.data("data"))
-    BWxCB.plotOn(mframe)
-    #ws.pdf("bw").plotOn(mframe, ROOT.RooFit.LineColor(ROOT.kRed))
+    data = workspace.data("data")
+    data.plotOn(mframe)
+    
+    BWxCB1 = workspace.pdf("BWxCB1")
+    BWxCB1.fitTo(data)
+    BWxCB1.plotOn(mframe)
+
+    BWxCB1xCB2 = workspace.pdf('BWxCB1xCB2')
+    BWxCB1xCB2.fitTo(data)
+    BWxCB1xCB2.plotOn(mframe, LineColor(ROOT.kRed), LineStyle(ROOT.kDashed))
     mframe.Draw()
-    return ws
+    return workspace
 
-def getModelParams(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents=10000):
-    model = buildModel(ws)
-    data = getData(ws, bias, sigma, cut, power, nevents)
-    #mframe = ws.var("mass")
+def getModelParams(workspace, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents=10000):
+    model = buildModel(workspace)
+    data = getData(workspace, bias, sigma, cut, power, nevents)
+    #mframe = workspace.var("mass")
     model.fitTo(data, PrintLevel(-1))
-    getFitPlot(ws).Draw()
-    ws.var("cbBias").getVal()
-    return tuple([ws.var(x) for x in "cbBias cbSigma cbCut cbPower".split()])
+    getFitPlot(workspace).Draw()
+    workspace.var("cbBias").getVal()
+    return tuple([workspace.var(x) for x in "cbBias cbSigma cbCut cbPower".split()])
 
-#ws = test()
+#workspace = test()
 ## Shorthand for RooFit namespace functions
-exec(usingNamespaceRooFit())
-params = []
+# exec(usingNamespaceRooFit())
+# params = []
 
-N = 1000
+# N = 1000
 
 
-xvalues = [0.01, 0.01, 0.01] # + 0.005*i for i in range(20)]
-for sigma in xvalues:
-    ws = ROOT.RooWorkspace("ws")
-    params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=sigma)))
-    ws.writeToFile("resolutionScan2.root", False)
+# xvalues = [0.01, 0.01, 0.01] # + 0.005*i for i in range(20)]
+# for sigma in xvalues:
+#     workspace = ROOT.RooWorkspace("workspace")
+#     params.append(copy.deepcopy(getModelParams(workspace, nevents=N, sigma=sigma)))
+#    workspace.writeToFile("resolutionScan2.root", False)
 
 #xvalues = [0.95 + 0.005*i for i in range(21)]
 #for bias in xvalues:
-    #ws = ROOT.RooWorkspace("ws")
-    #params.append(copy.deepcopy(getModelParams(ws, nevents=N, bias=bias, sigma=0.01)))
-    #ws.writeToFile("scaleScan_100k.root", False)
+    #workspace = ROOT.RooWorkspace("workspace")
+    #params.append(copy.deepcopy(getModelParams(workspace, nevents=N, bias=bias, sigma=0.01)))
+    #workspace.writeToFile("scaleScan_100k.root", False)
 
 #for power in [1.0 + 0.1*i for i in range(11)]:
-    #ws = ROOT.RooWorkspace("ws")
-    #params.append(copy.deepcopy(getModelParams(ws, nevents=N, power=power)))
-    #ws.writeToFile("powerScan_100k.root", False)
+    #workspace = ROOT.RooWorkspace("workspace")
+    #params.append(copy.deepcopy(getModelParams(workspace, nevents=N, power=power)))
+    #workspace.writeToFile("powerScan_100k.root", False)
 
 #for cut in [0.1 + 0.1*i for i in range(21)]:
-    #ws = ROOT.RooWorkspace("ws")
-    #params.append(copy.deepcopy(getModelParams(ws, nevents=N, cut=cut)))
-    #ws.writeToFile("cutScan_100k.root", False)
+    #workspace = ROOT.RooWorkspace("workspace")
+    #params.append(copy.deepcopy(getModelParams(workspace, nevents=N, cut=cut)))
+    #workspace.writeToFile("cutScan_100k.root", False)
 
-#getFitPlot(ws, "mass", ).Draw()
+#getFitPlot(workspace, "mass", ).Draw()
 
-print "# x, xerr, m0(%), m0_err(%), sigma, sigma_err(%), cut, cut_err, power, power_err"
-for i in range(len(xvalues)):
-    print "% 5.3g   0.0   " % (100*(xvalues[i]-1.),),
-    factor = 100./91.19
-    print "% 8.4g %8.2g   " % (params[i][0].getVal() * factor, params[i][0].getError() * factor),
-    factor = factor * math.sqrt(2)
-    print "% 8.4g %8.2g   " % (params[i][1].getVal() * factor, params[i][1].getError() * factor),
-    for j in range(2, 4):
-        print "% 8.4g %8.2g   " % (params[i][j].getVal(), params[i][j].getError(),),
-    print
-if __name__ == "__main__": import user
+## print "# x, xerr, m0(%), m0_err(%), sigma, sigma_err(%), cut, cut_err, power, power_err"
+## for i in range(len(xvalues)):
+##     print "% 5.3g   0.0   " % (100*(xvalues[i]-1.),),
+##     factor = 100./91.19
+##     print "% 8.4g %8.2g   " % (params[i][0].getVal() * factor, params[i][0].getError() * factor),
+##     factor = factor * math.sqrt(2)
+##     print "% 8.4g %8.2g   " % (params[i][1].getVal() * factor, params[i][1].getError() * factor),
+##     for j in range(2, 4):
+##         print "% 8.4g %8.2g   " % (params[i][j].getVal(), params[i][j].getError(),),
+##     print
+
+if __name__ == "__main__":
+    import user
+    w = test()
+    
