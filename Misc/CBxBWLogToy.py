@@ -5,40 +5,44 @@ import math
 #sys.argv.append("-b")
 
 from ROOT import *
-
-def usingNamespaceRooFit():
-    return """
-import re
-import sys
-titlePattern = re.compile("^[A-Z]")
-for method in dir(RooFit):
-    if callable(getattr(RooFit, method)) and re.search(titlePattern, method):
-        if hasattr(sys.modules[__name__], method):
-            print "% not imported since it already exists!" % method
-        else:
-            setattr(sys.modules[__name__], method, getattr(RooFit, method))
-"""
+from JPsi.MuMu.common.roofit import *
 
 setattr(RooWorkspace, "Import", getattr(RooWorkspace, "import"))
 
-def buildModel(ws):
-    logm = ws.factory("logm[4,5]")
-    mass = ws.factory("FormulaVar::mass('exp(logm)', {logm})")
-    res = ws.factory("FormulaVar::res('exp(2.*logm)', {logm})")
-    CB1 = ws.factory("""CBShape::CB1(
-        res,
-        cbBias[0, -10, 10],
-        cbSigma[0.7, 0.001, 10],
-        cbCut[1.5, 0, 10],
-        cbPower[1.5, 0.1, 10])""")
-    CB2 = ws.factory("CBShape::CB2(res, cbBias, cbSigma, cbCut, cbPower)")
-    CB1xCB2 = ws.factory("FFTConvPdf::CB1xCB2(logm,CB1,CB2)")
-    bw = ws.factory("""BreitWigner::bw(
-        mass,
+def buildModel(wspace):
+    mass = wspace.factory('mass[60, 120]')
+    logmu = wspace.factory("logmu[-0.5,0.5]")
+    ## Mass as a function of logmu
+    massf = wspace.factory("FormulaVar::massf('91.2 * exp(logmu)', {logmu})")
+    ## logmu as a function of mass
+    logmuf = wspace.factory("FormulaVar::logmuf('log(mass/91.2)', {mass})")
+    resf = wspace.factory("FormulaVar::resf('exp(2*logmu)', {logmu})")
+    
+    logmu.setBins(10000, "fft")
+    bw = wspace.factory("""BreitWigner::bw(
+        massf,
         bwMean[91.19],
         bwWidth[2.5])""")
-    ws.var("mass").setBins(100000, "fft")
-    return ws.factory("FFTConvPdf::BWxCB(mass,bw,cb)")
+    cb1 = wspace.factory("""CBShape::cb1(
+        logmu,
+        cbBias[0, -0.1, 0.1],
+        cbSigma[0.02, 0.001, 0.1],
+        cbCut[1.5, 0, 10],
+        cbPower[1.5, 0.1, 10])""")
+    cb2 = wspace.factory("CBShape::cb2(logmu, cbBias, cbSigma, cbCut, cbPower)")
+    bwxcb1 = wspace.factory("FCONV::bwxcb1(logmu,bw,cb1)")
+    bwxcb1.setBufferFraction(0.25)
+    wspace.Print()
+
+    # bwxcb1xcb2 = wspace.factory("FFTConvPdf::bwxcb1xcb2(logmuf,logmu,bwxcb1,cb2)")
+    ## Start hack to workaround RooWorkspace::factory bug preventing usage
+    ## of the RooFFTConvPdf constructor with 4 arguments
+    bwxcb1xcb2 = RooFFTConvPdf('bwxcb1xcb2', 'bwxcb1xcb2',
+                               logmuf, logmu, bwxcb1, cb2)
+    wspace.Import(bwxcb1xcb2)
+    bwxcb1xcb2.setBufferFraction(0.25)
+    wspace.Print()
+    return bwxcb1xcb2
 
 def getData(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents = 10000):
     w = RooWorkspace("w")
@@ -58,7 +62,7 @@ def getData(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents = 10000
     mData = bw.generate(RooArgSet(w.var("m")), moreEvents)
     res1Data = cb.generate(RooArgSet(w.var("res")), moreEvents)
     res2Data = cb.generate(RooArgSet(w.var("res")), moreEvents)
-    gProcessLine("struct LeafVars {Double_t mass;};")
+    gROOT.ProcessLine("struct LeafVars {Double_t mass;};")
     leafVars = LeafVars()
     t1 = TTree("t1", "t1")
     t1.Branch("mass", AddressOf(leafVars, "mass"), "mass/D")
@@ -78,39 +82,45 @@ def getData(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents = 10000
     return data
 
 def getFitPlot(ws):
-    plot = ws.var("mass").frame()
-    ws.data("data").plotOn(plot)
-    model = ws.pdf("BWxCB")
-    paramsToShow = RooArgSet(
-        *[ws.var(x) for x in "cbBias cbSigma cbCut cbPower".split()]
-        )
-    model.paramOn(plot,
-        Format("NEU", AutoPrecision(2)),
-        Parameters(paramsToShow),
-        Layout(.67, .97, .97)
-        )
-    model.plotOn(plot)
-    return plot
+    ## plot = ws.var("mass").frame()
+    ## ws.data("data").plotOn(plot)
+    ## model = ws.pdf("BWxCB")
+    ## paramsToShow = RooArgSet(
+    ##     *[ws.var(x) for x in "cbBias cbSigma cbCut cbPower".split()]
+    ##     )
+    ## model.paramOn(plot,
+    ##     Format("NEU", AutoPrecision(2)),
+    ##     Parameters(paramsToShow),
+    ##     Layout(.67, .97, .97)
+    ##     )
+    ## model.plotOn(plot)
+    ## return plot
+    pass
 
 def test():
-    ws = RooWorkspace("testws")
-    buildModel(ws)
-    getData(ws)
-    ws.Print()
-    mass = ws.var("mass")
+    workspace = ROOT.RooWorkspace("testworkspace")
+    buildModel(workspace)
+    getData(workspace)
+    workspace.Print()
+    mass = workspace.var("mass")
     mframe = mass.frame()
-    #c1 = TCanvas()
+    #c1 = ROOT.TCanvas()
     #c1.Divide(2,2)
     #c1.cd(1)
     mframe.Draw()
     #c1.cd(2)
-    ws.data("data").plotOn(mframe)
-    BWxCB = ws.pdf("BWxCB")
-    BWxCB.fitTo(ws.data("data"))
-    BWxCB.plotOn(mframe)
-    #ws.pdf("bw").plotOn(mframe, RooFit.LineColor(kRed))
+    data = workspace.data("data")
+    data.plotOn(mframe)
+    
+    # BWxCB1 = workspace.pdf("bwxcb1")
+    # BWxCB1.fitTo(data)
+    # BWxCB1.plotOn(mframe)
+
+    BWxCB1xCB2 = workspace.pdf('bwxcb1xcb2')
+    BWxCB1xCB2.fitTo(data)
+    BWxCB1xCB2.plotOn(mframe, LineColor(ROOT.kRed), LineStyle(ROOT.kDashed))
     mframe.Draw()
-    return ws
+    return workspace
 
 def getModelParams(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents=10000):
     model = buildModel(ws)
@@ -123,8 +133,8 @@ def getModelParams(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents=
 
 #ws = test()
 ## Shorthand for RooFit namespace functions
-exec(usingNamespaceRooFit())
-params = []
+#exec(usingNamespaceRooFit())
+#params = []
 
 N = 100000
 #ws = RooWorkspace("ws"); params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=0.01)))
@@ -133,11 +143,11 @@ N = 100000
 #ws = RooWorkspace("ws"); params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=0.01)))
 #ws = RooWorkspace("ws"); params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=0.01)))
 
-xvalues = [0.005 + 0.005*i for i in range(20)]
-for sigma in xvalues:
-    ws = RooWorkspace("ws")
-    params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=sigma)))
-    ws.writeToFile("resolutionScan.root", False)
+## xvalues = [0.005 + 0.005*i for i in range(20)]
+## for sigma in xvalues:
+##     ws = RooWorkspace("ws")
+##     params.append(copy.deepcopy(getModelParams(ws, nevents=N, sigma=sigma)))
+##     ws.writeToFile("resolutionScan.root", False)
 
 #xvalues = [0.95 + 0.005*i for i in range(21)]
 #for bias in xvalues:
@@ -155,14 +165,14 @@ for sigma in xvalues:
 
 #getFitPlot(ws, "mass", ).Draw()
 
-print "# x, xerr, m0(%), m0_err(%), sigma, sigma_err(%), cut, cut_err, power, power_err"
-for i in range(len(xvalues)):
-    print "% 5.3g 0.0   " % (100*(xvalues[i]-1.),),
-    factor = 100./91.19
-    print "% 8.3g %8.2g   " % (params[i][0].getVal() * factor, params[i][0].getError() * factor),
-    factor = factor * math.sqrt(2)
-    print "% 8.3g %8.2g   " % (params[i][1].getVal() * factor, params[i][1].getError() * factor),
-    for j in range(2, 4):
-        print "% 8.3g %8.2g   " % (params[i][j].getVal(), params[i][j].getError(),),
-    print
+## print "# x, xerr, m0(%), m0_err(%), sigma, sigma_err(%), cut, cut_err, power, power_err"
+## for i in range(len(xvalues)):
+##     print "% 5.3g 0.0   " % (100*(xvalues[i]-1.),),
+##     factor = 100./91.19
+##     print "% 8.3g %8.2g   " % (params[i][0].getVal() * factor, params[i][0].getError() * factor),
+##     factor = factor * math.sqrt(2)
+##     print "% 8.3g %8.2g   " % (params[i][1].getVal() * factor, params[i][1].getError() * factor),
+##     for j in range(2, 4):
+##         print "% 8.3g %8.2g   " % (params[i][j].getVal(), params[i][j].getError(),),
+##     print
 if __name__ == "__main__": import user
