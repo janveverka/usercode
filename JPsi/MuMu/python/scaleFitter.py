@@ -634,11 +634,25 @@ class ScaleFitter(PlotData):
 
 
     #--------------------------------------------------------------------------
-    def _makeExtendedCanvas(self):
+    def _makeExtendedCanvas(self, landscape = False):
         ## Make a canvas
-        canvas = TCanvas( self.name, self.name, 800, 900 )
-        canvas.Divide(2,3)
-        self.pads.extend([canvas.cd(i) for i in range(1,6)])
+        canvas = TCanvas(self.name, self.name)
+        if landscape:
+            canvas.SetWindowSize(1200, 600)
+            canvas.Divide(3,2)
+            plots = [self.plot, self.plotZoom, self.pullDistPlot,
+                     self.pullPlot, self.residPlot]
+        else:
+            canvas.SetWindowSize(800, 900 )
+            canvas.Divide(2,3)
+            plots = [self.plot, self.plotZoom, 
+                     self.pullPlot, self.residPlot,
+                     self.pullDistPlot]
+
+
+        for i in range(1, 7):
+            self.pads.append(canvas.cd(i))
+            
         canvas.cd(1).SetLogy()
 
         self.model.paramOn(self.plot,
@@ -647,12 +661,8 @@ class ScaleFitter(PlotData):
                            Layout(*self.paramLayout))
 
         ## Draw the frames
-        for pad, plot in [(canvas.cd(1), self.plot),
-                          (canvas.cd(2), self.plotZoom),
-                          (canvas.cd(3), self.pullPlot),
-                          (canvas.cd(4), self.residPlot),
-                          (canvas.cd(5), self.pullDistPlot),]:
-            pad.cd()
+        for i, plot in enumerate(plots):
+            pad = canvas.cd(i+1)
             pad.SetGrid()
             #plot.GetYaxis().CenterTitle()
             plot.Draw()
@@ -836,6 +846,8 @@ class ScaleFitter(PlotData):
             self.canvas = self._makeCompactCanvas()
         elif self.canvasStyle == 'extended':
             self.canvas = self._makeExtendedCanvas()
+        elif self.canvasStyle == 'landscape':
+            self.canvas = self._makeExtendedCanvas(landscape = True)
         else:
             raise RuntimeError, "Illegal canvasStyle `'!" % self.canvasStyle
 
