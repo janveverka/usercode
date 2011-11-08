@@ -49,7 +49,7 @@ struefit = ScaleFitter(
     doAutoBinning = True,
     binContentMax = 200,
     binContentMin = 35,
-    canvasStyle = 'extended',
+    canvasStyle = 'landscape',
 
     doAutoXRange = True,
     doAutoXRangeZoom = True,
