@@ -6,6 +6,7 @@ import math
 
 from ROOT import *
 from JPsi.MuMu.common.roofit import *
+gSystem.Load('libJPsiMuMu')
 
 setattr(RooWorkspace, "Import", getattr(RooWorkspace, "import"))
 
@@ -23,13 +24,13 @@ def buildModel(wspace):
         massf,
         bwMean[91.19],
         bwWidth[2.5])""")
-    cb1 = wspace.factory("""CBShape::cb1(
+    cb1 = wspace.factory("""RooLogSqrtCBShape::cb1(
         logmu,
-        cbBias[0, -0.1, 0.1],
-        cbSigma[0.02, 0.001, 0.1],
-        cbCut[1.5, 0, 10],
-        cbPower[1.5, 0.1, 10])""")
-    cb2 = wspace.factory("CBShape::cb2(logmu, cbBias, cbSigma, cbCut, cbPower)")
+        #Deltam[1, 0.5, 1.5],
+        #sigma[0.02, 0.001, 0.1],
+        #alpha[1.5, 0, 10],
+        n[1.5, 0.1, 10])""")
+    cb2 = wspace.factory("RooLogSqrtCBShape::cb2(logmu, #Deltam, #sigma, #alpha, n)")
     bwxcb1 = wspace.factory("FCONV::bwxcb1(logmu,bw,cb1)")
     bwxcb1.setBufferFraction(0.25)
     wspace.Print()
@@ -44,7 +45,7 @@ def buildModel(wspace):
     wspace.Print()
     return bwxcb1xcb2
 
-def getData(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents = 10000):
+def getData(ws, bias = 1., sigma = 0.01, cut = 1.5, power = 1.5, nevents = 5000):
     w = RooWorkspace("w")
     cb = w.factory("""CBShape::cbTrue(
         res[0, 2],
@@ -100,7 +101,7 @@ def getFitPlot(ws):
 def test():
     workspace = ROOT.RooWorkspace("testworkspace")
     buildModel(workspace)
-    getData(workspace)
+    getData(workspace, nevents = 100000, sigma = 0.02, bias=0.96)
     workspace.Print()
     mass = workspace.var("mass")
     mframe = mass.frame()
@@ -119,6 +120,10 @@ def test():
     BWxCB1xCB2 = workspace.pdf('bwxcb1xcb2')
     BWxCB1xCB2.fitTo(data)
     BWxCB1xCB2.plotOn(mframe, LineColor(ROOT.kRed), LineStyle(ROOT.kDashed))
+    BWxCB1xCB2.paramOn(mframe,
+                       Format('NEU', AutoPrecision(2) ),
+                       Layout(.55, 0.92, 0.92) )
+
     mframe.Draw()
     return workspace
 
@@ -175,4 +180,6 @@ N = 100000
 ##     for j in range(2, 4):
 ##         print "% 8.3g %8.2g   " % (params[i][j].getVal(), params[i][j].getError(),),
 ##     print
-if __name__ == "__main__": import user
+if __name__ == "__main__":
+    import user
+    w = test()
