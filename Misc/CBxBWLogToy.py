@@ -24,6 +24,9 @@ def buildModel(wspace):
         massf,
         bwMean[91.19],
         bwWidth[2.5])""")
+    ## Start a hack to work around a RooFit limitation preventing observable
+    ## transform of the 2nd PDF in the FFT convolution.  Use custom PDF
+    ## RooLogCBShape instead of transforming RooCBShape.
     cb1 = wspace.factory("""RooLogSqrtCBShape::cb1(
         logmu,
         #Deltam[1, 0.5, 1.5],
@@ -101,7 +104,7 @@ def getFitPlot(ws):
 def test():
     workspace = ROOT.RooWorkspace("testworkspace")
     buildModel(workspace)
-    getData(workspace, nevents = 100000, sigma = 0.02, bias=0.96)
+    getData(workspace, nevents = 10000, sigma = 0.02, bias=0.96)
     workspace.Print()
     mass = workspace.var("mass")
     mframe = mass.frame()
@@ -119,7 +122,7 @@ def test():
 
     BWxCB1xCB2 = workspace.pdf('bwxcb1xcb2')
     BWxCB1xCB2.fitTo(data)
-    BWxCB1xCB2.plotOn(mframe, LineColor(ROOT.kRed), LineStyle(ROOT.kDashed))
+    BWxCB1xCB2.plotOn(mframe) #, LineColor(ROOT.kRed), LineStyle(ROOT.kDashed))
     BWxCB1xCB2.paramOn(mframe,
                        Format('NEU', AutoPrecision(2) ),
                        Layout(.55, 0.92, 0.92) )
