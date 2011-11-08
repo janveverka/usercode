@@ -10,6 +10,7 @@
 #include "JPsi/MuMu/interface/RooChi2Calculator.h"
 #include "JPsi/MuMu/interface/RooCruijff.h"
 #include "JPsi/MuMu/interface/RooGshPdf.h"
+#include "JPsi/MuMu/interface/RooLogSqrtCBShape.h"
 #include "JPsi/MuMu/interface/RooSechPdf.h"
 #include "TVirtualFFT.h"
 
@@ -32,6 +33,7 @@
 #pragma link C++ class RooBifurSechPdf;
 #pragma link C++ class RooCruijff;
 #pragma link C++ class RooGshPdf;
+#pragma link C++ class RooLogSqrtCBShape;
 #pragma link C++ class RooSechPdf;
 
 #pragma link C++ global gROOT;
