@@ -46,7 +46,8 @@ dataset = RooDataSet()
 #------------------------------------------------------------------------------
 def set(**kwargs):
     global tree, variable, weight, cuts, categories, dataset
-    for arg in 'tree variable weight cuts categories dataset'.split():
+    for arg in ('tree variable weight cuts categories dataset name '
+                'title').split():
         if arg in kwargs.keys():
             setattr( sys.modules[__name__], arg, kwargs[arg] )
             del kwargs[arg]
@@ -56,12 +57,15 @@ def set(**kwargs):
 
 #------------------------------------------------------------------------------
 def get(**kwargs):
-    global tree, variable, weight, cuts, categories, dataset
+    global tree, variable, weight, cuts, categories, dataset, name, title
 
     ## Initialize
+    name, title = 'data', 'data'
     set(**kwargs)
+    if name != 'data' and title == 'data':
+        title = name
     varSet = RooArgSet( variable, weight, *categories )
-    dataset = RooDataSet( 'data', 'data', varSet, WeightVar( weight.GetName() ) )
+    dataset = RooDataSet(name, title, varSet, WeightVar( weight.GetName() ) )
     #dataset.setWeightVar( weight )
     #dataset = RooDataSet('data', 'data', varSet )
 
