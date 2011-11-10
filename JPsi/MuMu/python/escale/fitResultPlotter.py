@@ -160,6 +160,19 @@ class FitResultPlotter():
             ylo.extend([graph.GetY()[i] - graph.GetEY()[i] for i in range(n)])
             yhi.extend([graph.GetY()[i] + graph.GetEY()[i] for i in range(n)])
 
+        if logy:
+            ## Only keep positive y values.
+            ytoremove = [y for y in ylo if y <= 0.]
+            for y in ytoremove:
+                ylo.remove(y)
+            ytoremove = [y for y in yhi if y <= 0.]
+            for y in ytoremove:
+                yhi.remove(y)
+
+        ## Check if all list of low and high x- and y-values are not empty.
+        if not (xlo and xhi and ylo and yhi):
+            raise RuntimeError, 'Cannot estimate axis ranges!'
+        
         xmin, xmax = min(xlo), max(xhi)
         ymin, ymax = min(ylo), max(yhi)
 

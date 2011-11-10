@@ -27,9 +27,10 @@ _chains = esChains.getChains('v11')
 
 ## Default fit of strue = Ereco / Egen - 1
 struefit = ScaleFitter(
-    name = 'strue_mc',
+    name = 'strue_mc_NominalFitRange71',
+##    name = 'strue_mc_FitRangePositive',
     title = 'strue-Fit, Powheg S4',
-    labels = ['Powheg S4'],
+    labels = ['Powheg S4 Summer11 MC'],
 
     source = _chains['z'],
     xName = 's',
@@ -44,7 +45,7 @@ struefit = ScaleFitter(
     massWindowScale = 1.5,
     massWindow = (87.2, 95.2),
     fitScale = 1.2,
-    fitRange = (-50,100),
+    fitRange = (0,50),
 
     doAutoBinning = True,
     binContentMax = 200,
@@ -61,7 +62,7 @@ struefit = ScaleFitter(
     fitRangeMode = 'Fraction',
     fitRangeSigmaLevel = 2.0,
     fitRangeNumberOfEntries = 3000,
-    fitRangeFraction = 0.68,
+    fitRangeFraction = 0.71,
     paramLayout = (0.57, 0.92, 0.92),
 
     useCustomChi2Calculator = True,    
@@ -98,21 +99,20 @@ for subdet_r9_cat in subdet_r9_categories:
             fit = struefit.clone().applyDefinitions([subdet_r9_cat,
                                                      PhoEtBin(lo, hi),
                                                      Model(model)])
-            if lo == 10 and 'EB_lowR9' in fit.name:
+            if ('EB_lowR9_PhoEt10-12' in fit.name or
+                'EB_lowR9_PhoEt12-15' in fit.name):
                 fit.fitRangeFraction -= 0.2
-            if lo == 12 and 'EB_lowR9' in fit.name:
-                fit.fitRangeFraction -= 0.1
             if 'EE' in fit.name:
                 fit.fitRangeFraction += 0.1
                 fit.binContentMax = 100
+            if fit.fitRangeFraction > 1.:
+                fit.fitRangeFraction = 1.
+            fit.labels.append('Fit Range Coverage: %.0f%%' %
+                              (100 * fit.fitRangeFraction))
+            # fit.labels.append('Fit Range: (%.0f, %.0f)%%' % fit.fitRange)
             struefits.append(fit)
 
 _fits = struefits
-
-maxIterations = 1
-fSigma = 1.5
-pullEpsilon = 0.1
-mwindows = {}
 
 ## Loop over plots
 for fitter in _fits[:]:
@@ -121,113 +121,24 @@ for fitter in _fits[:]:
     print "++ Configuration:"
     print fitter.pydump()
 
-    ## Get mass window, only perform fit once for a given selection and
-    cutsav = ' & '.join(fitter.cuts)
-    if not fitter.massWindow:
-        fitter.massWindow = mwindows.get(cutsav)
-    fitter.getMassCut(ws1)
-    ## Store the resulting mass window in mwindows
-    mwindows[cutsav] = fitter.massWindow
-
     ## Get the data
     fitter.getData(ws1)
-    try:
-        fitScale = fitter.fitScale
-    except AttributeError:
-        fitScale = fSigma
-    name = fitter.name
-    Deltas = ws1.var('#Deltas')
-    DeltasOld = Deltas.getVal()
-    sigmaL = ws1.var('#sigmaL')
-    sigmaR = ws1.var('#sigmaR')
-    sigma = ws1.var('#sigma')
-    k = ws1.function('k')
-    m0 = ws1.function('m0')
-
+    
     ## Load the initial paramter values
     ws1.loadSnapshot(fitter.pdf + '_init')
 
-    for iteration in range(maxIterations):
-        print "++ begin iteration", iteration
-        if iteration == 0:
-            if not hasattr(fitter, 'fitRange'):
-                ## Set the fit range automatically to include all data
-                xlo = fitter.data.tree().GetMinimum(fitter.x.GetName())
-                xhi = fitter.data.tree().GetMaximum(fitter.x.GetName())
+    ## Make the fit
+    fitter.fitToData(ws1)
+    fitter.makePlot(ws1)
 
-                xbinning = fitter.x.getBinning()
-                ilo = xbinning.binNumber(xlo)
-                ihi = xbinning.binNumber(xhi)
+    ## Save the fit result in the workspace
+    ws1.saveSnapshot('sFit_' + fitter.name, fitter.parameters, True)
 
-                ## Take one extra bin on each side
-                ilo = max(0, ilo - 1)
-                ihi = min(ihi + 1, fitter.x.getBins() - 1)
-
-                fitter.fitRange = (xbinning.binLow(ilo), xbinning.binHigh(ihi))
-                print ('+++ Setting fit range to [%f, %f]'
-                       'to cover all data.' % fitter.fitRange)
-        else:
-            if fitter.pdf in ['model', 'cbShape', 'gauss']:
-                fitter.fitRange = ( Deltas.getVal() - fitScale * sigma.getVal(),
-                                    Deltas.getVal() + fitScale * sigma.getVal() )
-            elif fitter.pdf in ['cruijff', 'bifurGauss']:
-                fitter.fitRange = ( Deltas.getVal() - fitScale * sigmaL.getVal(),
-                                    Deltas.getVal() + fitScale * sigmaR.getVal() )
-            elif fitter.pdf == 'lognormal':
-                fitter.fitRange = ( 100*(m0.getVal() / pow(k.getVal(), fitScale) - 1),
-                                    100*(m0.getVal() * pow(k.getVal(), fitScale) - 1) )
-            elif fitter.pdf == 'gamma':
-                dsVal = Deltas.getVal()
-                fsVal = fitScale * sigma.getVal()
-                fitter.fitRange = ( dsVal - fsVal / (1+fsVal/100),
-                                    dsVal + fsVal )
-            else:
-                raise RuntimeError, "Unsupported PDF: %s" % fitter.pdf
-            print ('+++ Setting fit range to [%f, %f]'
-                   'based on previous iteration.' % fitter.fitRange)
-        fitter.name = name + '_iter%d' % iteration
-        fitter.fitToData(ws1)
-        fitter.makePlot(ws1)
-        if iteration == 0:
-            DeltasOld = Deltas.getVal()
-        else:
-            pull = ( Deltas.getVal() - DeltasOld ) / Deltas.getError()
-            print "pull:", pull
-            DeltasOld = Deltas.getVal()
-            if abs(pull) < pullEpsilon:
-                break
-    fitter.niter = iteration + 1
-    ws1.saveSnapshot('sFit_' + name, fitter.parameters, True)
+    ## Make graphics
     if hasattr(fitter, 'graphicsExtensions'):
         for ext in fitter.graphicsExtensions:
-            fitter.canvas.Print('sFit_' + name + '.' + ext)
-
-#     fitter.fitRange = ( ws1.var('#Deltas').getVal() - 20,
-#                         ws1.var('#Deltas').getVal() + 20 )
-#     fitter.fit(ws1)
-
-## <-- loop over plots
-
-## Print a spreadsheet report
-# print '\nSpreadsheet report'
-# for plot in _fits:
-#     ws1.loadSnapshot( plot.name )
-#     print '%10f\t%10f\t%s' % ( ws1.var('#Deltas').getVal(),
-#                                ws1.var('#Deltas').getError(),
-#                                plot.title )
-## <-- loop over plots
-
-
-## Print a latex report
-# print "\nLatex report"
-# for plot in _fits:
-#     ws1.loadSnapshot( plot.name )
-#     print '  %50s | %6.2f $\pm$ %4.2f \\\\' % (
-#         plot.title,
-#         ws1.var('#Deltas').getVal(),
-#         ws1.var('#Deltas').getError()
-#     )
-## <-- loop over plots
+            fitter.canvas.Print(fitter.name + '.' + ext)
+## <-- loop over fitters
 
 
 ## Print an ASCII report
@@ -282,14 +193,9 @@ for plot in _fits:
         print  i, "%.3g" % plot.chi2s[i]
 ## <-- loop over plots
 
-ws1.writeToFile('test.root')
-# ws1.writeToFile('mc_BaselineSelection_strue_ManyModels_FitRangeSigmaLevel2p0.root')
-# ws1.writeToFile('mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
-# ws1.writeToFile('mc_mmMass80_EB_highR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
-# ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt15-20.root')
-# ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt20-25.root')
-# ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt25-30.root')
-# ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt30-100.root')
+#ws1.writeToFile('test.root')
+ws1.writeToFile('strue_FitRange71.root')
+# ws1.writeToFile('strue_FitRangePositive.root')
 
 if __name__ == "__main__":
     import user

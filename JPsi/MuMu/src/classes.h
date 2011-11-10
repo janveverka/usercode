@@ -7,6 +7,7 @@
 #include "JPsi/MuMu/interface/RooCruijff.h"
 #include "JPsi/MuMu/interface/RooGshPdf.h"
 #include "JPsi/MuMu/interface/RooLogSqrtCBShape.h"
+#include "JPsi/MuMu/interface/RooLogSqrtGaussian.h"
 #include "JPsi/MuMu/interface/RooSechPdf.h"
 
 namespace jpsimumu {
@@ -24,5 +25,6 @@ namespace jpsimumu {
     RooGshPdf       _gsh;
     RooSechPdf      _sech;
     RooLogSqrtCBShape _lscb;
+    RooLogSqrtCBShape _lsg;
   };
 }

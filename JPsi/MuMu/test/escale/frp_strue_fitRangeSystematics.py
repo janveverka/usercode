@@ -17,8 +17,10 @@ canvases.wheight = 400
 canvases.yperiod = 10
 
 path = '/Users/veverka/Work/CMSSW_4_2_3_FWLITE/src/JPsi/MuMu/test/escale/11-11-09'
+path = '/Users/veverka/Work/Talks/11-11-09'
 
 plotters = []
+hists = []
 
 ## Configuration for plots vs Pt
 binedges = list(BinEdges([10, 12, 15, 20, 25, 30, 100]))
@@ -51,6 +53,93 @@ class Config():
         for name, value in kwargs.items():
             setattr(self, name, value)
 ## end of Config
+
+
+################################################################################
+## Plot the p-values for 68% range (BASELINE)
+name = 'FitRange68'
+title = 'Baseline Fit Range'
+filenames = [os.path.join(path, 'strue_%s.root' % name)] * n
+workspaces = ['ws1'] * n
+snapshot = 'chi2_strue_mc_Nominal%s_mmMass80_%s_PhoEt%d-%d_bifurGauss'
+
+frp = FitResultPlotter(
+    sources = zip(filenames, workspaces,
+                  [snapshot % (name, 'EB_highR9', lo, hi)
+                   for lo, hi in binedges]),
+    getters =  var_vs_pt('chi2Prob'),
+    xtitle = 'E_{T}^{#gamma} (GeV)',
+    ytitle = 'p-value',
+    title = 'Barrel, R_{9}^{#gamma} < 0.94',
+    )
+
+for icat in cats:
+    frp.sources = zip(filenames, workspaces,
+                      [snapshot % (name, icat.name, lo, hi)
+                       for lo, hi in binedges])
+    frp.getters = var_vs_pt('chi2Prob')
+    frp.title = ', '.join(icat.labels)
+    frp.getdata()
+    frp.makegraph()
+
+canvases.next('strue_pvalues_vs_phoEt_%s' % name)
+frp.plotall(title = title)
+plotters.append(frp)
+
+## Make the distribution of the p-values
+hist = frp.histogramall(
+    name = 'h_strue_pvalues_%s' % name,
+    title = '%s;p-value;Fits' % title,
+    nbins = 5, xlow = 0, xhigh = 1
+    )
+canvases.next('strue_pvalues_distro_%s' % name)
+hist.Draw('e0')
+hists.append(hist)
+canvases.canvases[-1].Update()
+
+
+
+################################################################################
+## Plot the p-values for 71% range
+name = 'FitRange71'
+title = '+3% Fit Range'
+filenames = [os.path.join(path, 'strue_%s.root' % name)] * n
+workspaces = ['ws1'] * n
+snapshot = 'chi2_strue_mc_Nominal%s_mmMass80_%s_PhoEt%d-%d_bifurGauss'
+
+frp = FitResultPlotter(
+    sources = zip(filenames, workspaces,
+                  [snapshot % (name, 'EB_highR9', lo, hi)
+                   for lo, hi in binedges]),
+    getters =  var_vs_pt('chi2Prob'),
+    xtitle = 'E_{T}^{#gamma} (GeV)',
+    ytitle = 'p-value',
+    title = 'Barrel, R_{9}^{#gamma} < 0.94',
+    )
+
+for icat in cats:
+    frp.sources = zip(filenames, workspaces,
+                      [snapshot % (name, icat.name, lo, hi)
+                       for lo, hi in binedges])
+    frp.getters = var_vs_pt('chi2Prob')
+    frp.title = ', '.join(icat.labels)
+    frp.getdata()
+    frp.makegraph()
+
+canvases.next('strue_pvalues_vs_phoEt_%s' % name)
+frp.plotall(title = title)
+plotters.append(frp)
+
+## Make the distribution of the p-values
+hist = frp.histogramall(
+    name = 'h_strue_pvalues_%s' % name,
+    title = '%s;p-value;Fits' % title,
+    nbins = 5, xlow = 0, xhigh = 1
+    )
+canvases.next('strue_pvalues_distro_%s' % name)
+hist.Draw('e0')
+hists.append(hist)
+canvases.canvases[-1].Update()
 
 
 ################################################################################
@@ -91,7 +180,7 @@ hist = frp.histogramall(
     )
 canvases.next('strue_pvalues_distro_%s' % name)
 hist.Draw('e0')
-plotters.append(hist)
+hists.append(hist)
 canvases.canvases[-1].Update()
 
 
@@ -133,7 +222,7 @@ hist = frp.histogramall(
     )
 canvases.next('strue_pvalues_distro_%s' % name)
 hist.Draw('e0')
-plotters.append(hist)
+hists.append(hist)
 canvases.canvases[-1].Update()
 
 
@@ -175,7 +264,7 @@ hist = frp.histogramall(
     )
 canvases.next('strue_pvalues_distro_%s' % name)
 hist.Draw('e0')
-plotters.append(hist)
+hists.append(hist)
 canvases.canvases[-1].Update()
 
 
@@ -217,7 +306,7 @@ hist = frp.histogramall(
     )
 canvases.next('strue_pvalues_distro_%s' % name)
 hist.Draw('e0')
-plotters.append(hist)
+hists.append(hist)
 canvases.canvases[-1].Update()
 
 
@@ -260,7 +349,7 @@ hist = frp.histogramall(
     )
 canvases.next('strue_pvalues_distro_%s' % name)
 hist.Draw('e0')
-plotters.append(hist)
+hists.append(hist)
 canvases.canvases[-1].Update()
 
 
@@ -303,7 +392,7 @@ hist = frp.histogramall(
     )
 canvases.next('strue_pvalues_distro_%s' % name)
 hist.Draw('e0')
-plotters.append(hist)
+hists.append(hist)
 canvases.canvases[-1].Update()
 
 
