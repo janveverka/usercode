@@ -11,8 +11,9 @@ gSystem.Load('libJPsiMuMu')
 setattr(RooWorkspace, "Import", getattr(RooWorkspace, "import"))
 
 def buildModel(wspace):
-    mass = wspace.factory('mass[60, 120]')
-    logmu = wspace.factory("logmu[-0.5,0.5]")
+    mass = wspace.factory('mass[40, 140]')
+    logmu = wspace.factory("logmu[%f,%f]" % (math.log(mass.getMin()/91.2),
+                                             math.log(mass.getMax()/91.2)))
     ## Mass as a function of logmu
     massf = wspace.factory("FormulaVar::massf('91.2 * exp(logmu)', {logmu})")
     ## logmu as a function of mass
@@ -107,7 +108,7 @@ def test():
     getData(workspace, nevents = 10000, sigma = 0.02, bias=0.96)
     workspace.Print()
     mass = workspace.var("mass")
-    mframe = mass.frame()
+    mframe = mass.frame(Range(60,120))
     #c1 = ROOT.TCanvas()
     #c1.Divide(2,2)
     #c1.cd(1)
@@ -121,7 +122,7 @@ def test():
     # BWxCB1.plotOn(mframe)
 
     BWxCB1xCB2 = workspace.pdf('bwxcb1xcb2')
-    BWxCB1xCB2.fitTo(data)
+    BWxCB1xCB2.fitTo(data, Range(60,120))
     BWxCB1xCB2.plotOn(mframe) #, LineColor(ROOT.kRed), LineStyle(ROOT.kDashed))
     BWxCB1xCB2.paramOn(mframe,
                        Format('NEU', AutoPrecision(2) ),
