@@ -21,6 +21,7 @@ path = '/Users/veverka/Work/Talks/11-11-09'
 
 plotters = []
 hists = []
+graphs = []
 
 ## Configuration for plots vs Pt
 binedges = list(BinEdges([10, 12, 15, 20, 25, 30, 100]))
@@ -31,8 +32,6 @@ binhalfwidths = [0.5*(hi - lo)
 n = len(binedges)
 
 cats = list(subdet_r9_categories)
-
-# binhalfwidths = [0] * n
 
 def var_vs_pt(name):
     """Returns functions that take a workspaces ws and return
@@ -45,14 +44,49 @@ def var_vs_pt(name):
         lambda ws: ws.var(name).getError(),           # ey
     )
 
-categories = 'EB_lowR9 EB_highR9 EE_lowR9 EE_highR9'.split()
+categories = [c.name for c in cats]
 
-class Config():
-    """Holds fitResultPlotter configuration data."""
-    def __init__(self, **kwargs):
-        for name, value in kwargs.items():
-            setattr(self, name, value)
-## end of Config
+workspaces = ['ws1'] * n
+snapshot = 'sFit_strue_mc_Nominal{f}_mmMass80_{c}_PhoEt{l}-{h}_bifurGauss'
+plotter = FitResultPlotter(None, None)
+for etar9 in cats:
+    frp = FitResultPlotter(
+        sources = 'dummy',
+        getters = var_vs_pt('#Deltas'),
+        xtitle = 'E_{T}^{#gamma} (GeV)',
+        ytitle = 's_{gen} = E^{#gamma}_{reco}/E^{#gamma}_{gen} - 1 (%)',
+        )
+    for fitrange, title in zip(['FitRange' + x for x in '65 68 71'.split()],
+                               '-3% Nominal +3%'.split()):
+        filenames = [os.path.join(path, 'strue_%s.root' % fitrange)] * n
+        snapshots = [snapshot.format(f=fitrange, c=etar9.name, l=lo, h=hi)
+                     for lo, hi in binedges]
+        frp.sources = zip(filenames, workspaces, snapshots)
+        frp.getters = var_vs_pt('#Deltas')
+        frp.title = title
+        frp.getdata()
+        frp.makegraph()
+
+    canvases.next('strue_FitRangeSystematics' + etar9.name)
+    frp.plotall(title=etar9.title)
+    plotters.append(frp)
+
+    graph = frp.graphs[0].Clone('g_' + etar9.name)
+    for i in range(graph.GetN()):
+        x = graph.GetX()[i]
+        ylo = min([g.GetY()[i] for g in frp.graphs])
+        yhi = max([g.GetY()[i] for g in frp.graphs])
+        graph.SetPoint(i, x, 0.5 * (yhi - ylo))
+        graph.SetPointError(i, graph.GetEX()[i], 0)
+
+    plotter.graphs.append(graph)
+    plotter.titles.append(etar9.title)
+
+canvases.next('strue_FitRangeSystematics')
+plotter.xtitle = 'E_{T}^{#gamma} (GeV)'
+plotter.ytitle = 'Uncertainty on True Scale (%)' 
+plotter.plotall(title = 'Fit Range Systematics')
+plotters.append(plotter)
 
 
 ################################################################################
