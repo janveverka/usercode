@@ -796,17 +796,19 @@ class ScaleFitter(PlotData):
         pull.setBins(10)
         self.pullDistPlot = pull.frame()
         self.pullDistPlot.SetYTitle('Bins of %s' % self.xTitle)
-        pulldata = RooDataSet('pulldata', 'pulldata', RooArgSet(pull))
+        self.pulldata = RooDataSet('pulldata_' + self.name,
+                                   'Pulls, ' + self.title, RooArgSet(pull))
         for i in range(hpull.GetN()):
             pull.setVal(hpull.GetY()[i])
-            pulldata.add(RooArgSet(pull))
+            self.pulldata.add(RooArgSet(pull))
         ## entries = pulldata.tree().Draw('pull', '', 'goff')
         ## pullbins = DataDrivenBinning(entries, pulldata.tree().GetV1(), 5, 10)
         ## binning = pullbins.binning(ROOT.RooBinning())
         ## uniformBinning = pullbins.uniformBinning(ROOT.RooUniformBinning())
         ## pulldata.plotOn(self.pullDistPlot, Binning(uniformBinning), Invisible())
         ## pulldata.plotOn(self.pullDistPlot, Binning(binning))
-        pulldata.plotOn(self.pullDistPlot)
+        workspace.Import(self.pulldata)
+        self.pulldata.plotOn(self.pullDistPlot)
         standardNormal.plotOn(self.pullDistPlot)#, Normalization(hpull.GetN()))
 
         ## Customize plot titles and axis
