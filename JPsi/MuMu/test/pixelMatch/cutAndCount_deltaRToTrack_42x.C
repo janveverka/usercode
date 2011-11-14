@@ -73,6 +73,8 @@ TCut phoPt10to20("10 <= phoPt & phoPt < 20");
 TCut phoPt20up("20 <= phoPt");
 TCut ebLowR9("0.36 < phoR9 && phoR9 <= 0.94");
 TCut eeLowR9("0.32 < phoR9 && phoR9 <= 0.94");
+TCut ebLowR9MC("0.36 < phoR9 && phoR9 <= 0.94");
+TCut eeLowR9MC("0.32 < phoR9 && phoR9 <= 0.94");
 // TCut ebLowR9("phoR9 <= 0.94");
 // TCut eeLowR9("phoR9 <= 0.95");
 TCut highR9("0.94 < phoR9");
@@ -90,8 +92,8 @@ TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.
 // TCut selection = ebSelection;
 // TCut selection = eeSelection;
 // TCut selection = ebSelection && highR9;
-TCut selection = ebSelection && ebHighR9;
-// TCut selection = ebSelection && ebLowR9;
+// TCut selection = ebSelection && ebHighR9;
+TCut selection = ebSelection && ebLowR9;
 // TCut selection = eeSelection && highR9;
 // TCut selection = eeSelection && eeHighR9;
 // TCut selection = eeSelection && eeLowR9;
@@ -115,32 +117,32 @@ TH1::SetDefaultSumw2();
 
 // Barrel MC, passing probes
 double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)",
-                        Form("pileup.weightOOT * %f * (%s)",
+                        Form("pileup.weight * %f * (%s)",
                              weight[z],
                              (selection && vetoCut).GetTitle()
                             )
                         );
 double pb_mc = tmc->Draw("mmgMass>>hpb_mc(30,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
+                         Form("pileup.weight * %f * (%s)",
                               weight[z],
                               (selection && vetoCut && backgroundCut).GetTitle()
                              )
                         );
 double pb_qcd = tqcd->Draw("mmgMass>>hpb_qcd(30,75,105)",
-                           Form("pileup.weightOOT * %f * (%s)",
+                           Form("pileup.weight * %f * (%s)",
                                  weight[qcd],
                                  (selection && vetoCut).GetTitle()
                                 )
                           );
 double pb_w = tw->Draw("mmgMass>>hpb_w(30,75,105)",
-                       Form("pileup.weightOOT * %f * (%s)",
+                       Form("pileup.weight * %f * (%s)",
                              weight[w],
                              (selection && vetoCut).GetTitle()
                             )
                       );
 double pb_tt = ttt->Draw("mmgMass>>hpb_tt(30,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
-                               weight[w],
+                         Form("pileup.weight * %f * (%s)",
+                               weight[tt],
                                (selection && vetoCut).GetTitle()
                               )
                         );
@@ -149,31 +151,31 @@ double eps_mc = sqrt(ps_mc);
 
 // Barrel MC, failing probes
 double f_mc = tmc->Draw("mmgMass>>hf_mc(6,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
+                         Form("pileup.weight * %f * (%s)",
                               weight[z],
                               (selection && !vetoCut).GetTitle()
                              )
                         );
 double fb_mc = tmc->Draw("mmgMass>>hfb_mc(6,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
+                         Form("pileup.weight * %f * (%s)",
                                weight[z],
                                (selection && !vetoCut && backgroundCut).GetTitle()
                               )
                         );
 double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(6,75,105)",
-                           Form("pileup.weightOOT * %f * (%s)",
+                           Form("pileup.weight * %f * (%s)",
                                  weight[qcd],
                                  (selection && !vetoCut).GetTitle()
                                 )
                            );
 double fb_w = tw->Draw("mmgMass>>hfb_w(6,75,105)",
-                        Form("pileup.weightOOT * %f * (%s)",
+                        Form("pileup.weight * %f * (%s)",
                               weight[w],
                               (selection && !vetoCut).GetTitle()
                              )
                        );
 double fb_tt = ttt->Draw("mmgMass>>hfb_tt(6,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
+                         Form("pileup.weight * %f * (%s)",
                                weight[tt],
                                (selection && !vetoCut).GetTitle()
                              )
@@ -312,6 +314,8 @@ hpb_qcd->SetFillColor(kYellow - 7);
 hp_mc->SetTitle("Passing Probes");
 hp_mc->GetXaxis()->SetTitle("m(#mu#mu#gamma) (GeV)");
 hp_mc->GetYaxis()->SetTitle("Entries / 1 GeV");
+hp_mc->GetYaxis()->SetTitleOffset(1.7);
+
 
 hp_mc->SetStats(0);
 hpb_mc->SetStats(0);
@@ -327,7 +331,8 @@ double ymax = TMath::Max(
 hp_mc->GetYaxis()->SetRangeUser(0, 1.1*ymax);
 
 
-c1->cd(1);
+TPad * pad1 = (TPad*) c1->cd(1);
+pad1->SetLeftMargin(0.15);
 hp_mc->Draw("hist");
 hpb_mc->Draw("hist same");
 hpb_qcd->Draw("hist same");
@@ -353,6 +358,8 @@ hfb_mc->SetFillColor(kSpring + 5);
 hf_mc->SetTitle("Failing Probes");
 hf_mc->GetXaxis()->SetTitle("m(#mu#mu#gamma) (GeV)");
 hf_mc->GetYaxis()->SetTitle("Entries / 5 GeV");
+hf_mc->GetYaxis()->SetTitleOffset(1.2);
+
 
 hf_mc->SetStats(0);
 hfb_mc->SetStats(0);
@@ -391,6 +398,8 @@ frame->GetXaxis()->SetBinLabel(2,"MC");
 frame->Draw();
 g_eff.GetPaintedGraph()->Draw("p");
 
+c1->Print("m3_x.eps");
 c1->Print("m3_x.png");
+c2->Print("eff_x.eps");
 c2->Print("eff_x.png");
 }
