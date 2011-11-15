@@ -4,8 +4,8 @@ gROOT->LoadMacro("../resolutionErrors.C");
 // const char *filenameData = "pixelMatch_data_Nov4ReReco_v4.dat";
 // const char *filenameMC   = "pixelMatch_Powheg_Fall10_v4.dat";
 
-// const char *path = "/raid2/veverka/pmvTrees/";
-const char *path = "/Users/veverka/Work/Data/pmvTrees/";
+const char *path = "/raid2/veverka/pmvTrees/";
+// const char *path = "/Users/veverka/Work/Data/pmvTrees/";
 
 /**
     'data' : [ 'pmvTree_V9_Run2010B-ZMu-Apr21ReReco-v1.root',

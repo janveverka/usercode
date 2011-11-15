@@ -41,20 +41,24 @@ cweight = {
     #"w"  : 0.074139194512438,
     #"tt" : 0.005083191122289,
 
-    'z'  : 0.17175592557735 * 1795714. / 2008540., ## read events Spring11 / Summer11
-    'tt' : 0.019860956416475,
-    'w'  : 0.54974976060237,
-    'qcd': 0.27884236321449,
+#     'z'  : 0.17175592557735 * 1795714. / 2008540., ## read events Spring11 / Summer11
+#     'tt' : 0.019860956416475,
+#     'w'  : 0.54974976060237,
+#     'qcd': 0.27884236321449,
 
+    'z'  : 0.2578237765992,
+    'tt' : 0.20516095989489,
+    'w'  : 1.77177343641992,
+    'qcd': 15.5412157722089,
 }
 
 puWeight = {
     'data': '1.',
 
-    'z'  : 'pileup.weightOOT',
-    'tt' : 'pileup.weightOOT',
-    'w'  : 'pileup.weightOOT',
-    'qcd': 'pileup.weightOOT',
+    'z'  : 'pileup.weight',
+    'tt' : 'pileup.weight',
+    'w'  : 'pileup.weight',
+    'qcd': 'pileup.weight',
 
 }
 
@@ -107,24 +111,24 @@ latexLabel.SetNDC()
 tree = {}
 # for tag, f in file.items():
 #     tree[tag] = f.Get("pmvTree/pmv")
-import JPsi.MuMu.common.energyScaleChains as esChains
-tree = esChains.getChains('v4')
-esChainsV2 = esChains.getChains('v2')
-tree['w'] = esChainsV2['w']
-tree['tt'] = esChainsV2['tt']
-tree['qcd'] = esChainsV2['qcd']
+# import JPsi.MuMu.common.energyScaleChains as esChains
+import JPsi.MuMu.common.pmvTrees as pmvTrees
+chains = pmvTrees.getChains('v15')
+tree = {}
+for tag in 'data z qcd w tt'.split():
+  tree[tag] = chains[tag]
 
 ## make histos of pmv vs mmgMass
 
 #ebSelection = "phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
 #eeSelection = "!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)"
-selection = "scEt > 10 && phoHoE < 0.5"
+selection = "scEt > 10 && phoHoE < 0.5 && mmMass < 80"
 #selection = 'phoIsEB'
 #selection = '!phoIsEB'
 
 ###############################################################################
 # Plot a quantity in data for EB
-yRange = (1e-4, 500.)
+yRange = (1e-4, 7000.)
 
 c1 = TCanvas()
 canvases.append(c1)
@@ -141,8 +145,8 @@ h_temp.SetStats(0)
 histos = {}
 for tag, t in tree.items():
     sel = '(%s)' % (selection,)
-    if tag == 'z':
-        sel += ' && isFSR'
+#    if tag == 'z':
+#        sel += ' && isFSR'
     if tag == 'data':
         continue
     sel = '%s * %f * (%s) ' % (puWeight[tag], cweight[tag], sel,)
@@ -150,7 +154,7 @@ for tag, t in tree.items():
     t.Draw(var.GetName() + '>>h_temp', sel )
     histos[tag] = h_temp.Clone( 'h_' + tag )
 
-sel = "%s * %f * ( (%s) && !isFSR )" % (puWeight['z'], cweight[tag], selection)
+sel = "%s * %f * ( (%s) && !isFSR )" % (puWeight['z'], cweight['z'], selection)
 tree['z'].Draw(var.GetName() + '>>h_temp', sel)
 histos['zj'] = h_temp.Clone( 'h_zj' )
 
@@ -178,9 +182,10 @@ hstacks.reverse()
 
 ## Normalize MC to data
 mcIntegral = hstacks[0].Integral( 1, var.getBins() )
+dataIntegral = hdata.Integral( 1, var.getBins() )
 
 for hist in hstacks:
-    hist.Scale( hdata.GetEntries() / mcIntegral )
+    hist.Scale( dataIntegral / mcIntegral )
 
 
 for h in hstacks:
@@ -201,7 +206,7 @@ latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 latexLabel.DrawLatex(0.2, 0.875, "42X data and MC")
 latexLabel.DrawLatex(0.2, 0.8, "Total events: %d" % (int( hdata.GetEntries() ),) )
 # latexLabel.DrawLatex(0.2, 0.725, "L = 332 pb^{-1}")
-latexLabel.DrawLatex(0.2, 0.725, "L = 715 pb^{-1}")
+latexLabel.DrawLatex(0.2, 0.725, "L = 4.603 fb^{-1}")
 latexLabel.DrawLatex(0.2, 0.65, "E_{T}^{#gamma} > 10 GeV")
 
 c1.Update()
@@ -209,12 +214,13 @@ c1.Update()
 ## Print yields:
 print "--++ Yields and Purities"
 print "%10s %10.f" % ( 'data', hdata.Integral() )
+nbins = var.getBins()
 for i in range( len(hstacks) ):
     if i < len(hstacks) - 1:
-        res = hstacks[i].Integral() - hstacks[i+1].Integral()
+        res = hstacks[i].Integral(1, nbins) - hstacks[i+1].Integral(1, nbins)
     else:
-        res = hstacks[i].Integral()
+        res = hstacks[i].Integral(1, nbins)
     print "%10s %10.2f %10.3g%%" % ( hstacks[i].GetName().replace('hs_', ''),
                                  res,
-                                 100. * res/hdata.Integral() )
+                                 100. * res/hdata.Integral(1, nbins) )
 
