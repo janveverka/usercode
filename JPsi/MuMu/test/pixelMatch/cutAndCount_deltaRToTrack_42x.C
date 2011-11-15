@@ -4,7 +4,8 @@ gROOT->LoadMacro("../resolutionErrors.C");
 // const char *filenameData = "pixelMatch_data_Nov4ReReco_v4.dat";
 // const char *filenameMC   = "pixelMatch_Powheg_Fall10_v4.dat";
 
-const char *path = "/raid2/veverka/pmvTrees/";
+// const char *path = "/raid2/veverka/pmvTrees/";
+const char *path = "/Users/veverka/Work/Data/pmvTrees/";
 
 /**
     'data' : [ 'pmvTree_V9_Run2010B-ZMu-Apr21ReReco-v1.root',
@@ -22,8 +23,18 @@ const char *path = "/raid2/veverka/pmvTrees/";
 // const char *filenameW    = "pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V6.root";
 // const char *filenameTT   = "pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root";
 
-const char *filenameData = "pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1_PromptReco-v6A_PromptReco-v1B.root";
-const char *filenameMC   = "pmvTree_V15_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
+// 2011A+B
+// const char *filenameData = "pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1_PromptReco-v1B.root";
+// 2011A
+// const char *filenameData = "pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1.root";
+// 2011B
+const char *filenameData = "pmvTree_V15_DoubleMu_Run2011B-PromptReco-v1_condor_Dimuon_AOD-42X-v9.root";
+// 2011A+B PU weights
+// const char *filenameMC   = "pmvTree_V15_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
+// 2011A PU weights
+// const char *filenameMC   = "pmvTree_V16_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
+// 2011B PU weights
+const char *filenameMC   = "pmvTree_V17_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
 const char *filenameQCD  = "pmvTree_V15_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_S4-v1_condor_Dimuon_AOD-42X-v9.root";
 const char *filenameW    = "pmvTree_V15_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1_condor_Dimuon_AOD-42X-v9.root";
 const char *filenameTT   = "pmvTree_V15_TTJets_TuneZ2_7TeV-madgraph-tauola_S4-v2_condor_Dimuon_AOD-42X-v9.root";
@@ -58,50 +69,59 @@ TCut drCut("minDeltaR < 1");
 // TCut phoEIsoCut("phoEcalIso < 4.2+0.006*phoPt");
 // TCut phoHIsoCut("phoHcalIso < 2.2+0.0025*phoPt");
 // TCut ebSihihCut("minDTheta<0.05|phoSigmaIetaIeta<0.013");
-TCut ebCut("abs(phoEta) < 1.5");
-TCut eeCut("abs(phoEta) > 1.5");
-TCut signalCut("isFSR");
-TCut backgroundCut("!isFSR");
-TCut mWindowCut("abs(mmgMass-90) < 15");
-TCut ubCut("(minDEta > 0.04 | minDPhi > 0.2)");
-TCut vetoCut("phoDeltaRToTrack > 1");
-// TCut vetoCut("phoDeltaRToTrack > 0.062"); //eb low R9
-// TCut vetoCut("!phoHasPixelMatch");
-TCut nVtx1to2("nVertices<=2");
-TCut phoPt5to10("5 <= phoPt & phoPt < 10");
-TCut phoPt10to20("10 <= phoPt & phoPt < 20");
-TCut phoPt20up("20 <= phoPt");
-TCut ebLowR9("0.36 < phoR9 && phoR9 <= 0.94");
-TCut eeLowR9("0.32 < phoR9 && phoR9 <= 0.94");
-TCut ebLowR9MC("0.36 < phoR9 && phoR9 <= 0.94");
-TCut eeLowR9MC("0.32 < phoR9 && phoR9 <= 0.94");
-// TCut ebLowR9("phoR9 <= 0.94");
-// TCut eeLowR9("phoR9 <= 0.95");
-TCut highR9("0.94 < phoR9");
-TCut ebHighR9("0.94 < phoR9");
-TCut eeHighR9("0.95 < phoR9");
+ TCut ebCut("abs(phoEta) < 1.5");
+ TCut eeCut("abs(phoEta) > 1.5");
+ TCut signalCut("isFSR");
+ TCut backgroundCut("!isFSR");
+ TCut mWindowCut("abs(mmgMass-90) < 15");
+ TCut ubCut("(minDEta > 0.04 | minDPhi > 0.2)");
+ TCut vetoCut("phoDeltaRToTrack > 1");
+ // TCut vetoCut("phoDeltaRToTrack > 0.062"); //eb low R9
+ // TCut vetoCut("!phoHasPixelMatch");
+ TCut nVtx1to2("nVertices<=2");
+ TCut phoPt5to10("5 <= phoPt & phoPt < 10");
+ TCut phoPt10to20("10 <= phoPt & phoPt < 20");
+ TCut phoPt20up("20 <= phoPt");
+ TCut ebLowR9("0.36 < phoR9 && phoR9 <= 0.94");
+ TCut eeLowR9("0.32 < phoR9 && phoR9 <= 0.94");
+ TCut ebLowR9MC("0.36 < phoR9 && phoR9 <= 0.94");
+ TCut eeLowR9MC("0.32 < phoR9 && phoR9 <= 0.94");
+ // TCut ebLowR9("phoR9 <= 0.94");
+ // TCut eeLowR9("phoR9 <= 0.95");
+ TCut highR9("0.94 < phoR9");
+ TCut ebHighR9("0.94 < phoR9");
+ TCut eeHighR9("0.94 < phoR9");
+ TCut run2011A("id.run < 175860");
+ TCut run2011B("id.run >= 175860");
 
-// These cuts are for the pixel match veto
-/*TCut ebSelection("phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.04 | minDPhi > 0.3)");
-TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 0.3)");*/
 
-// These near muon veto cuts are for the "delta R to nearest track" electron veto
-TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.1) && scEt > 10 && phoHoE < 0.5");
-TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.2) && scEt > 10 && phoHoE < 0.5");
+ // These cuts are for the pixel match veto
+ /*TCut ebSelection("phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.04 | minDPhi > 0.3)");
+   TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 0.3)");*/
+
+ // These near muon veto cuts are for the "delta R to nearest track" electron veto
+ TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.1) && scEt > 10 && phoHoE < 0.5");
+ TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.2) && scEt > 10 && phoHoE < 0.5");
 
 // TCut selection = ebSelection;
 // TCut selection = eeSelection;
 // TCut selection = ebSelection && highR9;
-// TCut selection = ebSelection && ebHighR9;
-TCut selection = ebSelection && ebLowR9;
-// TCut selection = eeSelection && highR9;
-// TCut selection = eeSelection && eeHighR9;
-// TCut selection = eeSelection && eeLowR9;
+ // TCut selection = ebSelection && ebHighR9;
+ // TCut selection = ebSelection && ebLowR9;
+ // TCut selection = eeSelection && highR9;
+ // TCut selection = eeSelection && eeHighR9;
+ TCut selection = eeSelection && eeLowR9;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;
 // TCut selection = ebSelection && phoPt10to20;
 // TCut selection = ebSelection && phoPt20up;
+
+// TCut run2011X = run2011A;
+// TCut selection = ebSelection && ebHighR9 && run2011X;
+// TCut selection = ebSelection && ebLowR9 && run2011X;
+// TCut selection = eeSelection && eeHighR9 && run2011X;
+// TCut selection = eeSelection && eeLowR9 && run2011X;
 
 
 // gStyle->SetPadLeftMargin(1.3);
