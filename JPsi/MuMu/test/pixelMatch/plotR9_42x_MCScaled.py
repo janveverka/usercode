@@ -125,8 +125,8 @@ for tag in 'data z qcd w tt'.split():
 #ebSelection = "phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
 #eeSelection = "!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)"
 
-selection = "!phoIsEB & phoPt > 20 && scEt > 10 && phoHoE < 0.5"
-# selection = "phoIsEB & phoPt > 20 && scEt > 10 && phoHoE < 0.5"
+# selection = "!phoIsEB & phoPt > 20 && scEt > 10 && phoHoE < 0.5"
+selection = "phoIsEB & phoPt > 20 && scEt > 10 && phoHoE < 0.5"
 
 # selection = "phoIsEB & phoPt > 15 && phoPt < 20 && phoHoE < 0.5"
 
@@ -143,7 +143,8 @@ yRange = (1e-4, 2000.)
 c1 = TCanvas()
 canvases.append(c1)
 
-var = RooRealVar("phoR9", "photon R_{9}", 0.3, 1.1)
+var = RooRealVar("1.005*phoR9", "photon R_{9}", 0.3, 1.1)
+varData = RooRealVar("phoR9", "photon R_{9}", 0.3, 1.1)
 var.setBins(80)
 
 h_temp = TH1F("h_temp", "", var.getBins(), var.getMin(), var.getMax() )
@@ -167,7 +168,7 @@ sel = "%s * %f * ( (%s) && !isFSR )" % (puWeight['z'], cweight['z'], selection)
 tree['z'].Draw(var.GetName() + '>>h_temp', sel)
 histos['zj'] = h_temp.Clone( 'h_zj' )
 
-tree['data'].Draw(var.GetName() + '>>h_temp', selection )
+tree['data'].Draw(varData.GetName() + '>>h_temp', selection )
 hdata = h_temp.Clone( 'hdata' )
 
 for tag in mcSamples:
@@ -211,8 +212,8 @@ c1.RedrawAxis()
 latexLabel.SetTextFont(gStyle.GetTitleFont())
 latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2011")
 latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
-# latexLabel.DrawLatex(0.2, 0.575, "Barrel")
-latexLabel.DrawLatex(0.2, 0.575, "Endcaps")
+latexLabel.DrawLatex(0.2, 0.575, "Barrel")
+#latexLabel.DrawLatex(0.2, 0.575, "Endcaps")
 latexLabel.DrawLatex(0.2, 0.875, "42X data + Simulation")
 latexLabel.DrawLatex(0.2, 0.8,
                      "Total events: %d" % \

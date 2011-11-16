@@ -4,8 +4,8 @@ gROOT->LoadMacro("../resolutionErrors.C");
 // const char *filenameData = "pixelMatch_data_Nov4ReReco_v4.dat";
 // const char *filenameMC   = "pixelMatch_Powheg_Fall10_v4.dat";
 
-const char *path = "/raid2/veverka/pmvTrees/";
-// const char *path = "/Users/veverka/Work/Data/pmvTrees/";
+// const char *path = "/raid2/veverka/pmvTrees/";
+const char *path = "/Users/veverka/Work/Data/pmvTrees/";
 
 /**
     'data' : [ 'pmvTree_V9_Run2010B-ZMu-Apr21ReReco-v1.root',
@@ -75,8 +75,8 @@ TCut drCut("minDeltaR < 1");
  TCut backgroundCut("!isFSR");
  TCut mWindowCut("abs(mmgMass-90) < 15");
  TCut ubCut("(minDEta > 0.04 | minDPhi > 0.2)");
- TCut vetoCut("phoDeltaRToTrack > 1");
- // TCut vetoCut("phoDeltaRToTrack > 0.062"); //eb low R9
+ // TCut vetoCut("phoDeltaRToTrack > 1");
+ TCut vetoCut("phoDeltaRToTrack > 0.062"); //eb low R9
  // TCut vetoCut("!phoHasPixelMatch");
  TCut nVtx1to2("nVertices<=2");
  TCut phoPt5to10("5 <= phoPt & phoPt < 10");
@@ -107,10 +107,10 @@ TCut drCut("minDeltaR < 1");
 // TCut selection = eeSelection;
 // TCut selection = ebSelection && highR9;
  // TCut selection = ebSelection && ebHighR9;
- // TCut selection = ebSelection && ebLowR9;
+ TCut selection = ebSelection && ebLowR9;
  // TCut selection = eeSelection && highR9;
  // TCut selection = eeSelection && eeHighR9;
- TCut selection = eeSelection && eeLowR9;
+ // TCut selection = eeSelection && eeLowR9;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;
