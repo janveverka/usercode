@@ -27,7 +27,7 @@ _chains = esChains.getChains('v11')
 
 ## Default fit of strue = Ereco / Egen - 1
 struefit = ScaleFitter(
-    name = 'strue_mc_NominalFitRange71',
+    name = 'strue_mc_NominalFitRange68',
 ##    name = 'strue_mc_FitRangePositive',
     title = 'strue-Fit, Powheg S4',
     labels = ['Powheg S4 Summer11 MC'],
@@ -62,7 +62,7 @@ struefit = ScaleFitter(
     fitRangeMode = 'Fraction',
     fitRangeSigmaLevel = 2.0,
     fitRangeNumberOfEntries = 3000,
-    fitRangeFraction = 0.71,
+    fitRangeFraction = 0.68,
     paramLayout = (0.57, 0.92, 0.92),
 
     useCustomChi2Calculator = True,    
@@ -115,7 +115,7 @@ for subdet_r9_cat in subdet_r9_categories:
 _fits = struefits
 
 ## Loop over plots
-for fitter in _fits[:]:
+for fitter in _fits[:1]:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
@@ -194,7 +194,7 @@ for plot in _fits:
 ## <-- loop over plots
 
 #ws1.writeToFile('test.root')
-ws1.writeToFile('strue_FitRange71.root')
+#wn1.writeToFile('strue_FitRange71.root')
 # ws1.writeToFile('strue_FitRangePositive.root')
 
 if __name__ == "__main__":

@@ -494,6 +494,7 @@ class ScaleFitter(PlotData):
                 message = "Illegal fitRangeMode = '%s'" % self.fitRangeMode
                 raise RuntimeError, message
             self.fitRange =  tuple(mi.bounds())
+            print "++++ fit range changed to:", self.fitRange
     # end of _updateRanges
 
 
@@ -817,7 +818,7 @@ class ScaleFitter(PlotData):
             p.SetTitle('')
             self._customizeAxis(p.GetYaxis(), 0.01, 3)
         ## end of loop over plots
-        self._customizeAxis( self.pullPlot.GetXaxis(), 0.01, 3.5 )
+        #self._customizeAxis( self.pullPlot.GetXaxis(), 0.01, 3.5 )
 
         ## Save the chi2 and ndof in the workspace
         if workspace.var('reducedChi2'):

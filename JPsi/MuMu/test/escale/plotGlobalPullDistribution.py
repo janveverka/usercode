@@ -3,6 +3,8 @@ import JPsi.MuMu.common.roofit
 ROOT.gSystem.Load('libJPsiMuMu')
 
 filename = 'mc_sreco_strue_Baseline.root'
+filename = '/Users/veverka/Work/Talks/11-11-09/Baseline_mod1/mc_sreco_strue_Baseline_mod1.root'
+
 rootfile = ROOT.TFile.Open(filename)
 w = rootfile.Get('ws1')
 pull = w.var('pull')

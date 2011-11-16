@@ -1,5 +1,5 @@
 '''
-Plot mean and width of s vs pt for Lyon and Caltech MC and MC truth
+Plot mean and width of s vs pt for Baseline and Caltech MC and MC truth
     Usage: python -i frp_caltech_vs_lyon.py
 '''
 
@@ -119,7 +119,7 @@ cfgs = [
 for cfg in cfgs:
     #------------------------------------------------------------------------------
     ## Scale Comparison
-    ## Lyon
+    ## Baseline
     frp = FitResultPlotter(
         sources = zip(cfg.filenames, cfg.wsnames, cfg.sreco_snapshots),
         getters = (
@@ -130,14 +130,14 @@ for cfg in cfgs:
             ),
         xtitle = 'E_{T}^{#gamma} (GeV)',
         ytitle = 's_{reco} = E^{#gamma}_{reco}/E^{kin}_{reco} - 1 (%)',
-        title = 'Lyon',
+        title = 'Baseline',
         )
     frp.getdata()
     frp.makegraph()
 
-    ## Caltech
+    ## Proposal 1
     frp.getters = var_vs_pt('#Deltas')
-    frp.title = 'Caltech'
+    frp.title = 'Proposal 1'
     frp.getdata()
     frp.makegraph()
 
@@ -148,7 +148,7 @@ for cfg in cfgs:
     frp.getdata()
     frp.makegraph()
 
-    ## Compare Caltech, Lyon and MC truth scale
+    ## Compare Proposal 1, Baseline and MC truth scale
     canvases.next('s_' + cfg.name).SetGrid()
     frp.plotall(title = cfg.title,
                 styles = [20, 25, 22],
@@ -158,7 +158,7 @@ for cfg in cfgs:
 
     #------------------------------------------------------------------------------
     ## S width Comparison
-    ## Lyon
+    ## Baseline
     frp = FitResultPlotter(
         sources = zip(cfg.filenames, cfg.wsnames, cfg.sreco_snapshots),
         getters = (
@@ -169,18 +169,18 @@ for cfg in cfgs:
             ),
         xtitle = 'E_{T}^{#gamma} (GeV)',
         ytitle = '#sigma(s_{reco}) (%)',
-        title = 'Lyon',
+        title = 'Baseline',
         )
     frp.getdata()
     frp.makegraph()
 
-    ## Caltech
+    ## Proposal 1
     frp.getters = var_vs_pt('#sigma')
-    frp.title = 'Caltech'
+    frp.title = 'Proposal 1'
     frp.getdata()
     frp.makegraph()
 
-    ## Compare Caltech and Lyon s width
+    ## Compare Proposal 1 and Baseline s width
     canvases.next('sigma_' + cfg.name).SetGrid()
     frp.plotall(title = cfg.title,
                 styles = [20, 25])
@@ -253,7 +253,7 @@ for icat in cats:
     frp.getdata()
     frp.makegraph()
 
-canvases.next('sreco_pvalues_vs_phoEt').SetLogy()
+canvases.next('sreco_pvalues_vs_phoEt')
 frp.plotall(logy = True, title = 's_{reco} Fits')
 
 ## Make the distribution of the p-values

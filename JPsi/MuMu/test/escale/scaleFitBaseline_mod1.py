@@ -19,6 +19,8 @@ gROOT.LoadMacro('tools.C+');
 gROOT.LoadMacro("CMSStyle.C")
 ROOT.CMSstyle()
 
+sreco_fitrange = 90
+
 ## Get the data
 ## 715/pb for Vg Summer conferences
 # _chains = esChains.getChains('v7')
@@ -54,6 +56,14 @@ srecofit = ScaleFitter(
     paramLayout = (.45, 0.75, 0.5),
     useCustomChi2Calculator = True,
     )
+
+# srecofit.name += ('_FitRange%d' % int(sreco_fitrange))
+srecofit.title += (', Fit Range %d%%' % int(sreco_fitrange))
+srecofit.labels.append('Fit Range: %d%%' % int(sreco_fitrange))
+srecofit.doAutoFitRange = True
+srecofit.fitRangeMode = 'Fraction'
+srecofit.fitRangeFraction = float(sreco_fitrange) / 100.
+
 
 ## Default fit of strue = Ereco / Egen - 1
 struefit = srecofit.clone(
@@ -317,7 +327,7 @@ for plot in _fits:
 
 # ws1.writeToFile('test.root')
 # ws1.writeToFile('mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
-ws1.writeToFile('mc_sreco_strue_Baseline.root')
+ws1.writeToFile('mc_sreco_strue_Baseline_mod1.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt15-20.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt20-25.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt25-30.root')
