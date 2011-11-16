@@ -138,6 +138,10 @@ def getChains(version='v4'):
         ch.SetAlias( 'newCorrE', 'phoCrackCorr * newCorrE(rawE, scEta, brem)' )
         ch.SetAlias( 'corrKRatio', 'phoE * kRatio / corrE' )
         ch.SetAlias( 'newCorrKRatio', 'phoE * kRatio / newCorrE' )
+        ch.SetAlias('m1gMass',
+                    'sqrt(2*mu1Pt*phoPt*(cosh(mu1Eta - phoEta) - cos(mu1Phi - phoPhi)))')
+        ch.SetAlias('m2gMass',
+                    'sqrt(2*mu2Pt*phoPt*(cosh(mu2Eta - phoEta) - cos(mu2Phi - phoPhi)))')
 
     return chains
 
