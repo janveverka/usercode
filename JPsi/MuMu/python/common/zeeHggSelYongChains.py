@@ -6,15 +6,15 @@ from JPsi.MuMu.common.basicRoot import *
 _hostname = socket.gethostname()
 if _hostname == 't3-susy.ultralight.org':
     ## Path for the t3-susy
-    _path = '/home/raid2/yangyong/data/HiggsAnalysis/HiggsSelection/forJan/'
+    _path = '/raid2/veverka/zeeDataYong'
 # elif _hostname == 'nbcitjv':
 #     ## Path for Jan's Dell Inspiron 6000 laptop
-#     _path = '/home/veverka/Work/data/esTrees'
-# elif (_hostname == 'eee.home' or
-#       _hostname == 'Jan-Veverkas-MacBook-Pro.local' or
-#       (_hostname[:8] == 'pb-d-128' and _hostname[-8:] == '.cern.ch')):
-#     ## Path for Jan's MacBook Pro
-#     _path = '/Users/veverka/Work/Data/esTrees'
+#     _path = '/home/veverka/Work/data/zeeDataYong'
+elif (_hostname == 'eee.home' or
+      _hostname == 'Jan-Veverkas-MacBook-Pro.local' or
+      (_hostname[:8] == 'pb-d-128' and _hostname[-8:] == '.cern.ch')):
+    ## Path for Jan's MacBook Pro
+    _path = '/Users/veverka/Work/Data/zeeDataYong'
 else:
     raise RuntimeError, "Unknown hostname `%s'" % _hostname
 
