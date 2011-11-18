@@ -62,7 +62,7 @@ setattr(RooWorkspace, "Import", getattr(RooWorkspace, "import"))
 nentries = -1
 ## sTest = [-20, -10, -5, -2, -1, -0.5, 0, 0.5, 1, 2, 5, 10, 20]
 sTest = [-5, -2, -1, -0.5, 0, 0.5, 1, 2, 5]
-phoPtRange = (15,20)
+phoPtRange = (12,15)
 
 chains = getChains('v11')
 mcTree = chains['z']
@@ -193,7 +193,7 @@ for i, (fac, s) in enumerate(zip(fTest, sTest)):
 
     ## Display data overlaid with fitted and extrapolated models
     canvases.next('test%d' % i)
-    frame = mmgMass.frame(Range(80,120))
+    frame = mmgMass.frame(Range(60,120))
     frame.SetTitle('')
     frame.GetXaxis().SetTitle(
         'm_{#mu#mu#gamma} (GeV), E^{#gamma} scaled by %g%%' % s
@@ -206,17 +206,34 @@ for i, (fac, s) in enumerate(zip(fTest, sTest)):
     canvases.canvases[-1].Update()
 
 ## Plot fitted vs true
+graphs = []    
 graph = TGraphErrors(len(sTest))
 for i, (x, y, ey) in enumerate(zip(sTest, sFitted, sFittedErr)):
-    graph.SetPoint(i, x, y - x)
+    graph.SetPoint(i, x, y)
     graph.SetPointError(i, 0, ey)
 
 canvases.next('Injected_vs_Fitted')
 graph.SetTitle('Tranform Closure Test')
 graph.Draw('ap')
+graph.GetYaxis().SetTitle('Fitted Scale (%)')
+graph.GetXaxis().SetTitle('Injected Scale (%)')
+graph.Fit('pol1', '', '', -6, 6)
+
+graphs.append(graph)
+
+graph = TGraphErrors(len(sTest))
+for i, (x, y, ey) in enumerate(zip(sTest, sFitted, sFittedErr)):
+    graph.SetPoint(i, x, y - x)
+    graph.SetPointError(i, 0, ey)
+
+canvases.next('Injected_vs_Fitted_Bias')
+graph.SetTitle('Tranform Closure Test')
+graph.Draw('ap')
 graph.GetYaxis().SetTitle('Fitted Scale Bias (%)')
 graph.GetXaxis().SetTitle('Injected Scale (%)')
 graph.Fit('pol1', '', '', -6, 6)
+
+graphs.append(graph)
 
 print 'report:'
 fPho.Print()
