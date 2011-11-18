@@ -17,6 +17,7 @@ import JPsi.MuMu.common.canvases as canvases
 from math import log
 from math import sqrt
 
+from ROOT import gStyle
 from ROOT import gSystem
 from ROOT import gROOT
 from ROOT import kRed
@@ -52,6 +53,7 @@ from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
 
 gSystem.Load('libJPsiMuMu')
 gROOT.LoadMacro("tools.C+")
+gStyle.SetPadTopMargin(0.1)
 
 setattr(RooWorkspace, "Import", getattr(RooWorkspace, "import"))
 
@@ -59,7 +61,7 @@ setattr(RooWorkspace, "Import", getattr(RooWorkspace, "import"))
 
 nentries = -1
 sTest = [-20, -10, -5, -2, -1, -0.5, 0, 0.5, 1, 2, 5, 10, 20]
-phoPtRange = (12, 15)
+phoPtRange = (10, 12)
 
 chains = getChains('v11')
 mcTree = chains['z']
@@ -128,7 +130,7 @@ mmgData.SetName('mmgData')
 
 ## Define the translated mass
 mmgMassFunc = w.factory('''FormulaVar::mmgMassFunc(
-    "(mmgMass - mmgMode) / mmgScale + mmgMode * (1 - fPho*phoScale/100.)",
+    "((mmgMass - mmgMode) / mmgScale + mmgMode) * (1 - fPho*phoScale/100.)",
     {mmgMass, mmgMode[91.2,70,110], mmgScale[1.,0.1,5], fPho, phoScale}
     )''')
 mmgMode = w.var('mmgMode')
@@ -145,20 +147,15 @@ modelDH = RooDataHist('modelDH', 'modelDH', RooArgList(mmgMass), modelHist)
 tmodel = RooHistPdf('tmodel', 'tmodel', RooArgList(mmgMassFunc),
                     RooArgList(mmgMass), modelDH, 2)
 
-## Find the mode of the tmodel. Trick: use parameters as observables
-## and vice-versa. :-). Use only one param to avoid multidimensional
-## integration for normalization.
-dummyData = RooDataSet('dummyData', 'dummyData', RooArgSet(phoScale))
-dummyData.add(RooArgSet(phoScale))
-## Set all other parameters constant, except for the mmgMass and fit.
-mmgMode.setConstant(True)
-mmgScale.setConstant(True)
-fPho.setConstant(True)
-tmodel.fitTo(dummyData)
-## The mmg mass is now equal to it's most probable value = the mode!
-mmgMode.setVal(mmgMass.getVal())
-mmgMode.setConstant()
 
+## Find the mode of the tmodel.
+mmgMode.setVal(modelHist.GetBinCenter(modelHist.GetMaximumBin()))
+mmgMode.setConstant(True)
+fPho.setConstant(True)
+
+## Fit the photon scale
+phoScale.setConstant(False)
+mmgScale.setConstant(False)
 
 ## Make plots
 canvases.next('nominal')
@@ -174,7 +171,7 @@ dataCollection = []
 models = []
 sFitted = []
 sFittedErr = []
-for i, fac in enumerate(fTest):
+for i, (fac, s) in enumerate(zip(fTest, sTest)):
     mmgMass.SetTitle('scaledMmgMass3(%f, mmgMass, mmMass)' % fac)
     phoPtRangeMod = (phoPtRange[0] * fac, phoPtRange[1] * fac)
     cutsMod = cuts[:] + ['%f < phoPt & phoPt < %f' % phoPtRangeMod]
@@ -195,6 +192,10 @@ for i, fac in enumerate(fTest):
     ## Display data overlaid with fitted and extrapolated models
     canvases.next('test%d' % i)
     frame = mmgMass.frame(Range(70,140))
+    frame.SetTitle('')
+    frame.GetXaxis().SetTitle(
+        'm_{#mu#mu#gamma} (GeV), E^{#gamma} scaled by %g%%' % s
+        )
     data.plotOn(frame)
     m.plotOn(frame)
     tmodel.plotOn(frame, LineStyle(kDashed), LineColor(kRed))
@@ -214,6 +215,11 @@ graph.GetYaxis().SetTitle('Fitted Scale Bias (%)')
 graph.GetXaxis().SetTitle('Injected Scale (%)')
 graph.Fit('pol1', '', '', -6, 6)
 
+print 'report:'
+fPho.Print()
+phoScale.Print()
+mmgMode.Print()
+mmgScale.Print()
 
 for c in canvases.canvases:
     c.Update()
