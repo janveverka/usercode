@@ -60,8 +60,9 @@ setattr(RooWorkspace, "Import", getattr(RooWorkspace, "import"))
 ## Here starts the meat.
 
 nentries = -1
-sTest = [-20, -10, -5, -2, -1, -0.5, 0, 0.5, 1, 2, 5, 10, 20]
-phoPtRange = (10, 12)
+## sTest = [-20, -10, -5, -2, -1, -0.5, 0, 0.5, 1, 2, 5, 10, 20]
+sTest = [-5, -2, -1, -0.5, 0, 0.5, 1, 2, 5]
+phoPtRange = (15,20)
 
 chains = getChains('v11')
 mcTree = chains['z']
@@ -93,8 +94,9 @@ cuts = ['%f < %s & %s < %f' % (mmgMass.getMin(), hi, lo, mmgMass.getMax()),
         #'12 < phoPt & phoPt < 15',
         'phoIsEB',
         'phoR9 < 0.94',
-        'mmMass < 80',
-        'isFSR']
+        'mmMass + mmgMass < 190',
+        #'isFSR',
+        ]
 
 ## Add a loose cut on photon pt
 lo = phoPtRange[0] * min(fTest)
@@ -155,7 +157,7 @@ fPho.setConstant(True)
 
 ## Fit the photon scale
 phoScale.setConstant(False)
-mmgScale.setConstant(False)
+mmgScale.setConstant(True)
 
 ## Make plots
 canvases.next('nominal')
@@ -180,9 +182,9 @@ for i, (fac, s) in enumerate(zip(fTest, sTest)):
     data.SetName('data%d' % i)
     w.Import(data)
     ## Also build the PDF's
-    m = w.factory('KeysPdf::model%d(mmgMass, data%d, NoMirror, 2)' % (i, i))
+    ## m = w.factory('KeysPdf::model%d(mmgMass, data%d, NoMirror, 2)' % (i, i))
     dataCollection.append(data)
-    models.append(m)
+    ## models.append(m)
 
     ## fit the transformed model to the test data
     tmodel.fitTo(data)
@@ -191,16 +193,17 @@ for i, (fac, s) in enumerate(zip(fTest, sTest)):
 
     ## Display data overlaid with fitted and extrapolated models
     canvases.next('test%d' % i)
-    frame = mmgMass.frame(Range(70,140))
+    frame = mmgMass.frame(Range(80,120))
     frame.SetTitle('')
     frame.GetXaxis().SetTitle(
         'm_{#mu#mu#gamma} (GeV), E^{#gamma} scaled by %g%%' % s
         )
     data.plotOn(frame)
-    m.plotOn(frame)
+    # m.plotOn(frame)
     tmodel.plotOn(frame, LineStyle(kDashed), LineColor(kRed))
     tmodel.paramOn(frame)
     frame.Draw()
+    canvases.canvases[-1].Update()
 
 ## Plot fitted vs true
 graph = TGraphErrors(len(sTest))
