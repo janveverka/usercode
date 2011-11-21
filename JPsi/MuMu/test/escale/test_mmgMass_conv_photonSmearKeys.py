@@ -73,7 +73,7 @@ nentries = -1
 ## Pairs of photon scale and extra smearing.
 sTest = [-2, 0.5]
 rTest = [1, 0.5]
-phoPtRange = (30,50)
+phoPtRange = (10,50)
 
 chains = getChains('v11')
 mcTree = chains['z']
