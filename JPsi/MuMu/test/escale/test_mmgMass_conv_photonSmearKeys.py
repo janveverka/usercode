@@ -25,6 +25,8 @@ from math import sqrt
 from ROOT import gStyle
 from ROOT import gSystem
 from ROOT import gROOT
+from ROOT import kBlack
+from ROOT import kBlue
 from ROOT import kRed
 from ROOT import kDashed
 
@@ -56,6 +58,7 @@ from JPsi.MuMu.common.roofit import Minos
 from JPsi.MuMu.common.roofit import NumCPU
 from JPsi.MuMu.common.roofit import Range
 from JPsi.MuMu.common.roofit import RenameAllVariables
+from JPsi.MuMu.common.roofit import ShiftToZero
 from JPsi.MuMu.common.cmsstyle import cmsstyle
 from JPsi.MuMu.common.energyScaleChains import getChains
 from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
@@ -73,12 +76,14 @@ nentries = -1
 ## Pairs of photon scale and extra smearing.
 sTest = [-2, 0.5]
 rTest = [1, 0.5]
-phoPtRange = (10,50)
+phoPtRange = (15,20)
 
 chains = getChains('v11')
 mcTree = chains['z']
 
 w = RooWorkspace('w')
+
+massShift = 90 + 1.03506
 
 ## Define variables
 mmgMass = w.factory('mmgMass[40, 180]')
@@ -96,8 +101,8 @@ weight.SetTitle('pileup.weight')
 
 ## Shift mmg mass to peak at zero so that the mass spectrum can be treated
 ## as the detector resolution in the FFT convolution.
-mmgMassShifted.SetTitle('mmgMass - 90')
-mmgMassShiftedPhoGenE.SetTitle('mmgMassPhoGenE - 90')
+mmgMassShifted.SetTitle('mmgMass - %g' % float(massShift))
+mmgMassShiftedPhoGenE.SetTitle('mmgMassPhoGenE - %g' % float(massShift))
 
 ## print '## Photon scaling fraction, dlog(m_uuy)/dlog(E_y)'
 ## Photon scaling fraction, dlog(m_uuy)/dlog(E_y)
@@ -154,7 +159,8 @@ data = dataset.get(tree=tree,
 phoFFunc.SetName('phoF')
 data.addColumn(phoFFunc)
 phoFFunc.SetName('phoFFunc')
-phoF.setVal(data.mean(phoF))
+phoF.setVal(18.13)
+#phoF.setVal(data.mean(phoF))
 phoF.setConstant()
 
 reducedData = {}
@@ -229,9 +235,9 @@ phoEResDataHist = RooDataHist('phoEResDataHist', 'phoEResDataHist',
 # phoERes.setRange(-0.5 * deltaMass, 0.5 * deltaMass)
 ## Define the mass smearing mean and widht as functions of photon
 ## energy scale and resolution
-phoMean = w.factory('''FormulaVar::phoMean("phoF * phoScale / 100",
+phoMean = w.factory('''FormulaVar::phoMean("phoF * phoScale / 100.",
                                            {phoF, phoScale})''')
-phoWidth = w.factory('''FormulaVar::phoWidth("phoF * (1 + phoRes / 100)",
+phoWidth = w.factory('''FormulaVar::phoWidth("phoF * (1. + phoRes / 100.)",
                                              {phoF, phoRes[0,-99.5,10000]})''')
 w.var('phoScale').setUnit('%')
 w.var('phoRes').setUnit('%')
@@ -257,7 +263,7 @@ w.Import(phoSmear)
 
 ## Apply photon smearing to the theory
 mmgMassShifted.setRange(-30, 30)
-mmgMassShifted.setBins(100000, 'fft')
+mmgMassShifted.setBins(10000, 'fft')
 theoryXphoSmear = w.factory('FCONV::theoryXphoSmear(mmgMassShifted, phoSmear, theory)')
 ## mmgMassPhoGenEFunc = w.factory('FormulaVar::mmgMassPhoGenEFunc("mmgMass", {mmgMass})')
 ## theoryXphoSmear = RooFFTConvPdf('theoryXphoSmear', 'theoryXphoSmear',
@@ -296,7 +302,7 @@ plot.Draw()
 plots.append(plot)
 
 ## Mass smearing due to photon resolution
-phoSmear.fitTo(reducedData['mmgMassPhoSmear'], Range(-5, 5))
+phoSmear.fitTo(reducedData['mmgMassPhoSmear'], Range(-5, 5), NumCPU(3))
 canvases.next('mmgMassPhoSmear')#.SetLogy()
 plot = mmgMassShifted.frame(Range(-5,5)) #Range(-5,5)) #Range(0, 500))
 reducedData['mmgMassPhoSmear'].plotOn(plot)
@@ -306,14 +312,46 @@ plot.Draw()
 plots.append(plot)
 
 ## Data and model
-theoryXphoSmear.fitTo(reducedData['mmgMassShifted'], Range(-25, 25), Minos())
+theoryXphoSmear.fitTo(reducedData['mmgMassShifted'],
+                      Range(62-massShift, 118-massShift), Minos(), NumCPU(3))
 canvases.next('model')
-plot = mmgMassShifted.frame(Range(-32, 32))
+plot = mmgMassShifted.frame(Range(58-massShift, 122-massShift))
 reducedData['mmgMassShifted'].plotOn(plot)
 theoryXphoSmear.plotOn(plot)
 theoryXphoSmear.paramOn(plot)
 plot.Draw()
 #plot.GetYaxis().SetRangeUser(1e-5, 1e2)
+
+## Plot Likelihood vs scale
+nll = theoryXphoSmear.createNLL(reducedData['mmgMassShifted'])
+plot = phoScale.frame(
+    Range(max(phoScale.getVal() - 5 * phoScale.getError(), phoScale.getMin()),
+          min(phoScale.getVal() + 5 * phoScale.getError(), phoScale.getMax()))
+    )
+nll.plotOn(plot, ShiftToZero())
+canvases.next('NLL_vs_phoScale')
+plot.Draw()
+
+## Plot Likelihood vs resolution
+phoRes = w.var('phoRes')
+plot = phoRes.frame(
+    Range(max(phoRes.getVal() - 5 * phoRes.getError(), phoRes.getMin()),
+          min(phoRes.getVal() + 5 * phoRes.getError(), phoRes.getMax()))
+    )
+nll.plotOn(plot, ShiftToZero())
+canvases.next('NLL_vs_phoRes')
+plot.Draw()
+
+
+## Plot theory, smearing and smeared theory
+plot = mmgMassShifted.frame(Range(58-massShift, 122-massShift))
+phoScale.setVal(0)
+phoRes.setVal(0)
+theory.plotOn(plot)
+phoSmear.plotOn(plot, LineColor(kRed))
+thoeryXphoSmear.plotOn(plot, LineColor(kBlack))
+canvases.next('convolution')
+plot.Draw()
 
 
 ## canvases.next('nominal')
