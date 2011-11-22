@@ -15,6 +15,7 @@ import copy
 import sys
 ## Switch to ROOT's batch mode
 #sys.argv.append("-b")
+import ROOT
 import JPsi.MuMu.common.roofit as roofit
 import JPsi.MuMu.common.dataset as dataset
 import JPsi.MuMu.common.canvases as canvases
@@ -47,6 +48,8 @@ from ROOT import TCanvas
 from ROOT import TGraphErrors
 from ROOT import TH1F
 
+from JPsi.MuMu.common.latex import Latex
+
 from JPsi.MuMu.common.roofit import AutoPrecision
 from JPsi.MuMu.common.roofit import EventRange
 from JPsi.MuMu.common.roofit import Format
@@ -64,7 +67,8 @@ from JPsi.MuMu.common.energyScaleChains import getChains
 from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
 
 gSystem.Load('libJPsiMuMu')
-gROOT.LoadMacro("tools.C+")
+gROOT.LoadMacro('tools.C+')
+gROOT.LoadMacro('effSigma.C+')
 gStyle.SetPadTopMargin(0.1)
 
 setattr(RooWorkspace, "Import", getattr(RooWorkspace, "import"))
@@ -80,6 +84,7 @@ phoPtRange = (15,20)
 
 chains = getChains('v11')
 mcTree = chains['z']
+dataTree = chains['data']
 
 w = RooWorkspace('w')
 
@@ -93,7 +98,7 @@ mmgMassPhoGenE = w.factory('mmgMassPhoGenE[0, 300]')
 mmgMassShiftedPhoGenE = w.factory('mmgMassShiftedPhoGenE[-90, 210]')
 mmgMassPhoSmear = w.factory('mmgMassPhoSmear[-30,30]')
 mmgMassPhoSmear.SetTitle('mmgMass - mmgMassPhoGenE')
-phoERes = w.factory('phoERes[-0.5,1.0]')
+phoERes = w.factory('phoERes[-0.3,3]')
 mmMass = w.factory('mmMass[10, 180]')
 weight = w.factory('weight[1]')
 phoScale = w.factory('phoScale[0,-50,50]')
@@ -154,6 +159,22 @@ data = dataset.get(tree=tree,
                    weight=weight,
                    cuts = (cuts[:] + ['%f < phoPt & phoPt < %f' % phoPtRange]))
 
+## Create a preselected tree for real data
+tree = dataTree.CopyTree('&'.join(cuts))
+
+## Have to copy aliases by hand
+for a in dataTree.GetListOfAliases():
+    tree.SetAlias(a.GetName(), a.GetTitle())
+
+## Get the nominal dataset
+weight.SetTitle('1')
+realdata = dataset.get(tree=tree,
+                   variables=[mmgMass, mmgMassShifted, mmMass],
+                   weight=weight,
+                   cuts = (cuts[:] + ['%f < phoPt & phoPt < %f' % phoPtRange]))
+
+
+
 ## print '## Get the photon scale sensitivity factor'
 ## Get the photon scale sensitivity factor
 phoFFunc.SetName('phoF')
@@ -197,7 +218,14 @@ model = w.factory('KeysPdf::model(mmgMass, mmgMassData, NoMirror, 2)')
 ## Get the empirical PDF's for unsmeared mass and photon resolution
 theory = w.factory('''KeysPdf::theory(mmgMassShifted, mmgMassShiftedPhoGenEData,
                                       NoMirror, 2)''')
-phoEResShape = w.factory('KeysPdf::phoEResShape(phoERes, phoEResData, NoMirror, 1)')
+## Increase the phoERes range by 20 % margin to ensure zero density outside
+## of the data range.
+phoEResRange = phoERes.getMax() - phoERes.getMin()
+phoERes.setRange(phoERes.getMin() - 0.1 * phoEResRange,
+                 phoERes.getMax() + 0.1 * phoEResRange)
+phoEResShape = w.factory('KeysPdf::phoEResShape(phoERes, phoEResData, NoMirror, 2)')
+#phoERes.setRange(-10,10)
+phoEResShape2 = w.factory('KeysNDPdf::phoEResShape2(phoERes, phoEResData, NoMirror, 2)')
 
 w.Print()
 
@@ -237,8 +265,11 @@ phoEResDataHist = RooDataHist('phoEResDataHist', 'phoEResDataHist',
 ## energy scale and resolution
 phoMean = w.factory('''FormulaVar::phoMean("phoF * phoScale / 100.",
                                            {phoF, phoScale})''')
-phoWidth = w.factory('''FormulaVar::phoWidth("phoF * (1. + phoRes / 100.)",
-                                             {phoF, phoRes[0,-99.5,10000]})''')
+phoEResMC = ROOT.effSigma(phoEResHistExtended) * 100
+phoWidth = w.factory('''FormulaVar::phoWidth(
+    "phoF * phoRes / {effSigma}",
+    {{phoF, phoRes[{effSigma},0.1,1000]}}
+    )'''.format(effSigma = phoEResMC))
 w.var('phoScale').setUnit('%')
 w.var('phoRes').setUnit('%')
 
@@ -272,54 +303,122 @@ theoryXphoSmear = w.factory('FCONV::theoryXphoSmear(mmgMassShifted, phoSmear, th
 ## Fit Smeared theory to data
 #theoryXphoSmear.fitTo(mmgData, Range(70,110))
 
+## Make labels
+labels = []
+if 'phoIsEB' in cuts:
+    labels.append('Barrel')
+else:
+    labels.append('Endcaps')
+    
+labels = ['E_{T}^{#gamma} #in [%g,%g] GeV' % phoPtRange]
+
+for c in cuts:
+    if 'phoR9' in c:
+        labels.append(c.replace('phoR9', 'R_{9}'))
+        break
+
+labels.append('True Resolution (#sigma_{eff}): %.3g %%' % phoEResMC)
+labels.append('True Scale: %.3g %%' % (100*phoEScaleMC))
+labels.append('<EdM/dE>: %.3g GeV' % phoF.getVal())
+
+llabels = Latex(labels, (0.21, 0.83))
+
 ## Make plots
 plots = []
 
-## Photon Resolution
-canvases.next('phoERes').SetLogy()
-phoERes.setRange(-0.5,1)
-plot = phoERes.frame()
-reducedData['phoERes'].plotOn(plot)
-phoEResShape.plotOn(plot)
-plot.Draw()
-plot.GetYaxis().SetRangeUser(1e-3, 1e4)
-plots.append(plot)
-
-## Photon Resolution Zoom
-canvases.next('phoEResZoom')
-plot = phoERes.frame(Range(-0.25 + phoEScaleMC, 0.33 + phoEScaleMC))
-reducedData['phoERes'].plotOn(plot)
-phoEResShape.plotOn(plot)
-plot.Draw()
-plots.append(plot)
+phoRes = w.var('phoRes')
+phoRes.SetTitle('#sigma_{eff}(E_{#gamma})')
+phoScale.SetTitle('E_{#gamma} Scale')
+## for x in [phoRes, phoScale]:
+##     x.SetTitle(x.GetName())
 
 ## Theory for unsmeared photon
 canvases.next('theory')#.SetLogy()
+mmgMassShiftedTitle = mmgMassShifted.GetTitle().replace('mmgMass', 'm(#mu#mu#gamma)')
+mmgMassShifted.setUnit('GeV')
+mmgMassShifted.SetTitle(mmgMassShiftedTitle.replace('m(#mu#mu#gamma)', 'm(#mu#mu + gen #gamma)'))
 plot = mmgMassShifted.frame(Range(60-90,120-90)) #Range(-5,5)) #Range(0, 500))
+mmgMassShifted.SetTitle(mmgMassShiftedTitle)
+plot.SetTitle('"Theory:" #mu#mu#gamma Inv. Mass Modeling with Gen. Level Photon Energy')
 reducedData['mmgMassShiftedPhoGenE'].plotOn(plot)
 theory.plotOn(plot)
 plot.Draw()
 plots.append(plot)
 
+## Photon Resolution
+canvases.next('phoERes').SetLogy()
+phoERes.SetTitle('E^{#gamma}_{reco}/E^{#gamma}_{gen} - 1')
+phoERes.setRange(-0.9,3.2)
+plot = phoERes.frame()
+plot.SetTitle('Photon Resolution Modeling Zoom Out')
+reducedData['phoERes'].plotOn(plot)
+phoEResShape.plotOn(plot)
+plot.Draw()
+plot.GetYaxis().SetRangeUser(1e-3, 1e4)
+llabels.position = (0.6, 0.83)
+llabels.draw()
+plots.append(plot)
+
+## Photon Resolution Zoom In
+canvases.next('phoEResZoom')
+plot = phoERes.frame(Range(-0.25 + phoEScaleMC, 0.33 + phoEScaleMC))
+plot.SetTitle('Photon Resolution Modeling Zoom In')
+reducedData['phoERes'].plotOn(plot)
+phoEResShape.plotOn(plot)
+plot.Draw()
+llabels.draw()
+llabels.position = (0.21, 0.83)
+plots.append(plot)
+
+## ## Photon Resolution Zoom Out
+## canvases.next('phoEResZoomOut')
+## plot = phoERes.frame(Range(-1,1))
+## reducedData['phoERes'].plotOn(plot)
+## phoEResShape.plotOn(plot)
+## phoEResShape2.plotOn(plot, LineColor(kRed))
+## plot.Draw()
+## llabels.draw()
+## plots.append(plot)
+
 ## Mass smearing due to photon resolution
 phoSmear.fitTo(reducedData['mmgMassPhoSmear'], Range(-5, 5), NumCPU(3))
 canvases.next('mmgMassPhoSmear')#.SetLogy()
+mmgMassShifted.SetTitle('m(#mu#mu + reco #gamma) - m(#mu#mu + gen #gamma)')
 plot = mmgMassShifted.frame(Range(-5,5)) #Range(-5,5)) #Range(0, 500))
+mmgMassShifted.SetTitle(mmgMassShiftedTitle)
+plot.SetTitle('"Resolution:" Modeling of Mass Smearing Due to Photon Energy Resolution')
 reducedData['mmgMassPhoSmear'].plotOn(plot)
 phoSmear.plotOn(plot)
 phoSmear.paramOn(plot)
 plot.Draw()
+llabels.draw()
 plots.append(plot)
+
+## Plot theory, smearing and smeared theory
+plot = mmgMassShifted.frame(Range(-5, 5))
+plot.SetTitle('Model = Theory * Resolution')
+phoScale.setVal(0)
+phoRes.setVal(phoEResMC)
+theory.plotOn(plot)
+phoSmear.plotOn(plot, LineColor(kRed))
+theoryXphoSmear.plotOn(plot, LineColor(kBlack))
+c1 = canvases.next('convolution')
+c1.SetGridx()
+c1.SetGridy()
+plot.Draw()
+llabels.draw()
 
 ## Data and model
 theoryXphoSmear.fitTo(reducedData['mmgMassShifted'],
                       Range(62-massShift, 118-massShift), Minos(), NumCPU(3))
 canvases.next('model')
 plot = mmgMassShifted.frame(Range(58-massShift, 122-massShift))
+plot.SetTitle('"Model = Theory * Resolution:" Reco. Mass Modeling as a Convolution')
 reducedData['mmgMassShifted'].plotOn(plot)
 theoryXphoSmear.plotOn(plot)
 theoryXphoSmear.paramOn(plot)
 plot.Draw()
+llabels.draw()
 #plot.GetYaxis().SetRangeUser(1e-5, 1e2)
 
 ## Plot Likelihood vs scale
@@ -331,6 +430,19 @@ plot = phoScale.frame(
 nll.plotOn(plot, ShiftToZero())
 canvases.next('NLL_vs_phoScale')
 plot.Draw()
+llabels.position = (0.35, 0.83)
+llabels.draw()
+
+## Plot Likelihood vs resolution
+#phoRes.SetTitle('Fitted Photon Resolution (#sigma_{eff})')
+plot = phoRes.frame(
+    Range(max(phoRes.getVal() - 5 * phoRes.getError(), phoRes.getMin()),
+          min(phoRes.getVal() + 5 * phoRes.getError(), phoRes.getMax()))
+    )
+nll.plotOn(plot, ShiftToZero())
+canvases.next('NLL_vs_phoRes')
+plot.Draw()
+llabels.draw()
 
 ## Plot Likelihood vs resolution
 phoRes = w.var('phoRes')
@@ -341,18 +453,28 @@ plot = phoRes.frame(
 nll.plotOn(plot, ShiftToZero())
 canvases.next('NLL_vs_phoRes')
 plot.Draw()
+llabels.draw()
 
+## Plot Likelihood contours vs scale and resolution
+canvases.next('NLL_Contours')
+phoRes.setRange(
+    max(min(phoRes.getVal(), phoEResMC) - 6 * phoRes.getError(), phoRes.getMin()),
+    min(max(phoRes.getVal(), phoEResMC) + 6 * phoRes.getError(), phoRes.getMax())
+    )
 
-## Plot theory, smearing and smeared theory
-plot = mmgMassShifted.frame(Range(58-massShift, 122-massShift))
-phoScale.setVal(0)
-phoRes.setVal(0)
-theory.plotOn(plot)
-phoSmear.plotOn(plot, LineColor(kRed))
-thoeryXphoSmear.plotOn(plot, LineColor(kBlack))
-canvases.next('convolution')
+phoScale.setRange(
+    max(min(phoScale.getVal(), 100*phoEScaleMC) - 10 * phoRes.getError(), phoRes.getMin()),
+    min(max(phoScale.getVal(), 100*phoEScaleMC) + 10 * phoRes.getError(), phoRes.getMax())
+    )
+
+m = RooMinuit(nll)
+m.migrad()
+m.minos()
+plot = m.contour(phoScale, phoRes, 1,2,3)
+plot.SetTitle('NLL Countours')
 plot.Draw()
-
+mcTruth = ROOT.TMarker(100*phoEScaleMC, phoEResMC, 2)
+mcTruth.DrawClone()
 
 ## canvases.next('nominal')
 ## mmgFrame = mmgMass.frame(Range(80,100))
@@ -369,7 +491,8 @@ plot.Draw()
 ## mmgFrame.Draw()
 
 for c in canvases.canvases:
-    c.Update()
+    if c:
+        c.Update()
     
 if __name__ == "__main__":
     import user
