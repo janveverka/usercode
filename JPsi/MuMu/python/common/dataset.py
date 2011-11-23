@@ -1,4 +1,4 @@
-'''Utility to extract RooDataSet from a TTree.
+"""Utility to extract RooDataSet from a TTree.
 
 Data:
   - tree: source TTree
@@ -22,7 +22,12 @@ Functions:
 Takes a tree, a RooRealVar variable, a list of categories and a list of cuts.
 Returns a RooDataSet extracted from the tree given the expressions in
 variable and categories titles.
-'''
+
+This module has several design flaws and should be rewritten along these lines:
+    - Data and functions should be wrapped into a class.
+    - import * should be avoided
+    - Some sort of argument check should be implemented **kwargs is too generic.
+"""
 
 import os
 import sys
@@ -32,9 +37,15 @@ from JPsi.MuMu.common.basicRoot import *
 from JPsi.MuMu.common.roofit import *
 
 ## Configuration
-tree = TTree()
-variable = RooRealVar( 'x', 'dummy x variable', 0, -10, 10)
-weight = RooRealVar( 'w', 'dummy weight', 1 )
+## tree = TTree()
+## variable = RooRealVar( 'x', '0', 0, -10, 10)
+tree = None
+variable = None
+
+## Default values
+variables = []
+weight = RooRealVar( 'w', '1', 1 )
+name, title = 'data', 'data'
 
 ## Default/example categories
 categories = []
@@ -45,35 +56,54 @@ dataset = RooDataSet()
 
 #------------------------------------------------------------------------------
 def set(**kwargs):
-    global tree, variable, weight, cuts, categories, dataset
+    """set(tree, variable, variables, weight, cuts, categories, dataset,
+    name, title)"""
+    global tree, variable, weight, cuts, categories, dataset, name, title
+    global variables
+
+    ## require that tree and variable must be set
+    if (not (tree or 'tree' in kwargs) or 
+        (not (variable or 'variable' in kwargs) and not 'variables' in kwargs) or
+        (not (variable or 'variable' in kwargs) and not kwargs['variables'])):
+        raise RuntimeError, "Must provide tree and variable."
+
     for arg in ('tree variable weight cuts categories dataset name '
-                'title').split():
+                'title variables').split():
         if arg in kwargs.keys():
             setattr( sys.modules[__name__], arg, kwargs[arg] )
             del kwargs[arg]
     if kwargs.keys():
         raise RuntimeError, "Unknown argument(s): %s" % repr( kwargs.keys() )
+
+    if name != 'data' and title == 'data':
+        title = name
+
+    if variable and not variable in variables:
+        variables.append(variable)
+      
+    if not 'variable' in kwargs:
+        variable = variables[0]
 ## set
 
 #------------------------------------------------------------------------------
 def get(**kwargs):
+    """RooDataSet get(tree, variable, variables, weight, cuts, categories,
+    dataset, name, title)"""
     global tree, variable, weight, cuts, categories, dataset, name, title
+    global variables
 
     ## Initialize
-    name, title = 'data', 'data'
     set(**kwargs)
-    if name != 'data' and title == 'data':
-        title = name
-    varSet = RooArgSet( variable, weight, *categories )
+    varSet = RooArgSet(*(variables + categories + [weight]))
     dataset = RooDataSet(name, title, varSet, WeightVar( weight.GetName() ) )
     #dataset.setWeightVar( weight )
     #dataset = RooDataSet('data', 'data', varSet )
 
     ## Build list expressions for variables
-    varExpressions = [ variable.GetTitle(), weight.GetTitle() ]
+    varExpressions = [x.GetTitle() for x in variables + categories + [weight]]
 
-    for cat in categories:
-        varExpressions.append( cat.GetTitle() )
+    ## for cat in categories:
+    ##     varExpressions.append( cat.GetTitle() )
 
     ## Auxiliary function to build the selection string
     andCuts = lambda(cuts): " & ".join( "(%s)" % cut for cut in cuts )
@@ -84,27 +114,32 @@ def get(**kwargs):
                                       andCuts(cuts)                    ) )
     ## Select only events within the range of variable.
     ## This is needed to exclude underflows and overflows.
-    cuts.append('%f<%s & %s<%f' % (variable.getMin(), variable.GetTitle(),
-                                   variable.GetTitle(), variable.getMax()))
+    for x in variables:
+        cuts.append('%f<%s & %s<%f' % (x.getMin(), x.GetTitle(),
+                                       x.GetTitle(), x.getMax()))
     ## Get the data from the tree
     tree.Draw( joinExpressions(varExpressions), andCuts(cuts), 'goff para' )
 
+    ## get a list of variables for fast adding
+    row = dataset.get()
+    rowVars = [row[x.GetName()] for x in variables + categories]
+    
     ## Fill the dataset
     for i in range( tree.GetSelectedRows() ):
-        variable.setVal( tree.GetV1()[i] )
-        weight.setVal( tree.GetV2()[i] )
-        for icat in range( len(categories) ):
-            cat = categories[icat]
-            x = tree.GetVal(icat+2)[i]
-            cat.setIndex( int(x) )
-        dataset.add( varSet, weight.getVal() )
+        for j, x in enumerate(rowVars):
+            if x in categories:
+                x.setIndex(int(tree.GetVal(j)[i]))
+            else:
+                x.setVal(tree.GetVal(j)[i])
+        weight.setVal(tree.GetVal(len(rowVars))[i])
+        dataset.addFast(row, weight.getVal())
     ## Close the file with source tree
 
     return dataset
 ## get
 
 #------------------------------------------------------------------------------
-def plot():
+def plot(variable):
     frame = variable.frame()
     dataset.plotOn(frame)
     frame.Draw()
@@ -114,40 +149,55 @@ def plot():
 #------------------------------------------------------------------------------
 def main():
     'test the get function'
+    import JPsi.MuMu.common.energyScaleChains as chains
+    trees = chains.getChains('v11')
+
     global canvases
     canvases = []
 
     #gROOT.Set
 
-    get()
-    canvases.append( TCanvas('s', 's') )
-    plot()
+    w = RooWorkspace('w', 'w')
+    #s = w.factory('s[-5,5]')
+    kRatio = w.factory('kRatio[-20,20]')
+    mmgMass = w.factory('mmgMass[40,140]')
+    mmMass = w.factory('mmMass[10,140]')
+    # s.SetTitle('1/kRatio - 1')
+    get(tree=trees['z'], variables=[kRatio, mmgMass, mmMass])
+    canvases.append( TCanvas('kRatio', 'kRatio') )
+    plot(kRatio)
+    
+    canvases.append( TCanvas('mmgMass', 'mmgMass') )
+    plot(mmgMass)
 
-    get( variable = RooRealVar('k', 'kRatio', 0.5, 1.5) )
-    canvases.append( TCanvas('k_noweights', 'k_noweights') )
-    frame = plot()
-    dataset.plotOn( frame, Cut('subdet==subdet::Barrel'), MarkerColor(kBlue),
-                    LineColor(kBlue) )
-    dataset.plotOn( frame, Cut('subdet==subdet::Endcaps'), MarkerColor(kRed),
-                    LineColor(kRed) )
-    frame.Draw()
+    canvases.append( TCanvas('mmMass', 'mmMass') )
+    plot(mmMass)
 
-    canvases.append( TCanvas('k_withweights', 'k_withweights') )
-    frame = plot()
-    dataset.plotOn( frame, Cut('subdet==subdet::Barrel'), MarkerColor(kBlue),
-                    LineColor(kBlue), DataError(RooAbsData.SumW2) )
-    dataset.plotOn( frame, Cut('subdet==subdet::Endcaps'), MarkerColor(kRed),
-                    LineColor(kRed) )
-    frame.Draw()
+    ## get( variable = RooRealVar('k', 'kRatio', 0.5, 1.5) )
+    ## canvases.append( TCanvas('k_noweights', 'k_noweights') )
+    ## frame = plot()
+    ## dataset.plotOn( frame, Cut('subdet==subdet::Barrel'), MarkerColor(kBlue),
+    ##                 LineColor(kBlue) )
+    ## dataset.plotOn( frame, Cut('subdet==subdet::Endcaps'), MarkerColor(kRed),
+    ##                 LineColor(kRed) )
+    ## frame.Draw()
 
-    get( variable = RooRealVar('logik', '-log(kRatio)', -0.5, 0.5) )
-    canvases.append( TCanvas() )
-    frame = plot()
-    dataset.plotOn( frame, Cut('r9==r9::High'), MarkerColor(kBlue),
-                    LineColor(kBlue) )
-    dataset.plotOn( frame, Cut('r9==r9::Low'), MarkerColor(kRed),
-                    LineColor(kRed) )
-    frame.Draw()
+    ## canvases.append( TCanvas('k_withweights', 'k_withweights') )
+    ## frame = plot()
+    ## dataset.plotOn( frame, Cut('subdet==subdet::Barrel'), MarkerColor(kBlue),
+    ##                 LineColor(kBlue), DataError(RooAbsData.SumW2) )
+    ## dataset.plotOn( frame, Cut('subdet==subdet::Endcaps'), MarkerColor(kRed),
+    ##                 LineColor(kRed) )
+    ## frame.Draw()
+
+    ## get( variable = RooRealVar('logik', '-log(kRatio)', -0.5, 0.5) )
+    ## canvases.append( TCanvas() )
+    ## frame = plot()
+    ## dataset.plotOn( frame, Cut('r9==r9::High'), MarkerColor(kBlue),
+    ##                 LineColor(kBlue) )
+    ## dataset.plotOn( frame, Cut('r9==r9::Low'), MarkerColor(kRed),
+    ##                 LineColor(kRed) )
+    ## frame.Draw()
 ## main
 
 if __name__ == "__main__":
