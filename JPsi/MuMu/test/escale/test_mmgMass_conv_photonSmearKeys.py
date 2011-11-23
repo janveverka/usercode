@@ -174,7 +174,6 @@ realdata = dataset.get(tree=tree,
                    cuts = (cuts[:] + ['%f < phoPt & phoPt < %f' % phoPtRange]))
 
 
-
 ## print '## Get the photon scale sensitivity factor'
 ## Get the photon scale sensitivity factor
 phoFFunc.SetName('phoF')
@@ -475,6 +474,7 @@ plot.SetTitle('NLL Countours')
 plot.Draw()
 mcTruth = ROOT.TMarker(100*phoEScaleMC, phoEResMC, 2)
 mcTruth.DrawClone()
+mcTruth.Draw()
 
 ## canvases.next('nominal')
 ## mmgFrame = mmgMass.frame(Range(80,100))
