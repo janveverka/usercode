@@ -25,6 +25,6 @@ namespace jpsimumu {
     RooGshPdf       _gsh;
     RooSechPdf      _sech;
     RooLogSqrtCBShape _lscb;
-    RooLogSqrtCBShape _lsg;
+    RooLogSqrtGaussian   _lsg;
   };
 }
