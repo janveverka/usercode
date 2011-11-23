@@ -1,10 +1,10 @@
 '''
 Facilitate adding latex labels to ROOT plots.
 Usage:
-from JPsi.MuMu.common.latex import LatexLabels
+from JPsi.MuMu.common.latex import Latex
 labels = get_list_of_labels_from_somewhere()
 latexlabels = Latex(labels [, position = (x1, y1))
-latexlabels.Draw()
+latexlabels.draw()
 '''
 
 import ROOT
