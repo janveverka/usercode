@@ -19,6 +19,7 @@ import ROOT
 import JPsi.MuMu.common.roofit as roofit
 import JPsi.MuMu.common.dataset as dataset
 import JPsi.MuMu.common.canvases as canvases
+import JPsi.MuMu.tools
 
 from math import log
 from math import sqrt
@@ -42,6 +43,7 @@ from ROOT import RooHistPdf
 from ROOT import RooKeysPdf
 from ROOT import RooMinuit
 from ROOT import RooRealVar
+from ROOT import RooNDKeysPdf
 from ROOT import RooWorkspace
 
 from ROOT import TCanvas
@@ -49,6 +51,10 @@ from ROOT import TGraphErrors
 from ROOT import TH1F
 
 from JPsi.MuMu.common.latex import Latex
+
+## For some reason it seems that this has to be imported *BEFORE* any
+## class from the cit namespace, e.g. DataDrivenBinning.
+from JPsi.MuMu.tools import effSigma
 
 from JPsi.MuMu.common.roofit import AutoPrecision
 from JPsi.MuMu.common.roofit import EventRange
@@ -67,8 +73,7 @@ from JPsi.MuMu.common.energyScaleChains import getChains
 from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
 
 gSystem.Load('libJPsiMuMu')
-gROOT.LoadMacro('tools.C+')
-gROOT.LoadMacro('effSigma.C+')
+# gROOT.LoadMacro('tools.C+')
 gStyle.SetPadTopMargin(0.1)
 
 setattr(RooWorkspace, "Import", getattr(RooWorkspace, "import"))
@@ -130,6 +135,7 @@ cuts = ['%f < %s & %s < %f' % (mmgMass.getMin(), hi, lo, mmgMass.getMax()),
         'phoIsEB',
         'phoR9 < 0.94',
         'mmMass + mmgMass < 190',
+        '1 <= abs(phoIEtaX) & abs(phoIEtaX) <= 25',
         #'isFSR',
         ]
 
@@ -212,17 +218,20 @@ for x in ('mmgMass mmgMassShifted phoERes mmgMassPhoGenE'.split() +
 
 ## print '## Get the nominal model for translation, use rho=2'
 ## Get the nominal model for translation, use rho=2
-model = w.factory('KeysPdf::model(mmgMass, mmgMassData, NoMirror, 2)')
+model = w.factory('KeysPdf::model(mmgMass, mmgMassData, NoMirror, 1.5)')
 
 ## Get the empirical PDF's for unsmeared mass and photon resolution
 theory = w.factory('''KeysPdf::theory(mmgMassShifted, mmgMassShiftedPhoGenEData,
-                                      NoMirror, 2)''')
+                                      NoMirror, 1.3)''')
+## theory2 = RooNDKeysPdf('theory2', 'theory2', RooArgList(mmgMassShifted),
+##                        reducedData['mmgMassShiftedPhoGenE'], 'a', 1.3)
+
 ## Increase the phoERes range by 20 % margin to ensure zero density outside
 ## of the data range.
 phoEResRange = phoERes.getMax() - phoERes.getMin()
 phoERes.setRange(phoERes.getMin() - 0.1 * phoEResRange,
                  phoERes.getMax() + 0.1 * phoEResRange)
-phoEResShape = w.factory('KeysPdf::phoEResShape(phoERes, phoEResData, NoMirror, 2)')
+phoEResShape = w.factory('KeysPdf::phoEResShape(phoERes, phoEResData, NoMirror, 1.5)')
 #phoERes.setRange(-10,10)
 phoEResShape2 = w.factory('KeysNDPdf::phoEResShape2(phoERes, phoEResData, NoMirror, 2)')
 
@@ -264,7 +273,8 @@ phoEResDataHist = RooDataHist('phoEResDataHist', 'phoEResDataHist',
 ## energy scale and resolution
 phoMean = w.factory('''FormulaVar::phoMean("phoF * phoScale / 100.",
                                            {phoF, phoScale})''')
-phoEResMC = ROOT.effSigma(phoEResHistExtended) * 100
+#phoEResMC = ROOT.effSigma(phoEResHistExtended) * 100
+phoEResMC = effSigma(phoEResHistExtended) * 100
 phoWidth = w.factory('''FormulaVar::phoWidth(
     "phoF * phoRes / {effSigma}",
     {{phoF, phoRes[{effSigma},0.1,1000]}}
@@ -316,6 +326,8 @@ for c in cuts:
         labels.append(c.replace('phoR9', 'R_{9}'))
         break
 
+labels.append('Moduel 1')
+
 labels.append('True Resolution (#sigma_{eff}): %.3g %%' % phoEResMC)
 labels.append('True Scale: %.3g %%' % (100*phoEScaleMC))
 labels.append('<EdM/dE>: %.3g GeV' % phoF.getVal())
@@ -341,6 +353,7 @@ mmgMassShifted.SetTitle(mmgMassShiftedTitle)
 plot.SetTitle('"Theory:" #mu#mu#gamma Inv. Mass Modeling with Gen. Level Photon Energy')
 reducedData['mmgMassShiftedPhoGenE'].plotOn(plot)
 theory.plotOn(plot)
+# theory2.plotOn(plot, LineColor(kRed), LineStyle(kDashed))
 plot.Draw()
 plots.append(plot)
 
