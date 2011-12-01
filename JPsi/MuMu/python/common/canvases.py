@@ -38,4 +38,13 @@ def make_plots(graphics_extensions = ['png']):
             c.Print(''.join([c.GetName(), '.', ext]))
         ## end of loop over graphics_extensions
     ## end of loop over canvases
-## end of print()
+## end of make_plots()
+
+#______________________________________________________________________________
+def update():
+    for c in canvases:
+        if c:
+            c.Update()
+    ## end of loop over canvases
+## end of update()
+
