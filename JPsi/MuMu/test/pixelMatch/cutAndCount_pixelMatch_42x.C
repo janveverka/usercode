@@ -4,7 +4,8 @@ gROOT->LoadMacro("../resolutionErrors.C");
 // const char *filenameData = "pixelMatch_data_Nov4ReReco_v4.dat";
 // const char *filenameMC   = "pixelMatch_Powheg_Fall10_v4.dat";
 
-const char *path = "/raid2/veverka/pmvTrees/";
+// const char *path = "/raid2/veverka/pmvTrees/";
+const char *path = "/Users/veverka/Work/Data/pmvTrees/";
 
 /**
     'data' : [ 'pmvTree_V9_Run2010B-ZMu-Apr21ReReco-v1.root',
@@ -16,33 +17,38 @@ const char *path = "/raid2/veverka/pmvTrees/";
     'tt'   : [ 'pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root' ],
 */
 
-const char *filenameData = "pmvTree_V9_ZMu-May10ReReco_plus_PromptReco-v4-42X-v3.root";
-const char *filenameMC   = "pmvTree_V9_DYToMuMu_pythia6_v2_RECO-42X-v4.root";
-const char *filenameQCD  = "pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V6.root";
-const char *filenameW    = "pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V6.root";
-const char *filenameTT   = "pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root";
+// const char *filenameData = "pmvTree_V9_ZMu-May10ReReco_plus_PromptReco-v4-42X-v3.root";
+// const char *filenameMC   = "pmvTree_V9_DYToMuMu_pythia6_v2_RECO-42X-v4.root";
+// const char *filenameQCD  = "pmvTree_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Spring11_41X-v2_V6.root";
+// const char *filenameW    = "pmvTree_WToMuNu_TuneZ2_7TeV-pythia6_Summer11_RECO_42X-v4_V6.root";
+// const char *filenameTT   = "pmvTree_TTJets_TuneZ2_7TeV-madgraph-tauola_Spring11_41X-v2_V6.root";
+
+// 2011A+B
+// const char *filenameData = "pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1_PromptReco-v1B.root";
+// 2011A
+// const char *filenameData = "pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1.root";
+// 2011B
+const char *filenameData = "pmvTree_V15_DoubleMu_Run2011B-PromptReco-v1_condor_Dimuon_AOD-42X-v9.root";
+// 2011A+B PU weights
+// const char *filenameMC   = "pmvTree_V15_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
+// 2011A PU weights
+// const char *filenameMC   = "pmvTree_V16_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
+// 2011B PU weights
+const char *filenameMC   = "pmvTree_V17_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
+const char *filenameQCD  = "pmvTree_V15_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_S4-v1_condor_Dimuon_AOD-42X-v9.root";
+const char *filenameW    = "pmvTree_V15_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1_condor_Dimuon_AOD-42X-v9.root";
+const char *filenameTT   = "pmvTree_V15_TTJets_TuneZ2_7TeV-madgraph-tauola_S4-v2_condor_Dimuon_AOD-42X-v9.root";
+
+
 
 enum mcSample {z=0, qcd, w, tt};
 
-/// FIXME
-/*
-cweight = {
-    "data": 1.,
-    'z'  : 0.17175592557735,
-    'tt' : 0.019860956416475,
-    'w'  : 0.54974976060237,
-    'qcd': 0.27884236321449,
-}
-
-
-
-*/
+// Weights of V15 ntuples for 4.603 / fb
 double weight[] = {
-  0.7083934238069 * 715.01 / 881.51549, // z v2
-//   0.17175592557735 * 1795714. / 2008540., // z
-  0.54974976060237 * 715.01 / 191.09326, //qcd
-  0.27884236321449 * 715.01 / 191.09326, //w
-  0.019860956416475 * 715.01 / 191.09326, //tt
+  0.2578237765992,  // Z
+  15.5412157722089, // QCD
+  0.20516095989489, // tt
+  1.77177343641992 // W
 };
 
 TFile dataFile(Form("%s%s", path, filenameData));
@@ -63,45 +69,61 @@ TCut drCut("minDeltaR < 1");
 // TCut phoEIsoCut("phoEcalIso < 4.2+0.006*phoPt");
 // TCut phoHIsoCut("phoHcalIso < 2.2+0.0025*phoPt");
 // TCut ebSihihCut("minDTheta<0.05|phoSigmaIetaIeta<0.013");
-TCut ebCut("abs(phoEta) < 1.5");
-TCut eeCut("abs(phoEta) > 1.5");
-TCut signalCut("isFSR");
-TCut backgroundCut("!isFSR");
-TCut mWindowCut("abs(mmgMass-90) < 15");
-TCut ubCut("(minDEta > 0.04 | minDPhi > 0.2)");
-// TCut vetoCut("phoDeltaRToTrack > 1");
-// TCut vetoCut("phoDeltaRToTrack > 0.062"); //eb low R9
-TCut vetoCut("!phoHasPixelMatch");
-TCut nVtx1to2("nVertices<=2");
-TCut phoPt5to10("5 <= phoPt & phoPt < 10");
-TCut phoPt10to20("10 <= phoPt & phoPt < 20");
-TCut phoPt20up("20 <= phoPt");
-// TCut ebLowR9("0.36 < phoR9 && phoR9 <= 0.94");
-// TCut eeLowR9("0.32 < phoR9 && phoR9 <= 0.94");
-TCut ebLowR9("phoR9 <= 0.94");
-TCut eeLowR9("phoR9 <= 0.95");
-TCut highR9("0.94 < phoR9");
-TCut ebHighR9("0.94 < phoR9");
-TCut eeHighR9("0.95 < phoR9");
+ TCut ebCut("abs(phoEta) < 1.5");
+ TCut eeCut("abs(phoEta) > 1.5");
+ TCut signalCut("isFSR");
+ TCut backgroundCut("!isFSR");
+ TCut mWindowCut("abs(mmgMass-90) < 15");
+ TCut ubCut("(minDEta > 0.04 | minDPhi > 0.2)");
+ TCut vetoCut("phoDeltaRToTrack > 1");
+ // TCut vetoCut("phoDeltaRToTrack > 0.062"); //eb low R9
+ // TCut vetoCut("!phoHasPixelMatch");
+ TCut nVtx1to2("nVertices<=2");
+ TCut phoPt5to10("5 <= phoPt & phoPt < 10");
+ TCut phoPt10to20("10 <= phoPt & phoPt < 20");
+ TCut phoPt20up("20 <= phoPt");
+ TCut ebLowR9("0.36 < phoR9 && phoR9 <= 0.94");
+ TCut eeLowR9("0.32 < phoR9 && phoR9 <= 0.94");
+ TCut ebLowR9MC("0.36 < phoR9 && phoR9 <= 0.94");
+ TCut eeLowR9MC("0.32 < phoR9 && phoR9 <= 0.94");
+ // TCut ebLowR9("phoR9 <= 0.94");
+ // TCut eeLowR9("phoR9 <= 0.95");
+ TCut highR9("0.94 < phoR9");
+ TCut ebHighR9("0.94 < phoR9");
+ TCut eeHighR9("0.94 < phoR9");
+ TCut run2011A("id.run < 175860");
+ TCut run2011B("id.run >= 175860");
 
-/*TCut ebSelection("phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.04 | minDPhi > 0.3)");
-TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 0.3)");*/
-TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.1) && scEt > 10 && phoHoE < 0.5");
-TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.2) && scEt > 10 && phoHoE < 0.5");
 
-TCut selection = ebSelection;
+ // These cuts are for the pixel match veto
+ TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)");
+   TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)");
+
+ // These near muon veto cuts are for the "delta R to nearest track" electron veto
+ /*
+ TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.1) && scEt > 10 && phoHoE < 0.5");
+ TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.2) && scEt > 10 && phoHoE < 0.5");
+ */
+
+// TCut selection = ebSelection;
 // TCut selection = eeSelection;
 // TCut selection = ebSelection && highR9;
-// TCut selection = ebSelection && ebHighR9;
-// TCut selection = ebSelection && ebLowR9;
-// TCut selection = eeSelection && highR9;
-// TCut selection = eeSelection && eeHighR9;
-// TCut selection = eeSelection && eeLowR9;
+ TCut selection = ebSelection && ebHighR9;
+ // TCut selection = ebSelection && ebLowR9;
+ // TCut selection = eeSelection && highR9;
+ // TCut selection = eeSelection && eeHighR9;
+ // TCut selection = eeSelection && eeLowR9;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;
 // TCut selection = ebSelection && phoPt10to20;
 // TCut selection = ebSelection && phoPt20up;
+
+// TCut run2011X = run2011A;
+// TCut selection = ebSelection && ebHighR9 && run2011X;
+// TCut selection = ebSelection && ebLowR9 && run2011X;
+// TCut selection = eeSelection && eeHighR9 && run2011X;
+// TCut selection = eeSelection && eeLowR9 && run2011X;
 
 
 // gStyle->SetPadLeftMargin(1.3);
@@ -117,32 +139,32 @@ TH1::SetDefaultSumw2();
 
 // Barrel MC, passing probes
 double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)",
-                        Form("pileup.weightOOT * %f * (%s)",
+                        Form("pileup.weight * %f * (%s)",
                              weight[z],
                              (selection && vetoCut).GetTitle()
                             )
                         );
 double pb_mc = tmc->Draw("mmgMass>>hpb_mc(30,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
+                         Form("pileup.weight * %f * (%s)",
                               weight[z],
                               (selection && vetoCut && backgroundCut).GetTitle()
                              )
                         );
 double pb_qcd = tqcd->Draw("mmgMass>>hpb_qcd(30,75,105)",
-                           Form("pileup.weightOOT * %f * (%s)",
+                           Form("pileup.weight * %f * (%s)",
                                  weight[qcd],
                                  (selection && vetoCut).GetTitle()
                                 )
                           );
 double pb_w = tw->Draw("mmgMass>>hpb_w(30,75,105)",
-                       Form("pileup.weightOOT * %f * (%s)",
+                       Form("pileup.weight * %f * (%s)",
                              weight[w],
                              (selection && vetoCut).GetTitle()
                             )
                       );
 double pb_tt = ttt->Draw("mmgMass>>hpb_tt(30,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
-                               weight[w],
+                         Form("pileup.weight * %f * (%s)",
+                               weight[tt],
                                (selection && vetoCut).GetTitle()
                               )
                         );
@@ -151,31 +173,31 @@ double eps_mc = sqrt(ps_mc);
 
 // Barrel MC, failing probes
 double f_mc = tmc->Draw("mmgMass>>hf_mc(6,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
+                         Form("pileup.weight * %f * (%s)",
                               weight[z],
                               (selection && !vetoCut).GetTitle()
                              )
                         );
 double fb_mc = tmc->Draw("mmgMass>>hfb_mc(6,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
+                         Form("pileup.weight * %f * (%s)",
                                weight[z],
                                (selection && !vetoCut && backgroundCut).GetTitle()
                               )
                         );
 double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(6,75,105)",
-                           Form("pileup.weightOOT * %f * (%s)",
+                           Form("pileup.weight * %f * (%s)",
                                  weight[qcd],
                                  (selection && !vetoCut).GetTitle()
                                 )
                            );
 double fb_w = tw->Draw("mmgMass>>hfb_w(6,75,105)",
-                        Form("pileup.weightOOT * %f * (%s)",
+                        Form("pileup.weight * %f * (%s)",
                               weight[w],
                               (selection && !vetoCut).GetTitle()
                              )
                        );
 double fb_tt = ttt->Draw("mmgMass>>hfb_tt(6,75,105)",
-                         Form("pileup.weightOOT * %f * (%s)",
+                         Form("pileup.weight * %f * (%s)",
                                weight[tt],
                                (selection && !vetoCut).GetTitle()
                              )
@@ -314,6 +336,8 @@ hpb_qcd->SetFillColor(kYellow - 7);
 hp_mc->SetTitle("Passing Probes");
 hp_mc->GetXaxis()->SetTitle("m(#mu#mu#gamma) (GeV)");
 hp_mc->GetYaxis()->SetTitle("Entries / 1 GeV");
+hp_mc->GetYaxis()->SetTitleOffset(1.7);
+
 
 hp_mc->SetStats(0);
 hpb_mc->SetStats(0);
@@ -329,7 +353,8 @@ double ymax = TMath::Max(
 hp_mc->GetYaxis()->SetRangeUser(0, 1.1*ymax);
 
 
-c1->cd(1);
+TPad * pad1 = (TPad*) c1->cd(1);
+pad1->SetLeftMargin(0.15);
 hp_mc->Draw("hist");
 hpb_mc->Draw("hist same");
 hpb_qcd->Draw("hist same");
@@ -355,6 +380,8 @@ hfb_mc->SetFillColor(kSpring + 5);
 hf_mc->SetTitle("Failing Probes");
 hf_mc->GetXaxis()->SetTitle("m(#mu#mu#gamma) (GeV)");
 hf_mc->GetYaxis()->SetTitle("Entries / 5 GeV");
+hf_mc->GetYaxis()->SetTitleOffset(1.2);
+
 
 hf_mc->SetStats(0);
 hfb_mc->SetStats(0);
@@ -393,6 +420,8 @@ frame->GetXaxis()->SetBinLabel(2,"MC");
 frame->Draw();
 g_eff.GetPaintedGraph()->Draw("p");
 
+c1->Print("m3_x.eps");
 c1->Print("m3_x.png");
+c2->Print("eff_x.eps");
 c2->Print("eff_x.png");
 }
