@@ -52,10 +52,6 @@ from ROOT import TH1F
 
 from JPsi.MuMu.common.latex import Latex
 
-## For some reason it seems that this has to be imported *BEFORE* any
-## class from the cit namespace, e.g. DataDrivenBinning.
-from JPsi.MuMu.tools import effSigma
-
 from JPsi.MuMu.common.roofit import AutoPrecision
 from JPsi.MuMu.common.roofit import EventRange
 from JPsi.MuMu.common.roofit import Format
@@ -71,6 +67,7 @@ from JPsi.MuMu.common.roofit import ShiftToZero
 from JPsi.MuMu.common.cmsstyle import cmsstyle
 from JPsi.MuMu.common.energyScaleChains import getChains
 from JPsi.MuMu.datadrivenbinning import DataDrivenBinning
+from JPsi.MuMu.tools import effSigma
 
 gSystem.Load('libJPsiMuMu')
 # gROOT.LoadMacro('tools.C+')
