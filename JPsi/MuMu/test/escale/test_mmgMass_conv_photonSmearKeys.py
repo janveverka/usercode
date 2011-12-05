@@ -35,6 +35,7 @@ from ROOT import kDashed
 from ROOT import RooArgList
 from ROOT import RooArgSet
 from ROOT import RooBinning
+from ROOT import RooCustomizer
 from ROOT import RooDataHist
 from ROOT import RooDataSet
 from ROOT import RooFFTConvPdf
@@ -295,6 +296,12 @@ phoEResFuncOfMMGMassShifted = w.factory(
 phoSmear = RooHistPdf('phoSmear', 'phoSmear',
                       RooArgList(phoEResFuncOfMMGMassShifted),
                       RooArgList(phoERes), phoEResDataHist, 2)
+## TODO: use RooCustomizer to transform phoEResShape
+## Define the transform such that the phoEResShape is always evaluated
+## inside of it's boundaries.
+cust = RooCustomizer(phoEResShape, "transformed")
+cust.replaceArg(phoERes, phoEResFuncOfMMGMassShifted)
+phoSmear2 = cust.build()
 
 w.Import(phoSmear)
 
@@ -390,15 +397,17 @@ plots.append(plot)
 ## plots.append(plot)
 
 ## Mass smearing due to photon resolution
-phoSmear.fitTo(reducedData['mmgMassPhoSmear'], Range(-5, 5), NumCPU(3))
 canvases.next('mmgMassPhoSmear')#.SetLogy()
 mmgMassShifted.SetTitle('m(#mu#mu + reco #gamma) - m(#mu#mu + gen #gamma)')
 plot = mmgMassShifted.frame(Range(-5,5)) #Range(-5,5)) #Range(0, 500))
 mmgMassShifted.SetTitle(mmgMassShiftedTitle)
 plot.SetTitle('"Resolution:" Modeling of Mass Smearing Due to Photon Energy Resolution')
 reducedData['mmgMassPhoSmear'].plotOn(plot)
+phoSmear.fitTo(reducedData['mmgMassPhoSmear'], Range(-5, 5), NumCPU(3))
 phoSmear.plotOn(plot)
 phoSmear.paramOn(plot)
+phoSmear2.fitTo(reducedData['mmgMassPhoSmear'], Range(-5, 5), NumCPU(3))
+phoSmear2.plotOn(plot, LineColor(kRed), LineStyle(kDashed))
 plot.Draw()
 llabels.draw()
 plots.append(plot)
