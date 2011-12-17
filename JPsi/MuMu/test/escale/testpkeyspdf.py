@@ -1,7 +1,13 @@
 '''
 Given a selection and data for Zmmg events, build a parametrized KEYS PDF
-for the photon resolution shape (Ereco/Etrue - 1) * 100 (in %).  Check
-that the PDF shifts and scales correctly.
+for the photon resolution shape (Ereco/Etrue - 1) * 100 (in %).  The
+shape of the PDF is taken from the RooKeysPdf trained on the simulated
+data.  The parametrization introduces dependence on the location
+and scale x -> (x-m)/s.  Here, the location and scale parameters are named
+m and s.  They are named phoScale and phoRes in the code and they
+bear the meaning of the mode and effective sigma of the shape.
+The test checks that the PDF shifts and scales correctly as a function
+of m and s.
 '''
 import ROOT
 import JPsi.MuMu.common.roofit as roo
