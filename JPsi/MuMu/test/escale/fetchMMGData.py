@@ -4,6 +4,9 @@ fetch a RooDataSet of mmgMass MC data smeared such that the photon detector
 responce Ereco/Etrue has the same shape as the nominal MC but has the given
 scale and resolution.
 '''
+### TODO: turn this into a class that can produce smeared data through a simple
+### interface.
+
 import ROOT
 import JPsi.MuMu.common.roofit as roo
 import JPsi.MuMu.common.dataset as dataset
@@ -175,20 +178,23 @@ def plot_smeared_phoeres_with_fit():
 ## end of plot_smeared_phoeres_with_fit
 
 ##------------------------------------------------------------------------------
-canvases.next('SmearedMMGMass').SetGrid()
-plot = mmgMass.frame(roo.Range(76, 106))
-plot.SetTitle("Nominal (black) and smeared (red) mmg mass")
-data.plotOn(plot)
-datasmeared.plotOn(plot, roo.MarkerColor(ROOT.kRed), roo.LineColor(ROOT.kRed))
-plot.Draw()
-Latex(['s_{0}: %.2g %%, s: %.2g %%' % (phoScaleRef, targets),
-       'r_{0}: %.2g %%, r: %.2g %%' % (phoResRef, targetr)],
-      position = (0.2, 0.8)).draw()
-
+def plot_nominal_and_smeared_mmgmass():
+    canvases.next('SmearedMMGMass').SetGrid()
+    plot = mmgMass.frame(roo.Range(76, 106))
+    plot.SetTitle("Nominal (black) and smeared (red) mmg mass")
+    data.plotOn(plot)
+    datasmeared.plotOn(plot, roo.MarkerColor(ROOT.kRed), roo.LineColor(ROOT.kRed))
+    plot.Draw()
+    Latex(['s_{0}: %.2g %%, s: %.2g %%' % (phoScaleRef, targets),
+           'r_{0}: %.2g %%, r: %.2g %%' % (phoResRef, targetr)],
+          position = (0.2, 0.8)).draw()
+## end of plot_nominal_and_smeared_mmgmass
+    
 ##------------------------------------------------------------------------------
 def main():
     plot_training_phoeres_with_shape_and_fit()
     plot_smeared_phoeres_with_fit()
+    plot_nominal_and_smeared_mmgmass()
     canvases.update()
 ## end of main
 
@@ -196,6 +202,6 @@ def main():
 ## Footer stuff
 canvases.update()
 if __name__ == "__main__":
-    # main()
+    main()
     import user
 
