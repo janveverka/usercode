@@ -172,6 +172,27 @@ class DimuonMassMax(Cut):
 
 
 #------------------------------------------------------------------------------
+class DimuonPlusDimuonGammaMassSumMax(Cut):
+    """Can act on a ScaleFitter object and modify it's name,
+    title, labels and cuts to reflect a fit performed for the sum of dimuon
+    and gammadimuon masses below the given mass value in GeV.
+    """
+    def __init__(self, max):
+        self.max = max
+        Cut.__init__(self,
+            name = 'mmPlusMmgMass%g' % max,
+            title = 'mmMass + mmgMass < %g GeV' % max,
+            labels = ['m_{#mu^{+}#mu^{-}} + m_{#mu^{+}#mu^{-}#gamma} < %g GeV' %
+                      max],
+            cuts = ['mmMass + mmgMass <= %g' % max],
+        )
+
+    def __str__(self):
+        return self.__class__.__name__ + '(%g)' % self.max
+## end of class DimuonPlusDimuonGammaMassSumMax
+
+
+#------------------------------------------------------------------------------
 class ICut():
     """Iterator over instances of Cut. The constructor arguments are
       * names - list of strings to form filenames
