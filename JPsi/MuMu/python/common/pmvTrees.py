@@ -12,6 +12,7 @@ if _hostname == 't3-susy.ultralight.org':
         'v11': '/raid2/veverka/pmvTrees/',
         'v12': '/raid2/veverka/pmvTrees/',
         'v15': '/raid2/veverka/pmvTrees/',
+        'v15reco': '/raid2/veverka/pmvTrees/',
     }
 elif _hostname == 'nbcitjv':
     ## Path for Jan's Dell Inspiron 6000 laptop
@@ -22,6 +23,7 @@ elif _hostname == 'nbcitjv':
         'v11': '/home/veverka/Work/data/pmvTrees',
         'v12': '/home/veverka/Work/data/pmvTrees',
         'v15': '/home/veverka/Work/data/pmvTrees',
+        'v15reco': '/home/veverka/Work/data/pmvTrees',
     }
 elif _hostname == 'eee.home' or _hostname == 'Jan-Veverkas-MacBook-Pro.local':
     ## Path for Jan's MacBook Pro
@@ -31,6 +33,7 @@ elif _hostname == 'eee.home' or _hostname == 'Jan-Veverkas-MacBook-Pro.local':
         'v11': '/Users/veverka/Work/Data/pmvTrees',
         'v12': '/Users/veverka/Work/Data/pmvTrees',
         'v15': '/Users/veverka/Work/Data/pmvTrees',
+        'v15reco': '/Users/veverka/Work/Data/pmvTrees',
     }
 else:
     raise RuntimeError, "Unknown hostname `%s'" % _hostname
@@ -87,6 +90,14 @@ _files['v15'] = {
     'w'    : ['pmvTree_V15_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1_condor_Dimuon_AOD-42X-v9.root',],
 }
 
+_files['v15reco'] = {
+    'data' : ['pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1_PromptReco-v1B_RECO.root',],
+    'z'    : ['pmvTree_V15_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1_glidein_Dimuon_RECO-42X-v9.root',],
+#    'qcd'  : ['pmvTree_V15_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_S4-v1_condor_Dimuon_AOD-42X-v9.root',],
+#     'tt'   : ['pmvTree_V15_TTJets_TuneZ2_7TeV-madgraph-tauola_S4-v2_condor_Dimuon_AOD-42X-v9.root',],
+#    'w'    : ['pmvTree_V15_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1_condor_Dimuon_AOD-42X-v9.root',],
+}
+
 _treeNames = {
     'v5' : 'pmvTree/pmv',
     'v9' : 'pmvTree/pmv',
@@ -94,6 +105,7 @@ _treeNames = {
     'v11': 'pmvTree/pmv',
     'v12': 'pmvTree/pmv',
     'v15': 'pmvTree/pmv',
+    'v15reco': 'pmvTree/pmv',
 }
 
 #------------------------------------------------------------------------------
