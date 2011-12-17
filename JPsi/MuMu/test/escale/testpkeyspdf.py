@@ -19,8 +19,6 @@ from JPsi.MuMu.common.energyScaleChains import getChains
 from JPsi.MuMu.common.latex import Latex
 from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
 
-ROOT.gStyle.SetPadTopMargin(0.1)
-
 ##------------------------------------------------------------------------------
 ## Here starts the meat.
 
