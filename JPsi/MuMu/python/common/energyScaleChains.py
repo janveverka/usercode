@@ -146,8 +146,8 @@ def getChains(version='v4'):
                     'sqrt(2*mu1GenPt*mu2GenPt*(cosh(mu1GenEta - mu2GenEta) - '
                                               'cos(mu1GenPhi - mu2GenPhi)))')
         ch.SetAlias('mmgGenMass',
-                    'threeBodyMass(mu1GenPt, mu1GenEta, mu1GenPhi, 0.106,'
-                                  'mu2GenPt, mu2GenEta, mu2GenPhi, 0.106,'
+                    'threeBodyMass(mu1GenPt, mu1GenEta, mu1GenPhi, 0.106, '
+                                  'mu2GenPt, mu2GenEta, mu2GenPhi, 0.106, '
                                   'phoGenEt, phoGenEta, phoGenPhi, 0)')
                     ## 'sqrt(2*mu1GenPt*mu2GenPt*(cosh(mu1GenEta - mu2GenEta) - '
                     ##                           'cos( mu1GenPhi - mu2GenPhi)) + '
@@ -156,8 +156,8 @@ def getChains(version='v4'):
                     ##      '2*mu2GenPt*phoGenEt*(cosh(mu2GenEta - phoGenEta) - '
                     ##                           'cos( mu2GenPhi - phoGenPhi)))')
         ch.SetAlias('mmgMassPhoGenE',
-                    'threeBodyMass(mu1Pt, mu1Eta, mu1Phi, 0.106,'
-                                  'mu2Pt, mu2Eta, mu2Phi, 0.106,'
+                    'threeBodyMass(mu1Pt, mu1Eta, mu1Phi, 0.106, '
+                                  'mu2Pt, mu2Eta, mu2Phi, 0.106, '
                                   'phoGenE * phoPt / phoE, phoEta, phoPhi, 0)')
         ch.SetAlias('mmgMassPhoGenEMuGenPt',
                     'threeBodyMass(mu1GenPt, mu1Eta, mu1Phi, 0.106,'
