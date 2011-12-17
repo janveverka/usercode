@@ -6,3 +6,5 @@ ROOT.gROOT.LoadMacro(os.path.join(os.environ['CMSSW_BASE'],
 cmsstyle = ROOT.CMSstyle
 print "Setting ROOT's style to CMS Style..."
 cmsstyle()
+ROOT.gStyle.SetPalette(1)
+
