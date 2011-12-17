@@ -14,7 +14,7 @@ if sys.platform == 'darwin':
 ### Rename the RooWorkspace::import method to avoid conflict with Python--------
 setattr(ROOT.RooWorkspace, 'Import', getattr(ROOT.RooWorkspace, 'import'))
 
-### Define all the callable attributes of ROOT.RooFit
+### Define all the callable attributes of ROOT.RooFit -------------------------
 for method in dir(ROOT.RooFit):
     if callable(getattr(ROOT.RooFit, method)) and re.search(_titlePattern, method):
         if method in vars():
@@ -22,3 +22,8 @@ for method in dir(ROOT.RooFit):
         else:
             setattr(sys.modules[__name__], method, getattr(ROOT.RooFit, method))
 
+### Enlarge the size of the pad top margin -------------------------------------
+ROOT.gStyle.SetPadTopMargin(0.1)
+
+if __name__ == '__main__':
+    import user
