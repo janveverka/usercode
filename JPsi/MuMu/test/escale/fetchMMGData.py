@@ -15,8 +15,8 @@ from JPsi.MuMu.common.latex import Latex
 from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
 
 ## Target photon energy scale and resolution of the smeared data.
-targets = 0
-targetr = 5
+targets = 0.083
+targetr = 3.0
 
 ##------------------------------------------------------------------------------
 ## Here starts the meat.
@@ -45,6 +45,9 @@ mmgMass = w.factory('mmgMass[40, 140]')
 mmMass = w.factory('mmMass[10, 140]')
 phoERes = w.factory('phoERes[-70, 100]')
 weight = w.factory('weight[1]')
+
+for x, u in zip([mmMass, mmMass, phoERes], ['GeV', 'GeV', '%']):
+    x.setUnit(u)
 
 ## The TFormula expression defining the data is given in the titles.
 weight.SetTitle('pileup.weight')
@@ -92,33 +95,46 @@ phoResRef = phoRes.getVal()
 phoEResSmear = w.factory('phoEResSmear[-100,200]')
 phoEResSmearFunc = w.factory('''expr::phoEResSmearFunc(
     "{m} + {s} * ({x} - {m0}) / {s0}",
-    {{{x}, {m}, {s}, {m0}, {s0}}}
+    {{{x}}}
     )'''.format(x='phoERes', m=targets, s=targetr, m0=phoScaleRef,
                 s0=phoResRef)
     )
 
-## Renaming identity phoEResSmear -> phoERes
-phoEResFunc = w.factory('expr::phoEResFunc("phoEResSmear", {phoEResSmear})')
-
-## mmgMassSmear = w.factory('mmgMassPhoSmearE[40, 140]')
-## phoEResSmear = w.factory('phoEResSmear[-80, 110]')
+mmgMassSmear = w.factory('mmgMassSmear[0, 200]')
+mmgMassSmearFunc = w.factory('''expr::mmgMassSmearFunc(
+    "sqrt({m2} + ({r}/100 + 1) / ({r0}/100 + 1) * ({M2} - {m2}))",
+    {{{m}, {M}, {r}, {r0}}}
+    )'''.format(m='mmMass', m2='mmMass*mmMass', M='mmgMass',
+                M2='mmgMass*mmgMass', r='phoEResSmear', r0='phoERes')
+    )
 
 ##------------------------------------------------------------------------------
 ## Get the smeared data
 phoEResSmearFunc.SetName('phoEResSmear')
+mmgMassSmearFunc.SetName('mmgMassSmear')
 data.addColumn(phoEResSmearFunc)
+data.addColumn(mmgMassSmearFunc)
 phoEResSmearFunc.SetName('phoEResSmearFunc')
-datasmeared = data.reduce(ROOT.RooArgSet(phoEResSmear))
+mmgMassSmearFunc.SetName('mmgMassSmearFunc')
+datasmeared = data.reduce(ROOT.RooArgSet(phoEResSmear, mmgMassSmear))
 
+## Renaming identities xFunc = xSmear to rename xSmear -> x
+mmgMassFunc = w.factory('expr::mmgMassFunc("mmgMassSmear", {mmgMassSmear})')
+phoEResFunc = w.factory('expr::phoEResFunc("phoEResSmear", {phoEResSmear})')
+
+## Rename xSmear -> x 
 phoEResFunc.SetName('phoERes')
+mmgMassFunc.SetName('mmgMass')
 datasmeared.addColumn(phoEResFunc)
+datasmeared.addColumn(mmgMassFunc)
 phoEResFunc.SetName('phoEResFunc')
+mmgMassFunc.SetName('mmgMassFunc')
+datasmeared = datasmeared.reduce(ROOT.RooArgSet(phoERes, mmgMass))
 
 ##------------------------------------------------------------------------------
 ## Plot the nominal MC data overlayed with the pdf shape and fit
 def plot_training_phoeres_with_shape_and_fit():
     canvases.next('TrainingSampleWithShapeAndFit')
-    phoERes.setUnit("%")
     plot = phoERes.frame(roo.Range(-7.5, 7.5))
     plot.SetTitle("MC overlayed with PDF shape (blue) and it's parametrized fit"
                   "(dashed red)")
@@ -159,6 +175,17 @@ def plot_smeared_phoeres_with_fit():
 ## end of plot_smeared_phoeres_with_fit
 
 ##------------------------------------------------------------------------------
+canvases.next('SmearedMMGMass').SetGrid()
+plot = mmgMass.frame(roo.Range(76, 106))
+plot.SetTitle("Nominal (black) and smeared (red) mmg mass")
+data.plotOn(plot)
+datasmeared.plotOn(plot, roo.MarkerColor(ROOT.kRed), roo.LineColor(ROOT.kRed))
+plot.Draw()
+Latex(['s_{0}: %.2g %%, s: %.2g %%' % (phoScaleRef, targets),
+       'r_{0}: %.2g %%, r: %.2g %%' % (phoResRef, targetr)],
+      position = (0.2, 0.8)).draw()
+
+##------------------------------------------------------------------------------
 def main():
     plot_training_phoeres_with_shape_and_fit()
     plot_smeared_phoeres_with_fit()
@@ -169,6 +196,6 @@ def main():
 ## Footer stuff
 canvases.update()
 if __name__ == "__main__":
-    main()
+    # main()
     import user
 
