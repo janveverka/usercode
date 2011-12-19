@@ -11,7 +11,9 @@ def pdf_effsigma(pdf, obs):
     ## TODO: use the pdf itself instead of sampling it into a histogram?
     hist = pdf.createHistogram(obs.GetName(), 10000)
     hist.Scale(10000)
-    return effSigma(hist)
+    ret = effSigma(hist)
+    hist.Delete()
+    return ret
 ## End of pdf_effsigma
 
 ##------------------------------------------------------------------------------
