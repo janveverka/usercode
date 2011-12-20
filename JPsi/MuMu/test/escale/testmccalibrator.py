@@ -182,6 +182,36 @@ def plot_smeared_phoeres_with_fit():
 ## end of plot_smeared_phoeres_with_fit
 
 ##------------------------------------------------------------------------------
+## Plot the smeared data for a number of different smearings
+def plot_phoeres_with_fit_for_multiple_smearings(name, stargets, rtargets,
+                                                 colors, plotrange=(-30, 30)):
+    canvases.next(name).SetGrid()
+    plot = phoERes.frame(roo.Range(*plotrange))
+    plot.SetTitle("MC with paremetrized fit for multiple smearing scenarious")
+    multilabels = []
+    ## Loop over the various smearings.
+    for starget, rtarget, color in zip(stargets, rtargets, colors):
+        mydata = calibrator.get_smeared_data(starget, rtarget)
+        phoEResPdf.fitTo(mydata, roo.PrintLevel(-1), roo.SumW2Error(False))
+        mydata.plotOn(plot, roo.LineColor(color), roo.MarkerColor(color))
+        phoEResPdf.plotOn(plot, roo.LineColor(color))
+        multilabels.append([
+            's_{target}: %.1f %%, #Delta s_{fit}: %.2g #pm %.2g %%' % (
+                starget, phoScale.getVal() - starget, phoScale.getError()
+                ),
+            'r_{target}: %.1f %%, #Delta r_{fit}: %.2g #pm %.2g %%' % (
+                rtarget, phoRes.getVal() - rtarget, phoRes.getError()
+                ),
+            ])
+    ## End of loop over the various smearings.
+    plot.Draw()
+    for i, (labels, color) in enumerate(zip(multilabels, colors)):
+        latex = Latex(labels, position=(0.2, 0.85 - i*0.11))
+        latex.SetTextColor(color)
+        latex.draw()
+## end of plot_phoeres_with_fit_for_multiple_smearings
+
+##------------------------------------------------------------------------------
 def plot_nominal_and_smeared_mmgmass():
     canvases.next('SmearedMMGMass').SetGrid()
     mmgMass.SetTitle('m(#mu#mu#gamma)')
@@ -198,9 +228,29 @@ def plot_nominal_and_smeared_mmgmass():
     
 ##------------------------------------------------------------------------------
 def main():
-    plot_training_phoeres_with_shape_and_fit()
-    plot_smeared_phoeres_with_fit()
-    plot_nominal_and_smeared_mmgmass()
+    # plot_training_phoeres_with_shape_and_fit()
+    # plot_smeared_phoeres_with_fit()
+    # plot_nominal_and_smeared_mmgmass()
+    colors = [ROOT.kRed - 3,
+              ROOT.kOrange - 2,
+              # ROOT.kYellow - 7,
+              ROOT.kSpring + 5,
+              ROOT.kAzure - 9,
+              ROOT.kBlack]
+    plot_phoeres_with_fit_for_multiple_smearings(
+        "PhoEResScaleScan",
+        stargets = [-5, -2, 0, 2, 5],
+        rtargets = [2,] * 5,
+        colors = colors,
+        plotrange = (-30, 10)
+        )
+    plot_phoeres_with_fit_for_multiple_smearings(
+        "PhoEResResolutionScan",
+        stargets = [0] * 5,
+        rtargets = [1, 1.5, 2, 2.5, 3],
+        colors = colors,
+        plotrange = (-15, 5)
+        )
     canvases.update()
 ## end of main
 
