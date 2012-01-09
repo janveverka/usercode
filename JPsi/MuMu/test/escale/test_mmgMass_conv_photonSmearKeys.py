@@ -129,11 +129,11 @@ cuts = ['%f < %s & %s < %f' % (mmgMass.getMin(), hi, lo, mmgMass.getMax()),
         '%f < mmMass & mmMass < %f' % (mmMass.getMin(), mmMass.getMax()),
         #'%f < m1gMass & m1gMass < %f' % (m1gMass.getMin(), m1gMass.getMax()),
         #'%f < m2gMass & m2gMass < %f' % (m2gMass.getMin(), m2gMass.getMax()),
-        #'12 < phoPt & phoPt < 15',
+        '15 < phoPt & phoPt < 20',
         'phoIsEB',
         'phoR9 < 0.94',
         'mmMass + mmgMass < 190',
-        '1 <= abs(phoIEtaX) & abs(phoIEtaX) <= 25',
+        #'1 <= abs(phoIEtaX) & abs(phoIEtaX) <= 25',
         #'isFSR',
         ]
 
@@ -330,7 +330,7 @@ for c in cuts:
         labels.append(c.replace('phoR9', 'R_{9}'))
         break
 
-labels.append('Moduel 1')
+# labels.append('Moduel 1')
 
 labels.append('True Resolution (#sigma_{eff}): %.3g %%' % phoEResMC)
 labels.append('True Scale: %.3g %%' % (100*phoEScaleMC))
@@ -428,7 +428,9 @@ llabels.draw()
 
 ## Data and model
 theoryXphoSmear.fitTo(reducedData['mmgMassShifted'],
-                      Range(62-massShift, 118-massShift), Minos(), NumCPU(3))
+                      Range(62-massShift, 118-massShift),
+                      #Minos(),
+                      NumCPU(3))
 canvases.next('model')
 plot = mmgMassShifted.frame(Range(58-massShift, 122-massShift))
 plot.SetTitle('"Model = Theory * Resolution:" Reco. Mass Modeling as a Convolution')
@@ -437,6 +439,25 @@ theoryXphoSmear.plotOn(plot)
 theoryXphoSmear.paramOn(plot)
 plot.Draw()
 llabels.draw()
+phoEResMCFit = phoRes.getVal()
+phoEScaleMCFit = phoScale.getVal()
+
+## Real data and model
+theoryXphoSmear.fitTo(realdata,
+                      Range(62-massShift, 118-massShift),
+                      # Minos(),
+                      NumCPU(3))
+canvases.next('realdata')
+plot = mmgMassShifted.frame(Range(58-massShift, 122-massShift))
+plot.SetTitle('Fit Model to Real Data')
+reducedData['mmgMassShifted'].plotOn(plot)
+theoryXphoSmear.plotOn(plot)
+theoryXphoSmear.paramOn(plot)
+plot.Draw()
+llabels.draw()
+phoEResData = phoRes.getVal()
+phoEScaleData = phoScale.getVal()
+
 #plot.GetYaxis().SetRangeUser(1e-5, 1e2)
 
 ## Plot Likelihood vs scale
@@ -462,16 +483,16 @@ canvases.next('NLL_vs_phoRes')
 plot.Draw()
 llabels.draw()
 
-## Plot Likelihood vs resolution
-phoRes = w.var('phoRes')
-plot = phoRes.frame(
-    Range(max(phoRes.getVal() - 5 * phoRes.getError(), phoRes.getMin()),
-          min(phoRes.getVal() + 5 * phoRes.getError(), phoRes.getMax()))
-    )
-nll.plotOn(plot, ShiftToZero())
-canvases.next('NLL_vs_phoRes')
-plot.Draw()
-llabels.draw()
+## ## Plot Likelihood vs resolution
+## phoRes = w.var('phoRes')
+## plot = phoRes.frame(
+##     Range(max(phoRes.getVal() - 5 * phoRes.getError(), phoRes.getMin()),
+##           min(phoRes.getVal() + 5 * phoRes.getError(), phoRes.getMax()))
+##     )
+## nll.plotOn(plot, ShiftToZero())
+## canvases.next('NLL_vs_phoRes')
+## plot.Draw()
+## llabels.draw()
 
 ## Plot Likelihood contours vs scale and resolution
 canvases.next('NLL_Contours')
@@ -509,10 +530,17 @@ mcTruth.Draw()
 ## ## phoSmearShifted.plotOn(mmgFrame, LineStyle(kDashed), LineColor(kRed))
 ## mmgFrame.Draw()
 
+## Print report
+print 'Source, scale, resolution'
+print 'MC true', phoEScaleMC, phoEResMC
+print 'MC fit', phoEScaleMCFit, phoEResMCFit
+print 'data', phoEResData, phoEResData
+
 for c in canvases.canvases:
     if c:
         c.Update()
     
+
 if __name__ == "__main__":
     import user
 
