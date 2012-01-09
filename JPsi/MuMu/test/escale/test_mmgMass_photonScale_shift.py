@@ -77,9 +77,9 @@ phoScale = w.factory('phoScale[0,-50,50]')
 weight.SetTitle('pileup.weight')
 
 ## Photon scaling fraction, dlog(m_uuy)/dlog(E_y)
-fPho = w.factory('fPho[0.15,0,1]')
+fPho = w.factory('fPho[0.15*91.2,0,100]')
 fPhoFunc = w.factory('''FormulaVar::fPhoFunc(
-    "0.5 - 0.5 * mmMass^2 / mmgMass^2",
+    "mmgMass * (0.5 - 0.5 * mmMass^2 / mmgMass^2)",
     {mmMass, mmgMass}
     )''')
 
@@ -132,7 +132,7 @@ mmgData.SetName('mmgData')
 
 ## Define the translated mass
 mmgMassFunc = w.factory('''FormulaVar::mmgMassFunc(
-    "((mmgMass - mmgMode) / mmgScale + mmgMode) * (1 - fPho*phoScale/100.)",
+    "((mmgMass - mmgMode) / mmgScale + mmgMode)  - fPho*phoScale/100.",
     {mmgMass, mmgMode[91.2,70,110], mmgScale[1.,0.1,5], fPho, phoScale}
     )''')
 mmgMode = w.var('mmgMode')
@@ -219,6 +219,7 @@ graph.GetYaxis().SetTitle('Fitted Scale (%)')
 graph.GetXaxis().SetTitle('Injected Scale (%)')
 graph.Fit('pol1', '', '', -6, 6)
 
+
 graphs.append(graph)
 
 graph = TGraphErrors(len(sTest))
@@ -231,7 +232,7 @@ graph.SetTitle('Tranform Closure Test')
 graph.Draw('ap')
 graph.GetYaxis().SetTitle('Fitted Scale Bias (%)')
 graph.GetXaxis().SetTitle('Injected Scale (%)')
-graph.Fit('pol1', '', '', -6, 6)
+graph.Fit('pol2', '', '', -6, 6)
 
 graphs.append(graph)
 
