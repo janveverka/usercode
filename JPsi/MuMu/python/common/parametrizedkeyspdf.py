@@ -34,7 +34,8 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
         self.shapewidth = tools.pdf_effsigma(self.shape, x)
         self.shapemode = tools.pdf_mode(self.shape, x)
         if self.shapewidth <= 0.:
-            raise RuntimeError, 'Illegal value of pdf width: %f.' % self.shapewidth
+            raise RuntimeError, ('Illegal value of pdf width: %f.' %
+                                 self.shapewidth)
         ## Define the transformation of x that introduces the dependence on the
         ## mode and width
         self.xtransform = ROOT.RooFormulaVar(
@@ -46,6 +47,31 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
                 ),
             ROOT.RooArgList(x, mode, width)
             )
+
+        ## TODO: Use RooLinearVar for the xtransform along the lines below
+        ## Unfortunately, the implementation below doesn't seem to work.
+        ## self.xslope = ROOT.RooFormulaVar(
+        ##     x.GetName() + '_slope_' + name,
+        ##     x.GetTitle() + ' Slope in Linear Transform',
+        ##     "{shapewidth} / {width}".format(
+        ##         shapewidth=self.shapewidth, width=width.GetName()
+        ##         ),
+        ##     ROOT.RooArgList(width)
+        ##     )
+        ## self.xoffset = ROOT.RooFormulaVar(
+        ##     x.GetName() + '_offset_' + name,
+        ##     x.GetTitle() + ' Offset in Linear Transform',
+        ##     "{shapemode} - {mode} * {shapewidth} / {width}".format(
+        ##         mode=mode.GetName(), width=width.GetName(), 
+        ##         shapemode=self.shapemode, shapewidth=self.shapewidth,
+        ##         ),
+        ##     ROOT.RooArgList(mode, width)
+        ##     )
+        ## self.xtransform = ROOT.RooLinearVar(
+        ##     x.GetName() + '_linearTransform_' + name,
+        ##     x.GetTitle() + ' Linear Transform for Substitution in ' + title,
+        ##     x, self.xslope, self.xoffset, x.getUnit()
+        ##     )
 
         if forcerange:
             ## Restrict the allowed tranformed values to the range where the
