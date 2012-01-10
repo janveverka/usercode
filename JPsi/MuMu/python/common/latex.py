@@ -22,6 +22,7 @@ class Latex(ROOT.TLatex):
         self.textsize = 18
         self.rowheight = 0.055
         self.primitives = []
+        self.color = ROOT.kBlack
         for arg, val in kwargs.items():
             setattr(self, arg, val)
 
@@ -30,6 +31,7 @@ class Latex(ROOT.TLatex):
         ## Font size in pixels
         self.SetTextFont(10*(self.GetTextFont()/10) + 3)
         self.SetTextSize(self.textsize)
+        self.SetTextColor(self.color)
     ## end of __init__
 
     def draw(self):
