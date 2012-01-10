@@ -4,8 +4,8 @@ fetch a RooDataSet of mmgMass MC data smeared such that the photon detector
 responce Ereco/Etrue has the same shape as the nominal MC but has the given
 scale and resolution.
 '''
-### TODO: turn this into a class that can produce smeared data through a simple
-### interface.
+### TODO: Add smearing dependent selection (photon pt, mmg mass)
+### TODO: Muon scale smearing.
 
 import ROOT
 import JPsi.MuMu.common.roofit as roo
@@ -33,7 +33,8 @@ class MonteCarloCalibrator:
         for x in 's0 r0 s r'.split():
             getattr(self, x).setUnit('%')
 
-        ## Define a set of the reference parameters, store it in the workspace.
+        ## Define a set of the fit and reference parameters,
+        ## store them in the workspace.
         self.sr = ROOT.RooArgSet(self.s, self.r)
         self.sr0 = ROOT.RooArgSet(self.s0, self.r0)
         self.w.defineSet('fit', self.sr)
@@ -60,7 +61,7 @@ class MonteCarloCalibrator:
         
         ## Extract the MC truth scale and resolution from MC
         self.phoEResPdf.fitTo(self.data, roo.PrintLevel(-1),
-                              roo.SumW2Error(False))
+                              roo.SumW2Error(False), roo.Range(-50,50))
 
         ## Store the MC truth scale and resolution
         self.s0.setVal(self.s.getVal())
@@ -126,7 +127,6 @@ class MonteCarloCalibrator:
         ## Set the name and title of the smeared data.
         self.sdata.SetName(self.data.GetName() + '_smeared')
         self.sdata.SetTitle(self.data.GetTitle() + ' smeared')
-        print '+++ Exiting MonteCarloCalibrator.get_smeared_data().'
         ## Return the smeared data
         return self.sdata
     ## end of get_smeared_data
