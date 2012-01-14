@@ -6,11 +6,11 @@ ROOT.gROOT.ProcessLine('#include "JPsi/MuMu/interface/tools.h"')
 effSigma = ROOT.effSigma
 
 ##------------------------------------------------------------------------------
-def pdf_effsigma(pdf, obs):
+def pdf_effsigma(pdf, obs, nbins=10000):
     'Returns the effective sigma of pdf of observable obs.'
     ## TODO: use the pdf itself instead of sampling it into a histogram?
-    hist = pdf.createHistogram(obs.GetName(), 10000)
-    hist.Scale(10000)
+    hist = pdf.createHistogram(obs.GetName(), nbins)
+    hist.Scale(nbins)
     ret = effSigma(hist)
     hist.Delete()
     return ret
