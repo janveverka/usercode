@@ -32,7 +32,17 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
         self.shape = ROOT.RooKeysPdf(name + '_shape', title + ' shape', x, data,
                                      mirror, rho)
         self.shapewidth = tools.pdf_effsigma(self.shape, x)
+        self.shapewidthvar = ROOT.RooRealVar(
+            name + '_shapewidthvar',
+            name + '_shapewidthvar',
+            self.shapewidth
+            )
         self.shapemode = tools.pdf_mode(self.shape, x)
+        self.shapemodevar = ROOT.RooRealVar(
+            name + '_shapemodevar',
+            name + '_shapemodevar',
+            self.shapemode
+            )
         if self.shapewidth <= 0.:
             raise RuntimeError, ('Illegal value of pdf width: %f.' %
                                  self.shapewidth)
@@ -42,10 +52,14 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
             x.GetName() + '_linearTransform_' + name,
             x.GetTitle() + ' Linear Transform for Substitution in ' + title,
             "{shapemode} + ({x} - {mode}) * {shapewidth} / {width}".format(
-                x=x.GetName(), shapemode=self.shapemode, mode=mode.GetName(),
-                width=width.GetName(), shapewidth=self.shapewidth
+                x=x.GetName(),
+                mode=mode.GetName(),
+                width=width.GetName(),
+                shapemode=self.shapemodevar.GetName(),
+                shapewidth=self.shapewidthvar.GetName()
                 ),
-            ROOT.RooArgList(x, mode, width)
+            ROOT.RooArgList(x, mode, width, self.shapemodevar,
+                            self.shapewidthvar)
             )
 
         ## TODO: Use RooLinearVar for the xtransform along the lines below
@@ -76,10 +90,13 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
         if forcerange:
             ## Restrict the allowed tranformed values to the range where the
             ## PDF was trained.
+            ## TODO: Use a custom compiled class for this instead of the
+            ## interpreted RooFormulaVar.
             self.xtransform_fullrange = self.xtransform
             self.xtransform = ROOT.RooFormulaVar(
-                x.GetName() + '_rangedLinearTransform_',
-                x.GetTitle() + ' Lin. Transform constrained to a Range',
+                x.GetName() + '_rangedLinearTransform_' + name,
+                (x.GetTitle() + ' Lin. Transform constrained to a Range in ' +
+                 title),
                 ('{lo} * ({x} <= {lo}) + '
                  '{x} * ({lo} < {x} & {x} < {hi}) + '
                  '{hi} * ({hi} <= {x})').format(x=self.xtransform.GetName(),
@@ -92,5 +109,7 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
         self.customizer.replaceArg(x, self.xtransform)
 
         ROOT.RooKeysPdf.__init__(self, self.customizer.build())
+        self.SetName(name)
+        self.SetTitle(title)
     ## end of __init__
 ## end of ParameterizedKeysPdf
