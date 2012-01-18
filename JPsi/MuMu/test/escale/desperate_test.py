@@ -30,7 +30,6 @@ from JPsi.MuMu.common.cmsstyle import cmsstyle
 
 w = ROOT.RooWorkspace('w', 'w')
 
-
 def plotxy(pdf, xyexpr = 'x:y'):
     h_pdf = pdf.createHistogram(xyexpr)
     h_pdf.SetLineColor(ROOT.kBlue)
