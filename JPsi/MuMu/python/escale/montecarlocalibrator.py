@@ -49,23 +49,30 @@ class MonteCarloCalibrator:
     def _get_mctruth_scale_and_resolution(self):
         ## Enlarge the range of the observable to get vanishing tails for
         ## the photon energy scale resolution        
-        savrange = (self.phoERes.getMin(), self.phoERes.getMax())
-        self.phoERes.setRange(savrange[0] - 10, savrange[1] + 10)
+        # savrange = (self.phoERes.getMin(), self.phoERes.getMax())
+        # self.phoERes.setRange(savrange[0] - 10, savrange[1] + 10)
 
         ## Build the model for the photon energy resolution.
         self.phoEResPdf = ParametrizedKeysPdf('phoEResPdf', 'phoEResPdf',
                                               self.phoERes, self.s, self.r,
                                               self.data,
                                               ROOT.RooKeysPdf.NoMirror, 1.5)
-        self.phoERes.setRange(*savrange)
+        # self.phoERes.setRange(*savrange)
         
         ## Extract the MC truth scale and resolution from MC
-        self.phoEResPdf.fitTo(self.data, roo.PrintLevel(-1),
-                              roo.SumW2Error(False), roo.Range(-50,50))
+        self.fitresult_mctruth = self.phoEResPdf.fitTo(
+            self.data, roo.PrintLevel(-1), roo.SumW2Error(False),
+            roo.Range(-50,50), roo.Save()
+            )
+        self.w.Import(self.fitresult_mctruth)
 
         ## Store the MC truth scale and resolution
-        self.s0.setVal(self.s.getVal())
-        self.r0.setVal(self.r.getVal())
+        for source, target in zip([self.s, self.r], [self.s0, self.r0]):
+            target.setVal(source.getVal())
+            target.setError(source.getError())
+            target.setAsymError(source.getErrorLo(), source.getErrorHi())
+        # self.s0.setVal(self.s.getVal())
+        # self.r0.setVal(self.r.getVal())
         self.w.saveSnapshot('sr_mctruth', self.sr)
         self.w.saveSnapshot('sr0_mctruth', self.sr0)
         self.s0.setConstant(True)
@@ -108,6 +115,14 @@ class MonteCarloCalibrator:
     ## end of _reduce_and_rename
 
     def get_smeared_data(self, starget, rtarget):
+        ## Make sure that the reference scale and resolution
+        ## are equal to the MC truth.
+        self.w.loadSnapshot('sr0_mctruth')
+        ## Check if any of the parameters is to be set to the nominal values.
+        if starget == 'nominal':
+            starget = self.s0.getVal()
+        if rtarget == 'nominal':
+            rtarget = self.r0.getVal()
         self.s.setVal(starget)
         self.r.setVal(rtarget)
         ## Make sure that the reference scale and resolution
