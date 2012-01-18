@@ -12,8 +12,14 @@ The composition + susbstitution seems to produce the same result as the
 traditional conditional product described in the RooFit manual.
 
 A culprit: Both the substituted variable and the function substituting
-have to have the same name, "mx" here.  This brings difficulties persisting
+have to have the same name, "mx" here if the function substituting it
+is interpreted.  This brings difficulties persisting
 them both simultaneously in a workspace.
+Compiling the substitucion function using the workspace operator
+"cexpr" enables the code to run with different names for the variable
+and the substitution function. However, it does not help with the persisitence
+since then the source code of RooAbsReal (and perhaps other RooFit classes) is
+needed.
 '''
 
 import ROOT
@@ -23,6 +29,7 @@ import JPsi.MuMu.common.canvases as canvases
 from JPsi.MuMu.common.cmsstyle import cmsstyle
 
 w = ROOT.RooWorkspace('w', 'w')
+
 
 def plotxy(pdf, xyexpr = 'x:y'):
     h_pdf = pdf.createHistogram(xyexpr)
@@ -45,16 +52,21 @@ fcond = w.factory('PROD::fcond(gx_shift|y, gy)')
 plotxy(fcond)
 
 ## The Test way ----------------------------------------------------------------
-## Compose the independent 2D model
-fxy = w.factory('''expr::fxy("sqrt((x-mx)^2/sx^2 + (y-my)^2/sy^2)",
-                             {x, mx, sx, y, my, sy})''')
+## Compose the independent 2D model (interpreted)
+## fxy = w.factory('''expr::fxy("sqrt(pow((x-mx)/sx,2) + pow((y-my)/sy,2))",
+##                              {x, mx, sx, y, my, sy})''')
+## Compose the independent 2D model (compiled)
+fxy = w.factory('''cexpr::fxy("sqrt(pow((x-mx)/sx,2) + pow((y-my)/sy,2))",
+                              {x, mx, sx, y, my, sy})''')
 gxy = w.factory('Gaussian::gxy(fxy, 0, 1)')
 plotxy(gxy)
 
+## The interpreted formula would not compile if the the substitution
+## had a different name.  Compiled formula is fine w/o renaming.
+if fxy.ClassName() == 'RooFormulaVar':
+    mxf.SetName('mx')
 ## Introduce the correlation through substitution
-mxf.SetName('mx')
 gxy_cust = ROOT.RooCustomizer(gxy, 'cond')
-## The formula would not compile if the the substitution had a different name.
 gxy_cust.replaceArg(w.var('mx'), mxf)
 gxy_cond = gxy_cust.build()
 w.Import(gxy_cond, True)
