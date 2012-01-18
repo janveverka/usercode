@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 import ROOT
@@ -13,6 +14,17 @@ if sys.platform == 'darwin':
 
 ### Rename the RooWorkspace::import method to avoid conflict with Python--------
 setattr(ROOT.RooWorkspace, 'Import', getattr(ROOT.RooWorkspace, 'import'))
+
+### To be able to embed auto-compiled expressions and PDFs in the workspace ----
+for path in 'ROOTSYS ROOFITSYS'.split():
+    try:
+        for subdir in 'include roofit/core'.split():
+            fullpath = os.path.join(os.environ[path], subdir)
+            if os.path.exists(fullpath):
+                ROOT.RooWorkspace.addClassDeclImportDir(fullpath)
+    except KeyError:
+        ## Environmental variable ROOTSYS or ROOFITSYS is not defined
+        pass
 
 ### Define all the callable attributes of ROOT.RooFit -------------------------
 for method in dir(ROOT.RooFit):
