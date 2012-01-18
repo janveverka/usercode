@@ -4,8 +4,6 @@ fetch a RooDataSet of mmgMass MC data smeared such that the photon detector
 responce Ereco/Etrue has the same shape as the nominal MC but has the given
 scale and resolution.
 '''
-### TODO: turn this into a class that can produce smeared data through a simple
-### interface.
 
 import ROOT
 import JPsi.MuMu.common.roofit as roo
@@ -19,8 +17,8 @@ from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
 from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 
 ## Target photon energy scale and resolution of the smeared data.
-targets = 0.083
-targetr = 2
+targets = 0
+targetr = 2.0
 
 ##------------------------------------------------------------------------------
 ## Here starts the meat.
@@ -116,8 +114,8 @@ mmgMassSmearPdf = ParametrizedKeysPdf('mmgMassSmearPdf', 'mmgMassSmearPdf',
 mmgMassSmearPdf.fitTo(sdata, roo.Range(60,120), roo.SumW2Error(False))
 
 ##------------------------------------------------------------------------------
-## Plot the nominal MC data overlayed with the pdf shape and fit
 def plot_training_phoeres_with_shape_and_fit():
+    """Plot the nominal MC data overlayed with the pdf shape and fit."""
     canvases.next('TrainingSampleWithShapeAndFit')
     plot = phoERes.frame(roo.Range(-7.5, 5))
     plot.SetTitle("MC overlayed with PDF shape (blue) and it's parametrized fit"
@@ -155,7 +153,10 @@ def plot_smeared_phoeres_with_fit():
     phoEResPdf.fitTo(sdata, roo.PrintLevel(-1), roo.SumW2Error(False),
                      roo.Range(-50, 50))
     canvases.next('SmearedSampleWithFit')
+    savtitle = phoERes.GetTitle()
+    phoERes.SetTitle('smeared E_{reco}^{#gamma}/E_{gen}^{#gamma} - 1')
     plot = phoERes.frame(roo.Range(-30, 30))
+    phoERes.SetTitle(savtitle)
     plot.SetTitle("Smeared MC with paremetrized fit")
     sdata.plotOn(plot)
     phoEResPdf.plotOn(plot)
@@ -179,34 +180,92 @@ def plot_smeared_phoeres_with_fit():
 ## end of plot_smeared_phoeres_with_fit
 
 ##------------------------------------------------------------------------------
-## Plot the smeared data for a number of different smearings
 def plot_phoeres_with_fit_for_multiple_smearings(name, stargets, rtargets,
                                                  colors, plotrange=(-30, 30)):
+    """Plot the smeared photon energy response for a number of different
+    smearings."""
     canvases.next(name).SetGrid()
     plot = phoERes.frame(roo.Range(*plotrange))
     plot.SetTitle("MC with paremetrized fit for multiple smearing scenarious")
-    multilabels = []
+    slabels = []
+    rlabels = []
     ## Loop over the various smearings.
     for starget, rtarget, color in zip(stargets, rtargets, colors):
         mydata = calibrator.get_smeared_data(starget, rtarget)
         phoEResPdf.fitTo(mydata, roo.PrintLevel(-1), roo.SumW2Error(False))
         mydata.plotOn(plot, roo.LineColor(color), roo.MarkerColor(color))
         phoEResPdf.plotOn(plot, roo.LineColor(color))
-        multilabels.append([
+        slabels.append([
             's_{target}: %.1f %%, #Delta s_{fit}: %.2g #pm %.2g %%' % (
                 starget, phoScale.getVal() - starget, phoScale.getError()
                 ),
+            ])
+        rlabels.append([
             'r_{target}: %.1f %%, #Delta r_{fit}: %.2g #pm %.2g %%' % (
                 rtarget, phoRes.getVal() - rtarget, phoRes.getError()
                 ),
             ])
     ## End of loop over the various smearings.
     plot.Draw()
-    for i, (labels, color) in enumerate(zip(multilabels, colors)):
-        latex = Latex(labels, position=(0.2, 0.85 - i*0.11))
+    for i, (labels, color) in enumerate(zip(slabels, colors)):
+        latex = Latex(labels, position=(0.2, 0.85 - i*0.055))
+        latex.SetTextColor(color)
+        latex.draw()
+    for i, (labels, color) in enumerate(zip(rlabels, colors)):
+        latex = Latex(labels,
+                      position=(0.2, 0.85 - len(slabels) * 0.055 -  i * 0.055))
         latex.SetTextColor(color)
         latex.draw()
 ## end of plot_phoeres_with_fit_for_multiple_smearings
+
+##------------------------------------------------------------------------------
+def plot_mmgmass_with_fit_for_multiple_smearings(name, stargets, rtargets,
+                                                 colors, plotrange=(60, 105)):
+    """Plot the smeared mmg mass for a number of different smearings."""
+    canvases.next(name).SetGrid()
+    plot = mmgMass.frame(roo.Range(*plotrange))
+    plot.SetTitle("m(#mu#mu#gamma) MC with paremetrized fit for multiple "
+                  "smearing scenarious")
+    slabels = []
+    rlabels = []
+    ## Loop over the various smearings.
+    for starget, rtarget, color in zip(stargets, rtargets, colors):
+        mydata = calibrator.get_smeared_data(starget, rtarget)
+        model = ParametrizedKeysPdf('model',
+                                    'model',
+                                    mmgMass, mmgMassSmearPeak,
+                                    mmgMassSmearWidth, mydata,
+                                    ROOT.RooKeysPdf.NoMirror, 1.5)
+        model.fitTo(mydata, roo.PrintLevel(-1), roo.Range(60, 120),
+                    roo.SumW2Error(False))
+        mydata.plotOn(plot, roo.LineColor(color), roo.MarkerColor(color))
+        model.plotOn(plot, roo.LineColor(color))
+        slabels.append([
+            's_{target}: %.1f %%, ' % starget +
+            '#Delta m_{#mu#mu#gamma}: %.2f #pm %.2f %%' % (
+                100 * (mmgMassSmearPeak.getVal() / 91.2 - 1.),
+                100 * mmgMassSmearPeak.getError() / 91.2
+                ),
+            ])
+        rlabels.append([
+            'r_{target}: %.1f %%, ' % rtarget +
+            '#sigma_{eff}(m_{#mu#mu#gamma}): %.2f #pm %.2f %%' % (
+                100 * mmgMassSmearWidth.getVal() / mmgMassSmearPeak.getVal(),
+                100 * mmgMassSmearWidth.getError() / mmgMassSmearPeak.getVal(),
+                ),
+            ])
+    ## End of loop over the various smearings.
+    plot.Draw()
+    for i, (labels, color) in enumerate(zip(slabels, colors)):
+        latex = Latex(labels, position=(0.2, 0.85 - i*0.055))
+        latex.SetTextColor(color)
+        latex.draw()
+    for i, (labels, color) in enumerate(zip(rlabels, colors)):
+        latex = Latex(labels,
+                      position=(0.2, 0.85 - len(slabels) * 0.055 - i*0.055))
+        latex.SetTextColor(color)
+        latex.draw()
+## end of plot_mmgmass_with_fit_for_multiple_smearings
 
 ##------------------------------------------------------------------------------
 def plot_nominal_and_smeared_mmgmass():
@@ -265,57 +324,55 @@ def plot_mmgmass_for_multiple_smearings(name, stargets, rtargets,
 ##------------------------------------------------------------------------------
 def main():
     ## plot_training_phoeres_with_shape_and_fit()
-    plot_smeared_phoeres_with_fit()
-    plot_nominal_and_smeared_mmgmass()
+    ## plot_smeared_phoeres_with_fit()
+    ## plot_nominal_and_smeared_mmgmass()
     colors = [ROOT.kRed - 3,
               ROOT.kOrange - 2,
               # ROOT.kYellow - 7,
               ROOT.kSpring + 5,
               ROOT.kAzure - 9,
               ROOT.kBlack]
-    ## plot_phoeres_with_fit_for_multiple_smearings(
-    ##     "PhoEResScaleScan",
-    ##     stargets = [-10, -5, 0, 5, 10],
-    ##     rtargets = [2,] * 5,
-    ##     colors = colors,
-    ##     plotrange = (-50, 20)
-    ##     )
-    ## plot_mmgmass_for_multiple_smearings(
-    ##     "MmgMassScaleScan",
-    ##     stargets = [-10, -5, 0, 5, 10],
-    ##     rtargets = [2,] * 5,
-    ##     colors = colors,
-    ##     plotrange = (80, 100)
-    ##     )
-    ## plot_phoeres_with_fit_for_multiple_smearings(
-    ##     "PhoEResResolutionScan",
-    ##     stargets = [0] * 5,
-    ##     rtargets = [1, 2, 5, 10, 20],
-    ##     colors = colors,
-    ##     plotrange = (-30, 10)
-    ##     )
-    ## plot_mmgmass_for_multiple_smearings(
-    ##     "MmgMassResolutionScan",
-    ##     stargets = [0] * 5,
-    ##     rtargets = [1, 2, 5, 10, 20],
-    ##     colors = colors,
-    ##     plotrange = (80, 100)
-    ##     )
+    plot_phoeres_with_fit_for_multiple_smearings(
+        "PhoEResScaleScan",
+        stargets = [-10, -5, 0, 5, 10],
+        rtargets = [2,] * 5,
+        colors = colors,
+        plotrange = (-50, 20)
+        )
+    plot_mmgmass_with_fit_for_multiple_smearings(
+        "MmgMassScaleScan",
+        stargets = [-10, -5, 0, 5, 10],
+        rtargets = [2,] * 5,
+        colors = colors,
+        )
+    plot_phoeres_with_fit_for_multiple_smearings(
+        "PhoEResResolutionScan",
+        stargets = [0] * 5,
+        rtargets = [1, 2, 3, 5, 10],
+        colors = colors,
+        plotrange = (-30, 10)
+        )
+    plot_mmgmass_with_fit_for_multiple_smearings(
+        "MMGMassResolutionScan",
+        stargets = [0] * 5,
+        rtargets = [1, 2, 3, 5, 10],
+        colors = colors,
+        )
     canvases.update()
 ## end of main
 
 ##------------------------------------------------------------------------------
-mmgMassSmearPdf = ParametrizedKeysPdf('mmgMassSmearPdf', 'mmgMassSmearPdf',
-                                      mmgMass, mmgMassPeak, mmgMassWidth,
-                                      sdata,
-                                      ROOT.RooKeysPdf.NoMirror, 1.5)
+## mmgMassSmearPdf = ParametrizedKeysPdf('mmgMassSmearPdf', 'mmgMassSmearPdf',
+##                                       mmgMass, mmgMassPeak, mmgMassWidth,
+##                                       sdata,
+##                                       ROOT.RooKeysPdf.NoMirror, 1.5)
 
 
 
 ##------------------------------------------------------------------------------
 ## Footer stuff
-canvases.update()
 if __name__ == "__main__":
     main()
+    canvases.update()
     import user
 
