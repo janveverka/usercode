@@ -66,6 +66,14 @@ def init():
     phoScale = w.factory('phoScale[0,-50,50]')
     phoRes = w.factory('phoRes[3,0.01,50]')
 
+    ## Set the binning for PDF normalization caching
+    sbins = ROOT.RooUniformBinning(-10, 10, 2, 'cache')
+    rboundaries = [0.5, 1, 2, 4, 6, 8, 10]
+    rbins = ROOT.RooBinning(len(rboundaries) - 1, array.array('d', rboundaries),
+                            'cache')
+    phoScale.setBinning(sbins)
+    phoRes.setBinning(rbins)
+
     ## Set units.
     for x, u in zip([phoScale, phoRes],
                     '% %'.split()):
@@ -172,17 +180,40 @@ def test_substituting_for_mmgMassPhoGenE():
     ## Test substituting for mmgMassPhoGenE
     ## This formula is approximate for s = phoERes << 1
     ## 1/(1+s) - 1 ~ -s
+    ## chachebins = ROOT.RooUniformBinning(-10, 10, 2, 'cache')
+    ## phoERes.setBinning(chachebins)
+    phoERes.setBins(3, 'cache')
+    
     mmgMassFunc = w.factory('''expr::mmgMassFunc(
         "sqrt(mmgMass^2 - 0.01 * phoERes * (mmgMass^2 - mmMass^2))",
         {mmMass, mmgMass, phoERes}
             )'''
         )
+    ## mmgMassFunc = w.factory('''cexpr::mmgMassFunc(
+    ##     "sqrt(mmgMass*mmgMass - 0.01 * phoERes * (mmgMass*mmgMass - mmMass*mmMass))",
+    ##     {mmMass, mmgMass, phoERes}
+    ##         )'''
+    ##     )
 
     cust = ROOT.RooCustomizer(pdf_mmMass_mmgMassPhoGenE, 'subs')
     cust.replaceArg(mmgMassPhoGenE, mmgMassFunc)
     pdf_mmMass_mmgMass = cust.build()
+    pdf_mmMass_mmgMass.addOwnedComponents(ROOT.RooArgSet(mmgMassFunc))
     pdf_mmMass_mmgMass.SetName('pdf_mmMass_mmgMass')
 
+    ## WARNING: The caching related lines below cause segmentation violation!
+    ## pdf_mmMass_mmgMass.setNormValueCaching(2)
+
+    ## print '-- Before chache --'
+    ## w.Print()
+
+    ## print '-- Calculating cache ... --'
+    ## ## Trigger the cache calculation
+    ## pdf_mmMass_mmgMass.getVal(ROOT.RooArgSet(mmMass, mmgMass))
+    
+    ## print '-- After chache --'
+    ## w.Print()
+    
     pdf = pdf_mmMass_mmgMassPhoGenE
     canvases.next(pdf.GetName()).SetGrid()
     h_pdf = pdf.createHistogram('h_' + pdf.GetName(),
@@ -238,33 +269,76 @@ def main():
     
     test_substituting_for_mmgMassPhoGenE()
 
+    canvases.update()
     sw.Stop()
     print 'CPU time:', sw.CpuTime(), 's, real time:', sw.RealTime(), 's'
 ## End of main()    
 
 
 ##------------------------------------------------------------------------------
-## init()
-## get_data()
+sw = ROOT.TStopwatch()
+sw.Start()
 
+init()
+get_data()
 
+pdfname = '_'.join(['pdf_mmMass_mmgMassPhoGenE', data.GetName()])
+pdf_mmMass_mmgMassPhoGenE = ROOT.RooNDKeysPdf(
+    pdfname, pdfname, ROOT.RooArgList(mmMass, mmgMassPhoGenE), data, "a",
+    1.5
+    )
+## Test substituting for mmgMassPhoGenE
+## This formula is approximate for s = phoERes << 1
+## 1/(1+s) - 1 ~ -s
+mmgMassFunc = w.factory('''expr::mmgMassFunc(
+    "sqrt(mmgMass^2 - 0.01 * phoERes * (mmgMass^2 - mmMass^2))",
+    {mmMass, mmgMass, phoERes}
+        )'''
+    )
 
-## pdf_phoERes = ParametrizedKeysPdf('pdf_phoERes', 'pdf_phoERes', phoERes,
-##                                   phoRes, phoScale, data,
-##                                   ROOT.RooKeysPdf.NoMirror, 1.5)
-## pdf_mmMass_mmgMassPhoGenE_phoERes = ROOT.RooProdPdf(
-##     'pdf_mmMass_mmgMassPhoGenE_phoERes', 'pdf_mmMass_mmgMassPhoGenE_phoERes',
-##     ROOT.RooArgList(pdf_mmMass_mmgMassPhoGenE, pdf_phoERes)
-##     )
+cust = ROOT.RooCustomizer(pdf_mmMass_mmgMassPhoGenE, 'subs')
+cust.replaceArg(mmgMassPhoGenE, mmgMassFunc)
+pdf_mmMass_mmgMass = cust.build()
+pdf_mmMass_mmgMass.SetName('pdf_mmMass_mmgMass')
 
-## svar = ROOT.RooFormulaVar('svar', 'svar',
-##                           "(mmgMassPhoGenE^2 - mmMass^2)/(91.2^2 - mmMass^2)",
-##                           ROOT.RooArgList(mmgMassPhoGenE, mmMass))
+pdf_phoERes = ParametrizedKeysPdf('pdf_phoERes', 'pdf_phoERes', phoERes,
+                                  phoScale, phoRes, data,
+                                  ROOT.RooKeysPdf.NoMirror, 1.5)
+# w.Import(pdf_phoERes)
 
-## pdf_mmMass_mmgMassPhoGenE_phoERes = ROOT.RooProdPdf('sb_pdf', 'sb_pdf',
-##                               banana_pdf, roo.Conditional(svar))
+pdf_mmMass_mmgMass_phoERes = ROOT.RooProdPdf(
+    'pdf_mmMass_mmgMass_phoERes', 'pdf_mmMass_mmgMass_phoERes',
+    ROOT.RooArgSet(pdf_phoERes),
+    roo.Conditional(ROOT.RooArgSet(pdf_mmMass_mmgMass),
+                    ROOT.RooArgSet(mmMass, mmgMass))
+    )
+
+## Integrate out the photon resolution function.
+pdf_banana = pdf_mmMass_mmgMass_phoERes.createProjection(
+    ROOT.RooArgSet(phoERes)
+    )
+
+w.Import(pdf_banana, roo.RecycleConflictNodes())
+
+w.Print()
+
+canvases.next(pdf_mmMass_mmgMassPhoGenE.GetName() + '_mmgMassPhoGenEProj')
+plot = mmgMassPhoGenE.frame(roo.Range(60, 120))
+data.plotOn(plot)
+pdf_mmMass_mmgMassPhoGenE.plotOn(plot)
+plot.Draw()
+canvases.update()
+
+canvases.next(pdf_banana.GetName() + '_mmgMassProj')
+plot = mmgMass.frame(roo.Range(60, 120))
+data.plotOn(plot)
+pdf_banana.plotOn(plot)
+plot.Draw()
+
+sw = ROOT.TStopwatch()
+sw.Start()
  
 
 if __name__ == '__main__':
-    main()
+    # main()
     import user
