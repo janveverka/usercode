@@ -1,13 +1,27 @@
 #!/usr/bin/env python -i
+import os
 import ROOT
 import JPsi.MuMu.common.roofit as roo
 import JPsi.MuMu.common.canvases as canvases
 from JPsi.MuMu.common.binedges import BinEdges
 from JPsi.MuMu.escale.fitResultPlotter import FitResultPlotter
 
-# filename = 'massmorph_test.root'
+# subdetr9 = 'EB_highR9'
+# subdetr9 = 'EB_lowR9'
+# subdetr9 = 'EE_highR9'
 subdetr9 = 'EE_lowR9'
-filename = 'massmorph_scalescan_EB_highR9_phoPt20-25.root'
+
+scalescanfilemask = 'massmorph_scalescan_' + subdetr9 + '_phoPt%d-%d.root'
+resscanfilemask = 'massmorph_resscan_' + subdetr9 + '_phoPt%d-%d.root'
+
+scalescanfilemask = '_'.join([os.path.join('~/Work/Data/escale/masstransform/',
+                                           'masstransform_scalescan'),
+                              subdetr9,
+                              'phoPt%d-%d.root'])
+resscanfilemask = '_'.join([os.path.join('~/Work/Data/escale/masstransform/',
+                                         'masstransform_resscan'),
+                            subdetr9,
+                            'phoPt%d-%d.root'])
 wsname = 'w'
 
 ROOT.gStyle.SetPadTopMargin(0.1)
@@ -24,7 +38,7 @@ ptitle = {
     'EE_highR9': 'Endcaps, R_{9} > 0.95',
     'EE_lowR9' : 'Endcaps, R_{9} < 0.95',
     }[subdetr9]
-ptbinedges = list(BinEdges([10, 12, 15, 20, 25, 30, 100]))
+ptbinedges = list(BinEdges([10, 12, 15, 20, 25, 30, 100]))[:]
 
 
 axistitles = {
@@ -114,23 +128,17 @@ def plot_scalescan():
     ## Mass scale vs photon scale
     plot_xy(xname = 'phoScale',
             yname = 'massScale',
-            ## xtitle = 'photon energy scale (%)',
-            ## ytitle = 'm_{#mu#mu#gamma} scale (%)',
-            filemask = 'massmorph_scalescan_' + subdetr9 + '_phoPt%d-%d.root')
+            filemask = scalescanfilemask)
     
     ## Relative mass width vs photon scale
     plot_xy(xname = 'phoScale',
             yname = 'massRes',
-            ## xtitle = 'photon energy scale (%)',
-            ## ytitle = 'm_{#mu#mu#gamma} width (%)',
-            filemask = 'massmorph_scalescan_' + subdetr9 + '_phoPt%d-%d.root')
+            filemask = scalescanfilemask)
     
     ## Absolute mass width vs photon scale
     plot_xy(xname = 'phoScale',
             yname = 'massWidth',
-            ## xtitle = 'photon energy scale (%)',
-            ## ytitle = 'm_{#mu#mu#gamma} width (GeV)',
-            filemask = 'massmorph_scalescan_' + subdetr9 + '_phoPt%d-%d.root',
+            filemask = scalescanfilemask,
             ytype = 'function')
 ## End of plot_scalescan().
 
@@ -144,14 +152,14 @@ def plot_resscan():
             yname = 'massScale',
             ## xtitle = 'photon energy resolution (%)',
             ## ytitle = 'm_{#mu#mu#gamma} scale (%)',
-            filemask = 'massmorph_resscan_' + subdetr9 + '_phoPt%d-%d.root')
+            filemask = resscanfilemask)
     
     ## Mass width vs photon resolution
     plot_xy(xname = 'phoRes',
             yname = 'massRes',
             ## xtitle = 'photon energy resolution (%)',
             ## ytitle = 'm_{#mu#mu#gamma} width (%)',
-            filemask = 'massmorph_resscan_' + subdetr9 + '_phoPt%d-%d.root')
+            filemask = resscanfilemask)
 ## End of plot_resscan().    
 
 ##------------------------------------------------------------------------------
@@ -184,8 +192,7 @@ def compare_scale_slopes():
     print '--'
     print 'pt range, fit slope, guessed slope'
     for ptrange, fitslope in zip(ptbinedges, fitslopes):
-        filename = ('massmorph_scalescan_' + subdetr9 + '_phoPt%d-%d.root' %
-                    ptrange)
+        filename = scalescanfilemask % ptrange
         print '%d-%3d GeV' % ptrange,
         print '%.3f %.3f' % (fitslope, guess_scale_slope(filename))
 ## End of compare_scale_slopes().
@@ -206,8 +213,7 @@ def compare_res_slopes():
     print '-- Resoluton slopes --'
     print 'pt range, guessed slope, fitted slope, offset, r2'
     for ptrange, (p0, p1, p2, p3) in zip(ptbinedges, fitpars):
-        filename = ('massmorph_scalescan_' + subdetr9 + '_phoPt%d-%d.root' %
-                    ptrange)
+        filename = resscanfilemask % ptrange
         print '%d-%3d GeV' % ptrange,
         print '%.3f  %.3f  %.3f  %.3f %.3f' % (guess_scale_slope(filename),
                                           p2, p0, p1, p3)
