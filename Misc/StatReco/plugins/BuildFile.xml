@@ -1,4 +1,0 @@
-<use   name="Misc/TreeMaker"/>
-<use   name="DataFormats/EcalRecHit"/>
-<flags   EDM_PLUGIN="1"/>
-<library   name="MiscStatReco_plugins" file="*.cc"/>
