@@ -26,9 +26,9 @@ from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 ##-- Configuration -------------------------------------------------------------
 ## Target photon scale and resolution in %
 ## Scale scan
-stargets = [-25 + 2.5*i for i in range(21)][19:]
-rtargets = [1.5] * len(stargets)
-outputfilename = 'massmorph_scalescan_test.root'
+## stargets = [-25 + 2.5*i for i in range(21)][19:]
+## rtargets = [1.5] * len(stargets)
+## outputfilename = 'massmorph_scalescan_test.root'
 
 ## Resolution scan
 ## rtargets = [0.05, 0.2] + [0.5 + 0.5 * i for i in range(20)]
@@ -36,8 +36,9 @@ outputfilename = 'massmorph_scalescan_test.root'
 ## outputfilename = 'massmorph_resscan_EB_highR9_phoPt20-25.root'
 
 
-## stargets = [-1, 0, 1,]
-## rtargets = [1.487] * len(stargets)
+stargets = [-1, 0, 1,]
+rtargets = [1.487] * len(stargets)
+outputfilename = 'massmorph_scalescan_test.root'
 
 ## Selection
 cuts = ['phoIsEB',
