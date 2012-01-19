@@ -8,7 +8,7 @@ Jan Veverka, Caltech, 18 January 2012
 '''
 
 ##- Boilerplate imports --------------------------------------------------------
-
+import math
 import ROOT
 import JPsi.MuMu.common.roofit as roo
 import JPsi.MuMu.common.dataset as dataset
@@ -27,7 +27,7 @@ name = 'EB_lowR9_pt15-20'
 cuts = ['mmMass + mmgMass < 190',
         'isFSR',
         'phoGenE > 0',
-        '71 < mmMass & mmMass < 72', 
+        '60 < mmMass & mmMass < 70', 
         ]
 
 ##------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ init()
 get_data()
 
 ## Define variables
-t = w.factory('t[0,5,10]')
+t = w.factory('t[7,5,10]')
 
 ## Get t1 data
 t1func = w.factory(
@@ -167,6 +167,32 @@ tfunc.SetName('t')
 data.addColumn(tfunc)
 tfunc.SetName('tfunc')
 tdata = data.reduce(ROOT.RooArgSet(t))
+data = data.reduce(ROOT.RooArgSet(mmgMass, mmMass, phoERes, mmgMassPhoGenE))
+
+## Get t1 v t2
+t.setRange(5, 10)
+t1 = w.factory('t1[5,10]')
+t2 = w.factory('t2[-1,1]')
+t1func.SetName('t1')
+data.addColumn(t1func)
+t1func.SetName('t1func')
+t2func.SetName('t2')
+data.addColumn(t2func)
+t2func.SetName('t2func')
+t1vt2data = data.reduce(ROOT.RooArgSet(t1, t2))
+data = data.reduce(ROOT.RooArgSet(mmgMass, mmMass, phoERes, mmgMassPhoGenE))
+
+## Get t1+t2 vs t data
+t.setRange(5, 10)
+t1xt2 = w.factory('t1xt2[5,10]')
+t1xt2func = w.factory('expr::t1xt2func("t1func + t2func", {t1func, t2func})')
+t1xt2func.SetName('t1xt2')
+data.addColumn(t1xt2func)
+t1xt2func.SetName('t1xt2func')
+tfunc.SetName('t')
+data.addColumn(tfunc)
+tfunc.SetName('tfunc')
+t1xt2vtdata = data.reduce(ROOT.RooArgSet(t, t1xt2))
 data = data.reduce(ROOT.RooArgSet(mmgMass, mmMass, phoERes, mmgMassPhoGenE))
 
 ## Build the model fT1(t1) for log(mmgMassPhoGenE^2 - mmMass^2)
@@ -252,12 +278,48 @@ Latex([
 canvases.next('tpdf').SetGrid()
 t.setRange(5, 10)
 t.SetTitle('log(m_{#mu#mu#gamma}^{2} - m_{#mu#mu}^{2})')
-tpdf.fitTo(tdata, roo.Range(5.5, 10.5))
+tpdf.fitTo(tdata, roo.Range(5.5, 9.5))
 plot = t.frame(roo.Range(6, 9))
 tdata.plotOn(plot)
 tpdf.plotOn(plot)
 tpdf.paramOn(plot)
 plot.Draw()
+
+## Plot t2 v t1 data
+canvases.next('t1vt2').SetGrid()
+t1.SetTitle('log(m_{#mu#mu#gamma,E_{gen}^{#gamma}}^{2} - m_{#mu#mu}^{2})')
+t2.SetTitle('log(E_{reco}^{#gamma}/E_{gen}^{#gamma})')
+ht1vt2 = t1vt2data.createHistogram(t2, t1, 100, 100, '', 'ht1vt2')
+ht1vt2.GetXaxis().SetTitle(t2.GetTitle())
+ht1vt2.GetYaxis().SetTitle(t1.GetTitle())
+xarange = (t2pdf.s0val - 4 * t2pdf.r0val, t2pdf.s0val + 4 * t2pdf.r0val)
+xarange = [math.log(1 + 0.01 * x) for x in xarange]
+ht1vt2.GetXaxis().SetRangeUser(*xarange)
+ht1vt2.GetYaxis().SetRangeUser(t1pdf.shapemode - 4 * t1pdf.shapewidth,
+                               t1pdf.shapemode + 4 * t1pdf.shapewidth)
+ht1vt2.Draw('cont0')
+Latex([
+    '#rho: %.3f' % t1vt2data.correlation(t1, t2),
+    ], position=(0.2, 0.75)).draw()
+
+## Plot t1+t2 vs t data
+canvases.next('tvt1xt2').SetGrid()
+t1xt2.SetTitle(' + '.join([
+    'log(m_{#mu#mu#gamma,E_{gen}^{#gamma}}^{2} - m_{#mu#mu}^{2})',
+    'log(E_{reco}^{#gamma}/E_{gen}^{#gamma})'
+    ]))
+t.SetTitle('log(m_{#mu#mu#gamma}^{2} - m_{#mu#mu}^{2})')
+htvt = t1xt2vtdata.createHistogram(t1xt2, t, 100, 100, '', 'htvt')
+htvt.GetXaxis().SetTitle(t1xt2.GetTitle())
+htvt.GetYaxis().SetTitle(t.GetTitle())
+htvt.GetXaxis().SetRangeUser(t1pdf.shapemode - 4 * t1pdf.shapewidth,
+                             t1pdf.shapemode + 4 * t1pdf.shapewidth)
+htvt.GetYaxis().SetRangeUser(t1pdf.shapemode - 4 * t1pdf.shapewidth,
+                             t1pdf.shapemode + 4 * t1pdf.shapewidth)
+htvt.Draw('cont0')
+Latex([
+    '#rho: %.3f' % t1xt2vtdata.correlation(t1xt2, t),
+    ], position=(0.2, 0.75)).draw()
 
 canvases.update()
 sw.Stop()
