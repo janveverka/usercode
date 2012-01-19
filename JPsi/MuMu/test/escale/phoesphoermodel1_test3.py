@@ -23,10 +23,11 @@ from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 
 ##-- Configuration -------------------------------------------------------------
 ## Selection
-name = 'EB_highR9_pt20-25'
+name = 'EB_lowR9_pt15-20'
 cuts = ['mmMass + mmgMass < 190',
         'isFSR',
         'phoGenE > 0',
+        '71 < mmMass & mmMass < 72', 
         ]
 
 ##------------------------------------------------------------------------------
@@ -170,11 +171,21 @@ data = data.reduce(ROOT.RooArgSet(mmgMass, mmMass, phoERes, mmgMassPhoGenE))
 
 ## Build the model fT1(t1) for log(mmgMassPhoGenE^2 - mmMass^2)
 t.setRange(5, 10)
+# t.setVal(8.3)
 nomirror = ROOT.RooKeysPdf.NoMirror
-t1pdf = ROOT.RooKeysPdf('t1pdf', 't1pdf', t, t1data, nomirror, 1.5)
+## t1pdf = ROOT.RooKeysPdf('t1pdf', 't1pdf', t, t1data, nomirror, 1.5)
+t1mode = w.factory('t1mode[8.3,5,10]')
+t1width = w.factory('t1width[0.2,0.01,5]')
+t1pdf = ParametrizedKeysPdf('t1pdf', 't1pdf', t, t1mode, t1width, t1data,
+                            nomirror, 1.5)
+t1pdf.fitTo(t1data)
+t1mode.setConstant(True)
+t1width.setConstant(True)
+## TODO: use parametrized KEYS PDF with forced ranges and fit it to data.
 
 ## Build the model fT2(t2|s,r) for log(Ereco/Egen) ft2(t2|r,s)
 t.setRange(-1, 1)
+t.setVal(0)
 t2pdf = LogPhoeresKeysPdf('t2pdf', 't2pdf', phoERes, t, phoScale, phoRes, data,
                           rho=1.5)
 
@@ -188,23 +199,44 @@ tpdf.setBufferFraction(0.1)
 canvases.next('t1pdf').SetGrid()
 t.setRange(5, 10)
 t.SetTitle('log(m_{#mu#mu#gamma,E_{gen}^{#gamma}}^{2} - m_{#mu#mu}^{2})')
-plot = t.frame(roo.Range(7.5, 9))
+plot = t.frame(roo.Range(6, 9))
 t1data.plotOn(plot)
-t1pdf.plotOn(plot)
+t1pdf.shape.plotOn(plot)
+t1pdf.plotOn(plot, roo.LineColor(ROOT.kRed), roo.LineStyle(ROOT.kDashed))
 plot.Draw()
+Latex([
+    's_{shape}: %.3f' % t1pdf.shapemode,
+    's_{fit}: %.3f #pm %.3f' % (t1mode.getVal(),
+                                   t1mode.getError()),
+    's_{fit} - s_{shape}: %.4f #pm %.4f' % (
+        t1mode.getVal() - t1pdf.shapemode,
+        t1mode.getError()
+        ),
+    'r_{shape}: %.3f' % t1pdf.shapewidth,
+    'r_{fit}: %.3f #pm %.3f' % (t1width.getVal(), t1width.getError()),
+    'r_{fit} - r_{shape}: %.4f #pm %.4f' % (
+        t1width.getVal() - t1pdf.shapewidth,
+        t1width.getError()),
+    'r_{fit}/r_{shape}: %.4f #pm %.4f' % (
+        t1width.getVal() / t1pdf.shapewidth,
+        t1width.getError() / t1pdf.shapewidth),
+    ], position=(0.2, 0.8)).draw()
 
 ## Plot fT2(t2|s,r) fitted to training data.
 canvases.next('t2pdf').SetGrid()
 t.setRange(-1, 1)
+t.setVal(0)
 t.SetTitle('log(E_{reco}^{#gamma}/E_{gen}^{#gamma})')
+phoScale.setVal(t2pdf.s0val)
+phoRes.setVal(t2pdf.r0val)
 t2pdf.fitTo(t2data, roo.Range(ROOT.TMath.Log(0.5), ROOT.TMath.Log(2.0)))
-plot = t.frame(roo.Range(-0.15, 0.15))
+plot = t.frame(roo.Range(-0.3, 0.3))
 t2data.plotOn(plot)
 t2pdf.plotOn(plot)
 plot.Draw()
 Latex([
     's_{shape}: %.3f %%' % t2pdf.s0val,
-    's_{sfit}: %.3f #pm %.3f %%' % (phoScale.getVal(), phoScale.getError()),
+    's_{fit}: %.3f #pm %.3f %%' % (phoScale.getVal(), phoScale.getError()),
     's_{fit} - s_{shape}: %.4f #pm %.4f %%' % (
         phoScale.getVal() - t2pdf.s0val,
         phoScale.getError()
@@ -220,13 +252,12 @@ Latex([
 canvases.next('tpdf').SetGrid()
 t.setRange(5, 10)
 t.SetTitle('log(m_{#mu#mu#gamma}^{2} - m_{#mu#mu}^{2})')
-tpdf.fitTo(tdata, roo.Range(6.5, 10))
-plot = t.frame(roo.Range(7.5, 9))
+tpdf.fitTo(tdata, roo.Range(5.5, 10.5))
+plot = t.frame(roo.Range(6, 9))
 tdata.plotOn(plot)
 tpdf.plotOn(plot)
 tpdf.paramOn(plot)
 plot.Draw()
-tdata.plotOn(plot)
 
 canvases.update()
 sw.Stop()
