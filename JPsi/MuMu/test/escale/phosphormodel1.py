@@ -89,6 +89,8 @@ def parse_name_to_cuts():
 ##------------------------------------------------------------------------------
 def init():
     'Initialize workspace and common variables and functions.'
+    global plots
+    plots = []
     parse_name_to_cuts()
     ## Create the default workspace
     global w
@@ -219,6 +221,7 @@ def plot_xt1_proj_x():
     xt1data.plotOn(plot)
     xt1pdf.plotOn(plot)
     plot.Draw()
+    plots.append(plot)
 ## End of plot_xt1_proj_x().
 
 ##------------------------------------------------------------------------------
@@ -231,6 +234,7 @@ def plot_xt1_proj_t1():
     xt1data.plotOn(plot)
     xt1pdf.plotOn(plot)
     plot.Draw()
+    plots.append(plot)
 ## End of plot_xt1_proj_t1().
 
 ##------------------------------------------------------------------------------
@@ -250,12 +254,14 @@ def plot_xt1():
     hxt1d.GetXaxis().SetRangeUser(*mmMass_range)
     hxt1d.GetYaxis().SetRangeUser(*t1range)
     hxt1d.Draw('cont0')
+    plots.append(hxt1d)
 
     c1.cd(2).SetGrid()
     hxt1f = xt1pdf.createHistogram('hxt1f', mmMass, roo.YVar(t))
     hxt1f.SetTitle('PDF')
     hxt1f.GetXaxis().SetTitleOffset(1.3)
     hxt1f.Draw("cont0")
+    plots.append(hxt1f)
 ## End of plot_xt1().
 
 ##------------------------------------------------------------------------------
@@ -286,6 +292,7 @@ def plot_t2():
             phoRes.getVal() / t2pdf.r0val,
             phoRes.getError() / t2pdf.r0val),
         ], position=(0.2, 0.75)).draw()
+    plots.append(plot)
 ## End of plot_t2()
 
 ##------------------------------------------------------------------------------
@@ -294,6 +301,52 @@ def check_timer(label = ''):
     print label, 'CPU time:', sw.CpuTime(), 's, real time:', sw.RealTime(), 's'
     sw.Reset()
     sw.Start()
+
+##------------------------------------------------------------------------------
+def plot_xy_proj_y():
+    'Plot fXY(x,y|s,r) projected on mmgMass.'
+    c1 = canvases.next('xy_proj_y')
+    # plot = mmgMass.frame(roo.Range(75, 105))
+    plot = mmgMass.frame()
+    data.plotOn(plot)
+    xypdf.plotOn(plot)
+    plot.Draw()
+## End of plot_xy_proj_y().
+
+##------------------------------------------------------------------------------
+def plot_xy_proj_x():
+    'Plot fXY(x,y|s,r) projected on mmMass.'
+    c1 = canvases.next('xy_proj_x')
+    # plot = mmMass.frame(roo.Range(40, 90))
+    plot = mmMass.frame()
+    data.plotOn(plot)
+    xypdf.plotOn(plot)
+    plot.Draw()
+## End of plot_xy_proj_x()
+
+##------------------------------------------------------------------------------
+def plot_xy():
+    'Plot fXY(x,y|s,r) 2D plot with data.'
+    c1 = canvases.next('xy')
+    c1.SetWindowSize(800, 400)
+    c1.Divide(2,1)
+    c1.cd(1).SetGrid()
+    hd = data.createHistogram(mmMass, mmgMass, 50, 50, '', 'hxyd')
+    hd.SetTitle('Data')
+    hd.GetXaxis().SetTitle(mmMass.GetTitle() + ' (GeV)')
+    hd.GetYaxis().SetTitle(mmgMass.GetTitle() + ' (GeV)')
+    # hd.GetXaxis().SetTitleOffset(1.3)
+    hd.GetXaxis().SetRangeUser(40, 80)
+    hd.GetYaxis().SetRangeUser(75, 105)
+    hd.Draw('cont0')
+
+    c1.cd(2).SetGrid()
+    hf = xypdf.createHistogram('hxyf', mmMass, roo.Binning(100, 40, 80),
+                               roo.YVar(mmgMass, roo.Binning(100, 75, 105)))
+    hf.SetTitle('PDF')
+    # hf.GetXaxis().SetTitleOffset(1.3)
+    hf.Draw("cont0")
+## End of plot_xy().
 
 ##------------------------------------------------------------------------------
 def build_models():
@@ -331,8 +384,8 @@ def build_models():
     tcfunc = w.factory('''expr::tcfunc("log(exptbound)", {exptbound})''')
     t.setRange(*trange)
     mmMass.setRange(*mmMass_range)
-    t.setBins(100, "cache")
-    mmMass.setBins(10, "cache")
+    t.setBins(2000, "cache")
+    mmMass.setBins(100, "cache")
     xypdf = ROOT.RooFFTConvPdf('xypdf', 'xypdf', tcfunc, t, xt1pdf, t2pdf)
     xypdf.setBufferFraction(0.2)
     xypdf.setCacheObservables(ROOT.RooArgSet(mmMass, t))
@@ -346,7 +399,23 @@ sw.Start()
 ## (a) xt1pdf norm val chaching
 ## (b) cache=1000*40, rho=3, 296s
 ## (c) cache=100*10, rho=1.5, 2.2s
-## (d) cache=100*100, rho=1.5, 2.3s
+## (d) cache=100*20, rho=1.5, 36s
+## (e) cache=100*50, rho=1.5, 74s 
+## (f) cache=100*100, rho=1.5, 136s
+## (g) cache=100*200, rho=1.5, 260s
+## (h) cache=200*10, rho=1.5, 19.7s
+## (i) cache=500*10, rho=1.5, 22.5s
+## (j) cache=1000*10, rho=1.5, 24.7s
+## (l) cache=2000*10, rho=1.5, 18.2s
+## (m) cache=5000*10, rho=1.5, 183s
+## (k) cache=10000*10, rho=1.5, 72.2s
+## (n) cache=200*50, rho=1.5, 16.3s
+## (o) cache=500*50, rho=1.5, 323s
+## (p) cache=1000*50, rho=1.5, 334s
+## (q) cache=2000*50, rho=1.5, 100s
+## (r) cache=2000*100, rho=1.5, 198s
+## TODO: rho=1, cexpr, fit
+
 
 ## 1. real time (s): 0.0 s
 init()
@@ -385,41 +454,11 @@ canvases.update()
 t.setRange(*t1range)
 t.setVal(0.5 * (t1range[0] + t1range[1]))
 
-## Plot fXY(x,y|s,r) projected on mmgMass
-c1 = canvases.next('xy_proj_y')
-plot = mmgMass.frame(roo.Range(75, 105))
-data.plotOn(plot)
-xypdf.plotOn(plot)
-plot.Draw()
+plot_xy_proj_y()
+plot_xy_proj_x()
+plot_xy()
 
-## Plot fXY(x,y|s,r) projected on mmMass
-c1 = canvases.next('xy_proj_x')
-plot = mmMass.frame(roo.Range(40, 90))
-data.plotOn(plot)
-xypdf.plotOn(plot)
-plot.Draw()
-
-## Plot fXY(x,y|s,r) 2D plot with data
-c1 = canvases.next('xy')
-c1.SetWindowSize(800, 400)
-c1.Divide(2,1)
-c1.cd(1).SetGrid()
-hd = data.createHistogram(mmMass, mmgMass, 50, 50, '', 'hxyd')
-hd.SetTitle('Data')
-hd.GetXaxis().SetTitle(mmMass.GetTitle() + ' (GeV)')
-hd.GetYaxis().SetTitle(mmgMass.GetTitle() + ' (GeV)')
-# hd.GetXaxis().SetTitleOffset(1.3)
-hd.GetXaxis().SetRangeUser(40, 80)
-hd.GetYaxis().SetRangeUser(75, 105)
-hd.Draw('cont0')
-
-c1.cd(2).SetGrid()
-hf = xypdf.createHistogram('hxyf', mmMass, roo.Binning(100, 40, 80),
-                           roo.YVar(mmgMass, roo.Binning(100, 75, 105)))
-hf.SetTitle('PDF')
-# hf.GetXaxis().SetTitleOffset(1.3)
-hf.Draw("cont0")
-
+    
 ## Plot fXY(x,y|s,r) slice at mmMass = [55, 60, 65, 70, 75] GeV
 c1 = canvases.next('xy_slice_y')
 plot = mmgMass.frame()
