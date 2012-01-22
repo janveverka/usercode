@@ -275,7 +275,9 @@ def plot_t2():
     phoRes.setVal(t2pdf.r0val)
     t2pdf.fitTo(t2data, roo.Range(ROOT.TMath.Log(0.5), ROOT.TMath.Log(1.5)),
                 roo.NumCPU(8), roo.SumW2Error(True))
-    plot = t.frame(roo.Range(-0.3, 0.3))
+    myrange = (math.log(1 + 0.01 * (t2pdf.s0val - 5*t2pdf.r0val)),
+               math.log(1 + 0.01 * (t2pdf.s0val + 5*t2pdf.r0val)))
+    plot = t.frame(roo.Range(*myrange))
     t2data.plotOn(plot)
     t2pdf.plotOn(plot)
     plot.Draw()
@@ -305,9 +307,9 @@ def check_timer(label = ''):
 ##------------------------------------------------------------------------------
 def plot_xy_proj_y():
     'Plot fXY(x,y|s,r) projected on mmgMass.'
-    c1 = canvases.next('xy_proj_y')
-    # plot = mmgMass.frame(roo.Range(75, 105))
-    plot = mmgMass.frame()
+    c1 = canvases.next('xy_proj_y').SetGrid()
+    plot = mmgMass.frame(roo.Range(75, 105))
+    # plot = mmgMass.frame()
     data.plotOn(plot)
     xypdf.plotOn(plot)
     plot.Draw()
@@ -316,7 +318,7 @@ def plot_xy_proj_y():
 ##------------------------------------------------------------------------------
 def plot_xy_proj_x():
     'Plot fXY(x,y|s,r) projected on mmMass.'
-    c1 = canvases.next('xy_proj_x')
+    c1 = canvases.next('xy_proj_x').SetGrid()
     # plot = mmMass.frame(roo.Range(40, 90))
     plot = mmMass.frame()
     data.plotOn(plot)
@@ -327,10 +329,11 @@ def plot_xy_proj_x():
 ##------------------------------------------------------------------------------
 def plot_xy():
     'Plot fXY(x,y|s,r) 2D plot with data.'
-    c1 = canvases.next('xy')
-    c1.SetWindowSize(800, 400)
-    c1.Divide(2,1)
-    c1.cd(1).SetGrid()
+    c1 = canvases.next('xy').SetGrid()
+    if c1:
+        c1.SetWindowSize(800, 400)
+        c1.Divide(2,1)
+        c1.cd(1).SetGrid()
     hd = data.createHistogram(mmMass, mmgMass, 50, 50, '', 'hxyd')
     hd.SetTitle('Data')
     hd.GetXaxis().SetTitle(mmMass.GetTitle() + ' (GeV)')
@@ -340,7 +343,8 @@ def plot_xy():
     hd.GetYaxis().SetRangeUser(75, 105)
     hd.Draw('cont0')
 
-    c1.cd(2).SetGrid()
+    if c1:
+        c1.cd(2).SetGrid()
     hf = xypdf.createHistogram('hxyf', mmMass, roo.Binning(100, 40, 80),
                                roo.YVar(mmgMass, roo.Binning(100, 75, 105)))
     hf.SetTitle('PDF')
@@ -349,13 +353,55 @@ def plot_xy():
 ## End of plot_xy().
 
 ##------------------------------------------------------------------------------
+def plot_xy_slice_y():    
+    'Plot fXY(x,y|s,r) slice at mmMass = [55, 60, 65, 70, 75] GeV.'
+    c1 = canvases.next('xy_slice_y').SetGrid()
+    plot = mmgMass.frame()
+    for mval, color in zip(
+        [45, 50, 55, 60, 65, 70, 75, 80],
+        'Red Yellow Orange Spring Green Magenta Blue Black'.split()
+        ):
+        mmMass.setVal(mval)
+        xypdf.plotOn(plot, roo.LineColor(getattr(ROOT, 'k' + color)))
+
+    plot.Draw()
+## End of plot_xy_slice_y().
+
+##------------------------------------------------------------------------------
+def plot_xy_slice_x():
+    'Plot fXY(x,y|s,r) slice at mmgMass values.'
+    c1 = canvases.next('xy_slice_x').SetGrid()
+    plot = mmMass.frame()
+    for mval, color in zip(
+        [70, 75, 80, 85, 90, 95, 100, 105],
+        'Red Yellow Orange Spring Green Magenta Blue Black'.split()
+        ):
+        mmgMass.setVal(mval)
+        xypdf.plotOn(plot, roo.LineColor(getattr(ROOT, 'k' + color)))
+
+    plot.Draw()
+## End of plot_xy_slice_x()
+
+##------------------------------------------------------------------------------
+def set_xbinning():
+    ## ## This seems to be messing up the normalization.
+    ## xbins = [51.5, 55.5, 58.5, 60.5, 62.5, 64.0, 65.5, 67.5, 70.0, 74.5]
+    ## xbinning = ROOT.RooBinning(mmMass.getMin(), mmMass.getMax(), 'cache')
+    ## for x in xbins:
+    ##     xbinning.addBoundary(x)
+    ## xbinning.Print()
+    ## mmMass.setBinning(xbinning, 'cache')
+    pass
+## End of set_xbinning().
+    
+##------------------------------------------------------------------------------
 def build_models():
     ## Build the model fXT1(x, t1) for mmMass vs
     ## log(mmgMassPhoGenE^2 - mmMass^2)
     global xt1pdf
     t.setRange(*t1range)
     xt1pdf = ROOT.RooNDKeysPdf('xt1pdf', 'xt1pdf', ROOT.RooArgList(mmMass, t),
-                               xt1data, "a", 1.5)
+                               xt1data, "a", 1.)
     xt1pdf.setNormValueCaching(2)
     ## Trigger filling the normalization cache.
     xt1pdf.getVal(ROOT.RooArgSet(mmMass, t))
@@ -365,14 +411,14 @@ def build_models():
     t.setRange(*t2range)
     t.setVal(0)
     t2pdf = LogPhoeresKeysPdf('t2pdf', 't2pdf', phoERes, t, phoScale,
-                              phoRes, data, rho=1.5)
+                              phoRes, data, rho=1.0)
 
     ## Build the model for fXY(x,y|s,r) = fXT1(t) * fT2(t|s,r), t = t(x,y)
     global eptbound, tcfunc, xypdf
     trange = (4, 10)
     buffrac = 0.2
     exptbound = w.factory(
-        '''expr::exptbound(
+        '''cexpr::exptbound(
             "({M}*{M} - {m}*{m} <= {exptmin}) * {exptmin} +
              ({exptmin} < {M}*{M} - {m}*{m}) * ({M}*{M} - {m}*{m})",
              {{{M}, {m}}})'''.format(
@@ -381,17 +427,17 @@ def build_models():
             m='mmMass', M='mmgMass'
             )
         )
-    tcfunc = w.factory('''expr::tcfunc("log(exptbound)", {exptbound})''')
+    tcfunc = w.factory('''cexpr::tcfunc("log(exptbound)", {exptbound})''')
     t.setRange(*trange)
     mmMass.setRange(*mmMass_range)
     t.setBins(2000, "cache")
-    mmMass.setBins(100, "cache")
+    # mmMass.setBins(20, "cache")
     xypdf = ROOT.RooFFTConvPdf('xypdf', 'xypdf', tcfunc, t, xt1pdf, t2pdf)
     xypdf.setBufferFraction(0.2)
     xypdf.setCacheObservables(ROOT.RooArgSet(mmMass, t))
     xypdf.setNormValueCaching(2)
 ## End of build_models().
-    
+
 ##------------------------------------------------------------------------------
 sw = ROOT.TStopwatch()
 sw.Start()
@@ -414,8 +460,23 @@ sw.Start()
 ## (p) cache=1000*50, rho=1.5, 334s
 ## (q) cache=2000*50, rho=1.5, 100s
 ## (r) cache=2000*100, rho=1.5, 198s
-## TODO: rho=1, cexpr, fit
-
+## (s) cache=2000*200, rho=1.5, 397s
+## (t) cache=2000*50, rho=1.5, no 9., 89s
+## (u) cache=2000*50, rho=1.5, no 9., 10., 77s 
+## (v) cache=2000*50, rho=1.0/1.5, 80s
+## (w) cache=2000*50, rho=1.0, 79s
+## (x) cache=2000*50, rho=1.0, cexpr, 79s
+## (y) cache=2000*20, rho=1.0, cexpr, 32s
+## (z) cache=2000*10, rho=1.0, cexpr, 32s
+## (A) cache=2000*10, rho=1.0, cexpr, xbinning, 28s
+## (B) cache=2000*20, rho=1.0, cexpr, 33s + 3:59:03h (fit)
+  ## NO.   NAME      VALUE            ERROR       STEP SIZE       VALUE   
+  ##  1  phoRes       4.28004e-01   3.72722e-01   4.53126e-02  -1.38766e+00
+  ##  2  phoScale    -9.24848e-01   3.37972e-01   3.85105e-05  -1.84980e-02
+## (C) cache=2000*10, rho=1.0, cexpr, batch mode, 17s
+## (D) cache=2000*20, rho=1.0, cexpr, batch mode, 32s
+## (E) cache=2000, rho=1.0, cexpr, batch mode, 154s
+## (F) cache=1000, rho=1.0, cexpr, batch mode, 630s
 
 ## 1. real time (s): 0.0 s
 init()
@@ -429,7 +490,8 @@ check_timer(2)
 get_derived_data()
 check_timer(3)
 
-## 4. real time (s): 20.4, 21.2 (a), 34.3 (b)
+## 4. real time (s): 20.4, 21.2 (a), 34.3 (b), 14.4 (v), 14.4 (w), 17.4 (x)
+##                   16.8 (C)
 build_models()
 check_timer(4)
 
@@ -451,46 +513,45 @@ check_timer(8)
 
 canvases.update()
 
+## set_xbinning()
 t.setRange(*t1range)
 t.setVal(0.5 * (t1range[0] + t1range[1]))
 
+sw2 = ROOT.TStopwatch()
+sw2.Start()
+
+## 9. real time (s): 74 (q), 52 (v)
 plot_xy_proj_y()
+check_timer(9)
+
+## 10. real time (s): 13 (q), 73 (t)
 plot_xy_proj_x()
+check_timer(10)
+
+## 11. real time (s): 13 (q), 75 (u)
 plot_xy()
+check_timer(11)
 
-    
-## Plot fXY(x,y|s,r) slice at mmMass = [55, 60, 65, 70, 75] GeV
-c1 = canvases.next('xy_slice_y')
-plot = mmgMass.frame()
-for mval, color in zip(
-    [45, 50, 55, 60, 65, 70, 75, 80],
-    'Red Yellow Orange Spring Green Magenta Blue Black'.split()
-    ):
-    mmMass.setVal(mval)
-    xypdf.plotOn(plot, roo.LineColor(getattr(ROOT, 'k' + color)))
+## 12. real time (s): 1 (q)
+plot_xy_slice_y()
+check_timer(12)
 
-plot.Draw()
+## 13. real time (s): 1 (q)
+plot_xy_slice_x()
+check_timer(13)
 
-## Plot fXY(x,y|s,r) slice at mmgMass values
-c1 = canvases.next('xy_slice_x')
-plot = mmMass.frame()
-for mval, color in zip(
-    [70, 75, 80, 85, 90, 95, 100, 105],
-    'Red Yellow Orange Spring Green Magenta Blue Black'.split()
-    ):
-    mmgMass.setVal(mval)
-    xypdf.plotOn(plot, roo.LineColor(getattr(ROOT, 'k' + color)))
-
-plot.Draw()
-
+sw2.Stop()
+print 'CPU time:', sw2.CpuTime(), 's, real time:', sw2.RealTime(), 's'
+ 
 canvases.update()
 
 ## Plot fXT(t|s,r) fitted to data
+## real time (h): 3:59:03
 data_small = data.reduce(roo.EventRange(0, data.numEntries()/10))
-## xypdf.fitTo(data_small, roo.NumCPU(8), roo.Verbose(True), roo.Timer(True),
-##             roo.SumW2Error(True),
-##             #roo.Minos(ROOT.RooArgSet(phoRes))
-##             )
+xypdf.fitTo(data_small, roo.NumCPU(8), roo.Verbose(True), roo.Timer(True),
+            roo.SumW2Error(True),
+            #roo.Minos(ROOT.RooArgSet(phoRes))
+            )
 
 ## canvases.next('tpdf').SetGrid()
 ## t.setRange(5, 10)
@@ -505,9 +566,7 @@ data_small = data.reduce(roo.EventRange(0, data.numEntries()/10))
 ## real time (s): 267.3, 296.5(b), 2.2(c)
 
 canvases.update()
-sw.Stop()
-print 'CPU time:', sw.CpuTime(), 's, real time:', sw.RealTime(), 's'
- 
+
 
 if __name__ == '__main__':
     # main()
