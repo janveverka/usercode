@@ -73,3 +73,52 @@ double cit::math::gsh(double x, double t) {
   /// voila!
   return c1 / (exp(c2*x) + 2.*a + exp(-c2*x));
 }
+
+
+/*******************************************************************************
+ * The CDF of the generalized hyperbolic secant density.
+ */
+double cit::math::gshCdf(double x, double t) {
+  static const double pi = TMath::Pi();
+  static const double pi2 = pi*pi;
+  static const double piOverSqrt3 = TMath::Pi() / TMath::Sqrt(3.);
+  static const double oneThird = 1./3.;
+
+  /// Avoid dividing by t, sin(t) and sinh(t) if |t| < epsilon.
+  static const double epsilon = 100. * FLT_EPSILON;
+
+  if (t <= -pi)
+    return 0.;
+
+  if (t <= 0.) {
+    /// t in (-pi, 0]
+    if (t < -epsilon) {
+      /// t in (-pi, -epsilon), it's safe to divide by sin(t)
+      double c2 = sqrt(oneThird*(pi2 - t*t)); 
+      double arg = - (TMath::Exp(c2*x) + TMath::Cos(t)) / TMath::Sin(t);
+      double arccot = TMath::PiOver2() - TMath::ATan(arg);
+      return 1. + arccot / t;
+    } else {
+      /// t in [-epsilon, 0]
+      /// avoid division by a very small numbers by expanding in t;
+      double f = 1./(1. + TMath::Exp(x));
+      return 1. - f + (f/6. - 0.5*f*f + f*f*f/3.)*t*t;
+    }
+  } else {
+    /// t in (0, +infinity)
+    if (t < epsilon) {
+      /// t in (0, epsilon)
+      /// avoid division by a very small t by expanding sinh(t) / t;
+      double f = 1./(1. + TMath::Exp(x));
+      return 1. - f - (f/6. - 0.5*f*f + f*f*f/3.)*t*t;
+    } else {
+      /// t in [epsilon, +infinity)
+      double c2 = sqrt(oneThird*(pi2 + t*t)); 
+      double inverse_arg = TMath::SinH(t) / (TMath::Exp(c2*x) + TMath::CosH(t));
+      double arccoth = TMath::ATanH(inverse_arg);
+      return 1. - arccoth / t;
+    }
+  }
+  // This should never happen.
+  return 1.;
+}
