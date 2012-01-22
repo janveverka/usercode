@@ -15,6 +15,13 @@ def next(name=None, title=None):
     wtopy = 20 * (i % yperiod)
 
     if name:
+        if ROOT.gROOT.GetListOfCanvases().FindObject(name):
+            i = 0
+            while ROOT.gROOT.GetListOfCanvases().FindObject(name + '_%d' % i):
+                i += 1
+            name = name + '_%d' % i
+            if title:
+                title = title + ' %d' % i
         if title:
             c1 = ROOT.TCanvas(name, title)
         else:
