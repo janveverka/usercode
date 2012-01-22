@@ -48,8 +48,8 @@ class LogPhoeresKeysPdf(ROOT.RooKeysPdf):
 
     def __init__(self, name, title, x, t, s, r, data,
                  mirror=ROOT.RooKeysPdf.NoMirror, rho=1., forcerange=True):
-        t.setMin(ROOT.TMath.Log(1 + 0.01 * x.getMin()))
-        t.setMax(ROOT.TMath.Log(1 + 0.01 * x.getMax()))
+        # t.setMin(ROOT.TMath.Log(1 + 0.01 * x.getMin()))
+        # t.setMax(ROOT.TMath.Log(1 + 0.01 * x.getMax()))
         
         self.w = ROOT.RooWorkspace('logErecoOverEgen')
         # self.w.Import(data)
