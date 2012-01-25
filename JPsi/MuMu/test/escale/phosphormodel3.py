@@ -111,10 +111,11 @@ def init():
     weight = w.factory('weight[1]')
 
     ## Define model parameters.
-    global phoScale, phoRes, t
+    global phoScale, phoRes, phoScaleTrue, phoResTrue
     phoScale = w.factory('phoScale[0,-50,50]')
     phoRes = w.factory('phoRes[1.5,0.01,50]')
-    t = w.factory('t[7,1,20]')
+    phoScaleTrue = w.factory('phoScaleTrue[0,-50,50]')
+    phoResTrue = w.factory('phoResTrue[1.5,0.01,50]')
 
     ## Set units.
     for x, u in zip([phoScale, phoRes],
@@ -169,8 +170,8 @@ def get_data(zchain = getChains('v11')['z']):
 init()
 get_data()
 
-traindata = calibrator.get_smeared_data(strain, rtrain)
 fitdata = calibrator.get_smeared_data(sfit, rfit)
+traindata = calibrator.get_smeared_data(strain, rtrain)
 
 ## Get x
 xfunc = w.factory('''FormulaVar::xfunc(
@@ -178,7 +179,8 @@ xfunc = w.factory('''FormulaVar::xfunc(
     {mmMass, mmgMass}
     )''')
 traindata.addColumn(xfunc)
-xmean = traindata.mean(traindata.get()['xfunc'])
+xmean = w.factory('xmean[0.1, 0, 1]')
+xmean.setVal(traindata.mean(traindata.get()['xfunc']))
 
 mmgMassPeak = w.factory('mmgMassPeak[91.2, 0, 200]')
 mmgMassWidth = w.factory('mmgMassWidth[5, 0.1, 200]')
@@ -187,49 +189,32 @@ mmgMassPdf = ParametrizedKeysPdf('mmgMassPdf', 'mmgMassPdf',
                                  mmgMass, mmgMassPeak,
                                  mmgMassWidth, traindata,
                                  ROOT.RooKeysPdf.NoMirror, 1.5)
-
-calibrator.phoEResPdf.fitTo(traindata, roo.Range(-50, 50), roo.Strategy(2),
-                            roo.SumW2Error(True))
-mmgMassPdf.fitTo(data, roo.Range(60,120), roo.SumW2Error(True))
+phoEResPdf = ParametrizedKeysPdf('phoEResPdf', 'phoEResPdf',
+                                 phoERes, phoScaleTrue, phoResTrue, data,
+                                 ROOT.RooKeysPdf.NoMirror, 1.5)
+w.Import(phoEResPdf)
+phoEResPdf.fitTo(traindata, roo.Range(-50, 50), roo.Strategy(2),
+                 roo.SumW2Error(True))
 
 mmgMassSlope = w.factory(
-    'expr::mmgMassSlope("1 - ({x})*({s} - ({s0}))", {{{s}}})'.format(
-        x=0.01*xmean, s=phoScale.GetName(), s0=calibrator.s.getVal()
+    '''expr::mmgMassSlope("1 - 0.01 * {x}*({s} - {s0})",
+                        {{ {s}, {s0}, {x} }})'''.format(
+        x=xmean.GetName(), s=phoScale.GetName(), s0=phoScaleTrue.GetName()
         )
     )
-
-mmgMassSlope2 = w.factory(
-    'expr::mmgMassSlope2("({a}) + ({b}) * {s}", {{{s}}})'.format(
-        a = (mmgMassPdf.shapewidth / mmgMassWidth.getVal() *
-             (1 + 0.01 * xmean * calibrator.s.getVal())),
-        b = - mmgMassPdf.shapewidth / mmgMassWidth.getVal() * 0.01 * xmean,
-        s = phoScale.GetName(),
-        )
-    )
-
-mmgMassOffset2 = w.factory('mmgMassOffset2[%f]' % (
-    mmgMassPdf.shapemode - mmgMassPdf.shapewidth * mmgMassPeak.getVal() /
-    mmgMassWidth.getVal()
-    ))
 
 mmgMassSubs = w.factory('LinearVar::mmgMassSubs(mmgMass, mmgMassSlope, 0)')
-mmgMassSubs2 = w.factory(
-    'LinearVar::mmgMassSubs2(mmgMass, mmgMassSlope2, mmgMassOffset2)'
-    )
 
 cust = ROOT.RooCustomizer(mmgMassPdf.shape, 'subs')
-cust2 = ROOT.RooCustomizer(mmgMassPdf.shape, 'subs2')
 cust.replaceArg(mmgMass, mmgMassSubs)
-cust2.replaceArg(mmgMass, mmgMassSubs2)
 mmgMassModel = cust.build()
-mmgMassModel2 = cust2.build()
 mmgMassModel.SetName('mmgMassModel')
-mmgMassModel2.SetName('mmgMassModel2')
 
 canvases.next('data')
 plot = mmgMass.frame(roo.Range(70, 110))
 data.plotOn(plot)
 mmgMassPdf.shape.plotOn(plot)
+mmgMassPdf.fitTo(data, roo.Range(60,120), roo.SumW2Error(True))
 mmgMassPdf.plotOn(plot, roo.LineColor(ROOT.kRed), roo.LineStyle(ROOT.kDashed))
 plot.Draw()
 Latex(
@@ -255,27 +240,24 @@ Latex(
 
 canvases.next('fit')
 calibrator.phoEResPdf.fitTo(fitdata, roo.Range(-50, 50))
+xmean.setConstant(True)
+phoScaleTrue.setConstant(True)
 mmgMassModel.fitTo(fitdata, roo.Range(60, 120), roo.SumW2Error(True),
                    roo.Strategy(2), roo.InitialHesse(), roo.Minos())
 res1 = (phoScale.getVal(), phoScale.getError())
-mmgMassModel2.fitTo(fitdata, roo.Range(60, 120), roo.SumW2Error(True),
-                    roo.Strategy(2), roo.InitialHesse(), roo.Minos())
-res2 = (phoScale.getVal(), phoScale.getError())
 plot = mmgMass.frame(roo.Range(70, 110))
 fitdata.plotOn(plot)
 mmgMassModel.plotOn(plot)
-mmgMassModel2.plotOn(plot, roo.LineColor(ROOT.kRed),
-                     roo.LineStyle(ROOT.kDashed))
 plot.Draw()
 Latex(
     ['m(E^{#gamma}_{reco}/E^{#gamma}_{gen}-1)',
      '  true: %.3f #pm %.3f %%' % (calibrator.s.getVal(),
                                    calibrator.s.getError()),
-     '   fit1: %.3f #pm %.3f %%' % res1,
-     '   fit2: %.3f #pm %.3f %%' % res2,
+     '   fit: %.3f #pm %.3f %%' % res1,
     ],
     position = (0.2, 0.8)
     ).draw()
+
 
 canvases.update()
 
