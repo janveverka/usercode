@@ -40,6 +40,7 @@ from JPsi.MuMu.common.cmsstyle import cmsstyle
 from JPsi.MuMu.common.energyScaleChains import getChains
 from JPsi.MuMu.common.latex import Latex
 from JPsi.MuMu.common.rangesafekeyspdf import RangeSafeKeysPdf
+from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
 from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 
 ##-- Configuration -------------------------------------------------------------
@@ -48,7 +49,10 @@ from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 ## resolutiontargets = [0.5, 1, 2, 4, 6, 8, 10]
 scaletargets = [-5, 0, 5]
 resolutiontargets = [0.5, 1, 2, 4, 6, 8, 10]
-## name = 'EB_highR9_pt12-15'
+
+stest = 'nominal'
+rtest = 3
+## name = 'EB_highR9_pt12to15'
 name = 'EB_highR9_pt20-25'
 
 ## Selection
@@ -78,7 +82,13 @@ def parse_name_to_cuts():
         for tok in name.split('_'):
             ## Get the token with the pt
             if 'pt' in tok:
-                lo, hi = tok.replace('pt', '').split('-')
+                if '-' in tok:
+                    separator = '-'
+                elif 'to' in tok:
+                    separator = 'to'
+                else:
+                    raise RuntimeError, 'Error parsing %s in %s!' % (tok, name)
+                lo, hi = tok.replace('pt', '').split(separator)
                 cuts.append('%s <= phoPt & phoPt < %s' % (lo, hi))
 ## End of parse_name_to_cuts().
 
@@ -135,9 +145,11 @@ def get_data(zchain = getChains('v11')['z']):
                        variables=[mmgMass, mmMass, phoERes,])
 
     ## Set units and nice titles
-    for x, t, u in zip([mmgMass, mmMass, phoERes],
+    for x, t, u in zip([mmgMass, mmMass, phoERes, phoRes, phoScale],
                        ['m_{#mu#mu#gamma}', 'm_{#mu#mu}',
-                        'E_{reco}^{#gamma}/E_{gen}^{#gamma} - 1', ],
+                        'E_{reco}^{#gamma}/E_{gen}^{#gamma} - 1',
+                        'photon energy resolution',
+                        'photon energy scale',],
                        'GeV GeV %'.split()):
         x.SetTitle(t)
         x.setUnit(u)
@@ -202,6 +214,7 @@ for rbin, rtarget in enumerate(resolutiontargets):
     w.Import(sdata)
 
     pdfname = '_'.join(['mmgMassPdf', name, bintag])
+    pdfname = pdfname.replace('-', 'to')
     ## KEYS PDF Dilemma: RooKeysPdf is deprecated,
     ## RooNDKeysPdf cannot be stored in a workspace,
     ## RooMomentMorph constructor works in workspace factory only
@@ -209,19 +222,34 @@ for rbin, rtarget in enumerate(resolutiontargets):
     ##                         ROOT.RooArgList(mmgMass), sdata, "a", 1.5)
     ## -> Stick to deprecated RooKeysPdf for now.
     ## mmgMass.setRange(40, 140)
-    pdf = ROOT.RooKeysPdf(pdfname, pdfname, mmgMass, sdata,
-                          ROOT.RooKeysPdf.NoMirror, 1.5)
-    ## peak = w.factory('%s_mode[91.2, 60, 120]' % pdfname)
-    ## width = w.factory('%s_effsigma[3, 0.1, 20]' % pdfname)
-    ## pdf = RangeSafeKeysPdf(pdfname, pdfname, mmgMass, sdata,
-    ##                        ROOT.RooKeysPdf.NoMirror, 1.5)
+    peak = w.factory('%s_mode[91.2, 60, 120]' % pdfname)
+    width = w.factory('%s_effsigma[3, 0.1, 20]' % pdfname)
+    pdf = ParametrizedKeysPdf(pdfname + '_pkeys', pdfname + '_pkyes',
+                              mmgMass, peak, width, sdata,
+                              ROOT.RooKeysPdf.NoMirror, 1.5)
+    savrange = (mmgMass.getMin(), mmgMass.getMax())
+    normrange = (40, 130)
+    fitrange = (60, 120)
+    mmgMass.setRange(*fitrange)
+    peak.setVal(pdf.shapemode)
+    width.setVal(pdf.shapewidth)
+    pdf.fitTo(sdata, roo.Range(*fitrange), roo.Strategy(2))
+    w.Import(pdf)
     ## peak.setConstant()
     ## width.setConstant()
+
+    hist = pdf.createHistogram(pdfname + '_hist', mmgMass, roo.Binning(1000))
+    dhist = ROOT.RooDataHist(pdfname + '_dhist', pdfname + '_hist',
+                             ROOT.RooArgList(mmgMass), hist)
+    w.Import(dhist)
+    hpdf = w.factory('HistPdf::{name}({{mmgMass}}, {name}_dhist, 1)'.format(
+        name=pdfname
+        ))
     ## bdata = data.reduce(ROOT.RooArgSet(mmgMass))
     ## bdata = bdata.binnedClone(data.GetName() + '_binned', data.GetTitle())
     ## pdf = ROOT.RooHistPdf(pdfname, pdfname, ROOT.RooArgSet(mmgMass), bdata, 2)
     pdf.Print()
-    w.Import(pdf)
+    # w.Import(pdf)
     rpdflist.append(pdfname)
     ## Store the target parameters in the workspaces
     phoScaleTarget.setVal(starget)
@@ -253,31 +281,35 @@ pdf = w.factory('''MomentMorph::{pdf}(
 w.Print()
 
 pdf.fitTo(data, roo.Range(60, 120), roo.Minos())
-canvases.next('test')
 
-mmgMass.setBins(120)
-plot = mmgMass.frame(roo.Range(60, 120))
-data.plotOn(plot)
+tdata = calibrator.get_smeared_data(stest, rtest)
+tdata.SetName('tdata')
+pdf.fitTo(tdata, roo.Range(60, 120), roo.Minos())
+calibrator.phoEResPdf.fitTo(tdata, roo.Range(-50, 50))
+canvases.next('test_fit')
+plot = mmgMass.frame(roo.Range(70, 110))
+tdata.plotOn(plot)
 pdf.plotOn(plot)
 plot.Draw()
-calibrator.w.loadSnapshot('sr_mctruth')
 Latex(
     [
         's_{true}: %.3f #pm %.3f %%' % (calibrator.s.getVal(),
                                         calibrator.s.getError()),
-        's_{fit}: %.3f #pm %.3f %%' % (phoScale.getVal(),
-                                       phoScale.getError()),
+        ## 's_{fit}: %.3f #pm %.3f %%' % (phoScale.getVal(),
+        ##                                phoScale.getError()),
         'r_{true}: %.3f #pm %.3f %%' % (calibrator.r.getVal(),
                                         calibrator.r.getError()),
-        'r_{fit}: %.3f #pm %.3f %%' % (phoRes.getVal(),
-                                       phoRes.getError()),
+        'r_{fit}: %.3f ^{+%.3f}_{%.3f} %%' % (phoRes.getVal(),
+                                                 phoRes.getErrorHi(),
+                                                 phoRes.getErrorLo()),
         ],
     position=(0.2, 0.8)
     ).draw()
 
-canvases.next('nll')
-nll = pdf.createNLL(data, roo.Range(60, 120))
-rframe = phoRes.frame(roo.Range(0.1, 10))
+canvases.next('test_nll').SetGrid()
+nll = pdf.createNLL(tdata, roo.Range(60, 120))
+rframe = phoRes.frame(roo.Range(phoRes.getVal() + 3*phoRes.getErrorLo(),
+                                phoRes.getVal() + 3*phoRes.getErrorHi()))
 nll.plotOn(rframe, roo.ShiftToZero())
 rframe.Draw()
 
