@@ -27,6 +27,12 @@ Strategy:
 Note:
 This is a beefed up version of test_mmgMass_photonScale_shift.py
 
+Note:
+The MomentMorph seems to be working fine with HistPdf reference shapes, see
+massmorphmodel.py v1.2!  (Although there are kinks at the reference values.)
+There decide to abandon the likelihood approximation and moving to
+transforming in scale and morphing in resolution as a next iteration.
+
 Jan Veverka, Caltech, 25 January 2012.
 '''
    
@@ -41,12 +47,13 @@ from JPsi.MuMu.common.cmsstyle import cmsstyle
 from JPsi.MuMu.common.energyScaleChains import getChains
 from JPsi.MuMu.common.latex import Latex
 from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
+from JPsi.MuMu.common.parametrizedndkeyspdf import ParametrizedNDKeysPdf
 from JPsi.MuMu.escale.logphoereskeyspdf import LogPhoeresKeysPdf
 from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 
 ##-- Configuration -------------------------------------------------------------
 ## Selection
-name = 'EE_lowR9_pt15-20'
+name = 'EB_lowR9_pt15-20'
 outputfile = 'out_phosphor2' + name + '_test.root'
 cuts = ['mmMass + mmgMass < 190',
         'isFSR',
@@ -56,7 +63,7 @@ cuts = ['mmMass + mmgMass < 190',
 strain = 'nominal'
 rtrain = 'nominal'
 
-sfit = 10
+sfit = 'nominal'
 rfit = 'nominal'
 
 ##------------------------------------------------------------------------------
@@ -190,46 +197,101 @@ traindata = calibrator.get_smeared_data(strain, rtrain)
 ## Get x
 traindata.addColumn(xfunc)
 xmean.setVal(traindata.mean(traindata.get()['xfunc']))
+xmean.setConstant()
 
 mmgMassPdf = ParametrizedKeysPdf('mmgMassPdf', 'mmgMassPdf',
                                  mmgMass, mmgMassPeak,
                                  mmgMassWidth, traindata,
-                                 ROOT.RooKeysPdf.NoMirror, 1.5)
+                                 ROOT.RooKeysPdf.NoMirror, 1.5,
+                                 forcerange=True)
+
+calibrator.phoEResPdf.fitTo(traindata, roo.Range(-50, 50), roo.Strategy(2),
+                            roo.SumW2Error(True))
+
+mmgMass.setRange(50, 130)
+mmgMassPdf.fitTo(data, roo.Range(60,120), roo.SumW2Error(True))
+
 phoEResPdf = ParametrizedKeysPdf('phoEResPdf', 'phoEResPdf',
                                  phoERes, phoScaleTrue, phoResTrue, data,
                                  ROOT.RooKeysPdf.NoMirror, 1.5)
+
+phoEResPdf2 = ParametrizedNDKeysPdf('phoEResPdf2', 'phoEResPdf2',
+                                    phoERes, phoScaleTrue, phoResTrue, data,
+                                    ROOT.RooKeysPdf.NoMirror, 1.5,
+                                    forcerange=False)
+
 w.Import(phoEResPdf)
 phoEResPdf.fitTo(traindata, roo.Range(-50, 50), roo.Strategy(2),
                  roo.SumW2Error(True))
-
+phoScaleTrue.setConstant(True)
+phoResTrue.setConstant(True)
 mmgMassSlope = w.factory(
     '''expr::mmgMassSlope("1 - 0.01 * {x}*({s} - {s0})",
-                        {{ {s}, {s0}, {x} }})'''.format(
+                          {{ {s}, {s0}, {x} }})'''.format(
         x=xmean.GetName(), s=phoScale.GetName(), s0=phoScaleTrue.GetName()
         )
     )
 
-mmgMassSubs = w.factory('LinearVar::mmgMassSubs(mmgMass, mmgMassSlope, 0)')
+mmgMassSlope2 = w.factory(
+    'expr::mmgMassSlope2("({a}) + ({b}) * {s}", {{{s}}})'.format(
+        a = (mmgMassPdf.shapewidth / mmgMassWidth.getVal() *
+             (1 + 0.01 * xmean.getVal() * calibrator.s.getVal())),
+        b = - mmgMassPdf.shapewidth / mmgMassWidth.getVal() * 0.01 * xmean.getVal(),
+        s = phoScale.GetName(),
+        )
+    )
+
+mmgMassOffset2 = w.factory('mmgMassOffset2[%f]' % (
+    mmgMassPdf.shapemode - mmgMassPdf.shapewidth * mmgMassPeak.getVal() /
+    mmgMassWidth.getVal()
+    ))
+
+## BEWARE: There seems to be a problem with normalization integral when using
+## RooKeysPdf + RooLinearVar which introduces a bias in the scale mesurement.
+## Use slow but biasfree FormulaVar instead.
+## mmgMassSubs = w.factory('LinearVar::mmgMassSubs(mmgMass, mmgMassSlope, 0)')
+## mmgMassSubs2 = w.factory(
+##     'LinearVar::mmgMassSubs2(mmgMass, mmgMassSlope2, mmgMassOffset2)'
+##     )
+mmgMassSubs = w.factory(
+    'expr::mmgMassSubs("mmgMass*mmgMassSlope", {mmgMass, mmgMassSlope})'
+    )
+mmgMassSubs2 = w.factory(
+    '''expr::mmgMassSubs2("mmgMass*mmgMassSlope2 + mmgMassOffset2",
+                          {mmgMass, mmgMassSlope2, mmgMassOffset2})'''
+    )
 
 cust = ROOT.RooCustomizer(mmgMassPdf.shape, 'subs')
 cust.replaceArg(mmgMass, mmgMassSubs)
 mmgMassModel = cust.build()
 mmgMassModel.SetName('mmgMassModel')
 
-## cust2 = ROOT.RooCustomizer(mmgMassPdf, 'subs2')
-## cust2.replaceArg(mmgMass, mmgMassSubs)
-## mmgMassModel2 = cust2.build()
-## mmgMassModel2.SetName('mmgMassModel2')
+cust2 = ROOT.RooCustomizer(mmgMassPdf.shape, 'subs2')
+cust2.replaceArg(mmgMass, mmgMassSubs2)
+mmgMassModel2 = cust2.build()
+mmgMassModel2.SetName('mmgMassModel2')
 
+calibrator.phoEResPdf.fitTo(fitdata, roo.Range(-50, 50))
+mmgMassModel.fitTo(fitdata, roo.Range(60, 120), roo.SumW2Error(True),
+                   roo.Strategy(2), roo.InitialHesse(True), roo.Minos(True),
+                   roo.Timer(True))
+res1 = (phoScale.getVal(), phoScale.getError())
+mmgMassModel2.fitTo(fitdata, roo.Range(60, 120), roo.SumW2Error(True),
+                   roo.Strategy(2), roo.InitialHesse(True), roo.Minos(True),
+                   roo.Timer(True))
+res2 = (phoScale.getVal(), phoScale.getError())
+
+##------------------------------------------------------------------------------
 canvases.next('data')
 plot = mmgMass.frame(roo.Range(70, 110))
 data.plotOn(plot)
 mmgMassPdf.shape.plotOn(plot)
-mmgMass.setRange(50, 130)
-mmgMassPdf.fitTo(data, roo.Range(60,120), roo.SumW2Error(True),
-                 roo.InitialHesse(True), roo.Minos(True), roo.Strategy(2),
-                 roo.Timer(True))
+## mmgMass.setRange(50, 130)
+## mmgMassPdf.fitTo(data, roo.Range(60,120), roo.SumW2Error(True),
+##                  roo.InitialHesse(True), roo.Minos(True), roo.Strategy(2),
+##                  roo.Timer(True))
 mmgMassPdf.plotOn(plot, roo.LineColor(ROOT.kRed), roo.LineStyle(ROOT.kDashed))
+print 'Plotting', plot.GetName(), 'on', canvases.canvases[-1].GetName()
 plot.Draw()
 Latex(
     ['m(E^{#gamma}_{reco}/E^{#gamma}_{gen}-1): %.3f #pm %.3f %%' % (
@@ -252,37 +314,30 @@ Latex(
     position = (0.2, 0.8)
     ).draw()
 
+##------------------------------------------------------------------------------
 canvases.next('fit')
-calibrator.phoEResPdf.fitTo(fitdata, roo.Range(-50, 50))
 xmean.setConstant(True)
 phoScaleTrue.setConstant(True)
-mmgMassModel.fitTo(fitdata, roo.Range(60, 120), roo.SumW2Error(True),
-                   roo.Strategy(2), roo.InitialHesse(True), roo.Minos(True),
-                   roo.Timer(True))
-res1 = (phoScale.getVal(), phoScale.getError())
-## mmgMassPeak.setConstant(True)
-## mmgMassWidth.setConstant(True)
-## mmgMassModel2.fitTo(fitdata, roo.Range(60, 120), roo.SumW2Error(True),
-##                    roo.Strategy(2), roo.InitialHesse(True), roo.Minos(True),
-##                    roo.Timer(True))
-## res2 = (phoScale.getVal(), phoScale.getError())
+mmgMassPeak.setConstant(True)
+mmgMassWidth.setConstant(True)
 plot = mmgMass.frame(roo.Range(70, 110))
 fitdata.plotOn(plot)
 mmgMassModel.plotOn(plot)
-## mmgMassModel2.plotOn(plot, roo.LineColor(ROOT.kRed),
-##                      roo.LineStyle(ROOT.kDashed))
+mmgMassModel2.plotOn(plot, roo.LineColor(ROOT.kRed),
+                     roo.LineStyle(ROOT.kDashed))
 plot.Draw()
 Latex(
     ['m(E^{#gamma}_{reco}/E^{#gamma}_{gen}-1)',
      '  true: %.3f #pm %.3f %%' % (calibrator.s.getVal(),
                                    calibrator.s.getError()),
      '   fit 1: %.3f #pm %.3f %%' % res1,
-#     '   fit 2: %.3f #pm %.3f %%' % res2,
+     '   fit 2: %.3f #pm %.3f %%' % res2,
     ],
     position = (0.2, 0.8)
     ).draw()
 
 
+##------------------------------------------------------------------------------
 canvases.update()
 
 if __name__ == '__main__':
