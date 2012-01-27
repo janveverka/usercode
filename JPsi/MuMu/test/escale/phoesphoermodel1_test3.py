@@ -23,7 +23,7 @@ from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 
 ##-- Configuration -------------------------------------------------------------
 ## Selection
-name = 'EB_lowR9_pt15-20'
+name = 'EB_highR9_e30-40'
 cuts = ['mmMass + mmgMass < 190',
         'isFSR',
         'phoGenE > 0',
