@@ -37,6 +37,7 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
             name + '_shapewidthvar',
             self.shapewidth
             )
+        self.shapewidthvar.setConstant(True)
         self.shapemode = tools.pdf_mode(self.shape, x)
         self.shapemodevar = ROOT.RooRealVar(
             name + '_shapemodevar',
@@ -46,11 +47,12 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
         if self.shapewidth <= 0.:
             raise RuntimeError, ('Illegal value of pdf width: %f.' %
                                  self.shapewidth)
+        self.shapemodevar.setConstant(True)
         ## Define the transformation of x that introduces the dependence on the
         ## mode and width
         self.xtransform = ROOT.RooFormulaVar(
-            x.GetName() + '_linearTransform_' + name,
-            x.GetTitle() + ' Linear Transform for Substitution in ' + title,
+            name + '_xtransform',
+            name + '_xtransform',
             "{shapemode} + ({x} - {mode}) * {shapewidth} / {width}".format(
                 x=x.GetName(),
                 mode=mode.GetName(),
@@ -64,26 +66,33 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
 
         ## TODO: Use RooLinearVar for the xtransform along the lines below
         ## Unfortunately, the implementation below doesn't seem to work.
+        ## It seems that the normalization is not calculated properly
+        ## for RooKeysPdf + RooLinearVar
         ## self.xslope = ROOT.RooFormulaVar(
-        ##     x.GetName() + '_slope_' + name,
-        ##     x.GetTitle() + ' Slope in Linear Transform',
+        ##     name + '_xslope',
+        ##     name + '_xslope',
         ##     "{shapewidth} / {width}".format(
-        ##         shapewidth=self.shapewidth, width=width.GetName()
+        ##         shapewidth=self.shapewidthvar.GetName(),
+        ##         width=width.GetName()
         ##         ),
-        ##     ROOT.RooArgList(width)
+        ##     ROOT.RooArgList(self.shapewidthvar, width)
         ##     )
+
         ## self.xoffset = ROOT.RooFormulaVar(
-        ##     x.GetName() + '_offset_' + name,
-        ##     x.GetTitle() + ' Offset in Linear Transform',
+        ##     name + '_xoffset',
+        ##     name + '_xoffset',
         ##     "{shapemode} - {mode} * {shapewidth} / {width}".format(
         ##         mode=mode.GetName(), width=width.GetName(), 
-        ##         shapemode=self.shapemode, shapewidth=self.shapewidth,
+        ##         shapemode=self.shapemodevar.GetName(),
+        ##         shapewidth=self.shapewidthvar.GetName(),
         ##         ),
-        ##     ROOT.RooArgList(mode, width)
+        ##     ROOT.RooArgList(mode, width, self.shapemodevar,
+        ##                     self.shapewidthvar)
         ##     )
+
         ## self.xtransform = ROOT.RooLinearVar(
-        ##     x.GetName() + '_linearTransform_' + name,
-        ##     x.GetTitle() + ' Linear Transform for Substitution in ' + title,
+        ##     name + '_xtransform',
+        ##     name + '_xtransform',
         ##     x, self.xslope, self.xoffset, x.getUnit()
         ##     )
 
@@ -93,15 +102,18 @@ class ParametrizedKeysPdf(ROOT.RooKeysPdf):
             ## TODO: Use a custom compiled class for this instead of the
             ## interpreted RooFormulaVar.
             self.xtransform_fullrange = self.xtransform
+            self.xtransform_fullrange.SetName(name + '_xtransform_fullrange')
+            self.xtransform_fullrange.SetTitle(name + '_xtransform_fullrange')
             self.xtransform = ROOT.RooFormulaVar(
-                x.GetName() + '_rangedLinearTransform_' + name,
-                (x.GetTitle() + ' Lin. Transform constrained to a Range in ' +
-                 title),
+                name + '_xtransform',
+                name + '_xtransform',
                 ('{lo} * ({x} <= {lo}) + '
                  '{x} * ({lo} < {x} & {x} < {hi}) + '
-                 '{hi} * ({hi} <= {x})').format(x=self.xtransform.GetName(),
-                                                lo=x.getMin(),
-                                                hi=x.getMax()),
+                 '{hi} * ({hi} <= {x})').format(
+                    x=self.xtransform_fullrange.GetName(),
+                    lo=x.getMin(),
+                    hi=x.getMax()
+                    ),
                 ROOT.RooArgList(self.xtransform_fullrange)
                 )
 
