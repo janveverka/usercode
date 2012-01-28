@@ -13,7 +13,7 @@ from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
 
 ##------------------------------------------------------------------------------
 class MonteCarloCalibrator:
-    def __init__(self, data):
+    def __init__(self, data, printlevel=-1):
         self.w = ROOT.RooWorkspace('mccworkspace',
                                    'MonteCarloCalibrator Workspace')
         self.datarow = ROOT.RooArgSet()
@@ -24,6 +24,8 @@ class MonteCarloCalibrator:
         self.data = data.reduce(self.datarow)
         self.data.SetName('data')
         self.w.Import(data)
+
+        self.printlevel = printlevel
 
         ## Define reference (0) and target scale (s) and resolution (r)
         self.s0 = self.w.factory('s0[0, -50, 50]')
@@ -58,11 +60,18 @@ class MonteCarloCalibrator:
                                               self.data,
                                               ROOT.RooKeysPdf.NoMirror, 1.5)
         # self.phoERes.setRange(*savrange)
+        ## Set sensible initial values
+        self.s.setVal(self.phoEResPdf.shapemode)
+        self.r.setVal(self.phoEResPdf.shapewidth)
         
         ## Extract the MC truth scale and resolution from MC
         self.fitresult_mctruth = self.phoEResPdf.fitTo(
-            self.data, roo.PrintLevel(-1), roo.SumW2Error(False),
-            roo.Range(-50,50), roo.Save()
+            self.data,
+            roo.PrintLevel(self.printlevel),
+            roo.SumW2Error(False),
+            roo.Range(-50,50),
+            roo.Save(),
+            roo.Strategy(2)
             )
         self.w.Import(self.fitresult_mctruth)
 
@@ -114,7 +123,26 @@ class MonteCarloCalibrator:
         return newdata.reduce(ROOT.RooArgSet(newvar))        
     ## end of _reduce_and_rename
 
-    def get_smeared_data(self, starget, rtarget):
+    def _fit_smeared_data(self, name):
+        'Fit the current smeared data to get the smeared s and r.'
+        self.fitresult_sdata = self.phoEResPdf.fitTo(
+            self.sdata,
+            roo.PrintLevel(self.printlevel),
+            roo.SumW2Error(False),
+            roo.Range(-50,50),
+            roo.Save(),
+            roo.Strategy(2)
+            )
+        self.w.saveSnapshot(name + '_sr', self.sr)
+        self.w.Import(self.fitresult_sdata, name + '_fitresult')
+    ## end of _fit_smeared_data()
+
+    def get_smeared_data(self, starget, rtarget,
+                         name='default', title='default', dofit=False):
+        if name == 'default':
+            name = self.data.GetName() + '_smeared'
+        if title == 'default':
+            title=self.data.GetTitle() + ' smeared'
         ## Make sure that the reference scale and resolution
         ## are equal to the MC truth.
         self.w.loadSnapshot('sr0_mctruth')
@@ -140,13 +168,17 @@ class MonteCarloCalibrator:
                                                     self.mmMass,
                                                     self.phoERes))
         ## Set the name and title of the smeared data.
-        self.sdata.SetName(self.data.GetName() + '_smeared')
-        self.sdata.SetTitle(self.data.GetTitle() + ' smeared')
+        self.sdata.SetName(name)
+        self.sdata.SetTitle(title)
+        ## Fit the smeared data
+        if dofit:
+            self._fit_smeared_data(name)
         ## Return the smeared data
         return self.sdata
     ## end of get_smeared_data
 ## end of MonteCarloCalibrator
     
+
 ##------------------------------------------------------------------------------
 def main():
     pass
