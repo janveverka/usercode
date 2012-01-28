@@ -37,6 +37,8 @@ def pdf_mode(pdf, obs,
                                pdf, ROOT.RooArgList(zero, minusone))
     ## Setup minuit for minization
     minuit = ROOT.RooMinuit(minuspdf)
+    ## To be on the safe side.
+    minuit.setStrategy(2)
     # minuit.setPrintLevel(-1)
     ## Sample the pdf in 1000 points
     h = pdf.createHistogram(obs.GetName(), 1000)
