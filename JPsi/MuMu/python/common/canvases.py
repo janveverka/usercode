@@ -10,6 +10,7 @@ wwidth = 700
 
 #______________________________________________________________________________
 def next(name=None, title=None):
+    update()
     i = len(ROOT.gROOT.GetListOfCanvases())
     wtopx = 20 * (i % xperiod)
     wtopy = 20 * (i % yperiod)
