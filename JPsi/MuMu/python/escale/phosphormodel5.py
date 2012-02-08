@@ -99,8 +99,8 @@ class PhosphorModel5(ROOT.RooHistPdf):
         ## Define the morphing parameter. This an identity with the
         ## photon resolution for now.
         mpar = self._mpar = w.factory(            
-            ## 'expr::{name}_mpar("{phor}", {{{phor}}})'.format(
-            'expr::{name}_mpar("2 + sqrt(0.5^2 + 0.05 * {phor}^2)", {{{phor}}})'.format(
+            'expr::{name}_mpar("{phor}", {{{phor}}})'.format(
+            ## 'expr::{name}_mpar("2 + sqrt(0.5^2 + 0.05 * {phor}^2)", {{{phor}}})'.format(
             ## 'expr::{name}_mpar("2.325+sqrt(0.4571 + (0.1608*{phor})^2)", {{{phor}}})'.format(
                 name=name, phor=phor.GetName()
                 )
@@ -160,17 +160,30 @@ class PhosphorModel5(ROOT.RooHistPdf):
             ## Define the mass scaling {name}_msubs{i} introducing
             ##     the dependence on phos. This needs self._calibrator.s and
             ##     dm_dphos.
+            ## msubs = w.factory(
+            ##     '''
+            ##     LinearVar::{msubs}(
+            ##         {mass}, 1,
+            ##         expr::{offset}(
+            ##             "- 0.01 * {dm_dphos} * ({phos} - {phostrue})",
+            ##             {{ {dm_dphos}, {phos}, {phostrue} }}
+            ##             )
+            ##         )
+            ##     '''.format(msubs = name + '_msubs_%d' % index,
+            ##                offset = name + '_msubs_offset_%d' % index,
+            ##                mass = self._mass.GetName(),
+            ##                dm_dphos = dm_dphos.GetName(),
+            ##                phos = self._phos.GetName(),
+            ##                phostrue = phostrue.GetName())
+            ## )
+            ## LinearVar cannot be persisted.
             msubs = w.factory(
                 '''
-                LinearVar::{msubs}(
-                    {mass}, 1,
-                    expr::{offset}(
-                        "- 0.01 * {dm_dphos} * ({phos} - {phostrue})",
-                        {{ {dm_dphos}, {phos}, {phostrue} }}
-                        )
-                    )
+                cexpr::{msubs}(
+                     "{mass} - 0.01 * {dm_dphos} * ({phos} - {phostrue})",
+                     {{ {mass}, {dm_dphos}, {phos}, {phostrue} }}
+                     )
                 '''.format(msubs = name + '_msubs_%d' % index,
-                           offset = name + '_msubs_offset_%d' % index,
                            mass = self._mass.GetName(),
                            dm_dphos = dm_dphos.GetName(),
                            phos = self._phos.GetName(),
@@ -286,7 +299,8 @@ class PhosphorModel5(ROOT.RooHistPdf):
         
         ## Quick hack to make things work.
         self._customizer = customizer = ROOT.RooCustomizer(model, 'msub')
-        customizer.replaceArg(mass, self._msubs_list[0])
+        average_index = (len(self._msubs_list) + 1) / 2
+        customizer.replaceArg(mass, self._msubs_list[average_index])
         model = customizer.build()
         
         ROOT.RooHistPdf.__init__(self, model)
@@ -389,4 +403,11 @@ class PhosphorModel5(ROOT.RooHistPdf):
                 ## End of loop over the x-axis bins.
             ## End of loop over the source histograms.
         ## End of _stitch_phorhists().
+
+    ##--------------------------------------------------------------------------
+    ## def selfNormalized(self):
+    ##     'Override the RooHistPdfs need for normalization'
+    ##     return True
+    ## End of selfNormalized.
+
 ## End of PhosphorModel5
