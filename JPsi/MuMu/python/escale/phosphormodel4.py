@@ -10,6 +10,7 @@ is introduced through the moment morphing.
 Jan Veverka, Caltech, 27 January 2012
 '''
 
+import array
 import ROOT
 import JPsi.MuMu.common.roofit as roo
 
@@ -18,7 +19,7 @@ from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
 
 ##------------------------------------------------------------------------------
 class PhosphorModel4(ROOT.RooMomentMorph):
-    def __init__(self, name, title, mass, phos, phor, data,
+    def __init__(self, name, title, mass, phos, phor, data, workspace, 
                  phostarget, phortargets, rho=1.5,
                  mirror=ROOT.RooKeysPdf.NoMirror,
                  mrangetrain=(40,140), mrangenorm=(50,130), mrangefit=(60,120)):
@@ -63,9 +64,12 @@ class PhosphorModel4(ROOT.RooMomentMorph):
         self._keys_effsigmas = []
         self._keys_fitresults = []
         self._pdfs = []
+        self._custs = []
+        self._pdfrefs = []
         self._mrefs = []
-        self._workspace = ROOT.RooWorkspace(name + '_workspace',
-                                            title + ' workspace')
+        self._workspace = workspace
+        ## self._workspace = ROOT.RooWorkspace(name + '_workspace',
+        ##                                     title + ' workspace')
         w = self._workspace
         self.w = w
         ## Import important args in workspace.
@@ -81,14 +85,16 @@ class PhosphorModel4(ROOT.RooMomentMorph):
             )
         ## Define the morphing parameter. This an identity with the
         ## photon resolution for now.
-        mpar = self._mpar = w.factory(
+        mpar = self._mpar = w.factory(            
             'expr::{name}_mpar("{phor}", {{{phor}}})'.format(
+            ## 'expr::{name}_mpar("sqrt(3^2 + {phor}^2)", {{{phor}}})'.format(
+            ## 'expr::{name}_mpar("2.325+sqrt(0.4571 + (0.1608*{phor})^2)", {{{phor}}})'.format(
                 name=name, phor=phor.GetName()
                 )
             )
         ## Define the formula for dlog(m)/dphos.
         self._dlogm_dphos_func = w.factory('''
-            expr::dlogm_dphos_func("0.5 * (1 - mmMass^2 / mmgMass^2)",
+            expr::dlogm_dphos_func("0.5 * (1 - mmMass^2 / mmgMass^2) * mmgMass",
                                    {mmMass, mmgMass})
             ''')
         ## Get the calibrator.
@@ -153,18 +159,34 @@ class PhosphorModel4(ROOT.RooMomentMorph):
             ##                phos = self._phos.GetName(),
             ##                phostrue = phostrue.GetName())
             ## )
+            ## msubs = w.factory(
+            ##     '''
+            ##     LinearVar::{msubs}(
+            ##         {mass},
+            ##         expr::{slope}(
+            ##             "(1 - 0.01 * {dlogm_dphos} * ({phos} - {phostrue}))",
+            ##             {{ {dlogm_dphos}, {phos}, {phostrue} }}
+            ##             ),
+            ##         0
+            ##         )
+            ##     '''.format(msubs = name + '_msubs_%d' % index,
+            ##                slope = name + '_msubs_slope_%d' % index,
+            ##                mass = self._mass.GetName(),
+            ##                dlogm_dphos = dlogm_dphos.GetName(),
+            ##                phos = self._phos.GetName(),
+            ##                phostrue = phostrue.GetName())
+            ## )
             msubs = w.factory(
                 '''
                 LinearVar::{msubs}(
-                    {mass},
-                    expr::{slope}(
-                        "(1 - 0.01 * {dlogm_dphos} * ({phos} - {phostrue}))",
+                    {mass}, 1,
+                    expr::{offset}(
+                        "- 0.01 * {dlogm_dphos} * ({phos} - {phostrue})",
                         {{ {dlogm_dphos}, {phos}, {phostrue} }}
-                        ),
-                    0
+                        )
                     )
                 '''.format(msubs = name + '_msubs_%d' % index,
-                           slope = name + '_msubs_slope_%d' % index,
+                           offset = name + '_msubs_offset_%d' % index,
                            mass = self._mass.GetName(),
                            dlogm_dphos = dlogm_dphos.GetName(),
                            phos = self._phos.GetName(),
@@ -210,6 +232,7 @@ class PhosphorModel4(ROOT.RooMomentMorph):
                                      keys_effsigma.GetName()]))
             
             ## Sample the fitted KEYS PDF to a histogram {name}_hist_{index}.
+            mass.setRange(*mrangetrain)
             hist = keys_pdf.createHistogram(name + '_hist_%d' % index,
                                             mass, roo.Binning(1000))
 
@@ -234,9 +257,23 @@ class PhosphorModel4(ROOT.RooMomentMorph):
                 )
             self._pdfs.append(pdf)
             mass.setRange(*self._massrange)
+
+            ## Supstitute for mass using customizer.
+            cust = ROOT.RooCustomizer(pdf, 'msubs_%d' % index)
+            self._custs.append(cust)
+            cust.replaceArg(mass, msubs)
+            pdfref = cust.build()
+            pdfref.addOwnedComponents(ROOT.RooArgSet(msubs))
+            pdfref.SetName(name + '_pdfref_%d' % index)
+            pdfref.SetTitle(name + '_pdfref_%d' % index)
+            w.Import(pdfref)
+            self._pdfrefs.append(pdfref)
             
             ## Calculate morphing parameter reference values float mref[index].
-            self._mrefs.append(phortrue.getVal())
+            phorval = phor.getVal()
+            phor.setVal(phortrue.getVal())
+            self._mrefs.append(mpar.getVal())
+            phor.setVal(phorval)
         ## End of loop over target phortargets
 
         ## Define the RooMomentMorph model.
@@ -245,9 +282,10 @@ class PhosphorModel4(ROOT.RooMomentMorph):
             MomentMorph::{name}({mpar}, {{{mass}}}, {{{pdfs}}}, {{{mrefs}}})
             '''.format(name=name, mpar=mpar.GetName(), mass=mass.GetName(),
                        pdfs=','.join([f.GetName() for f in self._pdfs]),
+                       # pdfs=','.join([f.GetName() for f in self._pdfrefs]),
                        mrefs=','.join([str(m) for m in self._mrefs]))
             )
-
+        
         ## Quick hack to make things work.
         cust = ROOT.RooCustomizer(model, 'msub')
         cust.replaceArg(mass, self._msubs_list[0])
@@ -257,4 +295,19 @@ class PhosphorModel4(ROOT.RooMomentMorph):
         self.SetName(name)
         self.SetTitle(title)
     ## End of __init__()
+
+    def make_mctrue_graph(self, xname='phor', yname='keys_effsigma'):
+        vardict = {'phos': self._phostrue_list,
+                   'phor': self._phortrue_list,
+                   'keys_mode': self._keys_modes,
+                   'keys_effsigma': self._keys_effsigmas}            
+        x = array.array('d', [v.getVal() for v in vardict[xname]])
+        y = array.array('d', [v.getVal() for v in vardict[yname]])
+        ex = array.array('d', [v.getError() for v in vardict[xname]])
+        ey = array.array('d', [v.getError() for v in vardict[yname]])
+        print len(vardict[xname]), x, y, ex, ey
+        graph = ROOT.TGraphErrors(len(vardict[xname]), x, y, ex, ey)
+        return graph
+        ## for xvar in
+    ## End of make_mctrue_graph()
 ## End of PhosphorModel4
