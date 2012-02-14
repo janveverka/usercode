@@ -1,0 +1,14 @@
+#!/usr/bin/env python -i
+import os
+import sys
+import user
+from ROOT import *
+from FWLite.Tools.roofit import *
+_main = sys.modules[__name__]
+for arg in sys.argv:
+    if os.path.exists(arg):
+        ext = os.path.splitext(arg)[-1]
+        if ext == '.root':
+            nfiles = len(gROOT.GetListOfFiles())
+            print 'Attaching %s as _file%d' % (arg, nfiles)
+            setattr(_main, '_file%d' % nfiles, TFile.Open(arg))
