@@ -12,6 +12,7 @@
 #include "JPsi/MuMu/interface/RooHyperbolicPdf.h"
 #include "JPsi/MuMu/interface/RooLogSqrtCBShape.h"
 #include "JPsi/MuMu/interface/RooLogSqrtGaussian.h"
+#include "JPsi/MuMu/interface/RooPhosphorPdf.h"
 #include "JPsi/MuMu/interface/RooRelativisticBreitWigner.h"
 #include "JPsi/MuMu/interface/RooSechPdf.h"
 #include "JPsi/MuMu/interface/RooTruncatedExponential.h"
@@ -39,6 +40,7 @@ namespace jpsimumu {
     RooSechPdf      _sech;
     RooLogSqrtCBShape _lscb;
     RooLogSqrtGaussian   _lsg;
+    RooPhosphorPdf _phosphor;
     RooRelativisticBreitWigner _rbw;
     RooTruncatedExponential _te;
     RooTransformPdf _tpdf;

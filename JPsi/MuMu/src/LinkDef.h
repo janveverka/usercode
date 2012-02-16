@@ -16,6 +16,7 @@
 #include "JPsi/MuMu/interface/RooLogSqrtCBShape.h"
 #include "JPsi/MuMu/interface/RooLogSqrtGaussian.h"
 #include "JPsi/MuMu/interface/RooSechPdf.h"
+#include "JPsi/MuMu/interface/RooPhosphorPdf.h"
 #include "JPsi/MuMu/interface/RooRelativisticBreitWigner.h"
 #include "JPsi/MuMu/interface/RooTruncatedExponential.h"
 #include "JPsi/MuMu/interface/RooTransformPdf.h"
@@ -50,6 +51,7 @@
 #pragma link C++ class RooLogSqrtCBShape;
 #pragma link C++ class RooLogSqrtGaussian;
 #pragma link C++ class RooSechPdf;
+#pragma link C++ class RooPhosphorPdf;
 #pragma link C++ class RooRelativisticBreitWigner;
 #pragma link C++ class RooTruncatedExponential;
 #pragma link C++ class RooTransformPdf;
