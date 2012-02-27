@@ -14,7 +14,9 @@ import FWLite.Tools.cmsstyle as cmsstyle
 from FWLite.Tools.latex import Latex
 ROOT.gSystem.Load('libJPsiMuMu')
 
+# name = 'EB_pt12to15'
 # name = 'EB_pt15to20'
+# name = 'EE_pt12to15'
 name = 'EE_pt15to20'
 
 times = []
@@ -181,7 +183,7 @@ check_timer('Norm vs scale')
 nfunc.plotOn(plot, roo.LineColor(ROOT.kRed), roo.LineStyle(ROOT.kDashed))
 nfunc3.plotOn(plot, roo.LineColor(ROOT.kBlack), roo.LineStyle(ROOT.kDotted))
 canvases.next('norm_vs_scale').SetGrid()
-plot.GetYaxis().SetRangeUser(0.994, 0.999)
+plot.GetYaxis().SetRangeUser(0.99, 1.00)
 plot.Draw()
 
 ##------------------------------------------------------------------------------
@@ -199,7 +201,7 @@ check_timer('Norm vs res')
 nfunc.plotOn(plot, roo.LineColor(ROOT.kRed), roo.LineStyle(ROOT.kDashed))
 nfunc3.plotOn(plot, roo.LineColor(ROOT.kBlack), roo.LineStyle(ROOT.kDotted))
 canvases.next('norm_vs_res').SetGrid()
-plot.GetYaxis().SetRangeUser(0.994, 0.999)
+plot.GetYaxis().SetRangeUser(0.99, 1.00)
 plot.Draw()
 
 canvases.update()
@@ -248,7 +250,7 @@ latex_labels = []
 for (t, s, f) in zip(labels_titles, labels_slow_fit, labels_fast_fit):
     latex_labels.extend([t, s, f, ''])
     
-Latex(latex_labels, position=(0.13, 0.8)).draw()
+Latex(latex_labels, position=(0.2, 0.8)).draw()
 
 ##------------------------------------------------------------------------------
 ## Fit the S only Monte Carlo.
@@ -291,7 +293,7 @@ latex_labels = []
 for (t, s, f) in zip(labels_titles, labels_slow_fit, labels_fast_fit):
     latex_labels.extend([t, s, f, ''])
     
-Latex(latex_labels, position=(0.13, 0.8)).draw()
+Latex(latex_labels, position=(0.2, 0.8)).draw()
 
 ##------------------------------------------------------------------------------
 plot = phos.frame(roo.Range(0,1))

@@ -27,8 +27,11 @@ import JPsi.MuMu.common.roofit as roo
 from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
 
+ROOT.gSystem.Load('libJPsiMuMu')
+
 ##------------------------------------------------------------------------------
-class PhosphorModel5(ROOT.RooHistPdf):
+#class PhosphorModel5(ROOT.RooHistPdf):
+class PhosphorModel5(ROOT.RooPhosphorPdf):
     ##--------------------------------------------------------------------------
     def __init__(self, name, title, mass, phos, phor, data, workspace, 
                  phostarget, phortargets, rho=1.5,
@@ -179,7 +182,7 @@ class PhosphorModel5(ROOT.RooHistPdf):
             ## LinearVar cannot be persisted.
             msubs = w.factory(
                 '''
-                cexpr::{msubs}(
+                expr::{msubs}(
                      "{mass} - 0.01 * {dm_dphos} * ({phos} - {phostrue})",
                      {{ {mass}, {dm_dphos}, {phos}, {phostrue} }}
                      )
@@ -208,7 +211,7 @@ class PhosphorModel5(ROOT.RooHistPdf):
             keys_pdf = ParametrizedKeysPdf(name + '_keys_pdf_%d' % index,
                                            name + '_keys_pdf_%d' % index,
                                            mass, keys_mode, keys_effsigma,
-                                           sdata)
+                                           sdata, rho=self._rho)
             self._keys_modes.append(keys_mode)
             self._keys_effsigmas.append(keys_effsigma)
             self._keys_pdfs.append(keys_pdf)
@@ -292,18 +295,26 @@ class PhosphorModel5(ROOT.RooHistPdf):
             name + '_phor_dhist', name + '_phor_dhist',
             ROOT.RooArgList(mass, phor), self._phorhist
             )
-        self._model = model = ROOT.RooHistPdf(
-            name + '_phor_histpdf', name + '_phor_histpdf',
-            ROOT.RooArgSet(mass, phor), phor_dhist, 2
-            )
-        
-        ## Quick hack to make things work.
-        self._customizer = customizer = ROOT.RooCustomizer(model, 'msub')
+
         average_index = (len(self._msubs_list) + 1) / 2
-        customizer.replaceArg(mass, self._msubs_list[average_index])
-        model = customizer.build()
+        msubs = self._msubs_list[average_index]
         
-        ROOT.RooHistPdf.__init__(self, model)
+        ## self._model = model = ROOT.RooHistPdf(
+        ##     name + '_phor_histpdf', name + '_phor_histpdf',
+        ##     ROOT.RooArgList(msubs, phor), ROOT.RooArgList(mass, phor), phor_dhist, 2
+        ##     )
+        ## self._model = model = ROOT.RooPhosphorPdf(
+        ##     name + '_phor_histpdf', name + '_phor_histpdf', mass, msubs, phor, phor_dhist, 2
+        ##     )
+        
+        ## ## Quick hack to make things work.
+        ## self._customizer = customizer = ROOT.RooCustomizer(model, 'msub')
+        ## customizer.replaceArg(mass, msubs)
+        ## model = customizer.build()
+        
+        # ROOT.RooHistPdf.__init__(self, model)
+        ROOT.RooPhosphorPdf.__init__(self, name, title, mass, msubs, phos, phor,
+                                     phor_dhist, 2)
         self.SetName(name)
         self.SetTitle(title)
     ## End of __init__()

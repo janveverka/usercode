@@ -261,7 +261,13 @@ Latex([
         phoRes.getError() / t2pdf.r0val),
     ], position=(0.2, 0.75)).draw()
 
-## Plot fT(t|s,r) fitted to data
+canvases.update()
+
+t.setRange(*t1range)
+xtpdf.fitTo(xtdata, roo.NumCPU(8), roo.Verbose(True), roo.Timer(True),
+            roo.SumW2Error(True), roo.Minos(ROOT.RooArgSet(phoRes)))
+
+## Plot fXT(t|s,r) fitted to data
 ## canvases.next('tpdf').SetGrid()
 ## t.setRange(5, 10)
 ## t.SetTitle('log(m_{#mu#mu#gamma}^{2} - m_{#mu#mu}^{2})')
@@ -271,13 +277,6 @@ Latex([
 ## tpdf.plotOn(plot)
 ## tpdf.paramOn(plot)
 ## plot.Draw()
-
-canvases.update()
-
-t.setRange(*t1range)
-xtpdf.fitTo(xtdata, roo.NumCPU(8), roo.Verbose(True), roo.Timer(True),
-            roo.SumW2Error(True), roo.Minos(ROOT.RooArgSet(phoRes)))
-
 canvases.update()
 sw.Stop()
 print 'CPU time:', sw.CpuTime(), 's, real time:', sw.RealTime(), 's'

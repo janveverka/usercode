@@ -300,40 +300,42 @@ def main():
                                   mmgMass, phoScale, phoRes,
                                   data['fsr'], w, 'nominal', phortargets,
                                   rho=2)
+    signal_model.getVal(ROOT.RooArgSet(mmgMass))
+    
     w.Import(signal_model)
 
     ## Build the Z+jets background PDF.
-    ## data['zj'].SetName(name + '_zj_mc')
-    ## w.Import(data['zj'])
+    data['zj'].SetName(name + '_zj_mc')
+    w.Import(data['zj'])
 
-    ## global zj_pdf
-    ## zj_pdf = ROOT.RooKeysPdf(name + '_zj_pdf', name + '_zj_pdf', mmgMass,
-    ##                          data['zj'], ROOT.RooKeysPdf.NoMirror, 1.5)
-    ## w.Import(zj_pdf)
+    global zj_pdf
+    zj_pdf = ROOT.RooKeysPdf(name + '_zj_pdf', name + '_zj_pdf', mmgMass,
+                             data['zj'], ROOT.RooKeysPdf.NoMirror, 1.5)
+    w.Import(zj_pdf)
     
-    ## ## Build the PDF for other backgrounds.
-    ## global bkg_pdf
-    ## bkg_pdf = w.factory(
-    ##     '''Exponential::{name}_bkg_pdf(mmgMass, {name}_bkg_c[-1,-10,10])
-    ##     '''.format(name=name)
-    ##     )
+    ## Build the PDF for other backgrounds.
+    global bkg_pdf
+    bkg_pdf = w.factory(
+        '''Exponential::{name}_bkg_pdf(mmgMass, {name}_bkg_c[-1,-10,10])
+        '''.format(name=name)
+        )
 
-    ## ## Build the composite model PDF
-    ## global pm
-    ## pm = w.factory(
-    ##     ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
-    ##     ##                    {name}_zj_N    [10,0,1e6]   * {name}_zj_pdf,
-    ##     ##                    {name}_bkg_N   [10,0,1e6]   * {name}_bkg_pdf)
-    ##     ## '''.format(name=name)
-    ##     '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
-    ##                        {name}_zj_N[50,0,1e6] * {name}_zj_pdf)
-    ##     '''.format(name=name)
-    ##     )
+    ## Build the composite model PDF
+    global pm
+    pm = w.factory(
+        ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
+        ##                    {name}_zj_N    [10,0,1e6]   * {name}_zj_pdf,
+        ##                    {name}_bkg_N   [10,0,1e6]   * {name}_bkg_pdf)
+        ## '''.format(name=name)
+        '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
+                           {name}_zj_N[50,0,1e6] * {name}_zj_pdf)
+        '''.format(name=name)
+        )
 
-    ## check_timer('2. PhosphorModel5 build')
+    check_timer('2. PhosphorModel5 build')
 
-    ## ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
-    ## ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-07)
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-09)
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-09)
 
     global fitdata
     fitdata = calibrator.get_smeared_data(sfit, rfit, name + '_fitdata',
@@ -360,191 +362,192 @@ def main():
     if reduce_data == True:
         fitdata = fitdata.reduce(roo.Range(reduced_entries,
                                            fitdata.numEntries()))
-    ## check_timer('3. get fit data (%d entries)' % fitdata.numEntries())
+    check_timer('3. get fit data (%d entries)' % fitdata.numEntries())
 
-    ## nll = pm.createNLL(fitdata, roo.Range('fit'))
-    ## minuit = ROOT.RooMinuit(nll)
-    ## minuit.setProfile()
-    ## minuit.setVerbose()
+    nll = pm.createNLL(fitdata, roo.Range('fit'))
+    minuit = ROOT.RooMinuit(nll)
+    minuit.setProfile()
+    minuit.setVerbose()
 
-    ## phoScale.setError(1)
-    ## phoRes.setError(1)
+    phoScale.setError(1)
+    phoRes.setError(1)
 
-    ## ## Initial HESSE
-    ## status = minuit.hesse()
-    ## fitres = minuit.save(name + '_fitres1_inithesse')
-    ## w.Import(fitres, fitres.GetName())
-    ## check_timer('4. initial hesse (status: %d)' % status)
+    ## Initial HESSE
+    status = minuit.hesse()
+    fitres = minuit.save(name + '_fitres1_inithesse')
+    w.Import(fitres, fitres.GetName())
+    check_timer('4. initial hesse (status: %d)' % status)
 
-    ## ## Minimization
-    ## minuit.setStrategy(2)
-    ## status = minuit.migrad()
-    ## fitres = minuit.save(name + '_fitres2_migrad')
-    ## w.Import(fitres, fitres.GetName())
-    ## check_timer('5. migrad (status: %d)' % status)
+    ## Minimization
+    minuit.setStrategy(2)
+    status = minuit.migrad()
+    fitres = minuit.save(name + '_fitres2_migrad')
+    w.Import(fitres, fitres.GetName())
+    check_timer('5. migrad (status: %d)' % status)
     
-    ## ## Parabolic errors
-    ## status = minuit.hesse()
-    ## fitres = minuit.save(name + '_fitres3_hesse')
-    ## w.Import(fitres, fitres.GetName())
-    ## check_timer('6. hesse (status: %d)' % status)
+    ## Parabolic errors
+    status = minuit.hesse()
+    fitres = minuit.save(name + '_fitres3_hesse')
+    w.Import(fitres, fitres.GetName())
+    check_timer('6. hesse (status: %d)' % status)
     
-    ## ## Minos errors
-    ## ## status = minuit.minos()
-    ## ## fitres = minuit.save(name + '_fitres4_minos')
-    ## ## w.Import(fitres, fitres.GetName())
-    ## ## check_timer('7. minos (status: %d)' % status)
+    ## Minos errors
+    status = minuit.minos()
+    fitres = minuit.save(name + '_fitres4_minos')
+    w.Import(fitres, fitres.GetName())
+    check_timer('7. minos (status: %d)' % status)
    
-    ## ## fres = pm.fitTo(fitdata,
-    ## ##                 roo.Range('fit'),
-    ## ##                 roo.Strategy(2),
-    ## ##                 roo.InitialHesse(True),
-    ## ##                 roo.Minos(),
-    ## ##                 roo.Verbose(True),
-    ## ##                 roo.NumCPU(8), roo.Save(), roo.Timer())
+    ## fres = pm.fitTo(fitdata,
+    ##                 roo.Range('fit'),
+    ##                 roo.Strategy(2),
+    ##                 roo.InitialHesse(True),
+    ##                 roo.Minos(),
+    ##                 roo.Verbose(True),
+    ##                 # roo.NumCPU(8),
+    ##                 roo.Save(), roo.Timer())
 
-    ## signal_model._phorhist.GetXaxis().SetRangeUser(75, 105)
-    ## signal_model._phorhist.GetYaxis().SetRangeUser(0, 10)
-    ## signal_model._phorhist.GetXaxis().SetTitle('%s (%s)' % (mmgMass.GetTitle(),
-    ##                                               mmgMass.getUnit()))
-    ## signal_model._phorhist.GetYaxis().SetTitle('E^{#gamma} Resolution (%)')
-    ## signal_model._phorhist.GetZaxis().SetTitle('Probability Density (1/GeV/%)')
-    ## signal_model._phorhist.SetTitle(latex_title)
-    ## signal_model._phorhist.GetXaxis().SetTitleOffset(1.5)
-    ## signal_model._phorhist.GetYaxis().SetTitleOffset(1.5)
-    ## signal_model._phorhist.GetZaxis().SetTitleOffset(1.5)
-    ## signal_model._phorhist.SetStats(False)
-    ## canvases.next(name + '_phorhist')
-    ## signal_model._phorhist.Draw('surf1')
+    signal_model._phorhist.GetXaxis().SetRangeUser(75, 105)
+    signal_model._phorhist.GetYaxis().SetRangeUser(0, 10)
+    signal_model._phorhist.GetXaxis().SetTitle('%s (%s)' % (mmgMass.GetTitle(),
+                                                  mmgMass.getUnit()))
+    signal_model._phorhist.GetYaxis().SetTitle('E^{#gamma} Resolution (%)')
+    signal_model._phorhist.GetZaxis().SetTitle('Probability Density (1/GeV/%)')
+    signal_model._phorhist.SetTitle(latex_title)
+    signal_model._phorhist.GetXaxis().SetTitleOffset(1.5)
+    signal_model._phorhist.GetYaxis().SetTitleOffset(1.5)
+    signal_model._phorhist.GetZaxis().SetTitleOffset(1.5)
+    signal_model._phorhist.SetStats(False)
+    canvases.next(name + '_phorhist')
+    signal_model._phorhist.Draw('surf1')
 
-    ## global graph
-    ## graph = signal_model.make_mctrue_graph()
-    ## graph.GetXaxis().SetTitle('E^{#gamma} resolution (%)')
-    ## graph.GetYaxis().SetTitle('m_{#mu^{+}#mu^{-}#gamma} effective #sigma (GeV)')
-    ## graph.SetTitle(latex_title)
-    ## canvases.next(name + '_mwidth_vs_phor')
-    ## graph.Draw('ap')
+    global graph
+    graph = signal_model.make_mctrue_graph()
+    graph.GetXaxis().SetTitle('E^{#gamma} resolution (%)')
+    graph.GetYaxis().SetTitle('m_{#mu^{+}#mu^{-}#gamma} effective #sigma (GeV)')
+    graph.SetTitle(latex_title)
+    canvases.next(name + '_mwidth_vs_phor')
+    graph.Draw('ap')
 
-    ## plot = mmgMass.frame(roo.Range('plot'))
-    ## plot.SetTitle(latex_title)
-    ## fitdata.plotOn(plot)
-    ## pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-    ## pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-    ##           roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))     
-    ## canvases.next(name + '_fit')
-    ## plot.Draw()
-    ## Latex([
-    ##     'E^{#gamma} Scale',
-    ##     '  MC Truth: %.2f #pm %.2f %%' % (calibrator.s.getVal(),
-    ##                                       calibrator.s.getError()),
-    ##     '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
-    ##         phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-    ##         phoScale.getErrorLo()
-    ##         ),
-    ##     '',
-    ##     'E^{#gamma} resolution',
-    ##     '  MC Truth: %.2f #pm %.2f %%' % (calibrator.r.getVal(),
-    ##                                       calibrator.r.getError()),
-    ##     '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
-    ##         phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-    ##         phoRes.getErrorLo()
-    ##         ),
-    ##     '',
-    ##     'N_{S} (events)',
-    ##     '  MC Truth: %.0f' % fitdata.sumEntries(),
-    ##     '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
-    ##         w.var(name + '_signal_N').getVal(),
-    ##         w.var(name + '_signal_N').getError()
-    ##         )
-    ##     ],
-    ##     position=(0.2, 0.8)
-    ##     ).draw()
+    plot = mmgMass.frame(roo.Range('plot'))
+    plot.SetTitle(latex_title)
+    fitdata.plotOn(plot)
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+              roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))     
+    canvases.next(name + '_fit')
+    plot.Draw()
+    Latex([
+        'E^{#gamma} Scale',
+        '  MC Truth: %.2f #pm %.2f %%' % (calibrator.s.getVal(),
+                                          calibrator.s.getError()),
+        '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
+            phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+            phoScale.getErrorLo()
+            ),
+        '',
+        'E^{#gamma} resolution',
+        '  MC Truth: %.2f #pm %.2f %%' % (calibrator.r.getVal(),
+                                          calibrator.r.getError()),
+        '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
+            phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+            phoRes.getErrorLo()
+            ),
+        '',
+        'N_{S} (events)',
+        '  MC Truth: %.0f' % fitdata.sumEntries(),
+        '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
+            w.var(name + '_signal_N').getVal(),
+            w.var(name + '_signal_N').getError()
+            )
+        ],
+        position=(0.2, 0.8)
+        ).draw()
 
-    ## check_timer('8. fast plots')
+    check_timer('8. fast plots')
 
     ## pm.fitTo(data['fsr'], roo.Verbose(), roo.Save(), roo.SumW2Error(True),
     ##          roo.Range(60, 120), roo.NumCPU(8))
-    ## mmgMass.setRange('plot', 70, 110)
-    ## mmgMass.setBins(80)
-    ## plot = mmgMass.frame(roo.Range('plot'))
-    ## plot.SetTitle(latex_title)
-    ## fitdata.plotOn(plot)
-    ## pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-    ## pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-    ##           roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-    ## canvases.next(name + '_fit_singal_only')
-    ## plot.Draw()
-    ## Latex(
-    ##     [
-    ##         'E^{#gamma} Scale',
-    ##         '  MC Truth: %.2f #pm %.2f %%' % (calibrator.s.getVal(),
-    ##                                         calibrator.s.getError()),
-    ##         '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
-    ##             phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-    ##             phoScale.getErrorLo()
-    ##             ),
-    ##         '',
-    ##         'E^{#gamma} resolution',
-    ##         '  MC Truth: %.2f #pm %.2f %%' % (calibrator.r.getVal(),
-    ##                                         calibrator.r.getError()),
-    ##         '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
-    ##             phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-    ##             phoRes.getErrorLo()
-    ##             ),
-    ##         '',
-    ##         ## 'N_{S} (events)',
-    ##         ## '  MC Truth: %.0f' % fitdata.sumEntries(),
-    ##         ## '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
-    ##         ##     w.var(name + '_signal_f').getVal() * fitdata.sumEntries(),
-    ##         ##     w.var(name + '_signal_f').getError() * fitdata.sumEntries()
-    ##         ##     )
-    ##         'N_{S} (events)',
-    ##         '  MC Truth: %.1f' % fitdata.sumEntries(),
-    ##         '  #mu#mu#gamma Fit: %.1f #pm %.1f' % (
-    ##             w.var(name + '_signal_N').getVal(),
-    ##             w.var(name + '_signal_N').getError()
-    ##             )
-    ##         ],
-    ##     position=(0.2, 0.8)
-    ##     ).draw()
+    mmgMass.setRange('plot', 70, 110)
+    mmgMass.setBins(80)
+    plot = mmgMass.frame(roo.Range('plot'))
+    plot.SetTitle(latex_title)
+    fitdata.plotOn(plot)
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+              roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
+    canvases.next(name + '_fit_singal_only')
+    plot.Draw()
+    Latex(
+        [
+            'E^{#gamma} Scale',
+            '  MC Truth: %.2f #pm %.2f %%' % (calibrator.s.getVal(),
+                                            calibrator.s.getError()),
+            '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
+                phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+                phoScale.getErrorLo()
+                ),
+            '',
+            'E^{#gamma} resolution',
+            '  MC Truth: %.2f #pm %.2f %%' % (calibrator.r.getVal(),
+                                            calibrator.r.getError()),
+            '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
+                phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+                phoRes.getErrorLo()
+                ),
+            '',
+            ## 'N_{S} (events)',
+            ## '  MC Truth: %.0f' % fitdata.sumEntries(),
+            ## '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
+            ##     w.var(name + '_signal_f').getVal() * fitdata.sumEntries(),
+            ##     w.var(name + '_signal_f').getError() * fitdata.sumEntries()
+            ##     )
+            'N_{S} (events)',
+            '  MC Truth: %.1f' % fitdata.sumEntries(),
+            '  #mu#mu#gamma Fit: %.1f #pm %.1f' % (
+                w.var(name + '_signal_N').getVal(),
+                w.var(name + '_signal_N').getError()
+                )
+            ],
+        position=(0.2, 0.8)
+        ).draw()
 
-    ## canvases.next(name + '_nll_vs_phos').SetGrid()
-    ## plot = pm.w.var('phoScale').frame(roo.Range(*get_confint(phoScale)))
-    ## plot.SetTitle(latex_title)
-    ## nll.plotOn(plot, roo.ShiftToZero())
-    ## # plot.GetYaxis().SetRangeUser(0, 10)
-    ## plot.Draw()
-    ## check_timer('9. nll vs phos')
+    canvases.next(name + '_nll_vs_phos').SetGrid()
+    plot = phoScale.frame(roo.Range(*get_confint(phoScale)))
+    plot.SetTitle(latex_title)
+    nll.plotOn(plot, roo.ShiftToZero())
+    # plot.GetYaxis().SetRangeUser(0, 10)
+    plot.Draw()
+    check_timer('9. nll vs phos')
 
-    ## canvases.next(name + 'norm')
-    ## norm = pm.getNormObj(ROOT.RooArgSet(), ROOT.RooArgSet(mmgMass))
-    ## plot = phoScale.frame(roo.Range(*get_confint(phoScale)))
-    ## norm.plotOn(plot)
-    ## plot.GetYaxis().SetRangeUser(0.9995, 1.0005)
-    ## plot.Draw()
-    ## check_timer('10. norm vs phos')
+    canvases.next(name + 'norm')
+    norm = pm.getNormObj(ROOT.RooArgSet(), ROOT.RooArgSet(mmgMass))
+    plot = phoScale.frame(roo.Range(*get_confint(phoScale)))
+    norm.plotOn(plot)
+    plot.GetYaxis().SetRangeUser(0.9995, 1.0005)
+    plot.Draw()
+    check_timer('10. norm vs phos')
 
-    ## canvases.next(name + '_nll_vs_phor').SetGrid()
-    ## plot = pm.w.var('phoRes').frame(roo.Range(*get_confint(phoRes)))
-    ## nll.plotOn(plot, roo.ShiftToZero())
-    ## # plot.GetYaxis().SetRangeUser(0, 10)
-    ## plot.Draw()
+    canvases.next(name + '_nll_vs_phor').SetGrid()
+    plot = pm.w.var('phoRes').frame(roo.Range(*get_confint(phoRes)))
+    nll.plotOn(plot, roo.ShiftToZero())
+    # plot.GetYaxis().SetRangeUser(0, 10)
+    plot.Draw()
 
-    ## canvases.next(name + '_nll_vs_phor_zoom').SetGrid()
-    ## plot = pm.w.var('phoRes').frame(roo.Range(*get_confint(phoRes,1.5)))
-    ## nll.plotOn(plot, roo.ShiftToZero())
-    ## # plot.GetYaxis().SetRangeUser(0, 10)
-    ## plot.Draw()
-    ## check_timer('11. nll vs phor')
+    canvases.next(name + '_nll_vs_phor_zoom').SetGrid()
+    plot = pm.w.var('phoRes').frame(roo.Range(*get_confint(phoRes,1.5)))
+    nll.plotOn(plot, roo.ShiftToZero())
+    # plot.GetYaxis().SetRangeUser(0, 10)
+    plot.Draw()
+    check_timer('11. nll vs phor')
 
-    ## canvases.next(name + '_nll2d').SetGrid()
-    ## h2nll = nll.createHistogram(
-    ##     'h2nll', phoScale, roo.Binning(40, *get_confint(phoScale, 2)),
-    ##     roo.YVar(phoRes, roo.Binning(40, *get_confint(phoRes, 2)))
-    ##     )
-    ## h2nll.SetStats(False)
-    ## h2nll.Draw('colz')
-    ## check_timer('12. 2d nll')
+    canvases.next(name + '_nll2d').SetGrid()
+    h2nll = nll.createHistogram(
+        'h2nll', phoScale, roo.Binning(40, *get_confint(phoScale, 2)),
+        roo.YVar(phoRes, roo.Binning(40, *get_confint(phoRes, 2)))
+        )
+    h2nll.SetStats(False)
+    h2nll.Draw('colz')
+    check_timer('12. 2d nll')
 
     ## Get real data
     dchain = getChains('v12')['data']
@@ -559,17 +562,17 @@ def main():
     mmgMass.SetTitle('m_{#mu#mu#gamma}')
 
     ## Fit it!
-    fres_realdata = signal_model.fitTo(data['real'], roo.Range(60, 120),
-                                       roo.NumCPU(8), roo.Save(), roo.Timer(),
-                                       roo.Verbose())
+    fres_realdata = pm.fitTo(data['real'], roo.Range(60, 120),
+                             # roo.NumCPU(8),
+                             roo.Save(), roo.Timer(),
+                             roo.Verbose())
 
     ## Make a plot
     mmgMass.setBins(80)
     plot = mmgMass.frame(roo.Range('plot'))
     plot.SetTitle(', '.join([latex_title, '2011A+B']))   
     data['real'].plotOn(plot)
-    signal_model.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-    signal_model.paramOn(plot)
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
     canvases.next(name + '_real_data')
     plot.Draw()
     Latex([

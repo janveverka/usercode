@@ -31,10 +31,10 @@ cuts = ['phoIsEB',
         'phoGenE > 0',
         ]
 cutlabels = [
-    'reco E_{T}^{#gamma} #in [20, 25] GeV',
-    'm_{#mu#mu} + m_{#mu#mu#gamma} < 190 GeV',
     'Barrel',
     'R_{9} > 0.94',
+    'E_{T}^{#gamma} #in [20, 25] GeV',
+    'm_{#mu#mu} + m_{#mu#mu#gamma} < 190 GeV',
     'FSR'
     ]
 
@@ -150,7 +150,7 @@ phoResRef = phoScale.getVal()
 
 ##------------------------------------------------------------------------------
 ## Plot the nominal MC data overlayed with the pdf shape and fit
-canvases.next()
+canvases.next('nominal_fit')
 phoERes.setUnit("%")
 plot = phoERes.frame(roo.Range(-7.5, 7.5))
 plot.SetTitle("MC overlayed with PDF shape (blue) and it's parametrized fit"
@@ -172,6 +172,34 @@ Latex([
         phoRes.getVal() / phoEResPdf.shapewidth,
         phoRes.getError() / phoEResPdf.shapewidth),
     ], position=(0.2, 0.75)).draw()
+
+##------------------------------------------------------------------------------
+## Plot the nominal MC data overlayed with a CB fit
+
+cb = w.factory('''CBShape::cb(phoERes, mcb[0,-50, 50], scb[3, 0.1, 20],
+                              acb[1.5, -10, 10], ncb[1.5, 0.2, 10])''')
+
+cb.fitTo(data, roo.Range(-40, 20))
+
+c1 = canvases.next('nominal_data_log')
+c1.SetLogy()
+c1.SetGrid()
+phoERes.setUnit("%")
+plot = phoERes.frame(roo.Range(-40, 20), roo.SumW2Error(True))
+plot.SetTitle(', '.join(cutlabels[:3]))
+data.plotOn(plot)
+cb.plotOn(plot)
+plot.GetYaxis().SetRangeUser(0.01, 1e4)
+plot.Draw()
+
+canvases.next('nominal_data_zoom').SetGrid()
+phoERes.setUnit("%")
+plot = phoERes.frame(roo.Range(-7.5, 7.5))
+plot.SetTitle(', '.join(cutlabels[:3]))
+data.plotOn(plot)
+cb.plotOn(plot)
+plot.Draw()
+
 
 ##------------------------------------------------------------------------------
 ## Footer stuff

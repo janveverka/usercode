@@ -34,6 +34,20 @@ Strategy:
 Culprit:
 T3 is only well defined for y > x.  Need to make the range of x depend on y.
 Is this possible in RooFit?
+This is solved by a identity function bound from above (texpbound).
+
+Culprit 2:
+t1 and t2 are correlated which introduces bias, especially in the resolution
+which is undermeasured.
+Possible solutions:
+(a) make bins in photon E instead of Et.  This reduces the correlation and
+(hopefully) the bias somewhat.
+(b) Remove convolution and build the model fXY(x, y| s) that only dependce
+on the photon Energy scale. Scan through a range of resolutions to fit
+for it.
+
+Culprit 3:
+An overly simplified version 
 
 Jan Veverka, Caltech, 18 January 2012.
 '''
@@ -55,6 +69,7 @@ from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 name = 'EB_highR9_pt20-25'
+outputfile = 'out_phosphor1' + name + '_test.root'
 cuts = ['mmMass + mmgMass < 190',
         'isFSR',
         'phoGenE > 0',
@@ -84,6 +99,14 @@ def parse_name_to_cuts():
             if 'pt' in tok:
                 lo, hi = tok.replace('pt', '').split('-')
                 cuts.append('%s <= phoPt & phoPt < %s' % (lo, hi))
+    if '_e' in name:
+        ## Split the name into tokens.
+        for tok in name.split('_'):
+            ## Get the token with the pt
+            if 'e' == tok[0]:
+                lo, hi = tok.replace('e', '').split('-')
+                cuts.append('%s <= phoPt * cosh(phoEta)' % lo)
+                cuts.append('phoPt * cosh(phoEta) < %s' % hi)
 ## End of parse_name_to_cuts().
 
 ##------------------------------------------------------------------------------
@@ -329,7 +352,7 @@ def plot_xy_proj_x():
 ##------------------------------------------------------------------------------
 def plot_xy():
     'Plot fXY(x,y|s,r) 2D plot with data.'
-    c1 = canvases.next('xy').SetGrid()
+    c1 = canvases.next('xy')
     if c1:
         c1.SetWindowSize(800, 400)
         c1.Divide(2,1)
@@ -395,6 +418,19 @@ def set_xbinning():
 ## End of set_xbinning().
     
 ##------------------------------------------------------------------------------
+def set_phores_caching():
+    xbins = [0.5, 2]
+    xbinning = ROOT.RooBinning(phoRes.getMin(), phoRes.getMax(), 'cache')
+    for x in xbins:
+        xbinning.addBoundary(x)
+    xbinning.Print()
+    phoRes.setBinning(xbinning, 'cache')
+    cacheset = ROOT.RooArgSet(phoRes)
+    cacheset.add(xypdf.cacheObservables())
+    xypdf.setCacheObservables(cacheset)
+## End of set_phores_caching().
+    
+##------------------------------------------------------------------------------
 def build_models():
     ## Build the model fXT1(x, t1) for mmMass vs
     ## log(mmgMassPhoGenE^2 - mmMass^2)
@@ -431,7 +467,7 @@ def build_models():
     t.setRange(*trange)
     mmMass.setRange(*mmMass_range)
     t.setBins(2000, "cache")
-    # mmMass.setBins(20, "cache")
+    mmMass.setBins(20, "cache")
     xypdf = ROOT.RooFFTConvPdf('xypdf', 'xypdf', tcfunc, t, xt1pdf, t2pdf)
     xypdf.setBufferFraction(0.2)
     xypdf.setCacheObservables(ROOT.RooArgSet(mmMass, t))
@@ -520,15 +556,15 @@ t.setVal(0.5 * (t1range[0] + t1range[1]))
 sw2 = ROOT.TStopwatch()
 sw2.Start()
 
-## 9. real time (s): 74 (q), 52 (v)
+## 9. real time (s): 74 (q), 52 (v), 21 (y)
 plot_xy_proj_y()
 check_timer(9)
 
-## 10. real time (s): 13 (q), 73 (t)
+## 10. real time (s): 13 (q), 73 (t), 5.5 (y)
 plot_xy_proj_x()
 check_timer(10)
 
-## 11. real time (s): 13 (q), 75 (u)
+## 11. real time (s): 13 (q), 75 (u), 5.5 (y)
 plot_xy()
 check_timer(11)
 
@@ -547,12 +583,32 @@ canvases.update()
 
 ## Plot fXT(t|s,r) fitted to data
 ## real time (h): 3:59:03
-data_small = data.reduce(roo.EventRange(0, data.numEntries()/10))
-xypdf.fitTo(data_small, roo.NumCPU(8), roo.Verbose(True), roo.Timer(True),
-            roo.SumW2Error(True),
-            #roo.Minos(ROOT.RooArgSet(phoRes))
-            )
+## data_small = data.reduce(roo.EventRange(0, data.numEntries()/10))
+## xyfit = xypdf.fitTo(data_small, roo.NumCPU(8), roo.Verbose(True),
+##                     roo.Timer(True), roo.SumW2Error(True), roo.Save()
+##                     #roo.Minos(ROOT.RooArgSet(phoRes))
+##                     )
 
+## xyfit.Print('v')
+## w.Import(xyfit)
+
+## Store interesting things in the workspace
+if t.getBinning('cache'):
+    binning = t.getBinning('cache')
+else:
+    binning = t.getBinning()
+
+binning.SetName(t.GetName() + '_binning')
+w.Import(binning, binning.GetName())
+    
+if mmMass.getBinning('cache'):         
+    binning = mmMass.getBinning('cache')
+else:
+    binning = mmMass.getBinning()
+
+binning.SetName(mmMass.GetName() + '_binning')
+w.Import(binning, binning.GetName())
+       
 ## canvases.next('tpdf').SetGrid()
 ## t.setRange(5, 10)
 ## t.SetTitle('log(m_{#mu#mu#gamma}^{2} - m_{#mu#mu}^{2})')
@@ -565,8 +621,14 @@ xypdf.fitTo(data_small, roo.NumCPU(8), roo.Verbose(True), roo.Timer(True),
 
 ## real time (s): 267.3, 296.5(b), 2.2(c)
 
+
 canvases.update()
 
+for c in canvases.canvases:
+    if c:
+        w.Import(c)
+
+w.writeToFile(outputfile)
 
 if __name__ == '__main__':
     # main()

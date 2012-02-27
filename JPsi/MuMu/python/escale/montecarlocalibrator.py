@@ -13,7 +13,7 @@ from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
 
 ##------------------------------------------------------------------------------
 class MonteCarloCalibrator:
-    def __init__(self, data, printlevel=-1):
+    def __init__(self, data, printlevel=-1, rho=1.5):
         self.w = ROOT.RooWorkspace('mccworkspace',
                                    'MonteCarloCalibrator Workspace')
         self.datarow = ROOT.RooArgSet()
@@ -23,6 +23,7 @@ class MonteCarloCalibrator:
             # self.w.Import(getattr(self, x))
         self.data = data.reduce(self.datarow)
         self.data.SetName('data')
+        self.rho = rho
         self.w.Import(data)
 
         self.printlevel = printlevel
@@ -58,7 +59,8 @@ class MonteCarloCalibrator:
         self.phoEResPdf = ParametrizedKeysPdf('phoEResPdf', 'phoEResPdf',
                                               self.phoERes, self.s, self.r,
                                               self.data,
-                                              ROOT.RooKeysPdf.NoMirror, 1.5)
+                                              ROOT.RooKeysPdf.NoMirror,
+                                              self.rho)
         # self.phoERes.setRange(*savrange)
         ## Set sensible initial values
         self.s.setVal(self.phoEResPdf.shapemode)

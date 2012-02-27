@@ -22,7 +22,7 @@ from JPsi.MuMu.escale.phosphormodel4 import PhosphorModel4
 
 ##-- Configuration -------------------------------------------------------------
 ## Selection
-name = 'EB_lowR9_pt15to20'
+name = 'EE_highR9_pt12to15'
 outputfile = 'out_phosphor2' + name + '_test.root'
 cuts = ['mmMass + mmgMass < 190',
         'isFSR',
@@ -155,36 +155,74 @@ def get_data(zchain = getChains('v11')['z']):
 ## End of get_data.
 
 ##------------------------------------------------------------------------------
+def get_confint(x, cl=5):
+    if x.hasAsymError():
+        return (max(x.getVal() + cl * x.getErrorLo(), x.getMin()),
+                min(x.getVal() + cl * x.getErrorHi(), x.getMax()))
+    else:
+        return (max(x.getVal() - cl * x.getError(), x.getMin()),
+                min(x.getVal() + cl * x.getError(), x.getMax()))
+## End of get_confint().
+
+##------------------------------------------------------------------------------
 init()
 get_data()
 
-pm = PhosphorModel4('pm', 'pm', mmgMass, phoScale, phoRes, data, 'nominal',
-                    [2, 4, 6])
-phoScale = pm.w.var('phoScale')
-phoRes = pm.w.var('phoRes')
+## Cheet a little to spead things up
+phoScale.setVal(calibrator.s0.getVal())
+phoRes.setVal(calibrator.r0.getVal())
+
+pmlist = []
+
+phortargets = [0.5, calibrator.r0.getVal(), 5, 15]
+phortargets.sort()
+pm = PhosphorModel4('pm0', 'pm0', mmgMass, phoScale, phoRes, data, w,
+                    'nominal', phortargets)
+
+setting = ROOT.Long(ROOT.RooMomentMorph.Linear)
+pm.setMode(setting)
+
+pmlist.append(pm)
+## phoScale = pm.w.var('phoScale')
+## phoRes = pm.w.var('phoRes')
 
 pm.w.Print()
 
 mmgMass.setRange(60, 120)
 
-fres = pm.fitTo(pm.w.data('data'), roo.Range(60, 120), roo.Strategy(2),
-                roo.Minos(), roo.NumCPU(8), roo.Save())
+## phoScale.setError(0.2)
+## phoRes.setError(0.5)
+
+fitdata = calibrator.get_smeared_data(sfit, rfit, 'fitdata', 'title', True)
+
+fres = pm.fitTo(fitdata, roo.Range(60, 120),
+                roo.Strategy(2),
+                roo.Minos(),
+                roo.NumCPU(8), roo.Save(), roo.Timer())
+
+canvases.next('mwidth_vs_phor')
+graph = pm.make_mctrue_graph()
+graph.GetXaxis().SetTitle('photon energy resolution (%)')
+graph.GetYaxis().SetTitle('#sigma_{eff}(m_{#mu^{+}#mu^{-}#gamma})')
+graph.SetTitle(name)
+graph.Draw('ap')
 
 canvases.next('fit')
 plot = mmgMass.frame(roo.Range(70, 110))
-data.plotOn(plot)
+fitdata.plotOn(plot)
 pm.plotOn(plot)
-pm.paramOn(plot)
+# pm.paramOn(plot)
 plot.Draw()
 Latex(
     [
-        's_{true}: %.3f #pm %.3f %%' % (pm._calibrator.s0.getVal(),
-                                        pm._calibrator.s0.getError()),
+        's_{true}: %.3f #pm %.3f %%' % (calibrator.s.getVal(),
+                                        calibrator.s.getError()),
         's_{fit}: %.3f ^{+%.3f}_{%.3f} %%' % (phoScale.getVal(),
                                               phoScale.getErrorHi(),
                                               phoScale.getErrorLo()),
-        'r_{true}: %.3f #pm %.3f %%' % (pm._calibrator.r0.getVal(),
-                                        pm._calibrator.r0.getError()),
+        '',
+        'r_{true}: %.3f #pm %.3f %%' % (calibrator.r.getVal(),
+                                        calibrator.r.getError()),
         'r_{fit}: %.3f ^{+%.3f}_{%.3f} %%' % (phoRes.getVal(),
                                               phoRes.getErrorHi(),
                                               phoRes.getErrorLo()),
@@ -192,19 +230,25 @@ Latex(
     position=(0.2, 0.8)
     ).draw()
 
-## pm.w.var('phoScale').setVal(3.6)
-## pm.w.var('phoRes').setVal(5.0)
 
-nll = pm.createNLL(data, roo.Range(60, 120))
+nll = pm.createNLL(fitdata, roo.Range(60, 120))
 
-canvases.next('nll_vs_phos')
-plot = pm.w.var('phoScale').frame(roo.Range(2,5))
+canvases.next('nll_vs_phos').SetGrid()
+plot = pm.w.var('phoScale').frame(roo.Range(*get_confint(phoScale)))
 nll.plotOn(plot, roo.ShiftToZero())
+plot.GetYaxis().SetRangeUser(0, 10)
 plot.Draw()
 
-canvases.next('nll_vs_phor')
-plot = pm.w.var('phoRes').frame(roo.Range(2,8))
+canvases.next('nll_vs_phor').SetGrid()
+plot = pm.w.var('phoRes').frame(roo.Range(*get_confint(phoRes)))
 nll.plotOn(plot, roo.ShiftToZero())
+# plot.GetYaxis().SetRangeUser(0, 10)
+plot.Draw()
+
+canvases.next('nll_vs_phor').SetGrid()
+plot = pm.w.var('phoRes').frame(roo.Range(*get_confint(phoRes,1.5)))
+nll.plotOn(plot, roo.ShiftToZero())
+# plot.GetYaxis().SetRangeUser(0, 10)
 plot.Draw()
 
 ##------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 '''
 Test if it is possible to build a 2D model with correlation using composition
-of a model of 2 independent variables and then substitutin for one of them
+of a model of 2 independent variables and then substituting for one of them
 an expression depending on the other.
 
 f(x,y,mx,sx,my,sy) = Gauss(x,mx,sx)*Gauss(y,my,sy)

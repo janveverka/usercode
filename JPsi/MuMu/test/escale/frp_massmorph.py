@@ -8,8 +8,8 @@ from JPsi.MuMu.escale.fitResultPlotter import FitResultPlotter
 
 # subdetr9 = 'EB_highR9'
 # subdetr9 = 'EB_lowR9'
-# subdetr9 = 'EE_highR9'
-subdetr9 = 'EE_lowR9'
+subdetr9 = 'EE_highR9'
+# subdetr9 = 'EE_lowR9'
 
 scalescanfilemask = 'massmorph_scalescan_' + subdetr9 + '_phoPt%d-%d.root'
 resscanfilemask = 'massmorph_resscan_' + subdetr9 + '_phoPt%d-%d.root'
@@ -230,14 +230,14 @@ def main():
     ##         filemask = ('massmorph_scalescan_' +
     ##                     subdetr9 +
     ##                     '_phoPt%d-%d.root'))
-    compare_scale_slopes()
+    ## compare_scale_slopes()
 
     ## plot_xy(xname = 'phoRes',
     ##         yname = 'massRes',
     ##         filemask = ('massmorph_resscan_' +
     ##                     subdetr9 +
     ##                     '_phoPt%d-%d.root'))
-    compare_res_slopes()
+    ## compare_res_slopes()
 
 ## End of main().
 

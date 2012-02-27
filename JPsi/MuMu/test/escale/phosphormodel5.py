@@ -22,8 +22,9 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 
 ##-- Configuration -------------------------------------------------------------
 ## Selection
-name = 'EB_highR9_pt12to15'
-outputfile = 'out_phosphor2' + name + '_test.root'
+# name = 'EB_highR9_pt15to20'
+name = 'EE_highR9_pt12to15'
+outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 cuts = ['mmMass + mmgMass < 190',
         'isFSR',
         'phoGenE > 0',
@@ -180,37 +181,61 @@ get_data()
 
 mmgMass.setBins(200, 'cache')
 phoRes.setBins(40, 'cache')
+# phoScale.setBins(40, 'cache')
 # phortargets =  [0.5 + 0.5 * i for i in range(16)]
-phortargets = [0.5, 1, 2, 3, 5, 7, 10]
+# phortargets = [0.5, 1, 2, 3, 5, 7, 10]
+phortargets = [0.5, calibrator.r0.getVal(), 10]
 # phortargets.append(calibrator.r0.getVal())
 phortargets.sort()
-pm = PhosphorModel5('pm5', 'pm5', mmgMass, phoScale, phoRes, data, w,
-                    'nominal', phortargets)
+
+ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-09)
+ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-09)
+
+pm = PhosphorModel5('pm5_' + name, 'pm5_' + name, mmgMass, phoScale, phoRes,
+                    data, w, 'nominal', phortargets)
+
+## ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
+## ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-07)
 
 fitdata = calibrator.get_smeared_data(sfit, rfit, 'fitdata', 'title', True)
+## RooAdaptiveGaussKronrodIntegrater1D
+#mmgMass.setRange(40, 140)
+## ROOT.RooAbsReal.defaultIntegratorConfig().method1D().setLabel(
+##     "RooAdaptiveGaussKronrodIntegrator1D"
+##     )
 
-# mmgMass.setRange(50, 130)
+## msubs_lo = w.factory('EDIT::msubs_lo(pm5_msubs_0, mmgMass=mmgMassLo[40])')
+## msubs_hi = w.factory('EDIT::msubs_hi(pm5_msubs_0, mmgMass=mmgMassHi[140])')
+# mmgMass.setRange('fit', msubs_lo, msubs_hi)
+mmgMass.setRange('fit', 60, 120)
 
-fres = pm.fitTo(fitdata, roo.Range(60, 120),
+## pm.setNormValueCaching(1)
+## pm.getVal(ROOT.RooArgSet(mmgMass))
+rfitdata = fitdata.reduce('60 < mmgMass & mmgMass < 120')
+fres = pm.fitTo(rfitdata,
+                roo.Range('fit'),
                 roo.Strategy(2),
-                # roo.Minos(),
+                roo.InitialHesse(True),
+                roo.Minos(),
+                roo.Verbose(True),
                 roo.NumCPU(8), roo.Save(), roo.Timer())
 
-canvases.next('phorhist')
+canvases.next(name + '_phorhist')
 pm._phorhist.GetXaxis().SetRangeUser(75, 105)
 pm._phorhist.GetYaxis().SetRangeUser(0, 10)
-pm._phorhist.GetXaxis().SetTitle('mmg mass (GeV)')
+pm._phorhist.GetXaxis().SetTitle('%s (%s)' % (mmgMass.GetTitle,
+                                              mmgMass.getUnit()))
 pm._phorhist.GetYaxis().SetTitle('photon resolution (%)')
 pm._phorhist.Draw('surf1')
 
-canvases.next('mwidth_vs_phor')
+canvases.next(name + '_mwidth_vs_phor')
 graph = pm.make_mctrue_graph()
 graph.GetXaxis().SetTitle('photon energy resolution (%)')
 graph.GetYaxis().SetTitle('#sigma_{eff}(m_{#mu^{+}#mu^{-}#gamma})')
 graph.SetTitle(name)
 graph.Draw('ap')
 
-canvases.next('fit')
+canvases.next(name + '_fit')
 mmgMass.setBins(60)
 plot = mmgMass.frame(roo.Range(70, 110))
 fitdata.plotOn(plot)
@@ -236,28 +261,51 @@ Latex(
 
 
 
-nll = pm.createNLL(fitdata, roo.Range(60, 120))
+nll = pm.createNLL(fitdata, roo.Range('fit'))
 
-canvases.next('nll_vs_phos').SetGrid()
+canvases.next(name + '_nll_vs_phos').SetGrid()
 plot = pm.w.var('phoScale').frame(roo.Range(*get_confint(phoScale)))
 nll.plotOn(plot, roo.ShiftToZero())
-plot.GetYaxis().SetRangeUser(0, 10)
+# plot.GetYaxis().SetRangeUser(0, 10)
 plot.Draw()
 
-canvases.next('nll_vs_phor').SetGrid()
+## canvases.next(name + 'norm')
+## norm = pm.getNormObj(ROOT.RooArgSet(), ROOT.RooArgSet(mmgMass))
+## plot = phoScale.frame(roo.Range(*get_confint(phoScale)))
+## norm.plotOn(plot)
+## plot.GetYaxis().SetRangeUser(0.9995, 1.0005)
+## plot.Draw()
+
+canvases.next(name + '_nll_vs_phor').SetGrid()
 plot = pm.w.var('phoRes').frame(roo.Range(*get_confint(phoRes)))
 nll.plotOn(plot, roo.ShiftToZero())
 # plot.GetYaxis().SetRangeUser(0, 10)
 plot.Draw()
 
-canvases.next('nll_vs_phor').SetGrid()
+canvases.next(name + '_nll_vs_phor_zoom').SetGrid()
 plot = pm.w.var('phoRes').frame(roo.Range(*get_confint(phoRes,1.5)))
 nll.plotOn(plot, roo.ShiftToZero())
 # plot.GetYaxis().SetRangeUser(0, 10)
 plot.Draw()
 
+canvases.next(name + '_nll2d').SetGrid()
+h2nll = nll.createHistogram('h2nll', phoScale,
+                            roo.Binning(40, *get_confint(phoScale, 2)),
+                            roo.YVar(phoRes,
+                                     roo.Binning(40, *get_confint(phoRes, 2))))
+h2nll.Draw('colz')
+
+
 ##------------------------------------------------------------------------------
 canvases.update()
+canvases.make_plots('png')
+canvases.make_plots('eps')
+
+for c in canvases.canvases:
+    if c:
+        w.Import(c, 'c_' + c.GetName())
+w.writeToFile(outputfile)
+
 
 if __name__ == '__main__':
     # main()

@@ -13,6 +13,9 @@ if _hostname == 't3-susy.ultralight.org':
         'v12': '/raid2/veverka/pmvTrees/',
         'v15': '/raid2/veverka/pmvTrees/',
         'v15reco': '/raid2/veverka/pmvTrees/',
+        'v19': '/raid2/veverka/pmvTrees/',
+        'v20': '/raid2/veverka/pmvTrees/',
+        'v21': '/raid2/veverka/pmvTrees/',
     }
 elif _hostname == 'nbcitjv':
     ## Path for Jan's Dell Inspiron 6000 laptop
@@ -24,6 +27,9 @@ elif _hostname == 'nbcitjv':
         'v12': '/home/veverka/Work/data/pmvTrees',
         'v15': '/home/veverka/Work/data/pmvTrees',
         'v15reco': '/home/veverka/Work/data/pmvTrees',
+        'v19': '/home/veverka/Work/data/pmvTrees',
+        'v20': '/home/veverka/Work/data/pmvTrees',
+        'v21': '/home/veverka/Work/data/pmvTrees',
     }
 elif _hostname == 'eee.home' or _hostname == 'Jan-Veverkas-MacBook-Pro.local':
     ## Path for Jan's MacBook Pro
@@ -34,6 +40,9 @@ elif _hostname == 'eee.home' or _hostname == 'Jan-Veverkas-MacBook-Pro.local':
         'v12': '/Users/veverka/Work/Data/pmvTrees',
         'v15': '/Users/veverka/Work/Data/pmvTrees',
         'v15reco': '/Users/veverka/Work/Data/pmvTrees',
+        'v19': '/Users/veverka/Work/Data/pmvTrees',
+        'v20': '/Users/veverka/Work/Data/pmvTrees',
+        'v21': '/Users/veverka/Work/Data/pmvTrees',
     }
 else:
     raise RuntimeError, "Unknown hostname `%s'" % _hostname
@@ -98,6 +107,17 @@ _files['v15reco'] = {
 #    'w'    : ['pmvTree_V15_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1_condor_Dimuon_AOD-42X-v9.root',],
 }
 
+_files['v19'] = {
+    'z' : ['pmvTree_V19_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root'],
+    'data' :  ['pmvTree_V19_DoubleMu_Run2011A-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root',
+               'pmvTree_V19_DoubleMu_Run2011B-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root'],
+    '2011A': ['pmvTree_V19_DoubleMu_Run2011A-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root'],
+    '2011B': ['pmvTree_V19_DoubleMu_Run2011B-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root'],
+    'qcd': ['pmvTree_V19_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root'],
+    'tt': ['pmvTree_V19_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root'],
+    'w': ['pmvTree_V19_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root'],
+    }
+
 _treeNames = {
     'v5' : 'pmvTree/pmv',
     'v9' : 'pmvTree/pmv',
@@ -106,6 +126,9 @@ _treeNames = {
     'v12': 'pmvTree/pmv',
     'v15': 'pmvTree/pmv',
     'v15reco': 'pmvTree/pmv',
+    'v19': 'pmvTree/pmv',
+    'v20': 'pmvTree/pmv',
+    'v21': 'pmvTree/pmv',
 }
 
 #------------------------------------------------------------------------------
