@@ -45,7 +45,7 @@ RooHistPdf(name, title, RooArgList(_msubs, _phor), RooArgList(_mass, _phor),
   normCache(new RooArgSet("normCache")),
   listOfNormDataHists(new TList())
 { 
-  std::cout << "Entering default RooPhosphorPdf ctor" << std::endl;
+  // std::cout << "Entering default RooPhosphorPdf ctor" << std::endl;
   listOfNormDataHists->SetOwner(kTRUE);
 } 
 
@@ -85,6 +85,8 @@ RooPhosphorPdf::RooPhosphorPdf(const RooPhosphorPdf& other, const char* name) :
     }
     RooHistFunc *otherNormFunc = dynamic_cast<RooHistFunc*>(otherNorm);
     RooDataHist const& otherNormData = otherNormFunc->dataHist();
+    cxcoutD(Caching) << "RooPhosphorPdf::ctor(" << name << "): cloning cached "
+		     << "norm " << otherNormFunc->GetName() << "." << std::endl;
     std::string normFuncName(otherNormFunc->GetName());
     std::string normDataName(otherNormData.GetName());
     if (strcmp(other.GetName(), name) != 0) {
@@ -162,9 +164,7 @@ RooPhosphorPdf::analyticalIntegral(Int_t code, const char* rangeName) const
   // RETURN ANALYTICAL INTEGRAL DEFINED BY RETURN CODE ASSIGNED BY 
   // getAnalyticalIntegral. THE MEMBER FUNCTION x.min(rangeName) AND x.max(rangeName)
   // WILL RETURN THE INTEGRATION BOUNDARIES FOR EACH OBSERVABLE x.
-  
-  // std::cout << "Entering RooPhosphorPdf::analyticalIntergral" << std::endl;
-  
+
   if (code==1) {
     std::string normName = Form("%s_Int[%s|(%g,%g)]", GetName(), 
 				mass.arg().GetName(), 
@@ -178,58 +178,65 @@ RooPhosphorPdf::analyticalIntegral(Int_t code, const char* rangeName) const
       			    << " for normalization." << std::endl;
       norm = dynamic_cast<RooHistFunc*>(normCache->find(normName.c_str()));
       if (!norm) {
-	coutE(Integration) << "RooPhosphorPdf::analyticalIntegral(" 
-		<< GetName()
-		<< ") ERROR: norm " << normName
-		<< " is not of type RooHistFunc" << std::endl;
+	coutE(Caching) << "RooPhosphorPdf::analyticalIntegral(" << GetName()
+		       << ") ERROR: norm " << normName
+		       << " is not of type RooHistFunc" << std::endl;
 	throw string("RooPhosphorPdf::analyticalIntegral() ERROR norm "
 		     "is not of type RooHistFunc") ;
       }
     } else {
-      coutI(Integration) << "RooPhosphorPdf::analyticalIntegral(" 
-      			    << GetName()
-      			    << "): caching " << normName
-      			    << " for normalization." << std::endl;
-      // std::cout << "Cloning self " << GetName() << "..." << std::endl;
-      RooHistPdf normCalcPdf(*this, "normCalcPdf");
-      RooAbsReal *normInt = normCalcPdf.createIntegral(RooArgSet(mass.arg()), 
-						       rangeName);
-      // std::cout << "Creating sampling histogram of the normalization "
-      // 		<< "integral..."  <<  std::endl;
       RooAbsRealLValue const& 
 	phosArg = dynamic_cast<RooAbsRealLValue const&> (phos.arg());
       RooAbsRealLValue const& 
 	phorArg = dynamic_cast<RooAbsRealLValue const&> (phor.arg());
-									     
+
+      if (!phosArg.hasBinning("normcache")) {
+	coutW(Caching) << "RooPhosphorPdf::analyticalIntegral(" 
+		       << GetName() << "): binning `normcache' not defined "
+		       << "for " << phosArg.GetName() << "." << std::endl;
+      }
+
+      if (!phorArg.hasBinning("normcache")) {
+	coutW(Caching) << "RooPhosphorPdf::analyticalIntegral(" 
+		       << GetName() << "): binning `normcache' not defined "
+		       << "for " << phorArg.GetName() << "." << std::endl;
+      }
+
+      coutI(Caching) << "RooPhosphorPdf::analyticalIntegral(" 
+		     << GetName() << "): caching " << normName
+		     << " for normalization at "
+		     << phosArg.getBinning("normcache").numBins() << "x"
+		     << phorArg.getBinning("normcache").numBins()
+		     << " bins in (" << phosArg.GetName() << ")x("
+		     << phorArg.GetName() << ")." << std::endl;
+
+      RooHistPdf normCalcPdf(*this, Form("%s_%s", GetName(), "normCalcPdf"));
+      RooAbsReal *normInt = normCalcPdf.createIntegral(RooArgSet(mass.arg()), 
+						       rangeName);
       RooCmdArg bins = RooFit::Binning("normcache");
       RooCmdArg yvar = RooFit::YVar(phorArg, bins);
 
       TH1 *normHist = normInt->createHistogram("normHist", phosArg, bins, 
 					       yvar, RooFit::Scaling(false));
 
-      // std::cout << "Creating sampling RooDataHist of the normalization "
-      // 		<< "integral..."  <<  std::endl;
       std::string normDataName = Form("%s_dataHist", normName.c_str());
       RooDataHist *
 	normData = new RooDataHist(normDataName.c_str(), normDataName.c_str(),
 				   RooArgList(*cachePhos, *cachePhor), 
 				   normHist);
 
-      // std::cout << "Creating cache " << normName << "..." << std::endl;
       norm = new RooHistFunc(normName.c_str(), normName.c_str(),
 			     RooArgSet(*cachePhos, *cachePhor),
 			     *normData, 2);
 
-      // std::cout << "Storing cache " << normName << "..." << std::endl;
       normCache->addOwned(*norm);
       listOfNormDataHists->Add(normData);
       delete normInt;
       delete normHist;
-      // std::cout << "Created cached normalization with value: " 
-      // 		<< norm->getVal() << std::endl;
     }
-    // std::cout << "Using value from cached norm " << norm->GetName() 
-    // 	      << std::endl;
+    coutI(Integration) << "RooPhosphorPdf::analyticalIntegral(" << GetName() 
+		       << "): Using cached norm " << norm->GetName() 
+		       << "." << std::endl;
     cachePhos->setVal(phos);
     cachePhor->setVal(phor);
     return (norm->getVal());
