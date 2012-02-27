@@ -26,19 +26,42 @@ const char *path = "/Users/veverka/Work/Data/pmvTrees/";
 // 2011A+B
 // const char *filenameData = "pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1_PromptReco-v1B.root";
 // 2011A
-const char *filenameData = "pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1.root";
+// const char *filenameData = "pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1.root";
 // 2011B
 // const char *filenameData = "pmvTree_V15_DoubleMu_Run2011B-PromptReco-v1_condor_Dimuon_AOD-42X-v9.root";
 // 2011A+B PU weights
 // const char *filenameMC   = "pmvTree_V15_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
 // 2011A PU weights
-const char *filenameMC   = "pmvTree_V16_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
+// const char *filenameMC   = "pmvTree_V16_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
 // 2011B PU weights
 // const char *filenameMC   = "pmvTree_V17_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root";
-const char *filenameQCD  = "pmvTree_V15_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_S4-v1_condor_Dimuon_AOD-42X-v9.root";
-const char *filenameW    = "pmvTree_V15_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1_condor_Dimuon_AOD-42X-v9.root";
-const char *filenameTT   = "pmvTree_V15_TTJets_TuneZ2_7TeV-madgraph-tauola_S4-v2_condor_Dimuon_AOD-42X-v9.root";
+// const char *filenameQCD  = "pmvTree_V15_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_S4-v1_condor_Dimuon_AOD-42X-v9.root";
+// const char *filenameW    = "pmvTree_V15_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1_condor_Dimuon_AOD-42X-v9.root";
+// const char *filenameTT   = "pmvTree_V15_TTJets_TuneZ2_7TeV-madgraph-tauola_S4-v2_condor_Dimuon_AOD-42X-v9.root";
 
+// Datasets for AN 2012/048 Hgg MVA 2011A+B
+// 2011A+B
+ // const char *filenameData = "pmvTree_V19_DoubleMu_Run2011AB-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
+ // const char *filenameMC   = "pmvTree_V19_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+ // const char *filenameQCD  = "pmvTree_V19_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+ // const char *filenameTT   = "pmvTree_V19_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+ // const char *filenameW    = "pmvTree_V19_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+
+// Datasets for AN 2012/048 Hgg MVA 2011A
+// 2011A
+ const char *filenameData = "pmvTree_V19_DoubleMu_Run2011A-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
+ const char *filenameMC   = "pmvTree_V20_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+ const char *filenameQCD  = "pmvTree_V20_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+ const char *filenameTT   = "pmvTree_V20_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+ const char *filenameW    = "pmvTree_V20_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+
+// Datasets for AN 2012/048 Hgg MVA 2011B
+// 2011B
+ // const char *filenameData = "pmvTree_V19_DoubleMu_Run2011B-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
+ // const char *filenameMC   = "pmvTree_V21_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+ // const char *filenameQCD  = "pmvTree_V21_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+ // const char *filenameTT   = "pmvTree_V21_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+ // const char *filenameW    = "pmvTree_V21_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
 
 
 enum mcSample {z=0, qcd, w, tt};
@@ -83,15 +106,15 @@ TCut drCut("minDeltaR < 1");
  TCut phoPt5to10("5 <= phoPt & phoPt < 10");
  TCut phoPt10to20("10 <= phoPt & phoPt < 20");
  TCut phoPt20up("20 <= phoPt");
- TCut ebLowR9("0.36 < phoR9 && phoR9 <= 0.94");
- TCut eeLowR9("0.32 < phoR9 && phoR9 <= 0.94");
- TCut ebLowR9MC("0.36 < phoR9 && phoR9 <= 0.94");
- TCut eeLowR9MC("0.32 < phoR9 && phoR9 <= 0.94");
+ TCut ebLowR9("0 < phoR9 && phoR9 <= 0.9");
+ TCut eeLowR9("0 < phoR9 && phoR9 <= 0.9");
+ TCut ebLowR9MC("0 < phoR9 && phoR9 <= 0.9");
+ TCut eeLowR9MC("0 < phoR9 && phoR9 <= 0.9");
  // TCut ebLowR9("phoR9 <= 0.94");
  // TCut eeLowR9("phoR9 <= 0.95");
- TCut highR9("0.94 < phoR9");
- TCut ebHighR9("0.94 < phoR9");
- TCut eeHighR9("0.94 < phoR9");
+ TCut highR9("0.9 < phoR9");
+ TCut ebHighR9("0.9 < phoR9");
+ TCut eeHighR9("0.9 < phoR9");
  TCut run2011A("id.run < 175860");
  TCut run2011B("id.run >= 175860");
 
@@ -104,14 +127,14 @@ TCut drCut("minDeltaR < 1");
  TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.1) && scEt > 10 && phoHoE < 0.5");
  TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.2) && scEt > 10 && phoHoE < 0.5");
 
-// TCut selection = ebSelection;
+ // TCut selection = ebSelection;
 // TCut selection = eeSelection;
- // TCut selection = ebSelection && highR9;
+ TCut selection = ebSelection && highR9;
  // TCut selection = ebSelection && ebHighR9;
  // TCut selection = ebSelection && ebLowR9;
  // TCut selection = eeSelection && highR9;
  // TCut selection = eeSelection && eeHighR9;
- TCut selection = eeSelection && eeLowR9;
+ // TCut selection = eeSelection && eeLowR9;
 // TCut selection = ebSelection && nVtx1to2;
 // TCut selection = ebSelection && !nVtx1to2;
 // TCut selection = ebSelection && phoPt5to10;
@@ -135,6 +158,88 @@ c1->cd(1);
 TH1::SetDefaultSumw2();
 
 // Scale all MC such that z has event weight 1 to maintain it's statistical error
+
+// // Barrel MC, passing probes
+// double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)",
+//                         Form("pileup.weight * %f * (%s)",
+//                              weight[z],
+//                              (selection && vetoCut).GetTitle()
+//                             )
+//                         );
+// double pb_mc = tmc->Draw("mmgMass>>hpb_mc(30,75,105)",
+//                          Form("pileup.weight * %f * (%s)",
+//                               weight[z],
+//                               (selection && vetoCut && backgroundCut).GetTitle()
+//                              )
+//                         );
+// double pb_qcd = tqcd->Draw("mmgMass>>hpb_qcd(30,75,105)",
+//                            Form("pileup.weight * %f * (%s)",
+//                                  weight[qcd],
+//                                  (selection && vetoCut).GetTitle()
+//                                 )
+//                           );
+// double pb_w = tw->Draw("mmgMass>>hpb_w(30,75,105)",
+//                        Form("pileup.weight * %f * (%s)",
+//                              weight[w],
+//                              (selection && vetoCut).GetTitle()
+//                             )
+//                       );
+// double pb_tt = ttt->Draw("mmgMass>>hpb_tt(30,75,105)",
+//                          Form("pileup.weight * %f * (%s)",
+//                                weight[tt],
+//                                (selection && vetoCut).GetTitle()
+//                               )
+//                         );
+// double ps_mc = p_mc - pb_mc;
+// double eps_mc = sqrt(ps_mc);
+
+// // Barrel MC, failing probes
+// double f_mc = tmc->Draw("mmgMass>>hf_mc(6,75,105)",
+//                          Form("pileup.weight * %f * (%s)",
+//                               weight[z],
+//                               (selection && !vetoCut).GetTitle()
+//                              )
+//                         );
+// double fb_mc = tmc->Draw("mmgMass>>hfb_mc(6,75,105)",
+//                          Form("pileup.weight * %f * (%s)",
+//                                weight[z],
+//                                (selection && !vetoCut && backgroundCut).GetTitle()
+//                               )
+//                         );
+// double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(6,75,105)",
+//                            Form("pileup.weight * %f * (%s)",
+//                                  weight[qcd],
+//                                  (selection && !vetoCut).GetTitle()
+//                                 )
+//                            );
+// double fb_w = tw->Draw("mmgMass>>hfb_w(6,75,105)",
+//                         Form("pileup.weight * %f * (%s)",
+//                               weight[w],
+//                               (selection && !vetoCut).GetTitle()
+//                              )
+//                        );
+// double fb_tt = ttt->Draw("mmgMass>>hfb_tt(6,75,105)",
+//                          Form("pileup.weight * %f * (%s)",
+//                                weight[tt],
+//                                (selection && !vetoCut).GetTitle()
+//                              )
+//                          );
+
+// double fs_mc = f_mc - fb_mc;
+// double efs_mc = sqrt(fs_mc);
+
+// // Barrel data
+// double p = tdata->Draw("mmgMass>>hp(30,75,105)", selection && vetoCut);
+// double f = tdata->Draw("mmgMass>>hf(6,75,105)", selection && !vetoCut);
+
+// double ps = ps_mc * p / (p_mc + pb_qcd + pb_w + pb_tt);
+// double fs = fs_mc * f / (f_mc + fb_qcd + fb_w + fb_tt);
+
+// double pb = p - ps;
+// double fb = f - fs;
+
+// double eps = Oplus(sqrt(p), pb + pb_qcd + pb_w + pb_tt); // 100 % error on bg
+// double efs = Oplus(sqrt(f), fb + pb_qcd + fb_w + fb_tt); // 100 % error on bg
 
 // Barrel MC, passing probes
 double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)",
@@ -167,47 +272,143 @@ double pb_tt = ttt->Draw("mmgMass>>hpb_tt(30,75,105)",
                                (selection && vetoCut).GetTitle()
                               )
                         );
-double ps_mc = p_mc - pb_mc;
-double eps_mc = sqrt(ps_mc);
 
 // Barrel MC, failing probes
-double f_mc = tmc->Draw("mmgMass>>hf_mc(6,75,105)",
+double f_mc = tmc->Draw("mmgMass>>hf_mc(15,75,105)",
                          Form("pileup.weight * %f * (%s)",
                               weight[z],
                               (selection && !vetoCut).GetTitle()
                              )
                         );
-double fb_mc = tmc->Draw("mmgMass>>hfb_mc(6,75,105)",
+double fb_mc = tmc->Draw("mmgMass>>hfb_mc(15,75,105)",
                          Form("pileup.weight * %f * (%s)",
                                weight[z],
                                (selection && !vetoCut && backgroundCut).GetTitle()
                               )
                         );
-double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(6,75,105)",
+double fb_qcd = tqcd->Draw("mmgMass>>hfb_qcd(15,75,105)",
                            Form("pileup.weight * %f * (%s)",
                                  weight[qcd],
                                  (selection && !vetoCut).GetTitle()
                                 )
                            );
-double fb_w = tw->Draw("mmgMass>>hfb_w(6,75,105)",
+double fb_w = tw->Draw("mmgMass>>hfb_w(15,75,105)",
                         Form("pileup.weight * %f * (%s)",
                               weight[w],
                               (selection && !vetoCut).GetTitle()
                              )
                        );
-double fb_tt = ttt->Draw("mmgMass>>hfb_tt(6,75,105)",
+double fb_tt = ttt->Draw("mmgMass>>hfb_tt(15,75,105)",
                          Form("pileup.weight * %f * (%s)",
                                weight[tt],
                                (selection && !vetoCut).GetTitle()
                              )
                          );
 
-double fs_mc = f_mc - fb_mc;
-double efs_mc = sqrt(fs_mc);
+// Mean weights
+ double wp_mc = tmc->Draw(Form("pileup.weight * %f >> hwp_mc", weight[z]),
+			  (selection && vetoCut).GetTitle());
+ double wp_mc = tmc->Draw(Form("pileup.weight * %f >> hwf_mc", weight[z]),
+			  (selection && !vetoCut).GetTitle());
+
 
 // Barrel data
 double p = tdata->Draw("mmgMass>>hp(30,75,105)", selection && vetoCut);
-double f = tdata->Draw("mmgMass>>hf(6,75,105)", selection && !vetoCut);
+double f = tdata->Draw("mmgMass>>hf(15,75,105)", selection && !vetoCut);
+
+// Get the histograms
+TH1F *hp = (TH1F*) gDirectory->Get("hp");
+TH1F *hp_mc = (TH1F*) gDirectory->Get("hp_mc");
+TH1F *hpb_mc = (TH1F*) gDirectory->Get("hpb_mc");
+TH1F *hpb_qcd = (TH1F*) gDirectory->Get("hpb_qcd");
+TH1F *hpb_w = (TH1F*) gDirectory->Get("hpb_w");
+TH1F *hpb_tt = (TH1F*) gDirectory->Get("hpb_tt");
+
+TH1F *hf = (TH1F*) gDirectory->Get("hf");
+TH1F *hf_mc = (TH1F*) gDirectory->Get("hf_mc");
+TH1F *hfb_mc = (TH1F*) gDirectory->Get("hfb_mc");
+TH1F *hfb_qcd = (TH1F*) gDirectory->Get("hfb_qcd");
+TH1F *hfb_w = (TH1F*) gDirectory->Get("hfb_w");
+TH1F *hfb_tt = (TH1F*) gDirectory->Get("hfb_tt");
+
+TH1F *hwp_mc = (TH1F*) gDirectory->Get("hwp_mc");
+TH1F *hwf_mc = (TH1F*) gDirectory->Get("hwf_mc");
+
+// Check for illegal pointers to histograms
+ if (!hp_mc) {
+   hp_mc = (TH1F*) hp->Clone("hp_mc");
+   hp_mc->Sumw2();
+   hp_mc->Scale(0);
+ }
+
+ if (!hpb_mc) {
+   hpb_mc = (TH1F*) hp->Clone("hpb_mc");
+   hpb_mc->Sumw2();
+   hpb_mc->Scale(0);
+ }
+
+ if (!hpb_qcd) {
+   hpb_qcd = (TH1F*) hp->Clone("hpb_qcd");
+   hpb_qcd->Sumw2();
+   hpb_qcd->Scale(0);
+ }
+
+ if (!hfb_qcd) {
+   hfb_qcd = (TH1F*) hf->Clone("hfb_qcd");
+   hfb_qcd->Sumw2();
+   hfb_qcd->Scale(0);
+ }
+
+ if (!hfb_w) {
+   hfb_w = (TH1F*) hf->Clone("hfb_w");
+   hfb_w->Sumw2();
+   hfb_w->Scale(0);
+ }
+
+ if (!hfb_tt) {
+   hfb_tt = (TH1F*) hf->Clone("hfb_tt");
+   hfb_tt->Sumw2();
+   hfb_tt->Scale(0);
+ }
+
+ // Set the numbers of passing/failing events to the number of events. 
+ // Use weighted events form MC, applying the pileup and cross-section weights.
+ p = hp->Integral(1, 30);
+ p_mc = hp_mc->Integral(1, 30);
+ pb_mc = hpb_mc->Integral(1, 30);
+ pb_qcd = hpb_qcd->Integral(1, 30);
+ pb_w = hpb_w->Integral(1, 30);
+ pb_tt = hpb_tt->Integral(1, 30);
+
+ f = hf->Integral(1, 15);
+ f_mc = hf_mc->Integral(1, 15);
+ fb_mc = hfb_mc->Integral(1, 15);
+ fb_qcd = hfb_qcd->Integral(1, 15);
+ fb_w = hfb_w->Integral(1, 15);
+ fb_tt = hfb_tt->Integral(1, 15);
+
+ // Scale the MC by the average weight of the most significant sample. 
+ // This is a poor man's estimate of the statistical significances of the sample.
+ wp_mc = hwp_mc->GetMean();
+ wf_mc = hwf_mc->GetMean();
+
+ p_mc /= wp_mc;
+ pb_mc /= wp_mc;
+ pb_qcd /= wp_mc;
+ pb_tt /= wp_mc;
+ pb_w /= wp_mc;
+
+ f_mc /= wp_mc;
+ fb_mc /= wp_mc;
+ fb_qcd /= wp_mc;
+ fb_tt /= wp_mc;
+ fb_w /= wp_mc;
+
+double ps_mc = p_mc - pb_mc;
+double eps_mc = sqrt(ps_mc);
+
+double fs_mc = f_mc - fb_mc;
+double efs_mc = sqrt(fs_mc);
 
 double ps = ps_mc * p / (p_mc + pb_qcd + pb_w + pb_tt);
 double fs = fs_mc * f / (f_mc + fb_qcd + fb_w + fb_tt);
@@ -217,6 +418,7 @@ double fb = f - fs;
 
 double eps = Oplus(sqrt(p), pb + pb_qcd + pb_w + pb_tt); // 100 % error on bg
 double efs = Oplus(sqrt(f), fb + pb_qcd + fb_w + fb_tt); // 100 % error on bg
+
 
 // Calculate efficiency
 double eff = ps / (ps + fs);
