@@ -28,7 +28,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
-name = 'test3_EB_highR9_pt10to999'
+name = 'test3_EE_highR9_pt20to999_v15'
 
 strain = 'nominal'
 rtrain = 'nominal'
@@ -156,6 +156,8 @@ def init():
     phoResTrue = w.factory('phoResTrue[1.5,0.01,50]')
 
     ## Define the binning for the normalization integral caching.
+    
+    ## This setting was used as a default for Adi's e/gamma paper placeholders.
     phosbins = ROOT.RooBinning(15, -15, 15, 'normcache')
     phorbins = ROOT.RooBinning(15, 0.1, 25.1, 'normcache')
     phoScale.setBinning(phosbins, 'normcache')
@@ -190,7 +192,7 @@ def init():
 
 
 ##------------------------------------------------------------------------------
-def get_data(chains = getChains('v11')):
+def get_data(chains = getChains('v15')):
     'Get the nominal data that is used for smearing.'
     ## The TFormula expression defining the data is given in the titles.
     weight.SetTitle('pileup.weight')
@@ -326,7 +328,10 @@ mmgMass.setBins(500, 'cache')
 phoRes.setBins(100, 'cache')
 # phoScale.setBins(40, 'cache')
 # phortargets =  [0.5 + 0.5 * i for i in range(30)]
+
+## This was used as a default for Adi's placeholders plots
 phortargets = [0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
+
 # phortargets = [0.5, 6, 7, 7.5, 8, 8.5, 8.75, 9, 9.5, 10, 10.5, 11, 11.5, 11.75, 12, 12.5, 13, 14]
 # phortargets = [0.5, calibrator1.r0.getVal(), 10, 20]
 # phortargets.append(calibrator1.r0.getVal())

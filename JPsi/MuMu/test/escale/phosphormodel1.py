@@ -514,6 +514,9 @@ sw.Start()
 ## (E) cache=2000, rho=1.0, cexpr, batch mode, 154s
 ## (F) cache=1000, rho=1.0, cexpr, batch mode, 630s
 
+import socket
+print 'Phosphor Model 1 running on', socket.gethostname()
+
 ## 1. real time (s): 0.0 s
 init()
 check_timer(1)
@@ -583,12 +586,14 @@ canvases.update()
 
 ## Plot fXT(t|s,r) fitted to data
 ## real time (h): 3:59:03
-## data_small = data.reduce(roo.EventRange(0, data.numEntries()/10))
-## xyfit = xypdf.fitTo(data_small, roo.NumCPU(8), roo.Verbose(True),
-##                     roo.Timer(True), roo.SumW2Error(True), roo.Save()
-##                     #roo.Minos(ROOT.RooArgSet(phoRes))
-##                     )
 
+# data_small = data.reduce(roo.EventRange(0, data.numEntries()/10))
+data_small = data.reduce(roo.EventRange(0, data.numEntries()))
+data_small.Print()
+xypdf.fitTo(data_small, roo.NumCPU(8), roo.Verbose(True), roo.Timer(True),
+            roo.SumW2Error(True),
+            #roo.Minos(ROOT.RooArgSet(phoRes))
+            )
 ## xyfit.Print('v')
 ## w.Import(xyfit)
 
