@@ -5,7 +5,8 @@ import JPsi.MuMu.common.clusterCorrections as clusterCorrs
 from JPsi.MuMu.common.basicRoot import *
 
 _hostname = socket.gethostname()
-if _hostname == 't3-susy.ultralight.org':
+if (_hostname == 't3-susy.ultralight.org' or 
+    ('compute-' in _hostname and '.local' in _hostname)) :
     ## Path for the t3-susy
     _path = '/raid2/veverka/esTrees/'
 elif _hostname == 'nbcitjv':
@@ -124,6 +125,36 @@ _files['v12'] = {
             '''.split(),
     }
 
+## Yong's trees with the default CMSSW photon cluster corrections
+_files['v13'] = {
+    'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AOD.'
+              'muid2.phtid1.phtcorr360.datapu0.mcpu0.r1to129.root')],
+    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
+              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
+              'muid2.phtid1.phtcorr360.datapu6.mcpu1.r1to50.root')],
+    }
+    
+
+## Yong's trees with the Caltech photon regression
+_files['v14'] = {
+    'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AOD.'
+              'muid2.phtid1.phtcorr360.datapu0.mcpu0.r1to129.root')],
+    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
+              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
+              'muid2.phtid1.phtcorr360.datapu6.mcpu1.r1to50.root')],
+    }
+    
+
+## Yong's trees with the Hgg photon regression v2
+_files['v15'] = {
+    'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AOD.'
+              'muid2.phtid1.phtcorr96.datapu0.mcpu0.r1to129.root')],
+    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
+              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
+              'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
+    }
+    
+    
 _treeNames = {
     'v1' : 'tree/es',
     'v2' : 'pmvTree/pmv',
@@ -136,6 +167,9 @@ _treeNames = {
     'v10' : 'tree/pmv',
     'v11' : 'tree/pmv',
     'v12' : 'tree/pmv',
+    'v13' : 'Analysis',
+    'v14' : 'Analysis',    
+    'v15' : 'Analysis',    
 }
 
 
@@ -147,6 +181,44 @@ def getChains(version='v4'):
             print "Loading ", name, ":", f
             chains[name].Add( os.path.join(_path, f) )
 
+    if version in 'v13 v14 v15'.split():
+        ## On each line corresponding to a list item, 
+        ## 1st is esTree name, 2nd is YY tree name in Yong's trees.
+        es_to_yy_name_map = '''mmMass          mm 
+                               phoEta          gameta
+                               phoPhi          gamphi
+                               phoGenE         gametrue
+                               phoIsEB         abs(gamsceta)<1.5
+                               phoR9           gamr9
+                               mu1Pt           mpt[0]
+                               mu2Pt           mpt[1]
+                               mu1Eta          meta[0]
+                               mu2Eta          meta[1]
+                               mu1Phi          mphi[0]
+                               mu2Phi          mphi[1]
+                               pileup.weight   evtweight
+                               isFSR           gametrue>0'''.split('\n')
+        if version == 'v13':
+            ## Use the default CMSSW cluster corrections
+            es_to_yy_name_map.extend(
+                '''mmgMass         mmg
+                  phoPt           gamenergy/cosh(gameta)'''.split('\n')
+                  )
+        elif version in 'v14 v15'.split():
+            ## Use the regression cluster corrections
+            es_to_yy_name_map.extend(
+                '''mmgMass         mmgcorr
+                   phoPt           gamscenergycorr/cosh(gameta)'''.split('\n')
+                   )
+        ## Set aliases for Yong's trees so that one can use the same names
+        ## as in esTrees
+        for ch in chains.values():
+            for name_pair in es_to_yy_name_map:
+                if len(name_pair.strip()) < 3:
+                    raise RuntimeError, 'Illegal name pair %s' % name_pair
+                es_name, yy_name = name_pair.split()
+                ch.SetAlias(es_name, yy_name)
+    
     ## Set aliases
     for ch in chains.values():
         ch.SetAlias( 'phoE', 'phoPt * cosh(phoEta)' )
