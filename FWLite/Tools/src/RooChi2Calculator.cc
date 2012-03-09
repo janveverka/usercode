@@ -67,11 +67,11 @@ const
   RooHist* ret = new RooHist(_nominalBinWidth) ;
   if (normalize) {
     ret->SetName(Form("pull_%s_%s", hist->GetName(), curve->GetName())) ;
-    ret->SetTitle(Form("Pull of %s and %s", hist->GetTitle(),
+    ret->SetTitle(Form("Pulls of %s w.r.t. %s", hist->GetTitle(),
                        curve->GetTitle())) ;
   } else {
     ret->SetName(Form("resid_%s_%s", hist->GetName(), curve->GetName())) ;
-    ret->SetTitle(Form("Residual of %s and %s", hist->GetTitle(),
+    ret->SetTitle(Form("Residuals of %s w.r.t. %s", hist->GetTitle(),
                        curve->GetTitle())) ;
   }
 
