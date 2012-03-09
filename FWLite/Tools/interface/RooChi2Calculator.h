@@ -1,5 +1,5 @@
-#ifndef JPSI_MUMU_ROOCHI2CALCULATOR_H
-#define JPSI_MUMU_ROOCHI2CALCULATOR_H
+#ifndef FWLITE_TOOLS_ROOCHI2CALCULATOR_H
+#define FWLITE_TOOLS_ROOCHI2CALCULATOR_H
 
 #include "TObject.h"
 #include "RooHist.h"
@@ -11,10 +11,15 @@
   * the difference that the number of expected entries per bin is obtained
   * from an integral over the bin rather than from the value at the bin
   * center.
+  * 
+  * TODO: Complete the transition of the class from JPsi/MuMu to FWLite/Tools
+  * and put it back in the cit namespace.
+  * 
   * Jan Veverka, Caltech,  1 November 2011
+  * Last Modified: 9 March 2012
   */
 
-namespace cit {
+// namespace cit {
   class RooChi2Calculator : public TObject {
     public:
       RooChi2Calculator() {};
@@ -44,6 +49,6 @@ namespace cit {
       ClassDef(RooChi2Calculator,0)
 
   };  /// end of declaration of class RooChi2Calculator
-} /// end of namespace cit
+//} /// end of namespace cit
 
 #endif

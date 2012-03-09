@@ -1,7 +1,12 @@
-#include "JPsi/MuMu/interface/RooChi2Calculator.h"
+#include "FWLite/Tools/interface/RooChi2Calculator.h"
 /**
   * Implementation of the RooChi2Calculator calss
+  *
+  * TODO: Complete the transition of the class from JPsi/MuMu to FWLite/Tools
+  * and put it back in the cit namespace.
+  * 
   * Jan Veverka, Caltech, 26 October 2011
+  * Last Modified: 9 March 2012
   */
 
 #include <iostream>
@@ -10,7 +15,7 @@
 #include "RooMsgService.h"
 #include "TMath.h"
 
-using namespace cit;
+// using namespace cit;
 using namespace std;
 
 /// Make this a ROOT class
