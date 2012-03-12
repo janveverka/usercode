@@ -1,0 +1,18 @@
+#!/bin/bash
+## Adapts dynamic libraries compiled by SCRAM so that they can be used
+## on Mac OS X.  Searches for libraries $CMSSW_BASE/lib/$SCRAM_ARCH/*.dylib .
+## For each library libX.dylib creates softlinks libX.so and libX.dylib.so
+## pointing to libX.dylib so that it can then be loaded in ROOT using the command:
+## gSystem->Load("libX");
+## or in PyROOT:
+## gSystem.Load('libX')
+## Jan Veverka, Caltech, 12 March 2012
+
+(
+    cd $CMSSW_BASE/lib/$SCRAM_ARCH && 
+    for f in *.dylib; do 
+        ln -sf $f $(basename $f dylib)so ; 
+        ln -sf $f $f.so ; 
+    done 
+)
+
