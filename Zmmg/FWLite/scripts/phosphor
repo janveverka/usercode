@@ -1,0 +1,46 @@
+#!/bin/env python
+
+'''
+phosphor
+
+This is the main driver for the PHOSPHOR fitter.
+'''
+from optparse import OptionParser
+
+
+#==============================================================================
+class Driver():
+    #__________________________________________________________________________
+    def __init__(self):
+        self.setup_parser()
+        (self.options, self.args) = self.parser.parse_args()
+    ## End of Driver.__init__().
+
+    #__________________________________________________________________________
+    def setup_parser():
+        self.parser = OptionParser(
+            usage='usage: %prog [options] [<file.cfg>]',
+            description='''PHOSPHOR fit driver.  You can pass an optional 
+                configuration file name, the default is `phosphor.cfg'.''',
+            version='%prog pre-alpha'
+            )
+
+        parser.add_option('-o', '--output-file', action='store', type='string',
+                          dest='outputfile', dafault='phosphor_test.root',
+                          help="write output to <file>", metavar="<file>")
+
+        return parser.parse_args()
+## End of parse_args().
+
+
+#______________________________________________________________________________
+def main():
+    driver = Driver()
+    driver.run()
+    print 'PHOSPHOR fit v0.1'
+## End of main().
+
+
+if __name__ == '__main__':
+    main()
+    import user
