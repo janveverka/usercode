@@ -28,7 +28,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
-name = 'test3_EE_highR9_pt20to999_v15'
+name = 'test3_EE_pt25to999_v15'
 
 strain = 'nominal'
 rtrain = 'nominal'
@@ -75,6 +75,16 @@ def parse_name_to_cuts():
                     raise RuntimeError, 'Error parsing %s in %s!' % (tok, name)
                 lo, hi = tok.replace('pt', '').split(separator)
                 cuts.append('%s <= phoPt & phoPt < %s' % (lo, hi))
+
+    global source_chains_version
+    source_chains_version = 'v11'
+    if 'v13' in name:
+        source_chains_version = 'v13'
+    elif 'v14' in name:        
+        source_chains_version = 'v14'
+    elif 'v15' in name:        
+        source_chains_version = 'v15'
+        
 ## End of parse_name_to_cuts().
 
 ##------------------------------------------------------------------------------
@@ -85,6 +95,7 @@ def parse_name_to_title():
     global latex_title
     tokens = []
     latex_labels = []
+
     if 'EB' in name:
         tokens.append('Barrel')
         latex_labels.append('Barrel')
@@ -120,6 +131,17 @@ def parse_name_to_title():
                 latex_labels.append(
                     'E_{T}^{#gamma} #in [%s, %s] GeV' % (lo, hi)
                     )
+
+    if 'v13' in name:
+        tokens.append('Default Cluster Corr.')
+        latex_labels.append('Default Cluster Corr.')
+    elif 'v14' in name:        
+        tokens.append('Caltech Regression')
+        latex_labels.append('Caltech Regression')
+    elif 'v15' in name:        
+        tokens.append('Hgg v2 Regression')
+        latex_labels.append('Hgg v2 Regression')
+
     title = ', '.join(tokens)
     latex_title = ', '.join(latex_labels)
 ## End of parse_name_to_title().
@@ -192,7 +214,7 @@ def init():
 
 
 ##------------------------------------------------------------------------------
-def get_data(chains = getChains('v15')):
+def get_data(chains = getChains('v11')):
     'Get the nominal data that is used for smearing.'
     ## The TFormula expression defining the data is given in the titles.
     weight.SetTitle('pileup.weight')
@@ -311,7 +333,7 @@ sw2 = ROOT.TStopwatch()
 sw2.Start()
 
 init()
-get_data()
+get_data(getChains(source_chains_version))
 
 if reduce_data:
     reduced_entries = int((1 - fit_data_fraction) * data['fsr0'].numEntries())
@@ -494,18 +516,18 @@ num_fsr_events = data['fsr1'].sumEntries()
 num_zj_events = data['zj1'].sumEntries()
 fsr_purity = 100 * num_fsr_events / (num_fsr_events + num_zj_events)
 Latex([
-    'E^{#gamma} Scale',
-    '  MC Truth: %.2f #pm %.2f %%' % (calibrator1.s.getVal(),
+    'E^{#gamma} Scale (%)',
+    '  MC Truth: %.2f #pm %.2f' % (calibrator1.s.getVal(),
                                       calibrator1.s.getError()),
-    '  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
+    '  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
         phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
         phoScale.getErrorLo()
         ),
     '',
-    'E^{#gamma} Resolution',
-    '  MC Truth: %.2f #pm %.2f %%' % (calibrator1.r.getVal(),
+    'E^{#gamma} Resolution (%)',
+    '  MC Truth: %.2f #pm %.2f' % (calibrator1.r.getVal(),
                                       calibrator1.r.getError()),
-    '  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
+    '  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
         phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
         phoRes.getErrorLo()
         ),
@@ -653,7 +675,9 @@ mc_true_graph.Draw("p")
 check_timer('12.1 1- and 2-sigma contours')
 
 ## Get real data
-dchain = getChains('v12')['data']
+if source_chains_version == 'v11':
+    source_chains_version = 'v12'
+dchain = getChains(source_chains_version)['data']
 weight.SetTitle('1')
 mmgMass.SetTitle('mmgMass')
 mmMass.SetTitle('mmMass')
@@ -685,7 +709,7 @@ Latex([
     'E^{#gamma} Scale (%)',
     '  MC Truth: %.2f #pm %.2f' % (calibrator1.s.getVal(),
                                    calibrator1.s.getError()),
-    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
+    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
         phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
         phoScale.getErrorLo()
         ),
@@ -693,7 +717,7 @@ Latex([
     'E^{#gamma} Resolution (%)',
     '  MC Truth: %.2f #pm %.2f' % (calibrator1.r.getVal(),
                                    calibrator1.r.getError()),
-    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f} %%' % (
+    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
         phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
         phoRes.getErrorLo()
         ),
