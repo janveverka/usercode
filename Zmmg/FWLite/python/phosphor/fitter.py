@@ -16,7 +16,7 @@ Provides a python class Fitter that
 '''
 
 import ROOT
-
+import FWLite.Tools.roofit as roo
 
 #==============================================================================
 class Fitter:
@@ -30,11 +30,10 @@ class Fitter:
         the PHOSPHOR model as well the I/O with a workspace.
         '''
         ## If no title provided, use the name for it.
-        if title == None:
+        if not title:
             title = name
             
         self.w = ROOT.RooWorkspace(name, title)
-        pass
     ## End of Fitter.__init__(...)
     
     
@@ -49,6 +48,7 @@ class Fitter:
             its dependents including component PDFs, variables and training
             data.  They are store in a top-level directory `model.'
         '''
+        
         pass
     ## End of Fitter.build_model(...)
     
