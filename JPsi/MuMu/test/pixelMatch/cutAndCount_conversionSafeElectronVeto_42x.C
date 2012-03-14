@@ -22,7 +22,7 @@ void cutAndCount_conversionSafeElectronVeto_42x(){
   Configuration cfg;
   
   /// Common configuration
-  cfg.host        = Configuration::t3_susy;
+  cfg.host        = Configuration::JansMacBookPro;
   cfg.dataset     = Configuration::AN_2011_048_HggMVA_2011AplusB;
   cfg.outputFile  = new TFile("cutAndCount_conversionSafeElectronVeto_42x.root",
                               "RECREATE");

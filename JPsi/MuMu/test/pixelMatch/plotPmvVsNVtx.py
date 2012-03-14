@@ -1,31 +1,9 @@
 import os
 from ROOT import *
 from array import array
+from JPsi.MuMu.common.pmvTrees import getChains
 
-# path = "/home/veverka/Work/data/pmv"
-path = "/raid2/veverka/PMVTrees_v1"
-
-fileName = {
-#     "data": "pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
-    #"z"   : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v1_V3.root",
-#     "z"  : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",
-    "data": "pmvTree_ZMu-May10ReReco_V4.root",
-    "z"   : "pmvTree_zSpring11_V4.root",
-    #"tt"  : "pmvTree_TTJets_TuneZ2-madgraph-Winter10_V2.root",
-    #"w"   : "",
-    #"qcd" : "",
-    "gj"  : "pmvTree_GJets_TuneD6T_HT-40To100-madgraph_Winter10_V4.root",
-#    "gj"  : "pmvTree_GJets_TuneD6T_HT-40To100-madgraph_Winter10_V3_numEvents40k.root",
-}
-
-weight = {
-    "data": 1.,
-#             "Z"   : 0.00225451955683,  # z2
-    "z"  : 0.030541912803076,
-    "qcd": 0.10306919044126,
-    "w"  : 0.074139194512438,
-    "tt" : 0.005083191122289,
-}
+tree = getChains('v15reco')
 
 canvases = []
 graphs = {}
@@ -38,6 +16,7 @@ if os.path.exists(macroPath):
     gROOT.ForceStyle()
 
 gStyle.SetPadRightMargin(0.05)
+gStyle.SetPadLeftMargin(0.2)
 gStyle.SetPadTopMargin(0.05)
 wWidth = 600
 wHeight = 600
@@ -47,28 +26,28 @@ canvasDY = 20
 latexLabel = TLatex()
 latexLabel.SetNDC()
 
-## open files
-file = {}
-for tag, name in fileName.items():
-    file[tag] = TFile(os.path.join(path, name))
 
-## get trees
-tree = {}
-for tag, f in file.items():
-    tree[tag] = f.Get("pmvTree/pmv")
-
-## make histos of pmv vs deta
+## make histos of pmv vs nvtx
 
 ###############################################################################
 # Plot PMV eff. vs photon pt in data for EB
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [0., 5., 10., 20.]
+xbins = [0., 5., 7, 8, 9, 10, 11, 12, 13, 15, 20.]
 
 h_Nvtx = TH1F("h_Nvtx_data_eb", "p_{T}^#gamma", len(xbins)-1, array("d", xbins))
 
-selection = "phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
+# selection = "phoIsEB & phoR9 > 0.94 & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
+# selection = "phoIsEB & phoR9 < 0.94 & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
+# selection = "!phoIsEB & phoR9 > 0.95 & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)"
+selection = "!phoIsEB & phoR9 < 0.95 & abs(mmgMass-90)<15 & (minDEta > 0.08 | minDPhi > 0.3)"
+
+## label = "Barrel, R9 > 0.94"
+## label = "Barrel, R9 < 0.94"
+## label = "Endcaps, R9 > 0.95"
+label = "Endcaps, R9 < 0.95"
+
 tree["data"].Draw("nVertices>>" + h_Nvtx.GetName(), selection)
 htot = h_Nvtx.Clone(h_Nvtx.GetName() + "_tot")
 
@@ -94,11 +73,11 @@ c1.Update()
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [0., 5., 10., 20.]
+xbins = [0., 5., 7, 8, 9, 10, 11, 12, 13, 15, 20.]
+# xbins = [0., 5., 10., 20.]
 
 h_Nvtx = TH1F("h_Nvtx_mc_eb", "p_{T}^#gamma", len(xbins)-1, array("d", xbins))
 
-selection = "phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
 tree["z"].Draw("nVertices>>" + h_Nvtx.GetName(), selection )
 htot = h_Nvtx.Clone(h_Nvtx.GetName() + "_tot")
 
@@ -273,27 +252,34 @@ for tag, gr in graphs.items():
     gr.SetMarkerStyle( markers[tag] )
 
 graphs["z"].Draw("ap")
-graphs["z"].GetYaxis().SetRangeUser(0.85, 1.1)
+graphs["z"].GetYaxis().SetTitleOffset(1.5)
+# graphs["z"].GetYaxis().SetRangeUser(0.95, 1.0)
 
-for tag in "gj_no_id gj_partial_id gj_full_id data".split():
-    graphs[tag].Draw("p")
+graphs["data"].Draw("p")
+## for tag in "gj_no_id gj_partial_id gj_full_id data".split():
+##     graphs[tag].Draw("p")
 
-legend = TLegend(0.55, 0.6, 0.9, 0.9)
+legend = TLegend(0.55, 0.75, 0.9, 0.9)
 legend.SetFillColor(0)
 legend.SetShadowColor(0)
 legend.SetBorderSize(0)
 
 legend.AddEntry( graphs["data"], "Data", "pl" )
-legend.AddEntry( graphs["z"], "Z#rightarrow#mu#mu#gamma", "pl" )
-legend.AddEntry( graphs["gj_no_id"], "#gamma+j no #gamma ID", "pl" )
-legend.AddEntry( graphs["gj_partial_id"], "#gamma+j partial #gamma ID", "pl" )
-legend.AddEntry( graphs["gj_full_id"], "#gamma+j full #gamma ID", "pl" )
+legend.AddEntry( graphs["z"], "Z#rightarrow#mu#mu#gamma Simulation", "pl" )
+## legend.AddEntry( graphs["gj_no_id"], "#gamma+j no #gamma ID", "pl" )
+## legend.AddEntry( graphs["gj_partial_id"], "#gamma+j partial #gamma ID", "pl" )
+## legend.AddEntry( graphs["gj_full_id"], "#gamma+j full #gamma ID", "pl" )
 
 legend.Draw()
 
 c1.SetGridx()
 c1.SetGridy()
 
-c1.Print("pmvVsPt_data_z_gj_variousID.eps")
-c1.Print("pmvVsPt_data_z_gj_variousID.C")
+# latexLabel.DrawLatex(0.15, 0.96, "Powheg/Pythia Z#rightarrow#mu#mu+X")
+# latexLabel.DrawLatex(0.75, 0.96, "Spring10")
+latexLabel.DrawLatex(0.25, 0.2, label)
+
+c1.Update()
+c1.Print("pmvVsNVtx_data_mc.eps")
+#c1.Print("pmvVsPt_data_z_gj_variousID.C")
 
