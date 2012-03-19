@@ -111,11 +111,14 @@ for tag, name in fileName.items():
 #     tree1[tag] = f.Get("pmvTree/pmv")
 
 import JPsi.MuMu.common.energyScaleChains as esChains
-tree = esChains.getChains('v4')
-esChainsV2 = esChains.getChains('v2')
-tree['w'] = esChainsV2['w']
-tree['tt'] = esChainsV2['tt']
-tree['qcd'] = esChainsV2['qcd']
+import JPsi.MuMu.common.pmvTrees as pmvTrees
+tree = pmvTrees.getChains('v19')
+del tree['2011A']
+del tree['2011B']
+#esChainsV2 = esChains.getChains('v12')
+#tree['w'] = esChainsV2['w']
+#tree['tt'] = esChainsV2['tt']
+#tree['qcd'] = esChainsV2['qcd']
 
 # pmv = tree1['gj']
 
@@ -130,17 +133,17 @@ selection = "scEt > 10 && phoHoE < 0.5 & abs(mmgMass-91.2)<4"
 
 ###############################################################################
 # Plot a quantity in data for EB
-yRange = (1e-4, 1000.)
+yRange = (1e-4, 5000.)
 
 c1 = TCanvas()
 canvases.append(c1)
 
-var = RooRealVar("nVertices", "# Vertices", -0.5, 20.5)
-var.setBins(21)
+var = RooRealVar("nVertices", "# Vertices", -0.5, 30.5)
+var.setBins(31)
 
 h_temp = TH1F("h_temp", "", var.getBins(), var.getMin(), var.getMax() )
 h_temp.GetXaxis().SetTitle( var.GetTitle() )
-h_temp.GetYaxis().SetTitle("Events / 1 GeV")
+h_temp.GetYaxis().SetTitle("Events / 1 Vertex")
 h_temp.SetTitle("")
 h_temp.SetStats(0)
 histos = {}
@@ -203,10 +206,10 @@ latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2011")
 latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 #latexLabel.DrawLatex(0.7, 0.2, "Barrel")
 #latexLabel.DrawLatex(0.7, 0.2, "Endcaps")
-latexLabel.DrawLatex(0.2, 0.875, "42X data and MC")
-latexLabel.DrawLatex(0.2, 0.8, "Total events: %d" % (int( hdata.GetEntries() ),) )
-latexLabel.DrawLatex(0.2, 0.725, "L = 332 pb^{-1}")
-latexLabel.DrawLatex(0.2, 0.65, "E_{T}^{#gamma} > 10 GeV")
+latexLabel.DrawLatex(0.6, 0.875, "42X data and MC")
+latexLabel.DrawLatex(0.6, 0.8, "Total events: %d" % (int( hdata.GetEntries() ),) )
+latexLabel.DrawLatex(0.6, 0.725, "L = 5.0 fb^{-1}")
+latexLabel.DrawLatex(0.6, 0.65, "E_{T}^{#gamma} > 10 GeV")
 
 c1.Update()
 
