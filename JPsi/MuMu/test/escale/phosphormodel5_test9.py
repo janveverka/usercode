@@ -28,7 +28,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
-name = 'test3_EE_pt25to999_v15'
+name = 'EB_pt15to20_v11'
 
 strain = 'nominal'
 rtrain = 'nominal'
@@ -39,7 +39,8 @@ rfit = 'nominal'
 fit_data_fraction = 0.25
 reduce_data = False
 
-fake_data_cut = 'Entry$ % 4 == 3'
+fake_data_cut = 'Entry$ % 4 == 4'
+use_independent_fake_data = False
 
 sw = ROOT.TStopwatch()
 times = []
@@ -270,9 +271,13 @@ def get_data(chains = getChains('v11')):
         x.SetTitle(t)
         x.setUnit(u)
     ##-- Get Smeared Data ------------------------------------------------------
-    global calibrator0, calibrator1
+    global calibrator0, calibrator1, fit_calibrator
     calibrator0 = MonteCarloCalibrator(data['fsr0'], printlevel=1, rho=1.5)
-    calibrator1 = MonteCarloCalibrator(data['fsr1'], printlevel=1, rho=1.5)
+    if use_independent_fake_data:
+        calibrator1 = MonteCarloCalibrator(data['fsr1'], printlevel=1, rho=1.5)
+        fit_calibrator = calibrator1
+    else:
+        fit_calibrator = calibrator0
 ## End of get_data.
 
 ##------------------------------------------------------------------------------
@@ -355,8 +360,8 @@ phoRes.setBins(100, 'cache')
 phortargets = [0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
 
 # phortargets = [0.5, 6, 7, 7.5, 8, 8.5, 8.75, 9, 9.5, 10, 10.5, 11, 11.5, 11.75, 12, 12.5, 13, 14]
-# phortargets = [0.5, calibrator1.r0.getVal(), 10, 20]
-# phortargets.append(calibrator1.r0.getVal())
+# phortargets = [0.5, fit_calibrator.r0.getVal(), 10, 20]
+# phortargets.append(fit_calibrator.r0.getVal())
 phortargets.sort()
 
 ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(0.2e-08)
@@ -414,266 +419,271 @@ check_timer('2.4 build full S+B model')
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-07)
 
-global fitdata1
-fitdata1 = calibrator1.get_smeared_data(sfit, rfit, 'fitdata1', 'fitdata1', True)
-fitdata1.reduce(ROOT.RooArgSet(mmgMass, mmMass))
-fitdata1.append(data['zj1'])
-fitdata1.SetName('fitdata1')
-data['fit1'] = fitdata1
-## RooAdaptiveGaussKronrodIntegrater1D
-#mmgMass.setRange(40, 140)
-## ROOT.RooAbsReal.defaultIntegratorConfig().method1D().setLabel(
-##     "RooAdaptiveGaussKronrodIntegrator1D"
-##     )
+#global fitdata1
+#fitdata1 = fit_calibrator.get_smeared_data(sfit, rfit, 'fitdata1', 'fitdata1', True)
+#fitdata1.reduce(ROOT.RooArgSet(mmgMass, mmMass))
+#fitdata1.append(data['zj1'])
+#fitdata1.SetName('fitdata1')
+#data['fit1'] = fitdata1
+### RooAdaptiveGaussKronrodIntegrater1D
+##mmgMass.setRange(40, 140)
+### ROOT.RooAbsReal.defaultIntegratorConfig().method1D().setLabel(
+###     "RooAdaptiveGaussKronrodIntegrator1D"
+###     )
 
-## msubs_lo = w.factory('EDIT::msubs_lo(pm5_msubs_0, mmgMass=mmgMassLo[40])')
-## msubs_hi = w.factory('EDIT::msubs_hi(pm5_msubs_0, mmgMass=mmgMassHi[140])')
-# mmgMass.setRange('fit', msubs_lo, msubs_hi)
+### msubs_lo = w.factory('EDIT::msubs_lo(pm5_msubs_0, mmgMass=mmgMassLo[40])')
+### msubs_hi = w.factory('EDIT::msubs_hi(pm5_msubs_0, mmgMass=mmgMassHi[140])')
+## mmgMass.setRange('fit', msubs_lo, msubs_hi)
 
-## pm.setNormValueCaching(1)
-## pm.getVal(ROOT.RooArgSet(mmgMass))
-## rfitdata = fitdata.reduce('60 < mmgMass & mmgMass < 120')
+### pm.setNormValueCaching(1)
+### pm.getVal(ROOT.RooArgSet(mmgMass))
+### rfitdata = fitdata.reduce('60 < mmgMass & mmgMass < 120')
 
-if reduce_data == True:
-    fitdata1 = fitdata1.reduce(roo.Range(reduced_entries,
-                                       fitdata1.numEntries()))
-check_timer('3. get fit data (%d entries)' % fitdata1.numEntries())
+#if reduce_data == True:
+    #fitdata1 = fitdata1.reduce(roo.Range(reduced_entries,
+                                       #fitdata1.numEntries()))
+#check_timer('3. get fit data (%d entries)' % fitdata1.numEntries())
 
-nll = pm.createNLL(fitdata1, roo.Range('fit'), roo.NumCPU(8))
+#nll = pm.createNLL(fitdata1, roo.Range('fit'), roo.NumCPU(8))
 
-minuit = ROOT.RooMinuit(nll)
-minuit.setProfile()
-minuit.setVerbose()
+#minuit = ROOT.RooMinuit(nll)
+#minuit.setProfile()
+#minuit.setVerbose()
 
-phoScale.setError(1)
-phoRes.setError(1)
+#phoScale.setError(1)
+#phoRes.setError(1)
 
-## Initial HESSE
-status = minuit.hesse()
-fitres = minuit.save(name + '_fitres1_inithesse')
-w.Import(fitres, fitres.GetName())
-check_timer('4. initial hesse (status: %d)' % status)
+### Initial HESSE
+#status = minuit.hesse()
+#fitres = minuit.save(name + '_fitres1_inithesse')
+#w.Import(fitres, fitres.GetName())
+#check_timer('4. initial hesse (status: %d)' % status)
 
-## Minimization
-minuit.setStrategy(2)
-status = minuit.migrad()
-fitres = minuit.save(name + '_fitres2_migrad')
-w.Import(fitres, fitres.GetName())
-check_timer('5. migrad (status: %d)' % status)
+### Minimization
+#minuit.setStrategy(2)
+#status = minuit.migrad()
+#fitres = minuit.save(name + '_fitres2_migrad')
+#w.Import(fitres, fitres.GetName())
+#check_timer('5. migrad (status: %d)' % status)
 
-## Parabolic errors
-status = minuit.hesse()
-fitres = minuit.save(name + '_fitres3_hesse')
-w.Import(fitres, fitres.GetName())
-check_timer('6. hesse (status: %d)' % status)
+### Parabolic errors
+#status = minuit.hesse()
+#fitres = minuit.save(name + '_fitres3_hesse')
+#w.Import(fitres, fitres.GetName())
+#check_timer('6. hesse (status: %d)' % status)
 
-## Minos errors
-status = minuit.minos()
-fitres = minuit.save(name + '_fitres4_minos')
-w.Import(fitres, fitres.GetName())
-check_timer('7. minos (status: %d)' % status)
+### Minos errors
+#status = minuit.minos()
+#fitres = minuit.save(name + '_fitres4_minos')
+#w.Import(fitres, fitres.GetName())
+#check_timer('7. minos (status: %d)' % status)
 
-# fres = pm.fitTo(fitdata1, roo.SumW2Error(True),
-#                 roo.Range('fit'),
-#                 # roo.Strategy(2),
-#                 roo.InitialHesse(True),
-#                 roo.Minos(),
-#                 roo.Verbose(True),
-#                 roo.NumCPU(8), roo.Save(), roo.Timer())
+## fres = pm.fitTo(fitdata1, roo.SumW2Error(True),
+##                 roo.Range('fit'),
+##                 # roo.Strategy(2),
+##                 roo.InitialHesse(True),
+##                 roo.Minos(),
+##                 roo.Verbose(True),
+##                 roo.NumCPU(8), roo.Save(), roo.Timer())
 
-signal_model._phorhist.GetXaxis().SetRangeUser(75, 105)
-signal_model._phorhist.GetYaxis().SetRangeUser(0, 15)
-signal_model._phorhist.GetXaxis().SetTitle('%s (%s)' % (mmgMass.GetTitle(),
-                                              mmgMass.getUnit()))
-signal_model._phorhist.GetYaxis().SetTitle('E^{#gamma} Resolution (%)')
-signal_model._phorhist.GetZaxis().SetTitle('Probability Density (1/GeV/%)')
-signal_model._phorhist.SetTitle(latex_title)
-signal_model._phorhist.GetXaxis().SetTitleOffset(1.5)
-signal_model._phorhist.GetYaxis().SetTitleOffset(1.5)
-signal_model._phorhist.GetZaxis().SetTitleOffset(1.5)
-signal_model._phorhist.SetStats(False)
-canvases.next(name + '_phorhist')
-signal_model._phorhist.Draw('surf1')
+#signal_model._phorhist.GetXaxis().SetRangeUser(75, 105)
+#signal_model._phorhist.GetYaxis().SetRangeUser(0, 15)
+#signal_model._phorhist.GetXaxis().SetTitle('%s (%s)' % (mmgMass.GetTitle(),
+                                              #mmgMass.getUnit()))
+#signal_model._phorhist.GetYaxis().SetTitle('E^{#gamma} Resolution (%)')
+#signal_model._phorhist.GetZaxis().SetTitle('Probability Density (1/GeV/%)')
+#signal_model._phorhist.SetTitle(latex_title)
+#signal_model._phorhist.GetXaxis().SetTitleOffset(1.5)
+#signal_model._phorhist.GetYaxis().SetTitleOffset(1.5)
+#signal_model._phorhist.GetZaxis().SetTitleOffset(1.5)
+#signal_model._phorhist.SetStats(False)
+#canvases.next(name + '_phorhist')
+#signal_model._phorhist.Draw('surf1')
 
-global graph
-graph = signal_model.make_mctrue_graph()
-graph.GetXaxis().SetTitle('E^{#gamma} resolution (%)')
-graph.GetYaxis().SetTitle('m_{#mu^{+}#mu^{-}#gamma} effective #sigma (GeV)')
-graph.SetTitle(latex_title)
-canvases.next(name + '_mwidth_vs_phor')
-graph.Draw('ap')
+#global graph
+#graph = signal_model.make_mctrue_graph()
+#graph.GetXaxis().SetTitle('E^{#gamma} resolution (%)')
+#graph.GetYaxis().SetTitle('m_{#mu^{+}#mu^{-}#gamma} effective #sigma (GeV)')
+#graph.SetTitle(latex_title)
+#canvases.next(name + '_mwidth_vs_phor')
+#graph.Draw('ap')
 
-mmgMass.setBins(80)
-plot = mmgMass.frame(roo.Range('plot'))
-plot.SetTitle('Fall11 MC, ' + latex_title)
-fitdata1.plotOn(plot)
-pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-          roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))     
-canvases.next(name + '_fit')
-plot.Draw()
-num_fsr_events = data['fsr1'].sumEntries()
-num_zj_events = data['zj1'].sumEntries()
+#mmgMass.setBins(80)
+#plot = mmgMass.frame(roo.Range('plot'))
+#plot.SetTitle('Fall11 MC, ' + latex_title)
+#fitdata1.plotOn(plot)
+#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+          #roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))     
+#canvases.next(name + '_fit')
+#plot.Draw()
+if use_independent_fake_data:
+    num_fsr_events = data['fsr1'].sumEntries()
+    num_zj_events = data['zj1'].sumEntries()
+else:
+    num_fsr_events = data['fsr0'].sumEntries()
+    num_zj_events = data['zj0'].sumEntries()
 fsr_purity = 100 * num_fsr_events / (num_fsr_events + num_zj_events)
-Latex([
-    'E^{#gamma} Scale (%)',
-    '  MC Truth: %.2f #pm %.2f' % (calibrator1.s.getVal(),
-                                      calibrator1.s.getError()),
-    '  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-        phoScale.getErrorLo()
-        ),
-    '',
-    'E^{#gamma} Resolution (%)',
-    '  MC Truth: %.2f #pm %.2f' % (calibrator1.r.getVal(),
-                                      calibrator1.r.getError()),
-    '  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-        phoRes.getErrorLo()
-        ),
-    '',
-        'Signal Purity (%)',
-        '  MC Truth: %.2f' % fsr_purity,
-        '  MC Fit: %.2f #pm %.2f' % (
-            100 * w.var('signal_f').getVal(),
-            100 * w.var('signal_f').getError()
-            )
-    # 'N_{S} (events)',
-    # '  MC Truth: %.0f' % fitdata1.sumEntries(),
-    # '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
-    #     w.var(name + '_signal_f').getVal(),
-    #     w.var(name + '_signal_f').getError()
-    #     )
-    ],
-    position=(0.2, 0.8)
-    ).draw()
+#Latex([
+    #'E^{#gamma} Scale (%)',
+    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
+                                      #fit_calibrator.s.getError()),
+    #'  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        #phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+        #phoScale.getErrorLo()
+        #),
+    #'',
+    #'E^{#gamma} Resolution (%)',
+    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
+                                      #fit_calibrator.r.getError()),
+    #'  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        #phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+        #phoRes.getErrorLo()
+        #),
+    #'',
+        #'Signal Purity (%)',
+        #'  MC Truth: %.2f' % fsr_purity,
+        #'  MC Fit: %.2f #pm %.2f' % (
+            #100 * w.var('signal_f').getVal(),
+            #100 * w.var('signal_f').getError()
+            #)
+    ## 'N_{S} (events)',
+    ## '  MC Truth: %.0f' % fitdata1.sumEntries(),
+    ## '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
+    ##     w.var(name + '_signal_f').getVal(),
+    ##     w.var(name + '_signal_f').getError()
+    ##     )
+    #],
+    #position=(0.2, 0.8)
+    #).draw()
 
-check_timer('8. fast plots')
+#check_timer('8. fast plots')
 
-# pm.fitTo(data['fsr'], roo.Verbose(), roo.Save(), roo.SumW2Error(True),
-#          roo.Range(60, 120), roo.NumCPU(8))
-# mmgMass.setRange('plot', 70, 110)
-# mmgMass.setBins(80)
-# plot = mmgMass.frame(roo.Range('plot'))
-# plot.SetTitle(latex_title)
-# fitdata1.plotOn(plot)
-# pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-# pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-#           roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-# canvases.next(name + '_fit_singal_only')
-# plot.Draw()
-# num_fsr_events = data['fsr'].sumEntries()
-# num_zj_events = data['zj'].sumEntries()
-# fsr_purity = num_fsr_events / (num_fsr_events + num_zj_events)
-# Latex(
-#     [
-#         'E^{#gamma} Scale (%)',
-#         '  MC Truth: %.2f #pm %.2f' % (calibrator1.s.getVal(),
-#                                         calibrator1.s.getError()),
-#         '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-#             phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-#             phoScale.getErrorLo()
-#             ),
-#         '',
-#         'E^{#gamma} resolution (%)',
-#         '  MC Truth: %.2f #pm %.2f' % (calibrator1.r.getVal(),
-#                                         calibrator1.r.getError()),
-#         '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-#             phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-#             phoRes.getErrorLo()
-#             ),
-#         '',
-#         'Signal purity (%)',
-#         '  MC Truth: %.2f' % 100.,
-#         '  #mu#mu#gamma Fit: %.2f #pm %.2f' % (
-#             100 * w.var(name + '_signal_f').getVal(),
-#             100 * w.var(name + '_signal_f').getError()
-#             )
-#         ## 'N_{S} (events)',
-#         ## '  MC Truth: %.1f' % fitdata1.sumEntries(),
-#         ## '  #mu#mu#gamma Fit: %.1f #pm %.1f' % (
-#         ##     w.var(name + '_signal_N').getVal(),
-#         ##     w.var(name + '_signal_N').getError()
-#         ##     )
-#         ],
-#     position=(0.2, 0.8)
-#     ).draw()
-
-canvases.next(name + '_nll_vs_phos').SetGrid()
-plot = w.var('phoScale').frame(roo.Range(*get_confint(phoScale)))
-plot.SetTitle(latex_title)
-nll.plotOn(plot, roo.ShiftToZero())
-# plot.GetYaxis().SetRangeUser(0, 10)
-plot.Draw()
-check_timer('9. nll vs phos')
-
-## canvases.next(name + 'norm')
-## norm = pm.getNormObj(ROOT.RooArgSet(), ROOT.RooArgSet(mmgMass))
-## plot = phoScale.frame(roo.Range(*get_confint(phoScale)))
-## norm.plotOn(plot)
-## plot.GetYaxis().SetRangeUser(0.9995, 1.0005)
+## pm.fitTo(data['fsr'], roo.Verbose(), roo.Save(), roo.SumW2Error(True),
+##          roo.Range(60, 120), roo.NumCPU(8))
+## mmgMass.setRange('plot', 70, 110)
+## mmgMass.setBins(80)
+## plot = mmgMass.frame(roo.Range('plot'))
+## plot.SetTitle(latex_title)
+## fitdata1.plotOn(plot)
+## pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+## pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+##           roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
+## canvases.next(name + '_fit_singal_only')
 ## plot.Draw()
-## check_timer('10. norm vs phos')
+## num_fsr_events = data['fsr'].sumEntries()
+## num_zj_events = data['zj'].sumEntries()
+## fsr_purity = num_fsr_events / (num_fsr_events + num_zj_events)
+## Latex(
+##     [
+##         'E^{#gamma} Scale (%)',
+##         '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
+##                                         fit_calibrator.s.getError()),
+##         '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+##             phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+##             phoScale.getErrorLo()
+##             ),
+##         '',
+##         'E^{#gamma} resolution (%)',
+##         '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
+##                                         fit_calibrator.r.getError()),
+##         '  #mu#mu#gamma Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+##             phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+##             phoRes.getErrorLo()
+##             ),
+##         '',
+##         'Signal purity (%)',
+##         '  MC Truth: %.2f' % 100.,
+##         '  #mu#mu#gamma Fit: %.2f #pm %.2f' % (
+##             100 * w.var(name + '_signal_f').getVal(),
+##             100 * w.var(name + '_signal_f').getError()
+##             )
+##         ## 'N_{S} (events)',
+##         ## '  MC Truth: %.1f' % fitdata1.sumEntries(),
+##         ## '  #mu#mu#gamma Fit: %.1f #pm %.1f' % (
+##         ##     w.var(name + '_signal_N').getVal(),
+##         ##     w.var(name + '_signal_N').getError()
+##         ##     )
+##         ],
+##     position=(0.2, 0.8)
+##     ).draw()
 
-canvases.next(name + '_nll_vs_phor').SetGrid()
-plot = phoRes.frame(roo.Range(*get_confint(phoRes)))
-nll.plotOn(plot, roo.ShiftToZero())
-# plot.GetYaxis().SetRangeUser(0, 10)
-plot.Draw()
+#canvases.next(name + '_nll_vs_phos').SetGrid()
+#plot = w.var('phoScale').frame(roo.Range(*get_confint(phoScale)))
+#plot.SetTitle(latex_title)
+#nll.plotOn(plot, roo.ShiftToZero())
+## plot.GetYaxis().SetRangeUser(0, 10)
+#plot.Draw()
+#check_timer('9. nll vs phos')
 
-canvases.next(name + '_nll_vs_phor_zoom').SetGrid()
-plot = phoRes.frame(roo.Range(*get_confint(phoRes,1.5)))
-nll.plotOn(plot, roo.ShiftToZero())
-# plot.GetYaxis().SetRangeUser(0, 10)
-plot.Draw()
-check_timer('11. nll vs phor')
+### canvases.next(name + 'norm')
+### norm = pm.getNormObj(ROOT.RooArgSet(), ROOT.RooArgSet(mmgMass))
+### plot = phoScale.frame(roo.Range(*get_confint(phoScale)))
+### norm.plotOn(plot)
+### plot.GetYaxis().SetRangeUser(0.9995, 1.0005)
+### plot.Draw()
+### check_timer('10. norm vs phos')
 
-c1 = canvases.next(name + '_nll2d')
-c1.SetGrid()
-c1.SetRightMargin(0.15)
-phos_range = unite_intervals([get_confint(phoScale, 4),
-                              get_confint(calibrator1.s0, 4)])
-phor_range = unite_intervals([get_confint(phoRes, 4),
-                              get_confint(calibrator1.r0, 4)])
-h2nll = nll.createHistogram('h2nll', phoScale, roo.Binning(40, *phos_range),
-                            roo.YVar(phoRes, roo.Binning(40, *phor_range)),
-                            roo.Scaling(False))
-h2nll_min = h2nll.GetMinimum() + 0.001
-for binx in range(1, h2nll.GetNbinsX() + 1):
-    for biny in range(1, h2nll.GetNbinsY() + 1):
-        binxy = h2nll.GetBin(binx, biny)
-        binc = h2nll.GetBinContent(binxy)
-        h2nll.SetBinContent(binxy, binc - h2nll_min)
-h2nll.SetStats(False)
-h2nll.SetTitle(latex_title)
-h2nll.GetZaxis().SetTitle('-log(Likelihood)')
-h2nll.GetZaxis().SetTitleOffset(0.8)
-h2nll.Draw('colz')
-check_timer('12. 2d nll')
+#canvases.next(name + '_nll_vs_phor').SetGrid()
+#plot = phoRes.frame(roo.Range(*get_confint(phoRes)))
+#nll.plotOn(plot, roo.ShiftToZero())
+## plot.GetYaxis().SetRangeUser(0, 10)
+#plot.Draw()
+
+#canvases.next(name + '_nll_vs_phor_zoom').SetGrid()
+#plot = phoRes.frame(roo.Range(*get_confint(phoRes,1.5)))
+#nll.plotOn(plot, roo.ShiftToZero())
+## plot.GetYaxis().SetRangeUser(0, 10)
+#plot.Draw()
+#check_timer('11. nll vs phor')
+
+#c1 = canvases.next(name + '_nll2d')
+#c1.SetGrid()
+#c1.SetRightMargin(0.15)
+#phos_range = unite_intervals([get_confint(phoScale, 4),
+                              #get_confint(fit_calibrator.s0, 4)])
+#phor_range = unite_intervals([get_confint(phoRes, 4),
+                              #get_confint(fit_calibrator.r0, 4)])
+#h2nll = nll.createHistogram('h2nll', phoScale, roo.Binning(40, *phos_range),
+                            #roo.YVar(phoRes, roo.Binning(40, *phor_range)),
+                            #roo.Scaling(False))
+#h2nll_min = h2nll.GetMinimum() + 0.001
+#for binx in range(1, h2nll.GetNbinsX() + 1):
+    #for biny in range(1, h2nll.GetNbinsY() + 1):
+        #binxy = h2nll.GetBin(binx, biny)
+        #binc = h2nll.GetBinContent(binxy)
+        #h2nll.SetBinContent(binxy, binc - h2nll_min)
+#h2nll.SetStats(False)
+#h2nll.SetTitle(latex_title)
+#h2nll.GetZaxis().SetTitle('-log(Likelihood)')
+#h2nll.GetZaxis().SetTitleOffset(0.8)
+#h2nll.Draw('colz')
+#check_timer('12. 2d nll')
 
 ## Draw 1 and 2 sigma contours
-minuit = ROOT.RooMinuit(nll)
-contour = minuit.contour(phoScale, phoRes)
-contour.getObject(0).SetMarkerStyle(2)
-contour.getObject(0).SetMarkerSize(2)
-contour.getObject(0).SetMarkerColor(ROOT.kWhite)
-if contour.numItems() > 1.5:
-    contour.getObject(1).SetLineColor(ROOT.kWhite)
-if contour.numItems() > 2.5:
-    contour.getObject(2).SetLineColor(ROOT.kWhite)
-contour.Draw('same')
+#minuit = ROOT.RooMinuit(nll)
+#contour = minuit.contour(phoScale, phoRes)
+#contour.getObject(0).SetMarkerStyle(2)
+#contour.getObject(0).SetMarkerSize(2)
+#contour.getObject(0).SetMarkerColor(ROOT.kWhite)
+#if contour.numItems() > 1.5:
+    #contour.getObject(1).SetLineColor(ROOT.kWhite)
+#if contour.numItems() > 2.5:
+    #contour.getObject(2).SetLineColor(ROOT.kWhite)
+#contour.Draw('same')
 
-mc_true_graph = ROOT.TGraphErrors(1)
-mc_true_graph.SetPoint(0, calibrator1.s0.getVal(), calibrator1.r0.getVal())
-mc_true_graph.SetPointError(0, calibrator1.s0.getError(),
-                            calibrator1.r0.getError())
-mc_true_graph.SetMarkerStyle(20)
-mc_true_graph.SetLineColor(ROOT.kRed)
-mc_true_graph.SetMarkerColor(ROOT.kRed)
-mc_true_graph.Draw("p")
+#mc_true_graph = ROOT.TGraphErrors(1)
+#mc_true_graph.SetPoint(0, fit_calibrator.s0.getVal(), fit_calibrator.r0.getVal())
+#mc_true_graph.SetPointError(0, fit_calibrator.s0.getError(),
+                            #fit_calibrator.r0.getError())
+#mc_true_graph.SetMarkerStyle(20)
+#mc_true_graph.SetLineColor(ROOT.kRed)
+#mc_true_graph.SetMarkerColor(ROOT.kRed)
+#mc_true_graph.Draw("p")
 
-check_timer('12.1 1- and 2-sigma contours')
+#check_timer('12.1 1- and 2-sigma contours')
 
+#==============================================================================
 ## Get real data
 if source_chains_version == 'v11':
     source_chains_version = 'v12'
@@ -694,8 +704,11 @@ fres_realdata = pm.fitTo(data['real'], roo.Range('fit'),  roo.NumCPU(8),
                          roo.InitialHesse(True), roo.Minos(),
                          roo.Save(), 
     )
-
+w.Import(fres_realdata, 'fitresult_real_data_2011AB')
+    
 ## Make a plot
+mmgMass.setRange('plot', 70, 110)
+mmgMass.setBins(80)
 plot = mmgMass.frame(roo.Range('plot'))
 plot.SetTitle('2011A+B, ' + latex_title)
 data['real'].plotOn(plot)
@@ -707,16 +720,16 @@ canvases.next(name + '_real_data')
 plot.Draw()
 Latex([
     'E^{#gamma} Scale (%)',
-    '  MC Truth: %.2f #pm %.2f' % (calibrator1.s.getVal(),
-                                   calibrator1.s.getError()),
+    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
+                                   fit_calibrator.s.getError()),
     '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
         phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
         phoScale.getErrorLo()
         ),
     '',
     'E^{#gamma} Resolution (%)',
-    '  MC Truth: %.2f #pm %.2f' % (calibrator1.r.getVal(),
-                                   calibrator1.r.getError()),
+    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
+                                   fit_calibrator.r.getError()),
     '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
         phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
         phoRes.getErrorLo()
@@ -738,6 +751,146 @@ Latex([
     position=(0.2, 0.8)
     ).draw()
 check_timer('13. get, fit and plot real data')
+
+
+#==============================================================================
+## Get real data 2011A
+if source_chains_version == 'v11':
+    source_chains_version = 'v12'
+dchain = getChains(source_chains_version)['2011A']
+weight.SetTitle('1')
+mmgMass.SetTitle('mmgMass')
+mmMass.SetTitle('mmMass')
+dataset.variables = []
+dataset.cuts = []
+data['2011A'] = dataset.get(tree=dchain, cuts=cuts[:],
+                            variables=[mmgMass, mmMass],
+                            weight=weight)
+mmgMass.SetTitle('m_{#mu#mu#gamma}')
+
+## Fit it!
+fres_realdata = pm.fitTo(data['2011A'], roo.Range('fit'),  roo.NumCPU(8),
+                         roo.Timer(), # roo.Verbose()
+                         roo.InitialHesse(True), roo.Minos(),
+                         roo.Save(), 
+    )
+w.Import(fres_realdata, 'fitresult_real_data_2011A')
+
+## Make a plot
+mmgMass.setRange('plot', 70, 110)
+mmgMass.setBins(80)
+plot = mmgMass.frame(roo.Range('plot'))
+plot.SetTitle('2011A, ' + latex_title)
+data['2011A'].plotOn(plot)
+pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+          roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
+# pm.paramOn(plot)
+canvases.next(name + '_real_data_2011A')
+plot.Draw()
+Latex([
+    'E^{#gamma} Scale (%)',
+    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
+                                   fit_calibrator.s.getError()),
+    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+        phoScale.getErrorLo()
+        ),
+    '',
+    'E^{#gamma} Resolution (%)',
+    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
+                                   fit_calibrator.r.getError()),
+    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+        phoRes.getErrorLo()
+        ),
+    '',
+        'Signal Purity (%)',
+        '  MC Truth: %.2f' % fsr_purity,
+        '  Data Fit: %.2f #pm %.2f' % (
+            100 * w.var('signal_f').getVal(),
+            100 * w.var('signal_f').getError()
+            )
+    # 'N_{S} (events)',
+    # '  MC Truth: %.0f' % fitdata1.sumEntries(),
+    # '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
+    #     w.var(name + '_signal_f').getVal(),
+    #     w.var(name + '_signal_f').getError()
+    #     )
+    ],
+    position=(0.2, 0.8)
+    ).draw()
+check_timer('13.1 get, fit and plot 2011A real data')
+
+
+#==============================================================================
+## Get real data 2011B
+if source_chains_version == 'v11':
+    source_chains_version = 'v12'
+dchain = getChains(source_chains_version)['2011B']
+weight.SetTitle('1')
+mmgMass.SetTitle('mmgMass')
+mmMass.SetTitle('mmMass')
+dataset.variables = []
+dataset.cuts = []
+data['2011B'] = dataset.get(tree=dchain, cuts=cuts[:],
+                            variables=[mmgMass, mmMass],
+                            weight=weight)
+mmgMass.SetTitle('m_{#mu#mu#gamma}')
+
+## Fit it!
+fres_realdata = pm.fitTo(data['2011B'], roo.Range('fit'),  roo.NumCPU(8),
+                         roo.Timer(), # roo.Verbose()
+                         roo.InitialHesse(True), roo.Minos(),
+                         roo.Save(), 
+    )
+w.Import(fres_realdata, 'fitresult_real_data_2011B')
+
+## Make a plot
+mmgMass.setRange('plot', 70, 110)
+mmgMass.setBins(80)
+plot = mmgMass.frame(roo.Range('plot'))
+plot.SetTitle('2011B, ' + latex_title)
+data['2011B'].plotOn(plot)
+pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+          roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
+# pm.paramOn(plot)
+canvases.next(name + '_real_data_2011B')
+plot.Draw()
+Latex([
+    'E^{#gamma} Scale (%)',
+    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
+                                   fit_calibrator.s.getError()),
+    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+        phoScale.getErrorLo()
+        ),
+    '',
+    'E^{#gamma} Resolution (%)',
+    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
+                                   fit_calibrator.r.getError()),
+    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+        phoRes.getErrorLo()
+        ),
+    '',
+        'Signal Purity (%)',
+        '  MC Truth: %.2f' % fsr_purity,
+        '  Data Fit: %.2f #pm %.2f' % (
+            100 * w.var('signal_f').getVal(),
+            100 * w.var('signal_f').getError()
+            )
+    # 'N_{S} (events)',
+    # '  MC Truth: %.0f' % fitdata1.sumEntries(),
+    # '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
+    #     w.var(name + '_signal_f').getVal(),
+    #     w.var(name + '_signal_f').getError()
+    #     )
+    ],
+    position=(0.2, 0.8)
+    ).draw()
+check_timer('13.2 get, fit and plot 2011B real data')
 
 outro()
 check_timer('14. outro')
