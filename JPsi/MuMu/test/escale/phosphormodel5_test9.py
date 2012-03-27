@@ -28,7 +28,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
-name = 'EB_pt15to20_v11'
+name = 'EE_highR9_pt25to30_v11'
 
 strain = 'nominal'
 rtrain = 'nominal'
@@ -148,8 +148,10 @@ def parse_name_to_title():
 ## End of parse_name_to_title().
 
 ##------------------------------------------------------------------------------
-def init():
-    'Initialize workspace and common variables and functions.'
+def init_globals():
+    '''
+    Initialize global variables, title, cuts, outputfilename, workspace w.
+    '''
     global plots, outputfile
     plots = []
     parse_name_to_title()
@@ -159,6 +161,15 @@ def init():
     ## Create the default workspace
     global w
     w = ROOT.RooWorkspace(name + '_workspace')
+## End of init_globals()
+
+
+##------------------------------------------------------------------------------
+def define_data_observables():
+    '''
+    Defines variables for observables in data in the workspace as python 
+    globals.
+    '''
 
     ## Define data observables. 
     global mmgMass, mmMass, phoERes, mmgMassPhoGenE, weight
@@ -168,8 +179,40 @@ def init():
     phoERes = w.factory('phoERes[-70, 100]')
     weight = w.factory('weight[1]')
 
+    ## Set relevant ranges
     mmgMass.setRange('plot', 70, 110)
     mmgMass.setRange('fit', 60, 120)
+## End of define_data_observables()
+
+
+##------------------------------------------------------------------------------
+def read_data_observables_from_workspace(workspace):
+    '''
+    Reads variables for observables in data from a given workspace in a given
+    file and defines them as python globals.
+    '''
+
+    ## Define data observables.
+    global mmgMass, mmMass, phoERes, mmgMassPhoGenE, weight
+    mmgMass = workspace.var('mmgMass')
+    mmgMassPhoGenE = workspace.var('mmgMassPhoGenE')
+    mmMass = workspace.var('mmMass')
+    phoERes = workspace.var('phoERes')
+    weight = workspace.var('weight')
+
+    ## Set relevant ranges
+    mmgMass.setRange('plot', 70, 110)
+    mmgMass.setRange('fit', 60, 120)
+## End of read_data_observables_from_file()
+
+
+
+##------------------------------------------------------------------------------
+def define_model_parameters():
+    '''
+    Defines model parameters and related variables in the workspace 
+    as python globals.
+    '''
 
     ## Define model parameters.
     global phoScale, phoRes, phoScaleTrue, phoResTrue
@@ -197,7 +240,18 @@ def init():
     phoResTarget = w.factory('phoResTarget[5,0.01,50]')
     params = ROOT.RooArgSet(phoScaleTarget, phoResTarget)
     w.defineSet('params', params)
+## End of define_model_parameters().
 
+
+##------------------------------------------------------------------------------
+def define_mass_derivative_function_and_mean():
+    '''
+    Defines the function for the derivateve of the logarithm of the 
+    mu-mu-gamma system invariant mass w.r.t. to photon energy
+    d log m(mmg) / d log E(g) 
+    and a variable holding it's mean for a given sample.  These are created
+    in the workspace and declared as python global variables.
+    '''
     global xfunc
     xfunc = w.factory('''FormulaVar::xfunc(
         "0.5 * (1 - mmMass^2 / mmgMass^2)",
@@ -207,10 +261,15 @@ def init():
     global xmean
     xmean = w.factory('xmean[0.1, 0, 1]')
 
-    global mmgMassPeak, mmgMassWidth
-    mmgMassPeak = w.factory('mmgMassPeak[91.2, 0, 200]')
-    mmgMassWidth = w.factory('mmgMassWidth[5, 0.1, 200]')
-    
+## End of define_mass_derivative_function_and_mean()
+
+##------------------------------------------------------------------------------
+def init():
+    'Initialize workspace and common variables and functions.'
+    init_globals()
+    define_data_observables()
+    define_model_parameters()
+    define_mass_derivative_function_and_mean()   
 ## End of init().
 
 
@@ -319,16 +378,109 @@ def check_timer(label = ''):
 ## End of check_timer()
 
 ##------------------------------------------------------------------------------
-def outro():
+def outro(make_plots=True, save_workspace=True):
     'Closing stuff'
     canvases.update()
-    canvases.make_plots(['png', 'eps'])
+    if make_plots:
+        canvases.make_plots(['png', 'eps'])
 
-    for c in canvases.canvases:
-        if c:
-            w.Import(c, 'c_' + c.GetName())
-    w.writeToFile(outputfile)
+    if save_workspace:
+        for c in canvases.canvases:
+            if c:
+                w.Import(c, 'c_' + c.GetName())
+        w.writeToFile(outputfile, False)
 ## End of outro().
+
+
+##------------------------------------------------------------------------------
+def build_signal_model():       
+    '''Builds the signal model and stores it as a global variable signal_model.'''
+    
+    ## Define the binning for the 2D histograms sampled off of the moment 
+    ## morphs.
+    mmgMass.setBins(500, 'cache')
+    phoRes.setBins(100, 'cache')
+    # phoScale.setBins(40, 'cache')
+    # phortargets =  [0.5 + 0.5 * i for i in range(30)]
+
+    ## This was used as a default for Adi's placeholders plots
+    # phortargets = [0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
+
+    # phortargets = [0.5, 6, 7, 7.5, 8, 8.5, 8.75, 9, 9.5, 10, 10.5, 11, 11.5, 11.75, 12, 12.5, 13, 14]
+    phortargets = [0.5, fit_calibrator.r0.getVal(), 10, 20]
+    # phortargets.append(fit_calibrator.r0.getVal())
+    phortargets.sort()
+
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(0.2e-08)
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(0.2e-08)
+
+    ## Build the signal PDF
+    global signal_model
+    signal_model = PhosphorModel5('signal_model0', 'signal_model0',
+                                  mmgMass, phoScale, phoRes,
+                                  data['fsr0'], w, 'nominal', phortargets,
+                                  rho=1.5)
+
+    check_timer('2. build PhosphorModel5')
+
+    # signal_model.getVal(ROOT.RooArgSet(mmgMass))
+    signal_model.analyticalIntegral(1, 'fit')
+    check_timer('2.1 get the nomalization integral cache for range fit')
+    signal_model.analyticalIntegral(1, 'plot')
+    check_timer('2.2 get the nomalization integral cache for range plot')
+    signal_model.analyticalIntegral(1, '')
+    check_timer('2.3 get the nomalization integral cache for range <none>')
+
+    w.Import(signal_model)
+## End of build_signal_model
+
+
+##------------------------------------------------------------------------------
+def build_model():
+    '''Builds the PDFs for the backgrounds and the full signal + background
+    model.'''
+    build_signal_model()
+    ## Build the Z+jets background PDF.
+    data['zj0'].SetName('zj0_mc')
+    w.Import(data['zj0'])
+
+    global zj_pdf
+    zj_pdf = ROOT.RooKeysPdf('zj0_pdf', 'zj0_pdf', mmgMass,
+                            data['zj0'], ROOT.RooKeysPdf.NoMirror, 3)
+    w.Import(zj_pdf)
+
+    ## Build the PDF for other backgrounds.
+    global bkg_pdf
+    bkg_pdf = w.factory('Exponential::bkg_pdf(mmgMass, bkg_c[-1,-10,10])')
+
+    ## Build the composite model PDF
+    global pm
+    pm = w.factory(
+        ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
+        ##                    {name}_zj_N    [10,0,1e6]   * {name}_zj_pdf,
+        ##                    {name}_bkg_N   [10,0,1e6]   * {name}_bkg_pdf)
+        ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
+        ##                    {name}_zj_N[50,0,1e6] * {name}_zj_pdf)
+        ## '''.format(name=name)
+        'SUM::pm(signal_f[0.97,0,1] * signal_model0, zj0_pdf)'
+        )
+    
+    check_timer('2.4 build full S+B model')
+## End build_full_model()
+        
+
+##------------------------------------------------------------------------------
+def read_model_from_workspace(workspace):
+    '''
+    Reads the full signa + background model from a given workspace.
+    '''
+    global signal_model, zj_pdf, bkg_pdf, pm
+    signal_model = workspace.pdf('signal_model0')
+    zj_pdf = workspace.pdf('zj0_pdf')
+    bkg_pdf = workspace.pdf('bkg_pdf')
+    pm = workspace.pdf('pm')
+## End of read_model_from_file().
+
 
 ##------------------------------------------------------------------------------
 ## def main():
@@ -338,6 +490,7 @@ sw2 = ROOT.TStopwatch()
 sw2.Start()
 
 init()
+read_data_observables_from_workspace(w)
 get_data(getChains(source_chains_version))
 
 if reduce_data:
@@ -349,75 +502,13 @@ check_timer('1. init and get_data (%d entries)' % (data['fsr0'].numEntries() +
                                                    data['zj0'].numEntries() +
                                                    data['zj1'].numEntries()))
 
-## phor_reference_targets = ROOT.RooBinning
-
-mmgMass.setBins(500, 'cache')
-phoRes.setBins(100, 'cache')
-# phoScale.setBins(40, 'cache')
-# phortargets =  [0.5 + 0.5 * i for i in range(30)]
-
-## This was used as a default for Adi's placeholders plots
-phortargets = [0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
-
-# phortargets = [0.5, 6, 7, 7.5, 8, 8.5, 8.75, 9, 9.5, 10, 10.5, 11, 11.5, 11.75, 12, 12.5, 13, 14]
-# phortargets = [0.5, fit_calibrator.r0.getVal(), 10, 20]
-# phortargets.append(fit_calibrator.r0.getVal())
-phortargets.sort()
-
-ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(0.2e-08)
-ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(0.2e-08)
-
-## Build the signal PDF
-global signal_model
-signal_model = PhosphorModel5('signal_model0', 'signal_model0',
-                              mmgMass, phoScale, phoRes,
-                              data['fsr0'], w, 'nominal', phortargets,
-                              rho=1.5)
-
-## Add the Integration topic to the message service stream 1
-# ROOT.RooMsgService.instance().getStream(1).addTopic(ROOT.RooFit.Integration)
-check_timer('2. build PhosphorModel5')
-
-# signal_model.getVal(ROOT.RooArgSet(mmgMass))
-signal_model.analyticalIntegral(1, 'fit')
-check_timer('2.1 get the nomalization integral cache for range fit')
-signal_model.analyticalIntegral(1, 'plot')
-check_timer('2.2 get the nomalization integral cache for range plot')
-signal_model.analyticalIntegral(1, '')
-check_timer('2.3 get the nomalization integral cache for range <none>')
-
-w.Import(signal_model)
-# w_signal_model = w.pdf(signal_model.GetName())
-
-## Build the Z+jets background PDF.
-data['zj0'].SetName('zj0_mc')
-w.Import(data['zj0'])
-
-global zj_pdf
-zj_pdf = ROOT.RooKeysPdf('zj0_pdf', 'zj0_pdf', mmgMass,
-                         data['zj0'], ROOT.RooKeysPdf.NoMirror, 3)
-w.Import(zj_pdf)
-
-## Build the PDF for other backgrounds.
-global bkg_pdf
-bkg_pdf = w.factory('Exponential::bkg_pdf(mmgMass, bkg_c[-1,-10,10])')
-
-## Build the composite model PDF
-global pm
-pm = w.factory(
-    ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
-    ##                    {name}_zj_N    [10,0,1e6]   * {name}_zj_pdf,
-    ##                    {name}_bkg_N   [10,0,1e6]   * {name}_bkg_pdf)
-    ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
-    ##                    {name}_zj_N[50,0,1e6] * {name}_zj_pdf)
-    ## '''.format(name=name)
-    'SUM::pm(signal_f[0.97,0,1] * signal_model0, zj0_pdf)'
-    )
-
-check_timer('2.4 build full S+B model')
+build_model()
+read_model_from_workspace(w)
 
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-07)
+
+
 
 #global fitdata1
 #fitdata1 = fit_calibrator.get_smeared_data(sfit, rfit, 'fitdata1', 'fitdata1', True)
@@ -753,150 +844,150 @@ Latex([
 check_timer('13. get, fit and plot real data')
 
 
-#==============================================================================
-## Get real data 2011A
-if source_chains_version == 'v11':
-    source_chains_version = 'v12'
-dchain = getChains(source_chains_version)['2011A']
-weight.SetTitle('1')
-mmgMass.SetTitle('mmgMass')
-mmMass.SetTitle('mmMass')
-dataset.variables = []
-dataset.cuts = []
-data['2011A'] = dataset.get(tree=dchain, cuts=cuts[:],
-                            variables=[mmgMass, mmMass],
-                            weight=weight)
-mmgMass.SetTitle('m_{#mu#mu#gamma}')
+##==============================================================================
+### Get real data 2011A
+#if source_chains_version == 'v11':
+    #source_chains_version = 'v12'
+#dchain = getChains(source_chains_version)['2011A']
+#weight.SetTitle('1')
+#mmgMass.SetTitle('mmgMass')
+#mmMass.SetTitle('mmMass')
+#dataset.variables = []
+#dataset.cuts = []
+#data['2011A'] = dataset.get(tree=dchain, cuts=cuts[:],
+                            #variables=[mmgMass, mmMass],
+                            #weight=weight)
+#mmgMass.SetTitle('m_{#mu#mu#gamma}')
 
-## Fit it!
-fres_realdata = pm.fitTo(data['2011A'], roo.Range('fit'),  roo.NumCPU(8),
-                         roo.Timer(), # roo.Verbose()
-                         roo.InitialHesse(True), roo.Minos(),
-                         roo.Save(), 
-    )
-w.Import(fres_realdata, 'fitresult_real_data_2011A')
+### Fit it!
+#fres_realdata = pm.fitTo(data['2011A'], roo.Range('fit'),  roo.NumCPU(8),
+                         #roo.Timer(), # roo.Verbose()
+                         #roo.InitialHesse(True), roo.Minos(),
+                         #roo.Save(), 
+    #)
+#w.Import(fres_realdata, 'fitresult_real_data_2011A')
 
-## Make a plot
-mmgMass.setRange('plot', 70, 110)
-mmgMass.setBins(80)
-plot = mmgMass.frame(roo.Range('plot'))
-plot.SetTitle('2011A, ' + latex_title)
-data['2011A'].plotOn(plot)
-pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-          roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-# pm.paramOn(plot)
-canvases.next(name + '_real_data_2011A')
-plot.Draw()
-Latex([
-    'E^{#gamma} Scale (%)',
-    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
-                                   fit_calibrator.s.getError()),
-    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-        phoScale.getErrorLo()
-        ),
-    '',
-    'E^{#gamma} Resolution (%)',
-    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
-                                   fit_calibrator.r.getError()),
-    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-        phoRes.getErrorLo()
-        ),
-    '',
-        'Signal Purity (%)',
-        '  MC Truth: %.2f' % fsr_purity,
-        '  Data Fit: %.2f #pm %.2f' % (
-            100 * w.var('signal_f').getVal(),
-            100 * w.var('signal_f').getError()
-            )
-    # 'N_{S} (events)',
-    # '  MC Truth: %.0f' % fitdata1.sumEntries(),
-    # '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
-    #     w.var(name + '_signal_f').getVal(),
-    #     w.var(name + '_signal_f').getError()
-    #     )
-    ],
-    position=(0.2, 0.8)
-    ).draw()
-check_timer('13.1 get, fit and plot 2011A real data')
+### Make a plot
+#mmgMass.setRange('plot', 70, 110)
+#mmgMass.setBins(80)
+#plot = mmgMass.frame(roo.Range('plot'))
+#plot.SetTitle('2011A, ' + latex_title)
+#data['2011A'].plotOn(plot)
+#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+          #roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
+## pm.paramOn(plot)
+#canvases.next(name + '_real_data_2011A')
+#plot.Draw()
+#Latex([
+    #'E^{#gamma} Scale (%)',
+    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
+                                   #fit_calibrator.s.getError()),
+    #'  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        #phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+        #phoScale.getErrorLo()
+        #),
+    #'',
+    #'E^{#gamma} Resolution (%)',
+    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
+                                   #fit_calibrator.r.getError()),
+    #'  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        #phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+        #phoRes.getErrorLo()
+        #),
+    #'',
+        #'Signal Purity (%)',
+        #'  MC Truth: %.2f' % fsr_purity,
+        #'  Data Fit: %.2f #pm %.2f' % (
+            #100 * w.var('signal_f').getVal(),
+            #100 * w.var('signal_f').getError()
+            #)
+    ## 'N_{S} (events)',
+    ## '  MC Truth: %.0f' % fitdata1.sumEntries(),
+    ## '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
+    ##     w.var(name + '_signal_f').getVal(),
+    ##     w.var(name + '_signal_f').getError()
+    ##     )
+    #],
+    #position=(0.2, 0.8)
+    #).draw()
+#check_timer('13.1 get, fit and plot 2011A real data')
 
 
-#==============================================================================
-## Get real data 2011B
-if source_chains_version == 'v11':
-    source_chains_version = 'v12'
-dchain = getChains(source_chains_version)['2011B']
-weight.SetTitle('1')
-mmgMass.SetTitle('mmgMass')
-mmMass.SetTitle('mmMass')
-dataset.variables = []
-dataset.cuts = []
-data['2011B'] = dataset.get(tree=dchain, cuts=cuts[:],
-                            variables=[mmgMass, mmMass],
-                            weight=weight)
-mmgMass.SetTitle('m_{#mu#mu#gamma}')
+##==============================================================================
+### Get real data 2011B
+#if source_chains_version == 'v11':
+    #source_chains_version = 'v12'
+#dchain = getChains(source_chains_version)['2011B']
+#weight.SetTitle('1')
+#mmgMass.SetTitle('mmgMass')
+#mmMass.SetTitle('mmMass')
+#dataset.variables = []
+#dataset.cuts = []
+#data['2011B'] = dataset.get(tree=dchain, cuts=cuts[:],
+                            #variables=[mmgMass, mmMass],
+                            #weight=weight)
+#mmgMass.SetTitle('m_{#mu#mu#gamma}')
 
-## Fit it!
-fres_realdata = pm.fitTo(data['2011B'], roo.Range('fit'),  roo.NumCPU(8),
-                         roo.Timer(), # roo.Verbose()
-                         roo.InitialHesse(True), roo.Minos(),
-                         roo.Save(), 
-    )
-w.Import(fres_realdata, 'fitresult_real_data_2011B')
+### Fit it!
+#fres_realdata = pm.fitTo(data['2011B'], roo.Range('fit'),  roo.NumCPU(8),
+                         #roo.Timer(), # roo.Verbose()
+                         #roo.InitialHesse(True), roo.Minos(),
+                         #roo.Save(), 
+    #)
+#w.Import(fres_realdata, 'fitresult_real_data_2011B')
 
-## Make a plot
-mmgMass.setRange('plot', 70, 110)
-mmgMass.setBins(80)
-plot = mmgMass.frame(roo.Range('plot'))
-plot.SetTitle('2011B, ' + latex_title)
-data['2011B'].plotOn(plot)
-pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-          roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-# pm.paramOn(plot)
-canvases.next(name + '_real_data_2011B')
-plot.Draw()
-Latex([
-    'E^{#gamma} Scale (%)',
-    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
-                                   fit_calibrator.s.getError()),
-    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-        phoScale.getErrorLo()
-        ),
-    '',
-    'E^{#gamma} Resolution (%)',
-    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
-                                   fit_calibrator.r.getError()),
-    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-        phoRes.getErrorLo()
-        ),
-    '',
-        'Signal Purity (%)',
-        '  MC Truth: %.2f' % fsr_purity,
-        '  Data Fit: %.2f #pm %.2f' % (
-            100 * w.var('signal_f').getVal(),
-            100 * w.var('signal_f').getError()
-            )
-    # 'N_{S} (events)',
-    # '  MC Truth: %.0f' % fitdata1.sumEntries(),
-    # '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
-    #     w.var(name + '_signal_f').getVal(),
-    #     w.var(name + '_signal_f').getError()
-    #     )
-    ],
-    position=(0.2, 0.8)
-    ).draw()
-check_timer('13.2 get, fit and plot 2011B real data')
+### Make a plot
+#mmgMass.setRange('plot', 70, 110)
+#mmgMass.setBins(80)
+#plot = mmgMass.frame(roo.Range('plot'))
+#plot.SetTitle('2011B, ' + latex_title)
+#data['2011B'].plotOn(plot)
+#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+          #roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
+## pm.paramOn(plot)
+#canvases.next(name + '_real_data_2011B')
+#plot.Draw()
+#Latex([
+    #'E^{#gamma} Scale (%)',
+    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
+                                   #fit_calibrator.s.getError()),
+    #'  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        #phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+        #phoScale.getErrorLo()
+        #),
+    #'',
+    #'E^{#gamma} Resolution (%)',
+    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
+                                   #fit_calibrator.r.getError()),
+    #'  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+        #phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+        #phoRes.getErrorLo()
+        #),
+    #'',
+        #'Signal Purity (%)',
+        #'  MC Truth: %.2f' % fsr_purity,
+        #'  Data Fit: %.2f #pm %.2f' % (
+            #100 * w.var('signal_f').getVal(),
+            #100 * w.var('signal_f').getError()
+            #)
+    ## 'N_{S} (events)',
+    ## '  MC Truth: %.0f' % fitdata1.sumEntries(),
+    ## '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
+    ##     w.var(name + '_signal_f').getVal(),
+    ##     w.var(name + '_signal_f').getError()
+    ##     )
+    #],
+    #position=(0.2, 0.8)
+    #).draw()
+#check_timer('13.2 get, fit and plot 2011B real data')
 
 outro()
 check_timer('14. outro')
 
-ct, rt = sw2.CpuTime(), sw2.RealTime()
-print '+++ TOTAL CPU time:', ct, 's, real time: %.2f' % rt, 's'
+#ct, rt = sw2.CpuTime(), sw2.RealTime()
+#print '+++ TOTAL CPU time:', ct, 's, real time: %.2f' % rt, 's'
 ## End of main().
 
 ##------------------------------------------------------------------------------
