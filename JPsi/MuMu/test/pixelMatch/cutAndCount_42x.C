@@ -20,7 +20,7 @@ string calculateEfficiencies(const Configuration &);
 string processDataset(Configuration::Dataset dataset, TFile& outputFile);
 
 ///____________________________________________________________________________
-void cutAndCount_conversionSafeElectronVeto_42x(){
+void cutAndCount_42x(){
   
   gROOT->LoadMacro("../resolutionErrors.C");
   TFile * outputFile = new TFile(
@@ -28,7 +28,17 @@ void cutAndCount_conversionSafeElectronVeto_42x(){
   );
   
   string table = "";
+  
+  table += "\n2011A+B\n";
   table += processDataset(Configuration::AN_2011_048_HggMVA_2011AplusB, 
+                          *outputFile);
+
+  table += "\n2011A\n";
+  table += processDataset(Configuration::AN_2011_048_HggMVA_2011A, 
+                          *outputFile);
+  
+  table += "\n2011B\n";
+  table += processDataset(Configuration::AN_2011_048_HggMVA_2011B, 
                           *outputFile);
   
   cout << table << endl;
@@ -69,11 +79,10 @@ string processDataset(Configuration::Dataset datset, TFile& outputFile) {
   row = calculateEfficiencies(cfg);
   report += " 4 & " + row + " \\\\\n";
   
-  cout << endl << report << endl;  
+  return report;
 }
 
-string calculateEfficiencies(const Configuration &cfg;)
-)
+string calculateEfficiencies(const Configuration &cfg)
 { 
   switch (cfg.host) {
     case Configuration::t3_susy:
