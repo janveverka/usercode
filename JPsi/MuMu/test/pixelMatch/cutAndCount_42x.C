@@ -3,85 +3,163 @@
  */
 
 struct Configuration {
-  enum Dataset {AN_2011_048_HggMVA_2011AplusB, 
-                AN_2011_048_HggMVA_2011A,
-                AN_2011_048_HggMVA_2011B,
-                Reload_16Jan_2011AplusB,
-                Reload_16Jan_2011A,
-                Reload_16Jan_2011B} dataset;
-  enum Subdetector {EcalBarrel, 
-                    EcalEndcaps} subdetector;
-  enum R9Category {LowR9, HighR9, AllR9} r9Category;
   enum Host {t3_susy, JansMacBookPro} host;
+  enum Analysis {AN_2011_048_HggMVA, Reload_16Jan} analysis;
+  enum Veto {kConversionSafeElectronVeto, kDeltaRToTrack, kPixelMatch} veto;
   TFile * outputFile;
+  enum Period {k2011AplusB, k2011A, k2011B} period;
+  enum Subdetector {EcalBarrel, EcalEndcaps} subdetector;
+  enum R9Category {LowR9, HighR9, AllR9} r9Category;
 };
 
 string calculateEfficiencies(const Configuration &);
-string processDataset(Configuration::Dataset dataset, TFile& outputFile);
+string loopOverPeriods(Configuration &);
+string loopOverCategories(Configuration &);
+string latexHeader(Configuration const&);
+string latexFooter(Configuration const&);
 
 ///____________________________________________________________________________
-void cutAndCount_42x(){
-  
+void cutAndCount_42x(){  
   gROOT->LoadMacro("../resolutionErrors.C");
-  TFile * outputFile = new TFile(
-    "cutAndCount_conversionSafeElectronVeto_42x.root", "RECREATE"
-  );
-  
-  string table = "";
-  
-  table += "\n2011A+B\n";
-  table += processDataset(Configuration::AN_2011_048_HggMVA_2011AplusB, 
-                          *outputFile);
-
-  table += "\n2011A\n";
-  table += processDataset(Configuration::AN_2011_048_HggMVA_2011A, 
-                          *outputFile);
-  
-  table += "\n2011B\n";
-  table += processDataset(Configuration::AN_2011_048_HggMVA_2011B, 
-                          *outputFile);
-  
-  cout << table << endl;
-}
-
-  
-///____________________________________________________________________________
-string processDataset(Configuration::Dataset datset, TFile& outputFile) {  
-  string row = "", report = "";
-  Configuration cfg;
   
   /// Common configuration
-  cfg.host        = Configuration::t3_susy;
-  cfg.dataset     = datset;
-  cfg.outputFile  = &outputFile;
+  Configuration cfg;
+  // cfg.host        = Configuration::t3_susy;
+  cfg.host       = Configuration::JansMacBookPro;
+  cfg.analysis   = Configuration::Reload_16Jan;
+  // cfg.analysis   = Configuration::AN_2011_048_HggMVA;
+  // cfg.veto       = Configuration::kConversionSafeElectronVeto;
+  cfg.veto       = Configuration::kDeltaRToTrack;
+  cfg.outputFile = new TFile("cutAndCount_42x_devel.root", "RECREATE");
+
+  string latex = "";  
+
+  switch (cfg.analysis) {
+  case Configuration::AN_2011_048_HggMVA:
+    latex += "\nAN 2011/48 (Hgg MVA)\n";
+    break;
+  case Configuration::Reload_16Jan:
+    latex += "\n16Jan re-reco reload\n";
+    break;
+  }
+
+  latex += latexHeader(cfg);
+  latex += loopOverPeriods(cfg);  
+  latex += latexFooter(cfg);
+
+  cout << latex << endl;
+} // cutAndCount_42x()
+
+
+///____________________________________________________________________________
+string latexHeader(Configuration const & cfg) {
+  string caption = "efficiencies";
+  string latex = ("\\begin{table}[htbp]\n"
+		  "\\caption{");
+  latex += caption;
+  latex += ("}\n"
+	    "\\begin{center}\n"
+	    "\\begin{tabular}{c|c|c|c}\n"
+	    "\\hline\n"
+	    "Category &\n"
+	    "    $\\epsilon_{data}$ (\\%) &\n"
+	    "        $\\epsilon_{MC}$ (\\%) &\n"
+	    "            $\\epsilon_{data}$/$\\epsilon_{MC}$ \\\\\n");
+  return latex;
+} // latexHeader(..)
+
+
+///____________________________________________________________________________
+string latexFooter(Configuration const & cfg) {
+  string latex = ("\\hline\n"
+		  "\\end{tabular}\n"
+		  "\\end{center}\n"
+		  "\\label{tab:cut_and_count}\n"
+		  "\\end{table}\n");
+  return latex;
+} // latexFooter(..)
+
+
+///____________________________________________________________________________
+string loopOverPeriods(Configuration &cfg) {
+  string latex = "";
   
-  /// Category 1
+  latex += ("\\hline\n"
+	    "\\multicolumn{4}{|c|}{2011 - all}\\\\\n"
+	    "\\hline\n");
+  cfg.period = Configuration::k2011AplusB;
+  latex += loopOverCategories(cfg);
+
+  latex += ("\\hline\n"
+	    "\\multicolumn{4}{|c|}{2011A}\\\\\n"
+	    "\\hline\n");
+  cfg.period = Configuration::k2011A;
+  latex += loopOverCategories(cfg);
+  
+  latex += ("\\hline\n"
+	    "\\multicolumn{4}{|c|}{2011B}\\\\\n"
+	    "\\hline\n");
+  cfg.period = Configuration::k2011B;
+  latex += loopOverCategories(cfg);
+
+  return latex;
+} // loopOverPeriods(..)
+  
+
+///____________________________________________________________________________
+string loopOverCategories(Configuration& cfg) {  
+  string row = "";
+  string latex = "";
+    
+  /// Category 1/5
   cfg.subdetector = Configuration::EcalBarrel;
   cfg.r9Category  = Configuration::HighR9;
   row = calculateEfficiencies(cfg);
-  report += " 1 & " + row + " \\\\\n";
+  switch(cfg.veto) {
+  case Configuration::kDeltaRToTrack:              latex += " 1 & "; break;
+  case Configuration::kConversionSafeElectronVeto: latex += " 5 & "; break;
+  case Configuration::kPixelMatch:                 latex += "  1 & "; break;
+  }
+  latex += row + " \\\\\n";
   
-  /// Category 2
+  /// Category 2/6
   cfg.subdetector = Configuration::EcalBarrel;
   cfg.r9Category = Configuration::LowR9;
   row = calculateEfficiencies(cfg);
-  report += " 2 & " + row + " \\\\\n";
+  switch(cfg.veto) {
+  case Configuration::kDeltaRToTrack:              latex += " 2 & "; break;
+  case Configuration::kConversionSafeElectronVeto: latex += " 6 & "; break;
+  case Configuration::kPixelMatch:                 latex += "  2 & "; break;
+  }
+  latex += row + " \\\\\n";
   
-  /// Category 3
+  /// Category 3/7/9
   cfg.subdetector = Configuration::EcalEndcaps;
   cfg.r9Category = Configuration::HighR9;
   row = calculateEfficiencies(cfg);
-  report += " 3 & " + row + " \\\\\n";
+  switch(cfg.veto) {
+  case Configuration::kDeltaRToTrack:              latex += " 3 & "; break;
+  case Configuration::kConversionSafeElectronVeto: latex += " 7 & "; break;
+  case Configuration::kPixelMatch:                 latex += "  9 & "; break;
+  }
+  latex += row + " \\\\\n";
 
-  /// Category 4
+  /// Category 4/8/10
   cfg.subdetector = Configuration::EcalEndcaps;
   cfg.r9Category = Configuration::LowR9;
   row = calculateEfficiencies(cfg);
-  report += " 4 & " + row + " \\\\\n";
+  switch(cfg.veto) {
+  case Configuration::kDeltaRToTrack:              latex += " 4 & "; break;
+  case Configuration::kConversionSafeElectronVeto: latex += " 8 & "; break;
+  case Configuration::kPixelMatch:                 latex += " 10 & "; break;
+  }
+  latex += row + " \\\\\n";
   
-  return report;
-}
+  return latex;
+} // loopOverCategories(..)
 
+
+///____________________________________________________________________________
 string calculateEfficiencies(const Configuration &cfg)
 { 
   switch (cfg.host) {
@@ -130,69 +208,80 @@ string calculateEfficiencies(const Configuration &cfg)
   // const char *filenameW    = "pmvTree_V15_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1_condor_Dimuon_AOD-42X-v9.root";
   // const char *filenameTT   = "pmvTree_V15_TTJets_TuneZ2_7TeV-madgraph-tauola_S4-v2_condor_Dimuon_AOD-42X-v9.root";
 
+  /// Build the label specific to the analysis and period.
   string label = "";
 
-  switch (cfg.dataset) {
-    // Datasets for AN 2012/048 Hgg MVA 2011A+B
-    case Configuration::AN_2011_048_HggMVA_2011AplusB:
-      label = "AN_2011_048_HggMVA_2011AplusB";
+  switch (cfg.analysis) {
+  case Configuration::AN_2011_048_HggMVA: label = "AN_2011_048_HggMVA"; break;
+  case Configuration::Reload_16Jan      : label = "Reload_16Jan"      ; break;
+  }
+
+  switch (cfg.period) {
+  case Configuration::k2011AplusB: label += "_2011AplusB"; break;
+  case Configuration::k2011A     : label += "_2011A"     ; break;
+  case Configuration::k2011B     : label += "_2011B"     ; break;
+  }
+
+  /// Samples
+  switch (cfg.period) {
+
+  case Configuration::k2011AplusB:
+    const char *filenameMC   = "pmvTree_V19_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    const char *filenameQCD  = "pmvTree_V19_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    const char *filenameTT   = "pmvTree_V19_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    const char *filenameW    = "pmvTree_V19_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+
+    switch (cfg.analysis) {
+    case Configuration::AN_2011_048_HggMVA:
+      // Datasets for AN 2012/048 Hgg MVA 2011A+B
       const char *filenameData = "pmvTree_V19_DoubleMu_Run2011AB-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
-      const char *filenameMC   = "pmvTree_V19_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameQCD  = "pmvTree_V19_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameTT   = "pmvTree_V19_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameW    = "pmvTree_V19_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      break;
-      
-    // Datasets for AN 2012/048 Hgg MVA 2011A
-    case Configuration::AN_2011_048_HggMVA_2011A:
-      label = "AN_2011_048_HggMVA_2011A";
-      const char *filenameData = "pmvTree_V19_DoubleMu_Run2011A-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
-      const char *filenameMC   = "pmvTree_V20_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameQCD  = "pmvTree_V20_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameTT   = "pmvTree_V20_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameW    = "pmvTree_V20_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      break;
-      
-    // Datasets for AN 2012/048 Hgg MVA 2011B
-    case Configuration::AN_2011_048_HggMVA_2011B:
-      label = "AN_2011_048_HggMVA_2011B";
-      const char *filenameData = "pmvTree_V19_DoubleMu_Run2011B-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
-      const char *filenameMC   = "pmvTree_V21_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameQCD  = "pmvTree_V21_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameTT   = "pmvTree_V21_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameW    = "pmvTree_V21_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
       break;
 
-    // Datasets for reload of 16Jan 2011A+B
-    case Configuration::Reload_16Jan_2011AplusB:
-      label = "Reload_16Jan_2011AplusB";
-      const char *filenameData = "pmvTree_V19_DoubleMu_Run2011AB-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
-      const char *filenameMC   = "pmvTree_V19_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameQCD  = "pmvTree_V19_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameTT   = "pmvTree_V19_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameW    = "pmvTree_V19_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    case Configuration::Reload_16Jan:
+      // Datasets for reload 16 Jan 2011A+B
+      const char *filenameData = "pmvTree_V21_DoubleMu_Run2011AB-16Jan2012-v1_condor_Dimuon_AOD-42X-v10.root";
       break;
+    }
+    break;
       
-    // Datasets for reload of 16Jan 2011A
-    case Configuration::Reload_16Jan_2011A:
-      label = "Reload_16Jan_2011A";
+    // Datasets for 2011A
+  case Configuration::k2011A:
+    const char *filenameMC   = "pmvTree_V20_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    const char *filenameQCD  = "pmvTree_V20_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    const char *filenameTT   = "pmvTree_V20_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    const char *filenameW    = "pmvTree_V20_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    switch (cfg.analysis) {
+    case Configuration::AN_2011_048_HggMVA:
+      // Datasets for AN 2012/048 Hgg MVA 2011A
       const char *filenameData = "pmvTree_V19_DoubleMu_Run2011A-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
-      const char *filenameMC   = "pmvTree_V20_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameQCD  = "pmvTree_V20_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameTT   = "pmvTree_V20_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameW    = "pmvTree_V20_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
       break;
+
+    case Configuration::Reload_16Jan:
+      // Datasets for reload 16 Jan 2011A
+      const char *filenameData = "pmvTree_V21_DoubleMu_Run2011A-16Jan2012-v1_condor_Dimuon_AOD-42X-v10.root";
+      break;
+    }
+    break;
       
-    // Datasets for reload of 16Jan 2011B
-    case Configuration::Reload_16Jan_2011A:
-      label = "Reload_16Jan_2011A";
+    // Datasets for 2011B
+  case Configuration::k2011B:
+    const char *filenameMC   = "pmvTree_V21_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    const char *filenameQCD  = "pmvTree_V21_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    const char *filenameTT   = "pmvTree_V21_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+    const char *filenameW    = "pmvTree_V21_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+
+    switch (cfg.analysis) {
+    case Configuration::AN_2011_048_HggMVA:
+      // Datasets for AN 2012/048 Hgg MVA 2011B
       const char *filenameData = "pmvTree_V19_DoubleMu_Run2011B-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
-      const char *filenameMC   = "pmvTree_V21_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameQCD  = "pmvTree_V21_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameTT   = "pmvTree_V21_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
-      const char *filenameW    = "pmvTree_V21_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
       break;
-    
+
+    case Configuration::Reload_16Jan:
+      // Datasets for reload 16 Jan 2011B
+      const char *filenameData = "pmvTree_V21_DoubleMu_Run2011B-16Jan2012-v1_condor_Dimuon_AOD-42X-v10.root";
+      break;
+    }
+    break;
   }
 
   enum mcSample {z=0, qcd, w, tt};
@@ -236,51 +325,60 @@ string calculateEfficiencies(const Configuration &cfg)
   TCut signalCut("isFSR");
   TCut backgroundCut("!isFSR");
   TCut mWindowCut("abs(mmgMass-90) < 15");
+  TCut mWindowCutUp("abs(mmgMass-90) < 17.5");
+  TCut mWindowCutDown("abs(mmgMass-90) < 12.5");
   TCut ubCut("(minDEta > 0.04 | minDPhi > 0.2)");
-  // TCut vetoCut("phoDeltaRToTrack > 1");
-  // TCut vetoCut("phoDeltaRToTrack > 0.062"); //eb low R9
-  // TCut vetoCut("!phoHasPixelMatch");
-  TCut vetoCut("phoPassElectronVeto");
   TCut nVtx1to2("nVertices<=2");
   TCut phoPt5to10("5 <= phoPt & phoPt < 10");
   TCut phoPt10to20("10 <= phoPt & phoPt < 20");
   TCut phoPt20up("20 <= phoPt");
-  switch (cfg.dataset) {
-    case Configuration::AN_2011_048_HggMVA_2011A:
-    case Configuration::AN_2011_048_HggMVA_2011B:
-    case Configuration::AN_2011_048_HggMVA_2011AplusB:
-    case Configuration::Reload_16Jan_2011A:
-    case Configuration::Reload_16Jan_2011B:
-    case Configuration::Reload_16Jan_2011AplusB:
-      // TCut highR9("0.9 < phoR9");
-      TCut ebLowR9("0 < phoR9 && phoR9 <= 0.9");
-      TCut eeLowR9("0 < phoR9 && phoR9 <= 0.9");
-      TCut ebLowR9MC("0 < phoR9 && phoR9 <= 0.9");
-      TCut eeLowR9MC("0 < phoR9 && phoR9 <= 0.9");
-      TCut ebHighR9("0.9 < phoR9");
-      TCut eeHighR9("0.9 < phoR9");
-      break;
-    default:
-      TCut ebLowR9("phoR9 <= 0.94");
-      TCut eeLowR9("phoR9 <= 0.95");
-      TCut ebHighR9("phoR9 > 0.94");
-      TCut eeHighR9("phoR9 > 0.95");
-      break;   
+  
+  TCut vetoCut, ebLowR9, eeLowR9, ebHighR9, eeHighR9, ebSelection, eeSelection;
+  switch (cfg.veto) {
+  case Configuration::kConversionSafeElectronVeto:
+    vetoCut = "phoPassElectronVeto";
+    // TCut highR9("0.9 < phoR9");
+    ebLowR9 = "0 < phoR9 && phoR9 <= 0.9";
+    eeLowR9 = "0 < phoR9 && phoR9 <= 0.9";
+    // TCut ebLowR9MC("0 < phoR9 && phoR9 <= 0.9");
+    // TCut eeLowR9MC("0 < phoR9 && phoR9 <= 0.9");
+    ebHighR9 = "0.9 < phoR9";
+    eeHighR9 = "0.9 < phoR9";
+    // These near muon veto cuts are for the "delta R to nearest track" electron veto
+    ebSelection = "(minDEta > 0.04 | minDPhi > 0.1) & phoIsEB";
+    eeSelection = "(minDEta > 0.04 | minDPhi > 0.2) & !phoIsEB";
+    break;
+  case Configuration::kDeltaRToTrack:
+    vetoCut = "phoDeltaRToTrack > 1";
+    if (cfg.subdetector == Configuration::EcalBarrel &&
+        cfg.r9Category == Configuration::LowR9) {
+      vetoCut = "phoDeltaRToTrack > 0.062"; //eb low R9
+    }
+    ebLowR9 = ("phoR9 <= 0.94");
+    eeLowR9 = ("phoR9 <= 0.94");
+    ebHighR9 = ("phoR9 > 0.94");
+    eeHighR9 = ("phoR9 > 0.94");
+    // These near muon veto cuts are for the "delta R to nearest track" electron veto
+    ebSelection = ("(minDEta > 0.04 | minDPhi > 0.1) & phoIsEB");
+    eeSelection = ("(minDEta > 0.04 | minDPhi > 0.2) & !phoIsEB");
+    break;   
+  case Configuration::kPixelMatch:
+    vetoCut = "!phoHasPixelMatch";
+    ebLowR9 = ("phoR9 <= 0.94");
+    eeLowR9 = ("phoR9 <= 0.95");
+    ebHighR9 = ("phoR9 > 0.94");
+    eeHighR9 = ("phoR9 > 0.95");
+    // These cuts are for the pixel match veto
+    ebSelection = ("(minDEta > 0.04 | minDPhi > 0.3) & phoIsEB");
+    eeSelection = ("(minDEta > 0.08 | minDPhi > 0.3) & !phoIsEB");
+    break;   
   }
     
   TCut run2011A("id.run < 175860");
   TCut run2011B("id.run >= 175860");
 
-
-  // These cuts are for the pixel match veto
-  /*TCut ebSelection("phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.04 | minDPhi > 0.3)");
-    TCut eeSelection("!phoIsEB & abs(mmgMass-90)<17.5 & (minDEta > 0.08 | minDPhi > 0.3)");*/
-
-  // These near muon veto cuts are for the "delta R to nearest track" electron veto
-  TCut ebSelection("phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.1) && scEt > 10 && phoHoE < 0.5");
-  TCut eeSelection("!phoIsEB & abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.2) && scEt > 10 && phoHoE < 0.5");
-
-  TCut selection("mmMass < 80 & phoPt > 10");
+  TCut selection("mmMass < 80 & phoPt > 10 & scEt > 10 & phoHoE < 0.5");
+  selection = selection && mWindowCut;
   
   switch (cfg.subdetector) {
     case Configuration::EcalBarrel :
@@ -595,10 +693,6 @@ string calculateEfficiencies(const Configuration &cfg)
   double ps = ps_mc * p / (p_mc + pb_qcd + pb_w + pb_tt);
   double fs = fs_mc * f / (f_mc + fb_qcd + fb_w + fb_tt);
   
-  cout << "DEBUG3: fs inputs: (f, f_mc, fs_mc, fb_qcd, fb_w, fb_tt) = ("
-       << f << ", " << f_mc << ", " << fs_mc << ", " << fb_qcd << ", " 
-       << fb_w << ", " << fb_tt << ")" << endl;
-
   double pb = p - ps;
   double fb = f - fs;
 
@@ -666,11 +760,6 @@ string calculateEfficiencies(const Configuration &cfg)
   // Add systematic error on data in quadrature
   // Assume systematic errors = 100% background
   double eeff_syst = eff*(1-eff)*Oplus(pb/ps, fb/fs);
-  cout << "DEBUG 2: syst inputs " 
-       << pb << " (pb),"
-       << ps << " (ps),"
-       << fb << " (fb),"
-       << fs << " (fs)" << endl;
 
   cout << "Veto: " << vetoCut.GetTitle() << endl;
   cout << "== Clopper-Pearson errors == " << endl;
@@ -699,14 +788,6 @@ string calculateEfficiencies(const Configuration &cfg)
 	  Oplus( g_eff->GetEfficiencyErrorLow(1),
 		  g_eff->GetEfficiencyErrorLow(2),
 		  eeff_syst ) );
-
-  // 98.77$^{+0.47}_{-0.64}$(stat)$\pm$0.36(syst) & 97.70$^{+0.32}_{-0.37}$ & 1.011$^{+0.007}_{-0.008}$ \ \
-  // 99.78$^{+0.13}_{-0.16}$(stat) & 99.59$^{+0.13}_{-0.17}$ & 1.002$^{+0.002}_{-0.002}$ \\
-
-  cout << "DEBUG 1: data errors " 
-       << 100 * g_eff->GetEfficiencyErrorUp(1) << " (stat up) "
-       << 100 * g_eff->GetEfficiencyErrorLow(1) << " (stat down) "
-       << 100 * eeff_syst << " (syst) " << endl;
   
   /// Latex
   char latex[1000];
@@ -862,4 +943,4 @@ string calculateEfficiencies(const Configuration &cfg)
   c2->Write("c2");
   
   return string(latex);
-}
+} // calculateEfficiencies
