@@ -2,46 +2,37 @@
  * Global Definitions
  */
 
-struct Configuration {
+struct Config {
   enum Host {t3_susy, JansMacBookPro} host;
-  enum Analysis {AN_2011_048_HggMVA, Reload_16Jan} analysis;
-  enum Veto {kConversionSafeElectronVeto, kDeltaRToTrack, kPixelMatch} veto;
+  enum Analysis {k30Nov2011ReReco, k16Jan2012ReReco} analysis;
+  enum Veto {kMvaVeto, kCiCVeto, kPixelMatch} veto;
   TFile * outputFile;
   enum Period {k2011AplusB, k2011A, k2011B} period;
   enum Subdetector {EcalBarrel, EcalEndcaps} subdetector;
   enum R9Category {LowR9, HighR9, AllR9} r9Category;
 };
 
-string calculateEfficiencies(const Configuration &);
-string loopOverPeriods(Configuration &);
-string loopOverCategories(Configuration &);
-string latexHeader(Configuration const&);
-string latexFooter(Configuration const&);
+string calculateEfficiencies(const Config &);
+string loopOverPeriods(Config &);
+string loopOverCategories(Config &);
+string latexHeader(Config const&);
+string latexFooter(Config const&);
 
 ///____________________________________________________________________________
 void cutAndCount_42x(){  
   gROOT->LoadMacro("../resolutionErrors.C");
   
   /// Common configuration
-  Configuration cfg;
-  // cfg.host        = Configuration::t3_susy;
-  cfg.host       = Configuration::JansMacBookPro;
-  cfg.analysis   = Configuration::Reload_16Jan;
-  // cfg.analysis   = Configuration::AN_2011_048_HggMVA;
-  // cfg.veto       = Configuration::kConversionSafeElectronVeto;
-  cfg.veto       = Configuration::kDeltaRToTrack;
+  Config cfg;
+  // cfg.host        = Config::t3_susy;
+  cfg.host       = Config::JansMacBookPro;
+  cfg.analysis   = Config::k16Jan2012ReReco;
+  // cfg.analysis   = Config::k30Nov2011ReReco;
+  // cfg.veto       = Config::kMvaVeto;
+  cfg.veto       = Config::kCiCVeto;
   cfg.outputFile = new TFile("cutAndCount_42x_devel.root", "RECREATE");
 
   string latex = "";  
-
-  switch (cfg.analysis) {
-  case Configuration::AN_2011_048_HggMVA:
-    latex += "\nAN 2011/48 (Hgg MVA)\n";
-    break;
-  case Configuration::Reload_16Jan:
-    latex += "\n16Jan re-reco reload\n";
-    break;
-  }
 
   latex += latexHeader(cfg);
   latex += loopOverPeriods(cfg);  
@@ -52,8 +43,34 @@ void cutAndCount_42x(){
 
 
 ///____________________________________________________________________________
-string latexHeader(Configuration const & cfg) {
-  string caption = "efficiencies";
+string latexHeader(Config const & cfg) {
+  
+  string caption;
+  
+  switch(cfg.veto) {
+  case Config::kPixelMatch:
+    caption = "Pixel match veto ";
+    break;
+  case Config::kCiCVeto: 
+    caption = "CiC photon ID electron rejection cut "; 
+    break;
+  case Config::kMvaVeto:
+    caption = "MVA photon ID electron rejection cut ";
+    break;
+  }
+  
+  caption += ("efficiency for photons in four different categories\n"
+	      "         measured for the ");
+  
+  switch (cfg.analysis) {
+  case Config::k30Nov2011ReReco:
+    caption += "30-Nov-2011 re-reco dataset.";
+    break;
+  case Config::k16Jan2012ReReco:
+    latex += "16-Jan-2012 re-reco dataset.";
+    break;
+  }
+
   string latex = ("\\begin{table}[htbp]\n"
 		  "\\caption{");
   latex += caption;
@@ -70,103 +87,121 @@ string latexHeader(Configuration const & cfg) {
 
 
 ///____________________________________________________________________________
-string latexFooter(Configuration const & cfg) {
+string latexFooter(Config const & cfg) {
+  string label = "cutAndCount";
+
+  switch(cfg.veto) {
+  case Config::kPixelMatch: label += "_PMV"    ; break;
+  case Config::kCiCVeto   : label += "_CiCVeto"; break;  
+  case Config::kMvaVeto    : label += "_MVAVeto"; break;
+  }
+  
+  switch (cfg.analysis) {
+  case Config::k30Nov2011ReReco: label += "_30Nov2011ReReco"; break;
+  case Config::k16Jan2012ReReco: label += "_16Jan2012ReReco"; break;
+  }
+
   string latex = ("\\hline\n"
 		  "\\end{tabular}\n"
 		  "\\end{center}\n"
-		  "\\label{tab:cut_and_count}\n"
-		  "\\end{table}\n");
+		  "\\label{tab:");
+
+  latex += label;
+
+  latex += ("}\n"
+	    "\\end{table}\n");
+
   return latex;
 } // latexFooter(..)
 
 
 ///____________________________________________________________________________
-string loopOverPeriods(Configuration &cfg) {
+string loopOverPeriods(Config &cfg) {
   string latex = "";
   
   latex += ("\\hline\n"
 	    "\\multicolumn{4}{|c|}{2011 - all}\\\\\n"
 	    "\\hline\n");
-  cfg.period = Configuration::k2011AplusB;
+  cfg.period = Config::k2011AplusB;
   latex += loopOverCategories(cfg);
 
-  latex += ("\\hline\n"
-	    "\\multicolumn{4}{|c|}{2011A}\\\\\n"
-	    "\\hline\n");
-  cfg.period = Configuration::k2011A;
-  latex += loopOverCategories(cfg);
+  // latex += ("\\hline\n"
+  // 	    "\\multicolumn{4}{|c|}{2011A}\\\\\n"
+  // 	    "\\hline\n");
+  // cfg.period = Config::k2011A;
+  // latex += loopOverCategories(cfg);
   
-  latex += ("\\hline\n"
-	    "\\multicolumn{4}{|c|}{2011B}\\\\\n"
-	    "\\hline\n");
-  cfg.period = Configuration::k2011B;
-  latex += loopOverCategories(cfg);
+  // latex += ("\\hline\n"
+  // 	    "\\multicolumn{4}{|c|}{2011B}\\\\\n"
+  // 	    "\\hline\n");
+  // cfg.period = Config::k2011B;
+  // latex += loopOverCategories(cfg);
 
   return latex;
 } // loopOverPeriods(..)
   
 
 ///____________________________________________________________________________
-string loopOverCategories(Configuration& cfg) {  
+string loopOverCategories(Config& cfg) {  
   string row = "";
   string latex = "";
     
   /// Category 1/5
-  cfg.subdetector = Configuration::EcalBarrel;
-  cfg.r9Category  = Configuration::HighR9;
+  cfg.subdetector = Config::EcalBarrel;
+  cfg.r9Category  = Config::HighR9;
   row = calculateEfficiencies(cfg);
   switch(cfg.veto) {
-  case Configuration::kDeltaRToTrack:              latex += " 1 & "; break;
-  case Configuration::kConversionSafeElectronVeto: latex += " 5 & "; break;
-  case Configuration::kPixelMatch:                 latex += "  1 & "; break;
+  case Config::kCiCVeto:              latex += " 1 & "; break;
+  case Config::kMvaVeto: latex += " 5 & "; break;
+  case Config::kPixelMatch:                 latex += "  1 & "; break;
   }
   latex += row + " \\\\\n";
   
-  /// Category 2/6
-  cfg.subdetector = Configuration::EcalBarrel;
-  cfg.r9Category = Configuration::LowR9;
-  row = calculateEfficiencies(cfg);
-  switch(cfg.veto) {
-  case Configuration::kDeltaRToTrack:              latex += " 2 & "; break;
-  case Configuration::kConversionSafeElectronVeto: latex += " 6 & "; break;
-  case Configuration::kPixelMatch:                 latex += "  2 & "; break;
-  }
-  latex += row + " \\\\\n";
+  // /// Category 2/6
+  // cfg.subdetector = Config::EcalBarrel;
+  // cfg.r9Category = Config::LowR9;
+  // row = calculateEfficiencies(cfg);
+  // switch(cfg.veto) {
+  // case Config::kCiCVeto:              latex += " 2 & "; break;
+  // case Config::kMvaVeto: latex += " 6 & "; break;
+  // case Config::kPixelMatch:                 latex += "  2 & "; break;
+  // }
+  // latex += row + " \\\\\n";
   
-  /// Category 3/7/9
-  cfg.subdetector = Configuration::EcalEndcaps;
-  cfg.r9Category = Configuration::HighR9;
-  row = calculateEfficiencies(cfg);
-  switch(cfg.veto) {
-  case Configuration::kDeltaRToTrack:              latex += " 3 & "; break;
-  case Configuration::kConversionSafeElectronVeto: latex += " 7 & "; break;
-  case Configuration::kPixelMatch:                 latex += "  9 & "; break;
-  }
-  latex += row + " \\\\\n";
+  // /// Category 3/7/9
+  // cfg.subdetector = Config::EcalEndcaps;
+  // cfg.r9Category = Config::HighR9;
+  // row = calculateEfficiencies(cfg);
+  // switch(cfg.veto) {
+  // case Config::kCiCVeto:              latex += " 3 & "; break;
+  // case Config::kMvaVeto: latex += " 7 & "; break;
+  // case Config::kPixelMatch:                 latex += "  9 & "; break;
+  // }
+  // latex += row + " \\\\\n";
 
-  /// Category 4/8/10
-  cfg.subdetector = Configuration::EcalEndcaps;
-  cfg.r9Category = Configuration::LowR9;
-  row = calculateEfficiencies(cfg);
-  switch(cfg.veto) {
-  case Configuration::kDeltaRToTrack:              latex += " 4 & "; break;
-  case Configuration::kConversionSafeElectronVeto: latex += " 8 & "; break;
-  case Configuration::kPixelMatch:                 latex += " 10 & "; break;
-  }
-  latex += row + " \\\\\n";
+  // /// Category 4/8/10
+  // cfg.subdetector = Config::EcalEndcaps;
+  // cfg.r9Category = Config::LowR9;
+  // row = calculateEfficiencies(cfg);
+  // switch(cfg.veto) {
+  // case Config::kCiCVeto:              latex += " 4 & "; break;
+  // case Config::kMvaVeto: latex += " 8 & "; break;
+  // case Config::kPixelMatch:                 latex += " 10 & "; break;
+  // }
+  // latex += row + " \\\\\n";
   
   return latex;
 } // loopOverCategories(..)
 
 
 ///____________________________________________________________________________
-string calculateEfficiencies(const Configuration &cfg)
+string calculateEfficiencies(const Config &cfg)
 { 
   switch (cfg.host) {
-    case Configuration::t3_susy:
+    case Config::t3_susy:
       const char *path = "/raid2/veverka/pmvTrees/";
       break;
-    case Configuration::JansMacBookPro:
+    case Config::JansMacBookPro:
       const char *path = "/Users/veverka/Work/Data/pmvTrees/";
       break;
   }
@@ -212,32 +247,32 @@ string calculateEfficiencies(const Configuration &cfg)
   string label = "";
 
   switch (cfg.analysis) {
-  case Configuration::AN_2011_048_HggMVA: label = "AN_2011_048_HggMVA"; break;
-  case Configuration::Reload_16Jan      : label = "Reload_16Jan"      ; break;
+  case Config::k30Nov2011ReReco: label = "k30Nov2011ReReco"; break;
+  case Config::k16Jan2012ReReco      : label = "k16Jan2012ReReco"      ; break;
   }
 
   switch (cfg.period) {
-  case Configuration::k2011AplusB: label += "_2011AplusB"; break;
-  case Configuration::k2011A     : label += "_2011A"     ; break;
-  case Configuration::k2011B     : label += "_2011B"     ; break;
+  case Config::k2011AplusB: label += "_2011AplusB"; break;
+  case Config::k2011A     : label += "_2011A"     ; break;
+  case Config::k2011B     : label += "_2011B"     ; break;
   }
 
   /// Samples
   switch (cfg.period) {
 
-  case Configuration::k2011AplusB:
+  case Config::k2011AplusB:
     const char *filenameMC   = "pmvTree_V19_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     const char *filenameQCD  = "pmvTree_V19_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     const char *filenameTT   = "pmvTree_V19_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     const char *filenameW    = "pmvTree_V19_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
 
     switch (cfg.analysis) {
-    case Configuration::AN_2011_048_HggMVA:
+    case Config::k30Nov2011ReReco:
       // Datasets for AN 2012/048 Hgg MVA 2011A+B
       const char *filenameData = "pmvTree_V19_DoubleMu_Run2011AB-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
       break;
 
-    case Configuration::Reload_16Jan:
+    case Config::k16Jan2012ReReco:
       // Datasets for reload 16 Jan 2011A+B
       const char *filenameData = "pmvTree_V21_DoubleMu_Run2011AB-16Jan2012-v1_condor_Dimuon_AOD-42X-v10.root";
       break;
@@ -245,18 +280,18 @@ string calculateEfficiencies(const Configuration &cfg)
     break;
       
     // Datasets for 2011A
-  case Configuration::k2011A:
+  case Config::k2011A:
     const char *filenameMC   = "pmvTree_V20_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     const char *filenameQCD  = "pmvTree_V20_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     const char *filenameTT   = "pmvTree_V20_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     const char *filenameW    = "pmvTree_V20_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     switch (cfg.analysis) {
-    case Configuration::AN_2011_048_HggMVA:
+    case Config::k30Nov2011ReReco:
       // Datasets for AN 2012/048 Hgg MVA 2011A
       const char *filenameData = "pmvTree_V19_DoubleMu_Run2011A-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
       break;
 
-    case Configuration::Reload_16Jan:
+    case Config::k16Jan2012ReReco:
       // Datasets for reload 16 Jan 2011A
       const char *filenameData = "pmvTree_V21_DoubleMu_Run2011A-16Jan2012-v1_condor_Dimuon_AOD-42X-v10.root";
       break;
@@ -264,19 +299,19 @@ string calculateEfficiencies(const Configuration &cfg)
     break;
       
     // Datasets for 2011B
-  case Configuration::k2011B:
+  case Config::k2011B:
     const char *filenameMC   = "pmvTree_V21_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     const char *filenameQCD  = "pmvTree_V21_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     const char *filenameTT   = "pmvTree_V21_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
     const char *filenameW    = "pmvTree_V21_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
 
     switch (cfg.analysis) {
-    case Configuration::AN_2011_048_HggMVA:
+    case Config::k30Nov2011ReReco:
       // Datasets for AN 2012/048 Hgg MVA 2011B
       const char *filenameData = "pmvTree_V19_DoubleMu_Run2011B-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
       break;
 
-    case Configuration::Reload_16Jan:
+    case Config::k16Jan2012ReReco:
       // Datasets for reload 16 Jan 2011B
       const char *filenameData = "pmvTree_V21_DoubleMu_Run2011B-16Jan2012-v1_condor_Dimuon_AOD-42X-v10.root";
       break;
@@ -335,7 +370,7 @@ string calculateEfficiencies(const Configuration &cfg)
   
   TCut vetoCut, ebLowR9, eeLowR9, ebHighR9, eeHighR9, ebSelection, eeSelection;
   switch (cfg.veto) {
-  case Configuration::kConversionSafeElectronVeto:
+  case Config::kMvaVeto:
     vetoCut = "phoPassElectronVeto";
     // TCut highR9("0.9 < phoR9");
     ebLowR9 = "0 < phoR9 && phoR9 <= 0.9";
@@ -348,10 +383,10 @@ string calculateEfficiencies(const Configuration &cfg)
     ebSelection = "(minDEta > 0.04 | minDPhi > 0.1) & phoIsEB";
     eeSelection = "(minDEta > 0.04 | minDPhi > 0.2) & !phoIsEB";
     break;
-  case Configuration::kDeltaRToTrack:
+  case Config::kCiCVeto:
     vetoCut = "phoDeltaRToTrack > 1";
-    if (cfg.subdetector == Configuration::EcalBarrel &&
-        cfg.r9Category == Configuration::LowR9) {
+    if (cfg.subdetector == Config::EcalBarrel &&
+        cfg.r9Category == Config::LowR9) {
       vetoCut = "phoDeltaRToTrack > 0.062"; //eb low R9
     }
     ebLowR9 = ("phoR9 <= 0.94");
@@ -362,7 +397,7 @@ string calculateEfficiencies(const Configuration &cfg)
     ebSelection = ("(minDEta > 0.04 | minDPhi > 0.1) & phoIsEB");
     eeSelection = ("(minDEta > 0.04 | minDPhi > 0.2) & !phoIsEB");
     break;   
-  case Configuration::kPixelMatch:
+  case Config::kPixelMatch:
     vetoCut = "!phoHasPixelMatch";
     ebLowR9 = ("phoR9 <= 0.94");
     eeLowR9 = ("phoR9 <= 0.95");
@@ -381,27 +416,27 @@ string calculateEfficiencies(const Configuration &cfg)
   selection = selection && mWindowCut;
   
   switch (cfg.subdetector) {
-    case Configuration::EcalBarrel :
+    case Config::EcalBarrel :
       label += "_EB";
       selection = selection && ebSelection;
       switch (cfg.r9Category) {
-        case Configuration::LowR9 : selection = selection && ebLowR9 ; break;
-        case Configuration::HighR9: selection = selection && ebHighR9; break;
+        case Config::LowR9 : selection = selection && ebLowR9 ; break;
+        case Config::HighR9: selection = selection && ebHighR9; break;
       }
       break;
-    case Configuration::EcalEndcaps: 
+    case Config::EcalEndcaps: 
       label += "_EE"; 
       selection = selection && eeSelection;
       switch (cfg.r9Category) {
-        case Configuration::LowR9 : selection = selection && eeLowR9 ; break;
-        case Configuration::HighR9: selection = selection && eeHighR9; break;
+        case Config::LowR9 : selection = selection && eeLowR9 ; break;
+        case Config::HighR9: selection = selection && eeHighR9; break;
       }
       break;
   }
   
   switch (cfg.r9Category) {
-    case Configuration::LowR9 : label += "_lowR9" ; break;
-    case Configuration::HighR9: label += "_highR9"; break;
+    case Config::LowR9 : label += "_lowR9" ; break;
+    case Config::HighR9: label += "_highR9"; break;
   }
 
   // TCut selection = ebSelection;
