@@ -132,6 +132,7 @@ class Fitter:
     #___________________________________________________________________________
     def build_models(self):
         '''Builds the model(s) for the fitting.'''
+        
         pass
     ## End of Fitter.build_models().
 
@@ -214,6 +215,9 @@ class Fitter:
     def draw_legend(self, items):
         '''Draw a legend given the items.'''
         legend = Legend(items.keys(), items.values())
+        for entry in list(legend.GetListOfPrimitives()):
+            if entry.GetLabel() != 'Data':
+                entry.SetOption('l')
         legend.Draw()
         self.legend = legend
     ## End of Fitter.draw_legend().
