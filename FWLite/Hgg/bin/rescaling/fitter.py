@@ -55,7 +55,9 @@ class Fitter:
         self.w.factory('gpt[1,0,500]').SetTitle('E_{T}^{#gamma}')
         self.w.factory('geta[1,-3,3]').SetTitle('#eta^{#gamma}')
         self.w.factory('r9[1,0,1.5]').SetTitle('E_{3x3}^{#gamma}/E_{raw}^{SC}')
-        self.w.factory('sihih[1,0,1]').SetTitle('#sigma_{i#etai#eta}')
+        self.w.factory('sihih[1,0,100]').SetTitle('#sigma_{i#etai#eta}')
+        self.w.factory('sphi[1,0,1]').SetTitle('#sigma_{#phi}^{SC}')
+        self.w.factory('seta[1,0,1]').SetTitle('#sigma_{#eta}^{SC}')
 
         ## (name) -> (unit, plot binning)
         variable_attributes = {
@@ -65,13 +67,29 @@ class Fitter:
             'gpt' : ('GeV', ROOT.RooUniformBinning(0, 100, 100)),
             'geta' : ('', ROOT.RooUniformBinning(-2.5, 2.5, 50)),
             'r9' : ('', ROOT.RooUniformBinning(0.2, 1.1, 90)),
-            'sihih' : ('', ROOT.RooUniformBinning(0., 0.1, 100)),
+            'sihih' : ('%', ROOT.RooUniformBinning(0., 10, 100)),
+            'sphi' : ('', ROOT.RooUniformBinning(0., 0.2, 100)),
+            'seta' : ('', ROOT.RooUniformBinning(0., 0.2, 100)),
             }
 
+        ## (name) -> (barrel binning, endcap binning)
+        ## with binning ::= (low boundary, high boundary, number of bins)
+        barrel_endcap_binnings_map = {
+            'r9'    : ( (0.85, 1.05, 100), (0.85, 1.05, 100) ),
+            'sihih' : ( (0.50, 1.50, 100), (1.50, 4.00, 100) ),
+            'sphi'  : ( (0.00, 0.05, 100), (0.00, 0.10, 100) ),
+            'seta'  : ( (0.00, 0.05, 100), (0.00, 0.10, 100) ),
+            }
+        
         for xname, (xunit, xbins) in variable_attributes.items():
             self.w.var(xname).setUnit(xunit)
             self.w.var(xname).setBinning(xbins, 'plot')
-        
+
+        for xname, (bbins, ebins) in barrel_endcap_binnings_map.items():
+            bbinning = ROOT.RooUniformBinning(*bbins)
+            ebinning = ROOT.RooUniformBinning(*ebins)
+            self.w.var(xname).setBinning(bbinning, 'Barrel')
+            self.w.var(xname).setBinning(ebinning, 'Endcaps')
     ## End of Fitter.define_observables().
 
 
@@ -90,8 +108,10 @@ class Fitter:
             'gpt' : 'gamenergy/cosh(gameta)',
             'geta' : 'gameta', 
             'r9' : 'gamr9' ,
-            'sihih' : 'gamsigmaIetaIeta',
+            'sihih' : '100*gamsigmaIetaIeta',
             'weight' : 'evtweight',
+            'sphi' : 'gamscphiWidth',
+            'seta' : 'gamscetaWidth',
             }
 
         # Change titles to TTree expressions while saving the original titles.
@@ -148,11 +168,11 @@ class Fitter:
     def make_plots(self):
         '''Makes the plots.'''
         ## Inclusive variables
-        for xname in 'mmg mm gpt geta'.split():
-            self.plot_variable(xname)
+        # for xname in 'mmg mm gpt geta'.split():
+        #     self.plot_variable(xname)
             
         ## Variables different for Barrel and Endcaps
-        for xname in 'r9 sihih'.split():
+        for xname in 'r9 sihih sphi seta'.split():
             self.plot_variable(xname, 'abs(geta) < 1.5', 'eb', 'Barrel')
             self.plot_variable(xname, 'abs(geta) > 1.5', 'ee', 'Endcaps')
     ## End of Fitter.make_plots().
@@ -160,10 +180,18 @@ class Fitter:
 
     #___________________________________________________________________________
     def plot_variable(self, varname, selection='', label='', title=''):
-        '''Makes a canvas of the variable spectrum for MC overlayed with data.'''
+        '''
+        Makes a canvas of the variable spectrum for MC overlayed with data.
+        Uses binning named "plot" unless binning of the same name as title
+        exists which is then used.
+        '''
 
         hvar = self.w.var(varname)
-        hbins = hvar.getBinning('plot')
+
+        if hvar.hasBinning(title):
+            hbins = hvar.getBinning(title)
+        else:
+            hbins = hvar.getBinning('plot')
 
         if label:
             name = '_'.join([hvar.GetName(), label])
@@ -203,6 +231,7 @@ class Fitter:
 
         ## Make the canvas
         canvas = canvases.next('c_' + name)
+        canvas.SetGrid()
         hmc.Draw('hist')
         hdata.Draw('same e0')
         self.draw_legend({hdata: 'Data', hmc: 'Simulation'})
