@@ -28,8 +28,8 @@ void cutAndCount_42x(){
   cfg.host       = Config::JansMacBookPro;
   cfg.analysis   = Config::k16Jan2012ReReco;
   // cfg.analysis   = Config::k30Nov2011ReReco;
-  // cfg.veto       = Config::kMvaVeto;
-  cfg.veto       = Config::kCiCVeto;
+  cfg.veto       = Config::kMvaVeto;
+  // cfg.veto       = Config::kCiCVeto;
   cfg.outputFile = new TFile("cutAndCount_42x_devel.root", "RECREATE");
 
   string latex = "";  
@@ -59,7 +59,8 @@ string latexHeader(Config const & cfg) {
     break;
   }
   
-  caption += ("efficiency for photons in four different categories\n"
+  caption += ("efficiency\n"
+	      "         for photons in four different categories\n"
 	      "         measured for the ");
   
   switch (cfg.analysis) {
@@ -67,7 +68,7 @@ string latexHeader(Config const & cfg) {
     caption += "30-Nov-2011 re-reco dataset.";
     break;
   case Config::k16Jan2012ReReco:
-    latex += "16-Jan-2012 re-reco dataset.";
+    caption += "16-Jan-2012 re-reco dataset.";
     break;
   }
 
@@ -77,6 +78,7 @@ string latexHeader(Config const & cfg) {
   latex += ("}\n"
 	    "\\begin{center}\n"
 	    "\\begin{tabular}{c|c|c|c}\n"
+	    "\\hline\n"
 	    "\\hline\n"
 	    "Category &\n"
 	    "    $\\epsilon_{data}$ (\\%) &\n"
@@ -88,7 +90,7 @@ string latexHeader(Config const & cfg) {
 
 ///____________________________________________________________________________
 string latexFooter(Config const & cfg) {
-  string label = "cutAndCount";
+  string label = "CutAndCount";
 
   switch(cfg.veto) {
   case Config::kPixelMatch: label += "_PMV"    ; break;
@@ -102,6 +104,7 @@ string latexFooter(Config const & cfg) {
   }
 
   string latex = ("\\hline\n"
+		  "\\hline\n"
 		  "\\end{tabular}\n"
 		  "\\end{center}\n"
 		  "\\label{tab:");
@@ -125,17 +128,17 @@ string loopOverPeriods(Config &cfg) {
   cfg.period = Config::k2011AplusB;
   latex += loopOverCategories(cfg);
 
-  // latex += ("\\hline\n"
-  // 	    "\\multicolumn{4}{|c|}{2011A}\\\\\n"
-  // 	    "\\hline\n");
-  // cfg.period = Config::k2011A;
-  // latex += loopOverCategories(cfg);
+  latex += ("\\hline\n"
+  	    "\\multicolumn{4}{|c|}{2011A}\\\\\n"
+  	    "\\hline\n");
+  cfg.period = Config::k2011A;
+  latex += loopOverCategories(cfg);
   
-  // latex += ("\\hline\n"
-  // 	    "\\multicolumn{4}{|c|}{2011B}\\\\\n"
-  // 	    "\\hline\n");
-  // cfg.period = Config::k2011B;
-  // latex += loopOverCategories(cfg);
+  latex += ("\\hline\n"
+  	    "\\multicolumn{4}{|c|}{2011B}\\\\\n"
+  	    "\\hline\n");
+  cfg.period = Config::k2011B;
+  latex += loopOverCategories(cfg);
 
   return latex;
 } // loopOverPeriods(..)
@@ -157,38 +160,38 @@ string loopOverCategories(Config& cfg) {
   }
   latex += row + " \\\\\n";
   
-  // /// Category 2/6
-  // cfg.subdetector = Config::EcalBarrel;
-  // cfg.r9Category = Config::LowR9;
-  // row = calculateEfficiencies(cfg);
-  // switch(cfg.veto) {
-  // case Config::kCiCVeto:              latex += " 2 & "; break;
-  // case Config::kMvaVeto: latex += " 6 & "; break;
-  // case Config::kPixelMatch:                 latex += "  2 & "; break;
-  // }
-  // latex += row + " \\\\\n";
+  /// Category 2/6
+  cfg.subdetector = Config::EcalBarrel;
+  cfg.r9Category = Config::LowR9;
+  row = calculateEfficiencies(cfg);
+  switch(cfg.veto) {
+  case Config::kCiCVeto:              latex += " 2 & "; break;
+  case Config::kMvaVeto: latex += " 6 & "; break;
+  case Config::kPixelMatch:                 latex += "  2 & "; break;
+  }
+  latex += row + " \\\\\n";
   
-  // /// Category 3/7/9
-  // cfg.subdetector = Config::EcalEndcaps;
-  // cfg.r9Category = Config::HighR9;
-  // row = calculateEfficiencies(cfg);
-  // switch(cfg.veto) {
-  // case Config::kCiCVeto:              latex += " 3 & "; break;
-  // case Config::kMvaVeto: latex += " 7 & "; break;
-  // case Config::kPixelMatch:                 latex += "  9 & "; break;
-  // }
-  // latex += row + " \\\\\n";
+  /// Category 3/7/9
+  cfg.subdetector = Config::EcalEndcaps;
+  cfg.r9Category = Config::HighR9;
+  row = calculateEfficiencies(cfg);
+  switch(cfg.veto) {
+  case Config::kCiCVeto:              latex += " 3 & "; break;
+  case Config::kMvaVeto: latex += " 7 & "; break;
+  case Config::kPixelMatch:                 latex += "  9 & "; break;
+  }
+  latex += row + " \\\\\n";
 
-  // /// Category 4/8/10
-  // cfg.subdetector = Config::EcalEndcaps;
-  // cfg.r9Category = Config::LowR9;
-  // row = calculateEfficiencies(cfg);
-  // switch(cfg.veto) {
-  // case Config::kCiCVeto:              latex += " 4 & "; break;
-  // case Config::kMvaVeto: latex += " 8 & "; break;
-  // case Config::kPixelMatch:                 latex += " 10 & "; break;
-  // }
-  // latex += row + " \\\\\n";
+  /// Category 4/8/10
+  cfg.subdetector = Config::EcalEndcaps;
+  cfg.r9Category = Config::LowR9;
+  row = calculateEfficiencies(cfg);
+  switch(cfg.veto) {
+  case Config::kCiCVeto:              latex += " 4 & "; break;
+  case Config::kMvaVeto: latex += " 8 & "; break;
+  case Config::kPixelMatch:                 latex += " 10 & "; break;
+  }
+  latex += row + " \\\\\n";
   
   return latex;
 } // loopOverCategories(..)
