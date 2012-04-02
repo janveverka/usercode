@@ -28,7 +28,9 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
-name = 'EE_highR9_pt25to30_v11'
+name = 'devel_EE_highR9_pt25to30_v11'
+inputfile = 'phosphor5_model_and_fit_' + name + '.root'
+outputfile = 'phosphor5_model_and_fit2_' + name + '.root'
 
 strain = 'nominal'
 rtrain = 'nominal'
@@ -84,9 +86,9 @@ def parse_name_to_cuts():
     elif 'v14' in name:        
         source_chains_version = 'v14'
     elif 'v15' in name:        
-        source_chains_version = 'v15'
-        
+        source_chains_version = 'v15'        
 ## End of parse_name_to_cuts().
+
 
 ##------------------------------------------------------------------------------
 def parse_name_to_title():
@@ -147,21 +149,37 @@ def parse_name_to_title():
     latex_title = ', '.join(latex_labels)
 ## End of parse_name_to_title().
 
+
 ##------------------------------------------------------------------------------
-def init_globals():
+def define_globals():
     '''
-    Initialize global variables, title, cuts, outputfilename, workspace w.
+    Define global variables, title, cuts, outputfilename, workspace w.
     '''
-    global plots, outputfile
+    global plots
     plots = []
     parse_name_to_title()
-    parse_name_to_cuts()
-    outputfile = 'phosphor5_model_and_fit_' + name + '.root'
-    
-    ## Create the default workspace
+    parse_name_to_cuts()    
+## End of define_globals()
+
+
+##------------------------------------------------------------------------------
+def define_workspace():
+    '''
+    Define the default workspace w.
+    '''
     global w
     w = ROOT.RooWorkspace(name + '_workspace')
-## End of init_globals()
+## End of define_workspace().  
+  
+
+##------------------------------------------------------------------------------
+def read_workspace_from_file(filename):
+    '''
+    Read the default workspace w from a file of the given filename.
+    '''
+    global w
+    w = ROOT.TFile.Open(filename).Get(name + '_workspace')
+## End of read_workspace_from_file()
 
 
 ##------------------------------------------------------------------------------
@@ -170,41 +188,38 @@ def define_data_observables():
     Defines variables for observables in data in the workspace as python 
     globals.
     '''
-
-    ## Define data observables. 
     global mmgMass, mmMass, phoERes, mmgMassPhoGenE, weight
-    mmgMass = w.factory('mmgMass[40, 140]')
+    mmgMass        = w.factory('mmgMass[40, 140]')
+    mmMass         = w.factory('mmMass[10, 140]')
+    phoERes        = w.factory('phoERes[-70, 100]')
     mmgMassPhoGenE = w.factory('mmgMassPhoGenE[0, 200]')
-    mmMass = w.factory('mmMass[10, 140]')
-    phoERes = w.factory('phoERes[-70, 100]')
-    weight = w.factory('weight[1]')
-
-    ## Set relevant ranges
-    mmgMass.setRange('plot', 70, 110)
-    mmgMass.setRange('fit', 60, 120)
+    weight         = w.factory('weight[1]')
 ## End of define_data_observables()
 
 
 ##------------------------------------------------------------------------------
 def read_data_observables_from_workspace(workspace):
     '''
-    Reads variables for observables in data from a given workspace in a given
-    file and defines them as python globals.
+    Reads variables for observables in data from a given workspace
+    and defines them as python globals.
     '''
-
-    ## Define data observables.
     global mmgMass, mmMass, phoERes, mmgMassPhoGenE, weight
-    mmgMass = workspace.var('mmgMass')
+    mmgMass        = workspace.var('mmgMass')
+    mmMass         = workspace.var('mmMass')
+    phoERes        = workspace.var('phoERes')
     mmgMassPhoGenE = workspace.var('mmgMassPhoGenE')
-    mmMass = workspace.var('mmMass')
-    phoERes = workspace.var('phoERes')
-    weight = workspace.var('weight')
-
-    ## Set relevant ranges
-    mmgMass.setRange('plot', 70, 110)
-    mmgMass.setRange('fit', 60, 120)
+    weight         = workspace.var('weight')
 ## End of read_data_observables_from_file()
 
+
+##------------------------------------------------------------------------------
+def set_ranges_for_data_observables():
+    '''
+    Sets the ranges used for fitting and plotting.
+    '''
+    mmgMass.setRange('plot', 70, 110)
+    mmgMass.setRange('fit', 60, 120)
+## End of set_ranges_for_data_observables().
 
 
 ##------------------------------------------------------------------------------
@@ -213,34 +228,62 @@ def define_model_parameters():
     Defines model parameters and related variables in the workspace 
     as python globals.
     '''
-
     ## Define model parameters.
     global phoScale, phoRes, phoScaleTrue, phoResTrue
-    phoScale = w.factory('phoScale[0,-50,50]')
-    phoRes = w.factory('phoRes[3,0.1,20.1]')
+    phoScale     = w.factory('phoScale[0,-50,50]')
+    phoRes       = w.factory('phoRes[3,0.1,20.1]')
     phoScaleTrue = w.factory('phoScaleTrue[0,-50,50]')
-    phoResTrue = w.factory('phoResTrue[1.5,0.01,50]')
+    phoResTrue   = w.factory('phoResTrue[1.5,0.01,50]')
 
-    ## Define the binning for the normalization integral caching.
+    ## Prep for storing fit results in the workspace.
+    global phoScaleTarget, phoResTarget, params
+    phoScaleTarget = w.factory('phoScaleTarget[0,-50,50]')
+    phoResTarget   = w.factory('phoResTarget[5,0.01,50]')
+    params         = ROOT.RooArgSet(phoScaleTarget, phoResTarget)
+    w.defineSet('params', params)
+
+    ## Set units.
+    for x, u in zip([phoScale, phoRes, phoScaleTrue, phoResTrue,
+                     phoScaleTarget, phoResTarget],
+                    '% % % % % %'.split()):
+        x.setUnit(u)
+
+## End of define_model_parameters().
+
+
+##------------------------------------------------------------------------------
+def read_model_parameters_from_workspace(workspace):
+    '''
+    Reads model parameters form the given workspace and defines them as 
+    python globals.
+    '''
+    global phoScale, phoRes, phoScaleTrue, phoResTrue
+    phoScale     = workspace.var('phoScale')
+    phoRes       = workspace.var('phoRes')
+    phoScaleTrue = workspace.var('phoScaleTrue')
+    phoResTrue   = workspace.var('phoResTrue')
     
+    
+    ## Prep for storing fit results in the workspace.
+    global phoScaleTarget, phoResTarget, params
+    phoScaleTarget = workspace.var('phoScaleTarget')
+    phoResTarget   = workspace.var('phoResTarget')
+    params         = workspace.set('params')
+  
+## End of read_model_parameters_from_workspace
+
+
+##------------------------------------------------------------------------------
+def set_signal_model_normalization_integral_cache_binnings():
+    '''
+    Define the binning for the normalization integral caching.
+    '''
     ## This setting was used as a default for Adi's e/gamma paper placeholders.
     phosbins = ROOT.RooBinning(15, -15, 15, 'normcache')
     phorbins = ROOT.RooBinning(15, 0.1, 25.1, 'normcache')
     phoScale.setBinning(phosbins, 'normcache')
     phoRes.setBinning(phorbins, 'normcache')
-
-    ## Set units.
-    for x, u in zip([phoScale, phoRes],
-                    '% %'.split()):
-        x.setUnit(u)
-
-    ## Prep for storing fit results in the workspace.
-    global phoScaleTarget, phoResTarget, params
-    phoScaleTarget = w.factory('phoScaleTarget[0,-50,50]')
-    phoResTarget = w.factory('phoResTarget[5,0.01,50]')
-    params = ROOT.RooArgSet(phoScaleTarget, phoResTarget)
-    w.defineSet('params', params)
-## End of define_model_parameters().
+## End of set_signal_model_normalization_integral_cache_binnings().
 
 
 ##------------------------------------------------------------------------------
@@ -260,22 +303,56 @@ def define_mass_derivative_function_and_mean():
 
     global xmean
     xmean = w.factory('xmean[0.1, 0, 1]')
-
 ## End of define_mass_derivative_function_and_mean()
 
+
 ##------------------------------------------------------------------------------
-def init():
-    'Initialize workspace and common variables and functions.'
-    init_globals()
-    define_data_observables()
-    define_model_parameters()
-    define_mass_derivative_function_and_mean()   
-## End of init().
+def read_mass_derivative_function_and_mean_from_workspace(workspace):
+    '''
+    Reads the function for the derivateve of the logarithm of the 
+    mu-mu-gamma system invariant mass w.r.t. to photon energy
+    d log m(mmg) / d log E(g) 
+    and a variable holding it's mean for a given sample from thei
+    given workspace.  These are declared as python global variables.
+    '''
+    global xfunc, xmean
+    xfunc = workspace.function('xfunc')
+    xmean = workspace.var('xmean')
+## End of read_mass_derivative_function_and_mean_from_workspace().
+
+
+##------------------------------------------------------------------------------
+def replace_variable_titles(self, new_titles):
+    '''
+    Replaces the titles of variables in the workspace using the given
+    dictionary (name)->(new title) and returns the dictionary of the
+    original titles (name)->(old title).
+    '''
+    old_titles = {}
+    for name in new_titles:
+        old_titles[name] = self.w.var(name).GetTitle()
+        self.w.var(name).SetTitle(new_titles[name])
+    return old_titles
+## End of replace_variable_titles().
 
 
 ##------------------------------------------------------------------------------
 def get_data(chains = getChains('v11')):
-    'Get the nominal data that is used for smearing.'
+    '''
+    Get the nominal data that is used for smearing.
+    '''
+    ## Map of variable names and corresponding TTree expressions to
+    ## calculate it.
+    expression_map = {
+        'mmgMass': 'mmgMass',
+        'mmMass' : 'mmMass' ,
+        'gpt'    : 'gamenergy/cosh(gameta)',
+        'geta' : 'gameta', 
+        'r9' : 'gamr9' ,
+        'sihih' : 'gamsigmaIetaIeta',
+        'weight' : 'evtweight',
+        }
+    
     ## The TFormula expression defining the data is given in the titles.
     weight.SetTitle('pileup.weight')
     phoERes.SetTitle('100 * phoERes')
@@ -329,6 +406,15 @@ def get_data(chains = getChains('v11')):
                        'GeV GeV GeV % % %'.split()):
         x.SetTitle(t)
         x.setUnit(u)
+        
+    ## Do we want to reduce the data?
+    if reduce_data:
+        reduced_entries = int( (1 - fit_data_fraction) * 
+                               data['fsr0'].numEntries() )
+        data['fsr0'] = data['fsr0'].reduce(
+            roo.EventRange(0, int(reduced_entries))
+            )
+
     ##-- Get Smeared Data ------------------------------------------------------
     global calibrator0, calibrator1, fit_calibrator
     calibrator0 = MonteCarloCalibrator(data['fsr0'], printlevel=1, rho=1.5)
@@ -337,7 +423,16 @@ def get_data(chains = getChains('v11')):
         fit_calibrator = calibrator1
     else:
         fit_calibrator = calibrator0
+
+    ##-- Check the time -------------------------------------------------------
+    check_timer(
+        '1. init and get_data (%d entries)' % (
+            data['fsr0'].numEntries() + data['fsr1'].numEntries() +
+            data['zj0'].numEntries() + data['zj1'].numEntries()
+            )
+        )
 ## End of get_data.
+
 
 ##------------------------------------------------------------------------------
 def get_confint(x, cl=5):
@@ -357,6 +452,7 @@ def get_confint(x, cl=5):
                 min(x.getVal() + cl * x.getError(), x.getMax()))
 ## End of get_confint().
 
+
 ##------------------------------------------------------------------------------
 def unite_intervals(ilist):
     '''Takes a list of n 1-dimensional intervals [(a_1, b_1), (a_2, b_2), ...,
@@ -365,6 +461,7 @@ def unite_intervals(ilist):
     lower_bounds, upper_bounds = zip(*ilist)
     return (min(lower_bounds), max(upper_bounds))
 ## End of unite_intervals()
+
 
 ##------------------------------------------------------------------------------
 def check_timer(label = ''):
@@ -376,6 +473,7 @@ def check_timer(label = ''):
     times.append((label, ct, rt))
     return ct, rt
 ## End of check_timer()
+
 
 ##------------------------------------------------------------------------------
 def outro(make_plots=True, save_workspace=True):
@@ -483,27 +581,50 @@ def read_model_from_workspace(workspace):
 
 
 ##------------------------------------------------------------------------------
+def init():
+    '''
+    Initialize workspace and common variables and functions.
+    '''
+    define_globals()
+    define_workspace()
+    define_data_observables()
+    define_model_parameters()
+    define_mass_derivative_function_and_mean()   
+    set_ranges_for_data_observables()
+    set_signal_model_normalization_integral_cache_binnings()
+    get_data(getChains(source_chains_version))
+    build_model()
+## End of init().
+
+
+##------------------------------------------------------------------------------
+def init_from_file(filename):
+    '''
+    Initialize workspace and common variables and functions from a file
+    of the given filename.
+    '''
+    define_globals()
+    read_workspace_from_file(filename)
+    read_data_observables_from_workspace(w)
+    read_model_parameters_from_workspace(w)
+    read_mass_derivative_function_and_mean_from_workspace(w)
+    set_ranges_for_data_observables()
+    set_signal_model_normalization_integral_cache_binnings()
+    get_data(getChains(source_chains_version))
+    # read_model_from_workspace(w)
+    build_model()
+## End of init_from_file().
+
+
+##------------------------------------------------------------------------------
 ## def main():
-global data
 sw.Start()
 sw2 = ROOT.TStopwatch()
 sw2.Start()
 
 init()
-read_data_observables_from_workspace(w)
-get_data(getChains(source_chains_version))
-
-if reduce_data:
-    reduced_entries = int((1 - fit_data_fraction) * data['fsr0'].numEntries())
-    data['fsr0'] = data['fsr0'].reduce(roo.EventRange(0, int(reduced_entries)))
-
-check_timer('1. init and get_data (%d entries)' % (data['fsr0'].numEntries() +
-                                                   data['fsr1'].numEntries() +
-                                                   data['zj0'].numEntries() +
-                                                   data['zj1'].numEntries()))
-
-build_model()
-read_model_from_workspace(w)
+# init_from_file(inputfile)
+# read_model_from_workspace(w)
 
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-07)
