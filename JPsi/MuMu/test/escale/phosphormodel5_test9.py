@@ -322,7 +322,7 @@ def read_mass_derivative_function_and_mean_from_workspace(workspace):
 
 
 ##------------------------------------------------------------------------------
-def replace_variable_titles(self, new_titles):
+def replace_variable_titles(new_titles, workspace):
     '''
     Replaces the titles of variables in the workspace using the given
     dictionary (name)->(new title) and returns the dictionary of the
@@ -330,8 +330,8 @@ def replace_variable_titles(self, new_titles):
     '''
     old_titles = {}
     for name in new_titles:
-        old_titles[name] = self.w.var(name).GetTitle()
-        self.w.var(name).SetTitle(new_titles[name])
+        old_titles[name] = workspace.var(name).GetTitle()
+        workspace.var(name).SetTitle(new_titles[name])
     return old_titles
 ## End of replace_variable_titles().
 
@@ -347,20 +347,17 @@ def get_data(chains = getChains('v11')):
     expression_map = {
         'mmgMass': 'mmgMass',
         'mmMass' : 'mmMass' ,
-        'gpt'    : 'gamenergy/cosh(gameta)',
-        'geta' : 'gameta', 
-        'r9' : 'gamr9' ,
-        'sihih' : 'gamsigmaIetaIeta',
-        'weight' : 'evtweight',
+        'phoERes'    : '100 * phoERes',
+        'mmgMassPhoGenE': ('threeBodyMass(mu1Pt, mu1Eta, mu1Phi, 0.106, '
+                            '              mu2Pt, mu2Eta, mu2Phi, 0.106, '
+                            '              phoGenE * phoPt / phoE, '
+                            '                     phoEta, phoPhi, 0)'),
+        'weight' : 'pileup.weight',
         }
     
     ## The TFormula expression defining the data is given in the titles.
-    weight.SetTitle('pileup.weight')
-    phoERes.SetTitle('100 * phoERes')
-    mmgMassPhoGenE.SetTitle('threeBodyMass(mu1Pt, mu1Eta, mu1Phi, 0.106, '
-                            '              mu2Pt, mu2Eta, mu2Phi, 0.106, '
-                            '              phoGenE * phoPt / phoE, '
-                            '                     phoEta, phoPhi, 0)')
+    latex_map = replace_variable_titles(expression_map, w)
+
     ## Create a preselected tree
     tree = {}
     tree['z'] = chains['z'].CopyTree('&'.join(cuts))
@@ -397,16 +394,7 @@ def get_data(chains = getChains('v11')):
                               variables=[mmgMass, mmMass])
 
     ## Set units and nice titles
-    for x, t, u in zip([mmgMass, mmgMassPhoGenE, mmMass, phoERes, phoScale,
-                        phoRes],
-                       ['m_{#mu#mu#gamma}',
-                        'm_{#mu#mu#gamma} with E_{gen}^{#gamma}',
-                        'm_{#mu^{+}#mu^{-}}',
-                        'E_{reco}^{#gamma}/E_{gen}^{#gamma} - 1',
-                        'E^{#gamma} Scale', 'E^{#gamma} Resolution'],
-                       'GeV GeV GeV % % %'.split()):
-        x.SetTitle(t)
-        x.setUnit(u)
+    replace_variable_titles(latex_map, w)
         
     ## Do we want to reduce the data?
     if reduce_data:
@@ -415,6 +403,9 @@ def get_data(chains = getChains('v11')):
         data['fsr0'] = data['fsr0'].reduce(
             roo.EventRange(0, int(reduced_entries))
             )
+
+    data['zj0'].SetName('zj0_mc')
+    w.Import(data['zj0'])
 
     ##-- Calculate MC Truth Purity ---------------------------------------------
     if use_independent_fake_data:
@@ -498,6 +489,8 @@ def outro(make_plots=True, save_workspace=True):
             if c:
                 w.Import(c, 'c_' + c.GetName())
         w.writeToFile(outputfile, False)
+
+    check_timer('14. outro')
 ## End of outro().
 
 
@@ -549,10 +542,8 @@ def build_model():
     '''Builds the PDFs for the backgrounds and the full signal + background
     model.'''
     build_signal_model()
-    ## Build the Z+jets background PDF.
-    data['zj0'].SetName('zj0_mc')
-    w.Import(data['zj0'])
 
+    ## Build the Z+jets background PDF.
     global zj_pdf
     zj_pdf = ROOT.RooKeysPdf('zj0_pdf', 'zj0_pdf', mmgMass,
                             data['zj0'], ROOT.RooKeysPdf.NoMirror, 3)
@@ -588,7 +579,7 @@ def read_model_from_workspace(workspace):
     zj_pdf = workspace.pdf('zj0_pdf')
     bkg_pdf = workspace.pdf('bkg_pdf')
     pm = workspace.pdf('pm')
-## End of read_model_from_file().
+## End of read_model_from_workspace().
 
 
 ##------------------------------------------------------------------------------
@@ -622,8 +613,8 @@ def init_from_file(filename):
     set_ranges_for_data_observables()
     set_signal_model_normalization_integral_cache_binnings()
     get_data(getChains(source_chains_version))
-    # read_model_from_workspace(w)
-    build_model()
+    read_model_from_workspace(w)
+    # build_model()
 ## End of init_from_file().
 
 
@@ -734,18 +725,16 @@ def process_real_data():
 
 
 ##------------------------------------------------------------------------------
-## def main():
-sw.Start()
-sw2 = ROOT.TStopwatch()
-sw2.Start()
+def main():
+    sw.Start()
+    sw2 = ROOT.TStopwatch()
+    sw2.Start()
 
-# init()
-# init_from_file(inputfile)
-# read_model_from_workspace(w)
-# process_real_data()
-# outro()
-# check_timer('14. outro')
-
+    # init()
+    init_from_file(inputfile)
+    process_real_data()
+    outro()
+## End of main().
 
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-07)
@@ -1159,6 +1148,6 @@ sw2.Start()
 
 ##------------------------------------------------------------------------------
 if __name__ == '__main__':
-    ## main()
+    main()
     import user
 
