@@ -30,7 +30,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 # name = 'EB_highR9_pt15to20'
 name = 'devel_EE_highR9_pt25to30_v11'
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
-outputfile = 'phosphor5_model_and_fit2_' + name + '.root'
+outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 
 strain = 'nominal'
 rtrain = 'nominal'
@@ -45,6 +45,8 @@ fake_data_cut = 'Entry$ % 4 == 4'
 use_independent_fake_data = False
 
 sw = ROOT.TStopwatch()
+sw2 = ROOT.TStopwatch()
+
 times = []
 
 ##------------------------------------------------------------------------------
@@ -491,6 +493,9 @@ def outro(make_plots=True, save_workspace=True):
         w.writeToFile(outputfile, False)
 
     check_timer('14. outro')
+    
+    ct, rt = sw2.CpuTime(), sw2.RealTime()
+    print '+++ TOTAL CPU time:', ct, 's, real time: %.2f' % rt, 's'
 ## End of outro().
 
 
@@ -506,10 +511,10 @@ def build_signal_model():
     # phortargets =  [0.5 + 0.5 * i for i in range(30)]
 
     ## This was used as a default for Adi's placeholders plots
-    # phortargets = [0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
+    phortargets = [0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
 
     # phortargets = [0.5, 6, 7, 7.5, 8, 8.5, 8.75, 9, 9.5, 10, 10.5, 11, 11.5, 11.75, 12, 12.5, 13, 14]
-    phortargets = [0.5, fit_calibrator.r0.getVal(), 10, 20]
+    # phortargets = [0.5, fit_calibrator.r0.getVal(), 10, 20]
     # phortargets.append(fit_calibrator.r0.getVal())
     phortargets.sort()
 
@@ -619,20 +624,21 @@ def init_from_file(filename):
 
 
 #-------------------------------------------------------------------------------
-def get_real_data():
+def get_real_data(label):
     '''
-    Get real data for the full 2011 run including 2011A + 2011B.
+    Get real data for the dataset specified by the label: "data" (full 2011A+B),
+    "2011A" or "2011B".
     '''
     global source_chains_version
     if source_chains_version == 'v11':
         source_chains_version = 'v12'
-    dchain = getChains(source_chains_version)['data']
+    dchain = getChains(source_chains_version)[label]
     weight.SetTitle('1')
     mmgMass.SetTitle('mmgMass')
     mmMass.SetTitle('mmMass')
     dataset.variables = []
     dataset.cuts = []
-    data['real'] = dataset.get(tree=dchain, cuts=cuts[:],
+    data[label] = dataset.get(tree=dchain, cuts=cuts[:],
                                variables=[mmgMass, mmMass],
                                weight=weight)
     mmgMass.SetTitle('m_{#mu#mu#gamma}')
@@ -640,37 +646,39 @@ def get_real_data():
 
 
 #-------------------------------------------------------------------------------
-def fit_real_data():
+def fit_real_data(label):
     '''
-    Get, fit and plot real data for the full 2011 run including 2011A + 2011B.
+    Fit dataset specified by the label: "data" (full 2011A+B),
+    "2011A" or "2011B".
     '''
-    get_real_data()
-    
-    ## Fit it!
-    fres_realdata = pm.fitTo(data['real'], roo.Range('fit'),  roo.NumCPU(8),
+    fit_result = pm.fitTo(data[label], roo.Range('fit'),  roo.NumCPU(8),
                              roo.Timer(), # roo.Verbose()
                              roo.InitialHesse(True), roo.Minos(),
                              roo.Save(), 
         )
-    w.Import(fres_realdata, 'fitresult_real_data_2011AB')
+    w.Import(fit_result, 'fitresult_' + label)
 ## End of fit_real_data()
 
 
 #-------------------------------------------------------------------------------
-def plot_fit_to_real_data():
+def plot_fit_to_real_data(label):
     '''
-    Plot fit to real data for the full 2011 run including 2011A + 2011B.
+    Plot fit to real data for a dataset specified by the label:
+    "data" (full 2011A+B), "2011A" or "2011B".
     '''
     mmgMass.setRange('plot', 70, 110)
     mmgMass.setBins(80)
     plot = mmgMass.frame(roo.Range('plot'))
-    plot.SetTitle('2011A+B, ' + latex_title)
-    data['real'].plotOn(plot)
+    if label == 'data':
+        title_start = '2011A+B'
+    else:
+        title_start = label
+    plot.SetTitle('%s, %s' % (title_start, latex_title))
+    data[label].plotOn(plot)
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
               roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-    # pm.paramOn(plot)
-    canvases.next(name + '_real_data')
+    canvases.next(name + '_' + label)
     plot.Draw()
 ## End of plot_fit_to_real_data().
 
@@ -678,8 +686,7 @@ def plot_fit_to_real_data():
 #-------------------------------------------------------------------------------
 def draw_latex_for_fit_to_real_data():
     '''
-    Draw latex results to the plot of the fit to real data for the full 2011
-    run including 2011A + 2011B.
+    Draw latex results to the plot of the fit to real data.
     '''
     global fsr_purity
     Latex([
@@ -712,26 +719,42 @@ def draw_latex_for_fit_to_real_data():
 
 
 #-------------------------------------------------------------------------------
+def process_real_data_single_dataset(label):
+    '''
+    Get, fit and plot real data for a dataset specified by the label:
+    "data" (full 2011A+B), "2011A" or "2011B".
+    '''
+    get_real_data(label)
+    fit_real_data(label)
+    plot_fit_to_real_data(label)
+    draw_latex_for_fit_to_real_data()
+## End of get_fit_and_plot_real_data_single_dataset().
+
+
+#-------------------------------------------------------------------------------
 def process_real_data():
     '''
-    Get, fit and plot real data for the full 2011 run (A+B).
+    Get, fit and plot real data for all 3 dataset specified:
+    "data" (full 2011A+B), "2011A" or "2011B".
     '''
-    get_real_data()
-    fit_real_data()
-    plot_fit_to_real_data()
-    draw_latex_for_fit_to_real_data()
+    process_real_data_single_dataset('data')
     check_timer('13. get, fit and plot real data')
-## End of get_fit_and_plot_real_data().
+
+    process_real_data_single_dataset('2011A')
+    check_timer('13.1 get, fit and plot 2011A real data')
+
+    process_real_data_single_dataset('2011B')
+    check_timer('13.2 get, fit and plot 2011B real data')
+## End of process_real_data().
 
 
 ##------------------------------------------------------------------------------
 def main():
     sw.Start()
-    sw2 = ROOT.TStopwatch()
     sw2.Start()
 
-    # init()
-    init_from_file(inputfile)
+    init()
+    # init_from_file(inputfile)
     process_real_data()
     outro()
 ## End of main().
@@ -999,150 +1022,7 @@ def main():
 #check_timer('12.1 1- and 2-sigma contours')
 
 
-##==============================================================================
-### Get real data 2011A
-#if source_chains_version == 'v11':
-    #source_chains_version = 'v12'
-#dchain = getChains(source_chains_version)['2011A']
-#weight.SetTitle('1')
-#mmgMass.SetTitle('mmgMass')
-#mmMass.SetTitle('mmMass')
-#dataset.variables = []
-#dataset.cuts = []
-#data['2011A'] = dataset.get(tree=dchain, cuts=cuts[:],
-                            #variables=[mmgMass, mmMass],
-                            #weight=weight)
-#mmgMass.SetTitle('m_{#mu#mu#gamma}')
 
-### Fit it!
-#fres_realdata = pm.fitTo(data['2011A'], roo.Range('fit'),  roo.NumCPU(8),
-                         #roo.Timer(), # roo.Verbose()
-                         #roo.InitialHesse(True), roo.Minos(),
-                         #roo.Save(), 
-    #)
-#w.Import(fres_realdata, 'fitresult_real_data_2011A')
-
-### Make a plot
-#mmgMass.setRange('plot', 70, 110)
-#mmgMass.setBins(80)
-#plot = mmgMass.frame(roo.Range('plot'))
-#plot.SetTitle('2011A, ' + latex_title)
-#data['2011A'].plotOn(plot)
-#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-          #roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-## pm.paramOn(plot)
-#canvases.next(name + '_real_data_2011A')
-#plot.Draw()
-#Latex([
-    #'E^{#gamma} Scale (%)',
-    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
-                                   #fit_calibrator.s.getError()),
-    #'  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        #phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-        #phoScale.getErrorLo()
-        #),
-    #'',
-    #'E^{#gamma} Resolution (%)',
-    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
-                                   #fit_calibrator.r.getError()),
-    #'  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        #phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-        #phoRes.getErrorLo()
-        #),
-    #'',
-        #'Signal Purity (%)',
-        #'  MC Truth: %.2f' % fsr_purity,
-        #'  Data Fit: %.2f #pm %.2f' % (
-            #100 * w.var('signal_f').getVal(),
-            #100 * w.var('signal_f').getError()
-            #)
-    ## 'N_{S} (events)',
-    ## '  MC Truth: %.0f' % fitdata1.sumEntries(),
-    ## '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
-    ##     w.var(name + '_signal_f').getVal(),
-    ##     w.var(name + '_signal_f').getError()
-    ##     )
-    #],
-    #position=(0.2, 0.8)
-    #).draw()
-#check_timer('13.1 get, fit and plot 2011A real data')
-
-
-##==============================================================================
-### Get real data 2011B
-#if source_chains_version == 'v11':
-    #source_chains_version = 'v12'
-#dchain = getChains(source_chains_version)['2011B']
-#weight.SetTitle('1')
-#mmgMass.SetTitle('mmgMass')
-#mmMass.SetTitle('mmMass')
-#dataset.variables = []
-#dataset.cuts = []
-#data['2011B'] = dataset.get(tree=dchain, cuts=cuts[:],
-                            #variables=[mmgMass, mmMass],
-                            #weight=weight)
-#mmgMass.SetTitle('m_{#mu#mu#gamma}')
-
-### Fit it!
-#fres_realdata = pm.fitTo(data['2011B'], roo.Range('fit'),  roo.NumCPU(8),
-                         #roo.Timer(), # roo.Verbose()
-                         #roo.InitialHesse(True), roo.Minos(),
-                         #roo.Save(), 
-    #)
-#w.Import(fres_realdata, 'fitresult_real_data_2011B')
-
-### Make a plot
-#mmgMass.setRange('plot', 70, 110)
-#mmgMass.setBins(80)
-#plot = mmgMass.frame(roo.Range('plot'))
-#plot.SetTitle('2011B, ' + latex_title)
-#data['2011B'].plotOn(plot)
-#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-          #roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-## pm.paramOn(plot)
-#canvases.next(name + '_real_data_2011B')
-#plot.Draw()
-#Latex([
-    #'E^{#gamma} Scale (%)',
-    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
-                                   #fit_calibrator.s.getError()),
-    #'  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        #phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-        #phoScale.getErrorLo()
-        #),
-    #'',
-    #'E^{#gamma} Resolution (%)',
-    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
-                                   #fit_calibrator.r.getError()),
-    #'  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        #phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-        #phoRes.getErrorLo()
-        #),
-    #'',
-        #'Signal Purity (%)',
-        #'  MC Truth: %.2f' % fsr_purity,
-        #'  Data Fit: %.2f #pm %.2f' % (
-            #100 * w.var('signal_f').getVal(),
-            #100 * w.var('signal_f').getError()
-            #)
-    ## 'N_{S} (events)',
-    ## '  MC Truth: %.0f' % fitdata1.sumEntries(),
-    ## '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
-    ##     w.var(name + '_signal_f').getVal(),
-    ##     w.var(name + '_signal_f').getError()
-    ##     )
-    #],
-    #position=(0.2, 0.8)
-    #).draw()
-#check_timer('13.2 get, fit and plot 2011B real data')
-
-# outro()
-# check_timer('14. outro')
-
-#ct, rt = sw2.CpuTime(), sw2.RealTime()
-#print '+++ TOTAL CPU time:', ct, 's, real time: %.2f' % rt, 's'
 ## End of main().
 
 
