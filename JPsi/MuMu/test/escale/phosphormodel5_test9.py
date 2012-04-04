@@ -739,11 +739,13 @@ sw.Start()
 sw2 = ROOT.TStopwatch()
 sw2.Start()
 
-init()
-process_real_data()
-
+# init()
 # init_from_file(inputfile)
 # read_model_from_workspace(w)
+# process_real_data()
+# outro()
+# check_timer('14. outro')
+
 
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-07)
@@ -1147,8 +1149,8 @@ process_real_data()
     #).draw()
 #check_timer('13.2 get, fit and plot 2011B real data')
 
-outro()
-check_timer('14. outro')
+# outro()
+# check_timer('14. outro')
 
 #ct, rt = sw2.CpuTime(), sw2.RealTime()
 #print '+++ TOTAL CPU time:', ct, 's, real time: %.2f' % rt, 's'
