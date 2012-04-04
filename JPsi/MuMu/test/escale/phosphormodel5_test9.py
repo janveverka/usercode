@@ -341,6 +341,7 @@ def get_data(chains = getChains('v11')):
     '''
     Get the nominal data that is used for smearing.
     '''
+    ## TODO: Break this down into several smaller methods.
     ## Map of variable names and corresponding TTree expressions to
     ## calculate it.
     expression_map = {
@@ -415,6 +416,16 @@ def get_data(chains = getChains('v11')):
             roo.EventRange(0, int(reduced_entries))
             )
 
+    ##-- Calculate MC Truth Purity ---------------------------------------------
+    if use_independent_fake_data:
+        num_fsr_events = data['fsr1'].sumEntries()
+        num_zj_events = data['zj1'].sumEntries()
+    else:
+        num_fsr_events = data['fsr0'].sumEntries()
+        num_zj_events = data['zj0'].sumEntries()
+    global fsr_purity
+    fsr_purity = 100 * num_fsr_events / (num_fsr_events + num_zj_events)
+    
     ##-- Get Smeared Data ------------------------------------------------------
     global calibrator0, calibrator1, fit_calibrator
     calibrator0 = MonteCarloCalibrator(data['fsr0'], printlevel=1, rho=1.5)
@@ -616,6 +627,112 @@ def init_from_file(filename):
 ## End of init_from_file().
 
 
+#-------------------------------------------------------------------------------
+def get_real_data():
+    '''
+    Get real data for the full 2011 run including 2011A + 2011B.
+    '''
+    global source_chains_version
+    if source_chains_version == 'v11':
+        source_chains_version = 'v12'
+    dchain = getChains(source_chains_version)['data']
+    weight.SetTitle('1')
+    mmgMass.SetTitle('mmgMass')
+    mmMass.SetTitle('mmMass')
+    dataset.variables = []
+    dataset.cuts = []
+    data['real'] = dataset.get(tree=dchain, cuts=cuts[:],
+                               variables=[mmgMass, mmMass],
+                               weight=weight)
+    mmgMass.SetTitle('m_{#mu#mu#gamma}')
+## End of get_real_data()
+
+
+#-------------------------------------------------------------------------------
+def fit_real_data():
+    '''
+    Get, fit and plot real data for the full 2011 run including 2011A + 2011B.
+    '''
+    get_real_data()
+    
+    ## Fit it!
+    fres_realdata = pm.fitTo(data['real'], roo.Range('fit'),  roo.NumCPU(8),
+                             roo.Timer(), # roo.Verbose()
+                             roo.InitialHesse(True), roo.Minos(),
+                             roo.Save(), 
+        )
+    w.Import(fres_realdata, 'fitresult_real_data_2011AB')
+## End of fit_real_data()
+
+
+#-------------------------------------------------------------------------------
+def plot_fit_to_real_data():
+    '''
+    Plot fit to real data for the full 2011 run including 2011A + 2011B.
+    '''
+    mmgMass.setRange('plot', 70, 110)
+    mmgMass.setBins(80)
+    plot = mmgMass.frame(roo.Range('plot'))
+    plot.SetTitle('2011A+B, ' + latex_title)
+    data['real'].plotOn(plot)
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+              roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
+    # pm.paramOn(plot)
+    canvases.next(name + '_real_data')
+    plot.Draw()
+## End of plot_fit_to_real_data().
+
+
+#-------------------------------------------------------------------------------
+def draw_latex_for_fit_to_real_data():
+    '''
+    Draw latex results to the plot of the fit to real data for the full 2011
+    run including 2011A + 2011B.
+    '''
+    global fsr_purity
+    Latex([
+        'E^{#gamma} Scale (%)',
+        '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
+                                       fit_calibrator.s.getError()),
+        '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+            phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+            phoScale.getErrorLo()
+            ),
+        '',
+        'E^{#gamma} Resolution (%)',
+        '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
+                                       fit_calibrator.r.getError()),
+        '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+            phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+            phoRes.getErrorLo()
+            ),
+        '',
+            'Signal Purity (%)',
+            '  MC Truth: %.2f' % fsr_purity,
+            '  Data Fit: %.2f #pm %.2f' % (
+                100 * w.var('signal_f').getVal(),
+                100 * w.var('signal_f').getError()
+                )
+        ],
+        position=(0.2, 0.8)
+        ).draw()
+## Enf of draw_latex_for_fit_to_real_data().
+
+
+#-------------------------------------------------------------------------------
+def process_real_data():
+    '''
+    Get, fit and plot real data for the full 2011 run (A+B).
+    '''
+    get_real_data()
+    fit_real_data()
+    plot_fit_to_real_data()
+    draw_latex_for_fit_to_real_data()
+    check_timer('13. get, fit and plot real data')
+## End of get_fit_and_plot_real_data().
+
+
 ##------------------------------------------------------------------------------
 ## def main():
 sw.Start()
@@ -623,6 +740,8 @@ sw2 = ROOT.TStopwatch()
 sw2.Start()
 
 init()
+process_real_data()
+
 # init_from_file(inputfile)
 # read_model_from_workspace(w)
 
@@ -729,13 +848,6 @@ init()
           #roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))     
 #canvases.next(name + '_fit')
 #plot.Draw()
-if use_independent_fake_data:
-    num_fsr_events = data['fsr1'].sumEntries()
-    num_zj_events = data['zj1'].sumEntries()
-else:
-    num_fsr_events = data['fsr0'].sumEntries()
-    num_zj_events = data['zj0'].sumEntries()
-fsr_purity = 100 * num_fsr_events / (num_fsr_events + num_zj_events)
 #Latex([
     #'E^{#gamma} Scale (%)',
     #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
@@ -895,75 +1007,6 @@ fsr_purity = 100 * num_fsr_events / (num_fsr_events + num_zj_events)
 
 #check_timer('12.1 1- and 2-sigma contours')
 
-#==============================================================================
-## Get real data
-if source_chains_version == 'v11':
-    source_chains_version = 'v12'
-dchain = getChains(source_chains_version)['data']
-weight.SetTitle('1')
-mmgMass.SetTitle('mmgMass')
-mmMass.SetTitle('mmMass')
-dataset.variables = []
-dataset.cuts = []
-data['real'] = dataset.get(tree=dchain, cuts=cuts[:],
-                           variables=[mmgMass, mmMass],
-                           weight=weight)
-mmgMass.SetTitle('m_{#mu#mu#gamma}')
-
-## Fit it!
-fres_realdata = pm.fitTo(data['real'], roo.Range('fit'),  roo.NumCPU(8),
-                         roo.Timer(), # roo.Verbose()
-                         roo.InitialHesse(True), roo.Minos(),
-                         roo.Save(), 
-    )
-w.Import(fres_realdata, 'fitresult_real_data_2011AB')
-    
-## Make a plot
-mmgMass.setRange('plot', 70, 110)
-mmgMass.setBins(80)
-plot = mmgMass.frame(roo.Range('plot'))
-plot.SetTitle('2011A+B, ' + latex_title)
-data['real'].plotOn(plot)
-pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-          roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-# pm.paramOn(plot)
-canvases.next(name + '_real_data')
-plot.Draw()
-Latex([
-    'E^{#gamma} Scale (%)',
-    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
-                                   fit_calibrator.s.getError()),
-    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-        phoScale.getErrorLo()
-        ),
-    '',
-    'E^{#gamma} Resolution (%)',
-    '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
-                                   fit_calibrator.r.getError()),
-    '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-        phoRes.getErrorLo()
-        ),
-    '',
-        'Signal Purity (%)',
-        '  MC Truth: %.2f' % fsr_purity,
-        '  Data Fit: %.2f #pm %.2f' % (
-            100 * w.var('signal_f').getVal(),
-            100 * w.var('signal_f').getError()
-            )
-    # 'N_{S} (events)',
-    # '  MC Truth: %.0f' % fitdata1.sumEntries(),
-    # '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
-    #     w.var(name + '_signal_f').getVal(),
-    #     w.var(name + '_signal_f').getError()
-    #     )
-    ],
-    position=(0.2, 0.8)
-    ).draw()
-check_timer('13. get, fit and plot real data')
-
 
 ##==============================================================================
 ### Get real data 2011A
@@ -1110,6 +1153,7 @@ check_timer('14. outro')
 #ct, rt = sw2.CpuTime(), sw2.RealTime()
 #print '+++ TOTAL CPU time:', ct, 's, real time: %.2f' % rt, 's'
 ## End of main().
+
 
 ##------------------------------------------------------------------------------
 if __name__ == '__main__':
