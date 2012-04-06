@@ -2,8 +2,10 @@
 ## pyroot
 ## ------
 ## Wrapper around the pyroot.py script.
+##
+## Usage: pyroot [-l] [-b] [-n] [data1.root ... dataN.root]
+## 
 ## Jan Veverka, Caltech, 6 March 2012
-
 ## Call the pyroot.py in interactive mode and pass it all obtained arguments
-env python -i $CMSSW_BASE/src/FWLite/Tools/python/pyroot.py $@
 
+env python -i $CMSSW_BASE/src/FWLite/Tools/python/pyroot.py $@
