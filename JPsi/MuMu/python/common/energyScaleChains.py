@@ -108,15 +108,18 @@ _files['v11'] = {
     'z'    : [ 'esTree_V11_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root' ]
 }
 
+## Full 2011 data as used by the Vgamma AN-11-251
 _files['v12'] = {
     'data': '''
-            esTree_V12_DoubleMu_Run2011A-05Jul2011ReReco-ECAL-v1_condor_Dimuon_RECO-42X-v9.root
+            esTree_V12_DoubleMu_Run2011A-May10ReReco-v1_glite_Dimuon_RECO-42X-v9.root
+            esTree_V12_DoubleMu_Run2011A-PromptReco-v4_glite_Dimuon_RECO-42X-v9.root
             esTree_V12_DoubleMu_Run2011A-05Aug2011-v1_glite_Dimuon_AOD-42X-v9.root
             esTree_V12_DoubleMu_Run2011A-03Oct2011-v1_condor_Dimuon_AOD-42X-v9.root
             esTree_V12_DoubleMu_Run2011B-PromptReco-v1_condor_Dimuon_AOD-42X-v9.root
             '''.split(),
     '2011A': '''
-            esTree_V12_DoubleMu_Run2011A-05Jul2011ReReco-ECAL-v1_condor_Dimuon_RECO-42X-v9.root
+            esTree_V12_DoubleMu_Run2011A-May10ReReco-v1_glite_Dimuon_RECO-42X-v9.root
+            esTree_V12_DoubleMu_Run2011A-PromptReco-v4_glite_Dimuon_RECO-42X-v9.root
             esTree_V12_DoubleMu_Run2011A-05Aug2011-v1_glite_Dimuon_AOD-42X-v9.root
             esTree_V12_DoubleMu_Run2011A-03Oct2011-v1_condor_Dimuon_AOD-42X-v9.root
             '''.split(),
