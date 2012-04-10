@@ -126,7 +126,7 @@ _files['v12'] = {
     }
 
 ## Yong's trees with the default CMSSW photon cluster corrections
-_files['v13'] = {
+_files['yyv1'] = {
     'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AOD.'
               'muid2.phtid1.phtcorr360.datapu0.mcpu0.r1to129.root')],
     'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
@@ -136,7 +136,7 @@ _files['v13'] = {
     
 
 ## Yong's trees with the Caltech photon regression
-_files['v14'] = {
+_files['yyv2'] = {
     'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AOD.'
               'muid2.phtid1.phtcorr360.datapu0.mcpu0.r1to129.root')],
     'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
@@ -146,7 +146,7 @@ _files['v14'] = {
     
 
 ## Yong's trees with the Hgg photon regression v2
-_files['v15'] = {
+_files['yyv3'] = {
     'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AOD.'
               'muid2.phtid1.phtcorr96.datapu0.mcpu0.r1to129.root')],
     'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
@@ -154,7 +154,15 @@ _files['v15'] = {
               'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
     }
     
-    
+_files['v13'] = {
+    'z' : [('esTree_V13_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
+            'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
+            'batch1of2.root'),
+           ('esTree_V13_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
+            'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
+            'batch2of2.root')]
+    }
+
 _treeNames = {
     'v1' : 'tree/es',
     'v2' : 'pmvTree/pmv',
@@ -167,9 +175,10 @@ _treeNames = {
     'v10' : 'tree/pmv',
     'v11' : 'tree/pmv',
     'v12' : 'tree/pmv',
-    'v13' : 'Analysis',
-    'v14' : 'Analysis',    
-    'v15' : 'Analysis',    
+    'v13' : 'tree/pmv',
+    'yyv1' : 'Analysis',
+    'yyv2' : 'Analysis',    
+    'yyv3' : 'Analysis',    
 }
 
 
@@ -181,7 +190,7 @@ def getChains(version='v4'):
             print "Loading ", name, ":", f
             chains[name].Add( os.path.join(_path, f) )
 
-    if version in 'v13 v14 v15'.split():
+    if version in 'yyv1 yyv2 yyv3'.split():
         ## On each line corresponding to a list item, 
         ## 1st is esTree name, 2nd is YY tree name in Yong's trees.
         es_to_yy_name_map = '''mmMass          mm 
@@ -198,13 +207,13 @@ def getChains(version='v4'):
                                mu2Phi          mphi[1]
                                pileup.weight   evtweight
                                isFSR           gametrue>0'''.split('\n')
-        if version == 'v13':
+        if version == 'yyv1':
             ## Use the default CMSSW cluster corrections
             es_to_yy_name_map.extend(
                 '''mmgMass         mmg
                   phoPt           gamenergy/cosh(gameta)'''.split('\n')
                   )
-        elif version in 'v14 v15'.split():
+        elif version in 'yyv2 yyv3'.split():
             ## Use the regression cluster corrections
             es_to_yy_name_map.extend(
                 '''mmgMass         mmgcorr
