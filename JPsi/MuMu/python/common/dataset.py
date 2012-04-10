@@ -94,7 +94,9 @@ def get(**kwargs):
 
     ## Initialize
     set(**kwargs)
+    print '+++ DEBUG before varSet ctor:', str(variables + categories + [weight])
     varSet = RooArgSet(*(variables + categories + [weight]))
+    print '+++ DEBUG after varSet ctor:', varSet.Print()
     dataset = RooDataSet(name, title, varSet, WeightVar( weight.GetName() ) )
     #dataset.setWeightVar( weight )
     #dataset = RooDataSet('data', 'data', varSet )
