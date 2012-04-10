@@ -28,7 +28,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
-name = 'devel_EE_highR9_pt25to30_v11'
+name = 'EE_highR9_pt30to999_v13'
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 
@@ -41,8 +41,8 @@ rfit = 'nominal'
 fit_data_fraction = 0.25
 reduce_data = False
 
-fake_data_cut = 'Entry$ % 4 == 4'
-use_independent_fake_data = False
+fake_data_cut = 'Entry$ % 4 == 0'
+use_independent_fake_data = True
 
 sw = ROOT.TStopwatch()
 sw2 = ROOT.TStopwatch()
@@ -53,7 +53,7 @@ times = []
 def parse_name_to_cuts():
     'Parse the name and apply the relevant cuts.'
     global cuts
-    cuts = ['mmMass + mmgMass < 190']
+    cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1']
     if 'EB' in name:
         cuts.append('phoIsEB')
         if 'highR9' in name:
@@ -83,12 +83,14 @@ def parse_name_to_cuts():
 
     global source_chains_version
     source_chains_version = 'v11'
-    if 'v13' in name:
+    if 'yyv1' in name:
+        source_chains_version = 'yyv1'
+    elif 'yyv2' in name:        
+        source_chains_version = 'yyv2'
+    elif 'yyv3' in name:        
+        source_chains_version = 'yyv3'
+    elif 'v13' in name.split('_'):        
         source_chains_version = 'v13'
-    elif 'v14' in name:        
-        source_chains_version = 'v14'
-    elif 'v15' in name:        
-        source_chains_version = 'v15'        
 ## End of parse_name_to_cuts().
 
 
@@ -196,6 +198,20 @@ def define_data_observables():
     phoERes        = w.factory('phoERes[-70, 100]')
     mmgMassPhoGenE = w.factory('mmgMassPhoGenE[0, 200]')
     weight         = w.factory('weight[1]')
+
+    ## Dictionary for variable properties (name) -> (title, unit)
+    title_unit_map = {
+        'mmgMass': 'm_{#mu#mu#gamma} GeV'.split(),
+        'mmMass' : 'm_{#mu#mu} GeV'.split(),
+        'phoERes': ('E_{reco}^{#gamma}/E_{gen}^{#gamma} - 1', ''),
+        'mmgMassPhoGenE': ('gen. level m_{#mu#mu#gamma}', 'GeV'),
+        }
+
+    ## Set nice latex names and titles:
+    for xname, (xtitle, xunit) in title_unit_map.items():
+        xvar = w.var(xname)
+        xvar.SetTitle(xtitle)
+        xvar.setUnit(xunit)
 ## End of define_data_observables()
 
 
@@ -339,6 +355,20 @@ def replace_variable_titles(new_titles, workspace):
 
 
 ##------------------------------------------------------------------------------
+def set_default_integrator_precision(eps_abs, eps_rel):
+    '''
+    Sets the default integration relative and absolute precition to eps
+    and returns the old precision values
+    '''
+    old_precision = (ROOT.RooAbsReal.defaultIntegratorConfig().epsAbs(),
+                     ROOT.RooAbsReal.defaultIntegratorConfig().epsRel())
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(eps_abs)
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(eps_rel)
+    return old_precision
+## End of set_default_integrator_precision.
+
+
+##------------------------------------------------------------------------------
 def get_data(chains = getChains('v11')):
     '''
     Get the nominal data that is used for smearing.
@@ -358,8 +388,10 @@ def get_data(chains = getChains('v11')):
         }
     
     ## The TFormula expression defining the data is given in the titles.
+    print '+++ DEBUG: before title replacement:', mmgMass.GetTitle()
     latex_map = replace_variable_titles(expression_map, w)
-
+    print '+++ DEBUG: after title replacement:', mmgMass.GetTitle()
+    
     ## Create a preselected tree
     tree = {}
     tree['z'] = chains['z'].CopyTree('&'.join(cuts))
@@ -377,12 +409,16 @@ def get_data(chains = getChains('v11')):
     #                           cuts=cuts + ['isFSR'],
     #                           variables=[mmgMass, mmMass, phoERes,
     #                                      mmgMassPhoGenE])
+    print '+++ DEBUG: before fsr0'
+    for xvar in [weight, mmgMass, mmMass, phoERes, mmgMassPhoGenE]:
+        print xvar.GetName(), ':', xvar.GetTitle()        
+    
     data['fsr0'] = dataset.get(tree=tree['z'], weight=weight,
                                cuts=cuts0 + ['isFSR'],
                                variables=[mmgMass, mmMass, phoERes,
                                           mmgMassPhoGenE])
     data['fsr1'] = dataset.get(tree=tree['z'], weight=weight,
-                               cuts=cuts1 + ['isFSR', ],
+                               cuts=cuts1 + ['isFSR'],
                                variables=[mmgMass, mmMass, phoERes,
                                           mmgMassPhoGenE])
     # data['zj'] = dataset.get(tree=tree['z'], weight=weight,
@@ -420,6 +456,7 @@ def get_data(chains = getChains('v11')):
     fsr_purity = 100 * num_fsr_events / (num_fsr_events + num_zj_events)
     
     ##-- Get Smeared Data ------------------------------------------------------
+    old_precision = set_default_integrator_precision(2e-9, 2e-9)
     global calibrator0, calibrator1, fit_calibrator
     calibrator0 = MonteCarloCalibrator(data['fsr0'], printlevel=1, rho=1.5)
     if use_independent_fake_data:
@@ -427,6 +464,7 @@ def get_data(chains = getChains('v11')):
         fit_calibrator = calibrator1
     else:
         fit_calibrator = calibrator0
+    set_default_integrator_precision(*old_precision)
 
     ##-- Check the time -------------------------------------------------------
     check_timer(
@@ -511,15 +549,15 @@ def build_signal_model():
     # phortargets =  [0.5 + 0.5 * i for i in range(30)]
 
     ## This was used as a default for Adi's placeholders plots
-    phortargets = [0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
+    phortargets = [0.1, 0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
 
     # phortargets = [0.5, 6, 7, 7.5, 8, 8.5, 8.75, 9, 9.5, 10, 10.5, 11, 11.5, 11.75, 12, 12.5, 13, 14]
     # phortargets = [0.5, fit_calibrator.r0.getVal(), 10, 20]
     # phortargets.append(fit_calibrator.r0.getVal())
     phortargets.sort()
 
-    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(0.2e-08)
-    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(0.2e-08)
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(0.1e-08)
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(0.1e-08)
 
     ## Build the signal PDF
     global signal_model
@@ -527,6 +565,9 @@ def build_signal_model():
                                   mmgMass, phoScale, phoRes,
                                   data['fsr0'], w, 'nominal', phortargets,
                                   rho=1.5)
+
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
+    ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-07)
 
     check_timer('2. build PhosphorModel5')
 
@@ -630,18 +671,25 @@ def get_real_data(label):
     "2011A" or "2011B".
     '''
     global source_chains_version
-    if source_chains_version == 'v11':
+    if source_chains_version in 'v11 v13'.split():
         source_chains_version = 'v12'
     dchain = getChains(source_chains_version)[label]
-    weight.SetTitle('1')
-    mmgMass.SetTitle('mmgMass')
-    mmMass.SetTitle('mmMass')
+    expression_title_map = {
+        'weight': '1',
+        'mmgMass': 'mmgMass',
+        'mmMass': 'mmMass',
+        }
+    latex_title_map = replace_variable_titles(expression_title_map, w)
+    # weight.SetTitle('1')
+    # mmgMass.SetTitle('mmgMass')
+    # mmMass.SetTitle('mmMass')
     dataset.variables = []
     dataset.cuts = []
     data[label] = dataset.get(tree=dchain, cuts=cuts[:],
                                variables=[mmgMass, mmMass],
                                weight=weight)
-    mmgMass.SetTitle('m_{#mu#mu#gamma}')
+    # mmgMass.SetTitle('m_{#mu#mu#gamma}')
+    replace_variable_titles(latex_title_map, w)
 ## End of get_real_data()
 
 
@@ -666,7 +714,7 @@ def plot_fit_to_real_data(label):
     Plot fit to real data for a dataset specified by the label:
     "data" (full 2011A+B), "2011A" or "2011B".
     '''
-    mmgMass.setRange('plot', 70, 110)
+    # mmgMass.setRange('plot', 70, 110)
     mmgMass.setBins(80)
     plot = mmgMass.frame(roo.Range('plot'))
     if label == 'data':
@@ -678,7 +726,7 @@ def plot_fit_to_real_data(label):
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
               roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-    canvases.next(name + '_' + label)
+    canvases.next(name + '_' + label).SetGrid()
     plot.Draw()
 ## End of plot_fit_to_real_data().
 
@@ -737,15 +785,162 @@ def process_real_data():
     Get, fit and plot real data for all 3 dataset specified:
     "data" (full 2011A+B), "2011A" or "2011B".
     '''
-    process_real_data_single_dataset('data')
-    check_timer('13. get, fit and plot real data')
-
     process_real_data_single_dataset('2011A')
     check_timer('13.1 get, fit and plot 2011A real data')
 
     process_real_data_single_dataset('2011B')
     check_timer('13.2 get, fit and plot 2011B real data')
+
+    process_real_data_single_dataset('data')
+    check_timer('13.3 get, fit and plot 2011A+B real data')
 ## End of process_real_data().
+    
+
+#-------------------------------------------------------------------------------
+def set_mc_truth(phos, phor):
+    '''
+    Set phoScaleTrue and phoResTrue value and error to phos and phor.
+    '''
+    phoScaleTrue.setVal(phos.getVal())
+    phoScaleTrue.setError(phos.getError())
+    phoResTrue.setVal(phor.getVal())
+    phoResTrue.setError(phor.getError())
+## End of set_mc_truth().
+
+
+#-------------------------------------------------------------------------------
+def process_monte_carlo():
+    '''
+    Get, fit and plot monte carlo.
+    '''
+    global fitdata1
+    fitdata1 = fit_calibrator.get_smeared_data(
+        sfit, rfit, 'fitdata1', 'fitdata1', True
+        )
+    fitdata1.reduce(ROOT.RooArgSet(mmgMass, mmMass))
+    fitdata1.append(data['zj1'])
+    fitdata1.SetName('fitdata1')
+    data['fit1'] = fitdata1
+
+    if reduce_data == True:
+        fitdata1 = fitdata1.reduce(roo.Range(reduced_entries,
+                                           fitdata1.numEntries()))
+    check_timer('3. get fit data (%d entries)' % fitdata1.numEntries())
+
+    nll = pm.createNLL(fitdata1, roo.Range('fit'), roo.NumCPU(8))
+
+    minuit = ROOT.RooMinuit(nll)
+    minuit.setProfile()
+    minuit.setVerbose()
+
+    phoScale.setError(1)
+    phoRes.setError(1)
+
+    ## Initial HESSE
+    status = minuit.hesse()
+    fitres = minuit.save(name + '_fitres1_inithesse')
+    w.Import(fitres, fitres.GetName())
+    check_timer('4. initial hesse (status: %d)' % status)
+
+    ## Minimization
+    minuit.setStrategy(2)
+    status = minuit.migrad()
+    fitres = minuit.save(name + '_fitres2_migrad')
+    w.Import(fitres, fitres.GetName())
+    check_timer('5. migrad (status: %d)' % status)
+
+    ## Parabolic errors
+    status = minuit.hesse()
+    fitres = minuit.save(name + '_fitres3_hesse')
+    w.Import(fitres, fitres.GetName())
+    check_timer('6. hesse (status: %d)' % status)
+
+    ## Minos errors
+    status = minuit.minos()
+    fitres = minuit.save(name + '_fitres4_minos')
+    w.Import(fitres, fitres.GetName())
+    check_timer('7. minos (status: %d)' % status)
+
+    fres = pm.fitTo(fitdata1, roo.SumW2Error(True),
+                    roo.Range('fit'),
+                    # roo.Strategy(2),
+                    roo.InitialHesse(True),
+                    roo.Minos(),
+                    roo.Verbose(True),
+                    roo.NumCPU(8), roo.Save(), roo.Timer())
+
+    signal_model._phorhist.GetXaxis().SetRangeUser(75, 105)
+    signal_model._phorhist.GetYaxis().SetRangeUser(0, 15)
+    signal_model._phorhist.GetXaxis().SetTitle('%s (%s)' % (mmgMass.GetTitle(),
+                                                  mmgMass.getUnit()))
+    signal_model._phorhist.GetYaxis().SetTitle('E^{#gamma} Resolution (%)')
+    signal_model._phorhist.GetZaxis().SetTitle('Probability Density (1/GeV/%)')
+    signal_model._phorhist.SetTitle(latex_title)
+    signal_model._phorhist.GetXaxis().SetTitleOffset(1.5)
+    signal_model._phorhist.GetYaxis().SetTitleOffset(1.5)
+    signal_model._phorhist.GetZaxis().SetTitleOffset(1.5)
+    signal_model._phorhist.SetStats(False)
+    canvases.next(name + '_phorhist')
+    signal_model._phorhist.Draw('surf1')
+
+    global graph
+    graph = signal_model.make_mctrue_graph()
+    graph.GetXaxis().SetTitle('E^{#gamma} resolution (%)')
+    graph.GetYaxis().SetTitle('m_{#mu^{+}#mu^{-}#gamma} effective #sigma (GeV)')
+    graph.SetTitle(latex_title)
+    canvases.next(name + '_mwidth_vs_phor').SetGrid()
+    graph.Draw('ap')
+
+    mmgMass.setBins(80)
+    plot = mmgMass.frame(roo.Range('plot'))
+    plot.SetTitle('Fall11 MC, ' + latex_title)
+    fitdata1.plotOn(plot)
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+              roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))     
+    canvases.next(name + '_fit').SetGrid()
+    plot.Draw()
+    ## Estimate the MC truth phos and phor:
+    old_precision = set_default_integrator_precision(2e-9, 2e-9)
+    calibrator0.s.setRange(-15, 15)
+    calibrator0.r.setRange(0,25)
+    calibrator0.phoEResPdf.fitTo(fitdata1, roo.Range(-50, 50), roo.Strategy(2))
+    set_default_integrator_precision(*old_precision)
+    set_mc_truth(calibrator0.s, calibrator0.r)
+
+    ## Store the result in the workspace:
+    w.saveSnapshot('mc_fit', ROOT.RooArgSet(phoScale, phoRes,
+                                            phoScaleTrue, phoResTrue))
+    ## Draw the results on the canvas:
+    Latex([
+        'E^{#gamma} Scale (%)',
+        '  MC Truth: %.2f #pm %.2f' % (calibrator0.s.getVal(),
+                                       calibrator0.s.getError()),
+        '  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+            phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
+            phoScale.getErrorLo()
+            ),
+        '',
+        'E^{#gamma} Resolution (%)',
+        '  MC Truth: %.2f #pm %.2f' % (calibrator0.r.getVal(),
+                                       calibrator0.r.getError()),
+        '  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
+            phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
+            phoRes.getErrorLo()
+            ),
+        '',
+            'Signal Purity (%)',
+            '  MC Truth: %.2f' % fsr_purity,
+            '  MC Fit: %.2f #pm %.2f' % (
+                100 * w.var('signal_f').getVal(),
+                100 * w.var('signal_f').getError()
+                )
+        ],
+        position=(0.2, 0.8)
+        ).draw()
+    
+    check_timer('8. fast plots')
+## End of process_real_data
 
 
 ##------------------------------------------------------------------------------
@@ -756,6 +951,7 @@ def main():
     init()
     # init_from_file(inputfile)
     process_real_data()
+    # process_monte_carlo()
     outro()
 ## End of main().
 
@@ -763,139 +959,6 @@ def main():
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsRel(1e-07)
 
 
-
-#global fitdata1
-#fitdata1 = fit_calibrator.get_smeared_data(sfit, rfit, 'fitdata1', 'fitdata1', True)
-#fitdata1.reduce(ROOT.RooArgSet(mmgMass, mmMass))
-#fitdata1.append(data['zj1'])
-#fitdata1.SetName('fitdata1')
-#data['fit1'] = fitdata1
-### RooAdaptiveGaussKronrodIntegrater1D
-##mmgMass.setRange(40, 140)
-### ROOT.RooAbsReal.defaultIntegratorConfig().method1D().setLabel(
-###     "RooAdaptiveGaussKronrodIntegrator1D"
-###     )
-
-### msubs_lo = w.factory('EDIT::msubs_lo(pm5_msubs_0, mmgMass=mmgMassLo[40])')
-### msubs_hi = w.factory('EDIT::msubs_hi(pm5_msubs_0, mmgMass=mmgMassHi[140])')
-## mmgMass.setRange('fit', msubs_lo, msubs_hi)
-
-### pm.setNormValueCaching(1)
-### pm.getVal(ROOT.RooArgSet(mmgMass))
-### rfitdata = fitdata.reduce('60 < mmgMass & mmgMass < 120')
-
-#if reduce_data == True:
-    #fitdata1 = fitdata1.reduce(roo.Range(reduced_entries,
-                                       #fitdata1.numEntries()))
-#check_timer('3. get fit data (%d entries)' % fitdata1.numEntries())
-
-#nll = pm.createNLL(fitdata1, roo.Range('fit'), roo.NumCPU(8))
-
-#minuit = ROOT.RooMinuit(nll)
-#minuit.setProfile()
-#minuit.setVerbose()
-
-#phoScale.setError(1)
-#phoRes.setError(1)
-
-### Initial HESSE
-#status = minuit.hesse()
-#fitres = minuit.save(name + '_fitres1_inithesse')
-#w.Import(fitres, fitres.GetName())
-#check_timer('4. initial hesse (status: %d)' % status)
-
-### Minimization
-#minuit.setStrategy(2)
-#status = minuit.migrad()
-#fitres = minuit.save(name + '_fitres2_migrad')
-#w.Import(fitres, fitres.GetName())
-#check_timer('5. migrad (status: %d)' % status)
-
-### Parabolic errors
-#status = minuit.hesse()
-#fitres = minuit.save(name + '_fitres3_hesse')
-#w.Import(fitres, fitres.GetName())
-#check_timer('6. hesse (status: %d)' % status)
-
-### Minos errors
-#status = minuit.minos()
-#fitres = minuit.save(name + '_fitres4_minos')
-#w.Import(fitres, fitres.GetName())
-#check_timer('7. minos (status: %d)' % status)
-
-## fres = pm.fitTo(fitdata1, roo.SumW2Error(True),
-##                 roo.Range('fit'),
-##                 # roo.Strategy(2),
-##                 roo.InitialHesse(True),
-##                 roo.Minos(),
-##                 roo.Verbose(True),
-##                 roo.NumCPU(8), roo.Save(), roo.Timer())
-
-#signal_model._phorhist.GetXaxis().SetRangeUser(75, 105)
-#signal_model._phorhist.GetYaxis().SetRangeUser(0, 15)
-#signal_model._phorhist.GetXaxis().SetTitle('%s (%s)' % (mmgMass.GetTitle(),
-                                              #mmgMass.getUnit()))
-#signal_model._phorhist.GetYaxis().SetTitle('E^{#gamma} Resolution (%)')
-#signal_model._phorhist.GetZaxis().SetTitle('Probability Density (1/GeV/%)')
-#signal_model._phorhist.SetTitle(latex_title)
-#signal_model._phorhist.GetXaxis().SetTitleOffset(1.5)
-#signal_model._phorhist.GetYaxis().SetTitleOffset(1.5)
-#signal_model._phorhist.GetZaxis().SetTitleOffset(1.5)
-#signal_model._phorhist.SetStats(False)
-#canvases.next(name + '_phorhist')
-#signal_model._phorhist.Draw('surf1')
-
-#global graph
-#graph = signal_model.make_mctrue_graph()
-#graph.GetXaxis().SetTitle('E^{#gamma} resolution (%)')
-#graph.GetYaxis().SetTitle('m_{#mu^{+}#mu^{-}#gamma} effective #sigma (GeV)')
-#graph.SetTitle(latex_title)
-#canvases.next(name + '_mwidth_vs_phor')
-#graph.Draw('ap')
-
-#mmgMass.setBins(80)
-#plot = mmgMass.frame(roo.Range('plot'))
-#plot.SetTitle('Fall11 MC, ' + latex_title)
-#fitdata1.plotOn(plot)
-#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-#pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-          #roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))     
-#canvases.next(name + '_fit')
-#plot.Draw()
-#Latex([
-    #'E^{#gamma} Scale (%)',
-    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
-                                      #fit_calibrator.s.getError()),
-    #'  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        #phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
-        #phoScale.getErrorLo()
-        #),
-    #'',
-    #'E^{#gamma} Resolution (%)',
-    #'  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
-                                      #fit_calibrator.r.getError()),
-    #'  MC Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
-        #phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
-        #phoRes.getErrorLo()
-        #),
-    #'',
-        #'Signal Purity (%)',
-        #'  MC Truth: %.2f' % fsr_purity,
-        #'  MC Fit: %.2f #pm %.2f' % (
-            #100 * w.var('signal_f').getVal(),
-            #100 * w.var('signal_f').getError()
-            #)
-    ## 'N_{S} (events)',
-    ## '  MC Truth: %.0f' % fitdata1.sumEntries(),
-    ## '  #mu#mu#gamma Fit: %.0f #pm %.0f' % (
-    ##     w.var(name + '_signal_f').getVal(),
-    ##     w.var(name + '_signal_f').getError()
-    ##     )
-    #],
-    #position=(0.2, 0.8)
-    #).draw()
-
-#check_timer('8. fast plots')
 
 ## pm.fitTo(data['fsr'], roo.Verbose(), roo.Save(), roo.SumW2Error(True),
 ##          roo.Range(60, 120), roo.NumCPU(8))
