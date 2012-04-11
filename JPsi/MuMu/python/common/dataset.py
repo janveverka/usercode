@@ -39,27 +39,40 @@ from JPsi.MuMu.common.roofit import *
 ## Configuration
 ## tree = TTree()
 ## variable = RooRealVar( 'x', '0', 0, -10, 10)
-tree = None
-variable = None
 
-## Default values
-variables = []
-weight = RooRealVar( 'w', '1', 1 )
-name, title = 'data', 'data'
+#------------------------------------------------------------------------------
+def init():
+    '''
+    Initializes global variables and sets them to their default values.
+    '''
+    global tree, variable, variables, weight, name, title, categories, cuts
+    tree = None
+    variable = None
 
-## Default/example categories
-categories = []
+    ## Default values
+    variables = []
+    weight = RooRealVar( 'w', '1', 1 )
+    name, title = 'data', 'data'
 
-cuts = []
+    ## Default/example categories
+    categories = []
 
-dataset = RooDataSet()
+    cuts = []
+    
+    global dataset
+    dataset = RooDataSet()
+## End of init_globals().
+    
 
 #------------------------------------------------------------------------------
 def set(**kwargs):
     """set(tree, variable, variables, weight, cuts, categories, dataset,
     name, title)"""
+    init()
+    
     global tree, variable, weight, cuts, categories, dataset, name, title
     global variables
+    
 
     ## require that tree and variable must be set
     if (not (tree or 'tree' in kwargs) or 
@@ -96,7 +109,8 @@ def get(**kwargs):
     set(**kwargs)
     print '+++ DEBUG before varSet ctor:', str(variables + categories + [weight])
     varSet = RooArgSet(*(variables + categories + [weight]))
-    print '+++ DEBUG after varSet ctor:', varSet.Print()
+    print '+++ DEBUG after varSet ctor: ', 
+    varSet.Print()
     dataset = RooDataSet(name, title, varSet, WeightVar( weight.GetName() ) )
     #dataset.setWeightVar( weight )
     #dataset = RooDataSet('data', 'data', varSet )
