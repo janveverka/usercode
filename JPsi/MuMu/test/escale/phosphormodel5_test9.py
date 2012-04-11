@@ -163,7 +163,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 v11 v13'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 v11 v13 v14 v15'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -189,6 +189,21 @@ def parse_name_to_title():
     tokens = []
     latex_labels = []
 
+    parse_name_to_cuts()
+    
+    if model_tree_version in 'v11'.split():
+        tokens.append('2011A+B PU S4 MC Model')
+        latex_labels.append('2011A+B PU S4 MC Model')
+    elif model_tree_version in 'v13 yyv1 yyv2 yyv3'.split():
+        tokens.append('2011A+B PU S6 MC Model')
+        latex_labels.append('2011A+B PU S6 MC Model')
+    elif model_tree_version == 'v14':
+        tokens.append('2011A PU S6 MC Model')
+        latex_labels.append('2011A PU S6 MC Model')        
+    elif model_tree_version == 'v15':
+        tokens.append('2011B PU')
+        latex_labels.append('2011B PU S6 MC Model')
+    
     if 'EB' in name:
         tokens.append('Barrel')
         latex_labels.append('Barrel')
@@ -225,13 +240,14 @@ def parse_name_to_title():
                     'E_{T}^{#gamma} #in [%s, %s] GeV' % (lo, hi)
                     )
 
-    if 'v13' in name:
+    
+    if model_tree_version in 'yyv1 v11 v12 v13 v14 v15'.split():
         tokens.append('Default Cluster Corr.')
         latex_labels.append('Default Cluster Corr.')
-    elif 'v14' in name:        
+    elif model_tree_version == 'yyv2':        
         tokens.append('Caltech Regression')
         latex_labels.append('Caltech Regression')
-    elif 'v15' in name:        
+    elif model_tree_version == 'yyv3':        
         tokens.append('Hgg v2 Regression')
         latex_labels.append('Hgg v2 Regression')
 
@@ -247,8 +263,8 @@ def define_globals():
     '''
     global plots
     plots = []
-    parse_name_to_title()
     parse_name_to_cuts()    
+    parse_name_to_title()
 ## End of define_globals()
 
 
@@ -755,7 +771,7 @@ def get_real_data(label):
     global model_tree_version
     if model_tree_version == 'v11':
         data_tree_version = 'v12'
-    if model_tree_version == 'v13':
+    if model_tree_version in 'v13 v14 v15'.split():
         data_tree_version = 'v15'
     dchain = getChains(data_tree_version)[label]
     expression_title_map = {
@@ -805,6 +821,7 @@ def plot_fit_to_real_data(label):
         title_start = '2011A+B'
     else:
         title_start = label
+       
     plot.SetTitle('%s, %s' % (title_start, latex_title))
     data[label].plotOn(plot)
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
