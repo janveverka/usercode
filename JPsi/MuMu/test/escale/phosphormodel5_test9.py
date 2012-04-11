@@ -8,7 +8,22 @@ the normalization integral to speed up the fitting and reduce numerical noise.
 
 Jan Veverka, Caltech, 17 February 2012.
 '''
-   
+
+## TODO LIST:
+## - Store fit results only
+## - Add model validation plots
+##     - probability density vs mmg mass and phos
+##     - switch the x and y axis for the probability density vs mmg and phor
+##     - mmg spectra for the reference phor values
+## - Add fit validation plots
+##     - Likelihood scans vs phos phor and purity
+##     - Likelihood profiles vs phos phor and purity
+##     - 2D likelihood scan vs phos and phor
+## - Support for different tree version for model training and fit, e.g.
+##   test_mc_EE_highR9_pt30to999_v13model_v15fit
+## - Understand crashes when model is read from a file
+
+
 ##- Boilerplate imports --------------------------------------------------------
 import math
 import re
