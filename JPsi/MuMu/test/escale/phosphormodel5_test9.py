@@ -28,7 +28,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
-name = 'EE_highR9_pt30to999_v13'
+name = 'EE_highR9_pt30to999_v13_modelv15'
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 

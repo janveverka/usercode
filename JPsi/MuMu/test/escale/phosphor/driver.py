@@ -28,7 +28,7 @@ def process_monte_carlo(subdet):
 
 def process_real_data(subdet):
     for pt in '10to12 12to15 15to20 20to999'.split():
-        fitter.name = '{subdet}_pt{pt}_v13'.format(
+        fitter.name = '{subdet}_pt{pt}_v13_v15data'.format(
             subdet=subdet, pt=pt
             )
         run()
