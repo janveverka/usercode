@@ -10,6 +10,7 @@ Jan Veverka, Caltech, 17 February 2012.
 '''
    
 ##- Boilerplate imports --------------------------------------------------------
+import re
 import math
 import ROOT
 import JPsi.MuMu.common.roofit as roo
@@ -28,7 +29,13 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
-name = 'test_EE_highR9_pt30to999_v13'
+
+## Uses Event$ % 2 == 1 to build the model and fits Event$ % 2 == 0
+name = 'mc_EE_highR9_pt30to999_v13_evt1of2'
+
+## Fits the same MC events that were used for the model training
+name = 'mc_EE_highR9_pt30to999_v13'
+
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 
@@ -41,19 +48,51 @@ rfit = 'nominal'
 fit_data_fraction = 0.25
 reduce_data = False
 
-fake_data_cut = 'Entry$ % 4 == 0'
-use_independent_fake_data = True
+#fake_data_cut = 'Entry$ % 4 == 0'
+#use_independent_fake_data = True
 
 sw = ROOT.TStopwatch()
 sw2 = ROOT.TStopwatch()
 
 times = []
 
+def parse_name_to_fake_data_cut(name):
+    '''
+    Parses the name for a fake data cut for MC of the form evtKofN.
+    This corresponds to Event$ % N == (K-1) for the fit data.
+    '''
+    fake_data_cut = None
+
+    pattern = re.compile(
+        r'''evt  # short for "event" at the beginning
+           (\d+) # integer K giving the K-th section
+           of    # preposition separating the two integers
+           (\d+) # integer N giving the total number of sections
+           ''', re.VERBOSE)
+    
+    parsed = False
+    
+    for tok in name.split('_'):
+        match = pattern.match(tok)
+        if match:
+            section = int(match.group(1))
+            total_sections = int(match.group(2))
+            if parsed or section < 1 or total_sections < section:
+                raise RuntimeError, 'Illegal token %s in %s' % (tok, name)
+            fake_data_cut = 'Entry$ % {N} == {K}'.format(
+                N = total_sections, K = int(section) - 1
+                )
+            parsed = True
+    
+    return fake_data_cut
+## End of parse_name_to_fake_data_cut().
+
+
 ##------------------------------------------------------------------------------
 def parse_name_to_cuts():
     'Parse the name and apply the relevant cuts.'
     global cuts
-    cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1']
+    cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5']
     if 'EB' in name:
         cuts.append('phoIsEB')
         if 'highR9' in name:
@@ -80,14 +119,21 @@ def parse_name_to_cuts():
                     raise RuntimeError, 'Error parsing %s in %s!' % (tok, name)
                 lo, hi = tok.replace('pt', '').split(separator)
                 cuts.append('%s <= phoPt & phoPt < %s' % (lo, hi))
-
+   
     global model_tree_version, data_tree_version
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
     for tree_version in 'yyv1 yyv2 yyv3 v11 v13'.split():
         if tree_version in name.split('_'):
-            model_tree_version = data_tree_version = tree_version    
+            model_tree_version = data_tree_version = tree_version  
+    
+    global fake_data_cut, use_independent_fake_data
+    fake_data_cut = parse_name_to_fake_data_cut(name)
+    if fake_data_cut:
+        use_independent_fake_data = True
+    else:
+        use_independent_fake_data = False
 ## End of parse_name_to_cuts().
 
 
@@ -397,16 +443,15 @@ def get_data(chains = getChains('v11')):
     for a in chains['z'].GetListOfAliases():
         tree['z'].SetAlias(a.GetName(), a.GetTitle())
 
+    cuts0 = cuts[:]
+    cuts1 = cuts[:]
+    if use_independent_fake_data:
+        cuts0.append('!(%s)' % fake_data_cut)
+        cuts1.append(fake_data_cut)
+           
     ## Get the nominal dataset
     global data
-    cuts0 = cuts[:] + ['!(%s)' % fake_data_cut]
-    cuts1 = cuts[:] + [fake_data_cut]
     data = {}
-    # data['fsr'] = dataset.get(tree=tree['z'], weight=weight,
-    #                           cuts=cuts + ['isFSR'],
-    #                           variables=[mmgMass, mmMass, phoERes,
-    #                                      mmgMassPhoGenE])
-    # print '+++ DEBUG: before fsr0'
     for xvar in [weight, mmgMass, mmMass, phoERes, mmgMassPhoGenE]:
         print xvar.GetName(), ':', xvar.GetTitle()        
     
@@ -418,9 +463,6 @@ def get_data(chains = getChains('v11')):
                                cuts=cuts1 + ['isFSR'],
                                variables=[mmgMass, mmMass, phoERes,
                                           mmgMassPhoGenE])
-    # data['zj'] = dataset.get(tree=tree['z'], weight=weight,
-    #                          cuts=cuts + ['!isFSR'],
-    #                          variables=[mmgMass, mmMass])
     data['zj0'] = dataset.get(tree=tree['z'], weight=weight,
                               cuts=cuts0 + ['!isFSR'],
                               variables=[mmgMass, mmMass])
@@ -669,10 +711,10 @@ def get_real_data(label):
     '''
     global model_tree_version
     if model_tree_version == 'v11':
-        model_tree_version = 'v12'
+        data_tree_version = 'v12'
     if model_tree_version == 'v13':
-        model_tree_version = 'v15'
-    dchain = getChains(model_tree_version)[label]
+        data_tree_version = 'v15'
+    dchain = getChains(data_tree_version)[label]
     expression_title_map = {
         'weight': '1',
         'mmgMass': 'mmgMass',
@@ -949,8 +991,8 @@ def main():
 
     init()
     # init_from_file(inputfile)
-    process_real_data()
-    # process_monte_carlo()
+    # process_real_data()
+    process_monte_carlo()
     outro()
 ## End of main().
 
