@@ -10,8 +10,10 @@ Jan Veverka, Caltech, 17 February 2012.
 '''
    
 ##- Boilerplate imports --------------------------------------------------------
-import re
 import math
+import re
+import sys
+
 import ROOT
 import JPsi.MuMu.common.roofit as roo
 import JPsi.MuMu.common.dataset as dataset
@@ -30,11 +32,15 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ## Selection
 # name = 'EB_highR9_pt15to20'
 
-## Uses Event$ % 2 == 1 to build the model and fits Event$ % 2 == 0
-name = 'mc_EE_highR9_pt30to999_v13_evt1of2'
+##  Fits events passing Event$ % 4 == 0 and uses all the other events to build 
+##+ the model.
+name = 'test_mc_EE_highR9_pt30to999_v13_evt1of4'
 
 ## Fits the same MC events that were used for the model training
-name = 'mc_EE_highR9_pt30to999_v13'
+# name = 'test_mc_EE_highR9_pt30to999_v13'
+
+## Fits real data
+# name = 'test_data_EE_highR9_pt30to999_v13'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -56,6 +62,21 @@ sw2 = ROOT.TStopwatch()
 
 times = []
 
+
+##------------------------------------------------------------------------------
+def parse_command_line_arguments():
+    '''
+    Uses the name supplied as a command-line argument if any.
+    '''
+    global name
+    
+    ## Use the name supplied on the command-line if any:
+    if len(sys.argv) == 2:
+        name = sys.argv[1]
+## End of parse_command_line_arguments().    
+    
+
+##------------------------------------------------------------------------------
 def parse_name_to_fake_data_cut(name):
     '''
     Parses the name for a fake data cut for MC of the form evtKofN.
@@ -89,8 +110,26 @@ def parse_name_to_fake_data_cut(name):
 
 
 ##------------------------------------------------------------------------------
+def parse_name_to_use_real_data(name):
+    '''
+    Parses the name and decides whether to use real data or MC for the fit.
+    Returns True if the former is true, False otherwise.
+    If the name is split into tokens separated by the underscore "_" and
+    one of the tokens is "data" then it means that real data should be fitted,
+    otherwise use MC for the fit.
+    '''
+    for tok in name.split('_'):
+        if tok == 'data':
+            return True
+    return False
+## End of parse_name_to_use_real_data(name)
+
+
+##------------------------------------------------------------------------------
 def parse_name_to_cuts():
     'Parse the name and apply the relevant cuts.'
+    global name
+    
     global cuts
     cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5']
     if 'EB' in name:
@@ -134,6 +173,10 @@ def parse_name_to_cuts():
         use_independent_fake_data = True
     else:
         use_independent_fake_data = False
+
+    global use_real_data
+    use_real_data = parse_name_to_use_real_data(name)
+        
 ## End of parse_name_to_cuts().
 
 
@@ -902,13 +945,13 @@ def process_monte_carlo():
     w.Import(fitres, fitres.GetName())
     check_timer('7. minos (status: %d)' % status)
 
-    fres = pm.fitTo(fitdata1, roo.SumW2Error(True),
-                    roo.Range('fit'),
-                    # roo.Strategy(2),
-                    roo.InitialHesse(True),
-                    roo.Minos(),
-                    roo.Verbose(True),
-                    roo.NumCPU(8), roo.Save(), roo.Timer())
+    #fres = pm.fitTo(fitdata1, roo.SumW2Error(True),
+                    #roo.Range('fit'),
+                    ## roo.Strategy(2),
+                    #roo.InitialHesse(True),
+                    #roo.Minos(),
+                    #roo.Verbose(True),
+                    #roo.NumCPU(8), roo.Save(), roo.Timer())
 
     signal_model._phorhist.GetXaxis().SetRangeUser(75, 105)
     signal_model._phorhist.GetYaxis().SetRangeUser(0, 15)
@@ -991,8 +1034,12 @@ def main():
 
     init()
     # init_from_file(inputfile)
-    # process_real_data()
-    process_monte_carlo()
+    
+    if use_real_data:
+        process_real_data()
+    else:
+        process_monte_carlo()
+
     outro()
 ## End of main().
 
@@ -1132,6 +1179,7 @@ def main():
 
 ##------------------------------------------------------------------------------
 if __name__ == '__main__':
+    parse_command_line_arguments()
     main()
     import user
 
