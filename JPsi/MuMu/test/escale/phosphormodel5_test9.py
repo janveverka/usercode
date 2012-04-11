@@ -68,11 +68,17 @@ def parse_command_line_arguments():
     '''
     Uses the name supplied as a command-line argument if any.
     '''
-    global name
+    global name, inputfile, outputfile
     
     ## Use the name supplied on the command-line if any:
-    if len(sys.argv) == 2:
-        name = sys.argv[1]
+    for arg in sys.argv[1:]:
+        ## Skip options
+        if arg[0] == '-':
+            continue
+        else:
+            name = arg
+            inputfile = 'phosphor5_model_and_fit_' + name + '.root'
+            outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 ## End of parse_command_line_arguments().    
     
 
