@@ -34,8 +34,8 @@ def process_real_data(subdet):
         run()
 ## End of process_real_data()
 
-# process_real_data('EB')
-process_real_data('EE')
+process_real_data('EB')
+# process_real_data('EE')
 
 # fitter.name = 'test_EE_highR9_pt30to999_v13'
 # fitter.fake_data_cut = 'Entry$ % 4 == 0'
