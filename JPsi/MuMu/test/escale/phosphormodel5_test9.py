@@ -28,7 +28,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
-name = 'EE_highR9_pt30to999_v13_modelv15'
+name = 'test_EE_highR9_pt30to999_v13'
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 
@@ -81,16 +81,13 @@ def parse_name_to_cuts():
                 lo, hi = tok.replace('pt', '').split(separator)
                 cuts.append('%s <= phoPt & phoPt < %s' % (lo, hi))
 
-    global source_chains_version
-    source_chains_version = 'v11'
-    if 'yyv1' in name:
-        source_chains_version = 'yyv1'
-    elif 'yyv2' in name:        
-        source_chains_version = 'yyv2'
-    elif 'yyv3' in name:        
-        source_chains_version = 'yyv3'
-    elif 'v13' in name.split('_'):        
-        source_chains_version = 'v13'
+    global model_tree_version, data_tree_version
+    ## Set the default
+    model_tree_version, data_tree_version = 'v11', 'v11'
+    
+    for tree_version in 'yyv1 yyv2 yyv3 v11 v13'.split():
+        if tree_version in name.split('_'):
+            model_tree_version = data_tree_version = tree_version    
 ## End of parse_name_to_cuts().
 
 
@@ -640,7 +637,7 @@ def init():
     define_mass_derivative_function_and_mean()   
     set_ranges_for_data_observables()
     set_signal_model_normalization_integral_cache_binnings()
-    get_data(getChains(source_chains_version))
+    get_data(getChains(model_tree_version))
     build_model()
 ## End of init().
 
@@ -658,7 +655,7 @@ def init_from_file(filename):
     read_mass_derivative_function_and_mean_from_workspace(w)
     set_ranges_for_data_observables()
     set_signal_model_normalization_integral_cache_binnings()
-    get_data(getChains(source_chains_version))
+    get_data(getChains(model_tree_version))
     read_model_from_workspace(w)
     # build_model()
 ## End of init_from_file().
@@ -670,12 +667,12 @@ def get_real_data(label):
     Get real data for the dataset specified by the label: "data" (full 2011A+B),
     "2011A" or "2011B".
     '''
-    global source_chains_version
-    if source_chains_version == 'v11':
-        source_chains_version = 'v12'
-    if source_chains_version == 'v13':
-        source_chains_version = 'v15'
-    dchain = getChains(source_chains_version)[label]
+    global model_tree_version
+    if model_tree_version == 'v11':
+        model_tree_version = 'v12'
+    if model_tree_version == 'v13':
+        model_tree_version = 'v15'
+    dchain = getChains(model_tree_version)[label]
     expression_title_map = {
         'weight': '1',
         'mmgMass': 'mmgMass',
