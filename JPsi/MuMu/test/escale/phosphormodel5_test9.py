@@ -388,9 +388,9 @@ def get_data(chains = getChains('v11')):
         }
     
     ## The TFormula expression defining the data is given in the titles.
-    print '+++ DEBUG: before title replacement:', mmgMass.GetTitle()
+    # print '+++ DEBUG: before title replacement:', mmgMass.GetTitle()
     latex_map = replace_variable_titles(expression_map, w)
-    print '+++ DEBUG: after title replacement:', mmgMass.GetTitle()
+    # print '+++ DEBUG: after title replacement:', mmgMass.GetTitle()
     
     ## Create a preselected tree
     tree = {}
@@ -409,7 +409,7 @@ def get_data(chains = getChains('v11')):
     #                           cuts=cuts + ['isFSR'],
     #                           variables=[mmgMass, mmMass, phoERes,
     #                                      mmgMassPhoGenE])
-    print '+++ DEBUG: before fsr0'
+    # print '+++ DEBUG: before fsr0'
     for xvar in [weight, mmgMass, mmMass, phoERes, mmgMassPhoGenE]:
         print xvar.GetName(), ':', xvar.GetTitle()        
     
@@ -671,8 +671,10 @@ def get_real_data(label):
     "2011A" or "2011B".
     '''
     global source_chains_version
-    if source_chains_version in 'v11 v13'.split():
+    if source_chains_version == 'v11':
         source_chains_version = 'v12'
+    if source_chains_version == 'v13':
+        source_chains_version = 'v15'
     dchain = getChains(source_chains_version)[label]
     expression_title_map = {
         'weight': '1',
