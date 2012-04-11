@@ -4,7 +4,8 @@ import FWLite.Tools.cmsstyle
 import FWLite.Tools.canvases as canvases
 import FWLite.Tools.roofit as roo
 
-path = '/raid2/veverka/phosphor/phosphor5_test9_res'
+# path = '/raid2/veverka/phosphor/phosphor5_test9_res'
+path = '/home/veverka/cmssw/CMSSW_4_2_3/src/JPsi/MuMu/test/escale/phosphor'
 basenames = '''
     EB_pt10to12
     EE_pt10to12
@@ -12,8 +13,8 @@ basenames = '''
     EE_pt20to999
     '''.split()
 
-phos_true_list = [4.45467e-01, 2.86975e-01, 6.40960e-01, 4.68551e-01]
-phor_true_list = [5.31726e+00, 4.14648e+00, 8.91343e+00, 7.13829e+00]
+phos_true_list = [4.45467e-01,]# 2.86975e-01, 6.40960e-01, 4.68551e-01]
+phor_true_list = [5.31726e+00,]# 4.14648e+00, 8.91343e+00, 7.13829e+00]
 
 ROOT.gSystem.Load('libJPsiMuMu')
 ROOT.gStyle.SetPadTopMargin(0.1)
@@ -50,9 +51,9 @@ phor_resid_hist_ee = ROOT.TH1F('phor_resid_hist_ee',
                                          'Entries / 1%']),
                                11, -5.5, 5.5)
 
-for (basename, phos_true, phor_true) in zip(basenames, phos_true_list, 
-                                            phor_true_list):
-    for test in 'test0 test1 test2 test3'.split():
+for basename in basenames:
+   for test in 'test0 test1 test2 test3'.split():
+    #for test in 'test0'.split():
         name = '_'.join([test, basename])
         filename = 'phosphor5_model_and_fit_%s.root' % name
         rootfile = ROOT.TFile.Open(os.path.join(path, filename))
@@ -60,7 +61,7 @@ for (basename, phos_true, phor_true) in zip(basenames, phos_true_list,
         phoScale = w.var('phoScale')
         phoRes = w.var('phoRes')
         phoScaleTrue = w.var('phoScaleTrue')
-        phoResTrue = w.var
+        phoResTrue = w.var('phoResTrue')
         fitres = w.obj(name + '_fitres4_minos')
         fitted_params = fitres.floatParsFinal()
         for i in range(fitted_params.getSize()):
@@ -75,13 +76,13 @@ for (basename, phos_true, phor_true) in zip(basenames, phos_true_list,
                 raise RuntimeError, 'Unexpected parameter name!'
         phoScaleFits.append(phoScaleFit.getVal())
         phoResFits.append(phoResFit.getVal())
-        phos_resid_hist.Fill(phoScaleFit.getVal() - phos_true)
-        phor_ratio_hist.Fill(phoResFit.getVal() / phor_true)
-        phor_resid_hist.Fill(phoResFit.getVal() - phor_true)
+        phos_resid_hist.Fill(phoScaleFit.getVal() - phoScaleTrue.getVal())
+        phor_ratio_hist.Fill(phoResFit.getVal() / phoResTrue.getVal())
+        phor_resid_hist.Fill(phoResFit.getVal() - phoResTrue.getVal())
         if 'EB' in basename:
-            phor_resid_hist_eb.Fill(phoResFit.getVal() - phor_true)
+            phor_resid_hist_eb.Fill(phoResFit.getVal() - phoResTrue.getVal())
         else:
-            phor_resid_hist_ee.Fill(phoResFit.getVal() - phor_true)          
+            phor_resid_hist_ee.Fill(phoResFit.getVal() - phoResTrue.getVal())
     
 
 #phos_resid_hist.SetTitle('E^{#gamma} scale')
