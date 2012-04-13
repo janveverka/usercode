@@ -163,9 +163,18 @@ _files['v13'] = {
             'batch1of2.root'),
            ('esTree_V13_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
             'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
-            'batch2of2.root')]
+            'batch2of2.root')],
     }
 
+_files['v14'] = {
+    'z' : [('esTree_V14_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
+            'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
+            'batch1_of2.root'),
+           ('esTree_V14_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
+            'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
+            'batch2_of2.root')],
+    }
+    
 _files['v15'] = {
     'data' : '''
         esTree_V15_DoubleMu_Run2011A-May10ReReco-v1_glite_Dimuon_RECO-42X-v9.root
@@ -182,7 +191,13 @@ _files['v15'] = {
         '''.split(),
     '2011B' : '''
         esTree_V15_DoubleMu_Run2011B-PromptReco-v1_condor_Dimuon_AOD-42X-v9.root
-        '''.split(),        
+        '''.split(),  
+    'z' : [('esTree_V15_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
+            'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
+            'batch1_of2.root'),
+           ('esTree_V15_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
+            'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
+            'batch2_of2.root')],       
 }
 
 _treeNames = {
