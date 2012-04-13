@@ -147,13 +147,13 @@ class Config():
             setattr(self, name, value)
 ## end of Config
 
-configurations = []
+scale_configurations = []
 for cat in categories:
     for period, version in zip('2011A 2011B 2011AB'.split(),
                                'v14 v15 v13'.split()):        
         name_base = '%s_pt{lo}to{hi}_%s' % (cat.name, version)
-        jobname_template1 = 'sgetest_mc_%s_evt1of4' % name_base
-        jobname_template2 = 'sgetest_mc_%s_evt1of4' % name_base
+        jobname_template1 = 'sgetest_mc_%s_evt2of4' % name_base
+        jobname_template2 = 'sgetest_mc_%s_evt2of4' % name_base
         jobname_template3 = 'sgetest_data_%s' % name_base
         if period == '2011AB':
             fitresult = 'fitresult_data'
@@ -163,9 +163,12 @@ for cat in categories:
             period_title = period
         cfg = Config(
             ## Canvas name
-            name = 'baseline_%s_%s' % (cat.name, period), 
+            name = 'baseline_scale_%s_%s' % (cat.name, period), 
             ## Canvas title
-            title = ', '.join(icat.labels + (period_title,)),
+            title = ', '.join(cat.labels + (period_title,)),
+            ## Axis titles
+            xtitle = 'E_{T}^{#gamma} (GeV)',
+            ytitle = 'E^{#gamma} Scale (%)',
             ## 1 : MC truth, 2: MC fit, 3: data fit
             sources1 = make_list_of_sources(jobname_template1),
             sources2 = make_list_of_sources(jobname_template2),
@@ -175,17 +178,53 @@ for cat in categories:
             getters3 = var_vs_pt_fitresult_getter_factory(fitresult, 
                                                           'phoScale'),
             )
-        configurations.append(cfg)
+        scale_configurations.append(cfg)
 ## End of loop categories
 
+
+resolution_configurations = []
+for cat in categories:
+    for period, version in zip('2011A 2011B 2011AB'.split(),
+                               'v14 v15 v13'.split()):        
+        name_base = '%s_pt{lo}to{hi}_%s' % (cat.name, version)
+        jobname_template1 = 'sgetest_mc_%s_evt2of4' % name_base
+        jobname_template2 = 'sgetest_mc_%s_evt2of4' % name_base
+        jobname_template3 = 'sgetest_data_%s' % name_base
+        if period == '2011AB':
+            fitresult = 'fitresult_data'
+            period_title = '2011A+B'
+        else:
+            fitresult = 'fitresult_' + period
+            period_title = period
+        cfg = Config(
+            ## Canvas name
+            name = 'baseline_resoln_%s_%s' % (cat.name, period),
+            
+            ## Canvas title
+            title = ', '.join(cat.labels + (period_title,)),
+            ## Axis titles
+            xtitle = 'E_{T}^{#gamma} (GeV)',
+            ytitle = 'E^{#gamma} Resolution (%)',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources(jobname_template1),
+            sources2 = make_list_of_sources(jobname_template2),
+            sources3 = make_list_of_sources(jobname_template3),
+            getters1 = var_vs_pt_getter_factory('phoResTrue'),
+            getters2 = var_vs_pt_getter_factory('phoRes'),
+            getters3 = var_vs_pt_fitresult_getter_factory(fitresult, 
+                                                          'phoRes'),
+            )
+        resolution_configurations.append(cfg)
+## End of loop categories
+
+
 plotters = []
+
 #==============================================================================
-for cfg in configurations[:]:
+for cfg in scale_configurations[:]:
     ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
-    xtitle = 'E_{T}^{#gamma} (GeV)'
-    ytitle = 'E^{#gamma} Scale (%)'
-    plotter = FitResultPlotter(cfg.sources1, cfg.getters1, xtitle, ytitle, 
-                               title = 'MC Truth')                          
+    plotter = FitResultPlotter(cfg.sources1, cfg.getters1, cfg.xtitle, 
+                               cfg.ytitle, title = 'MC Truth')                          
     plotter.getdata()
     plotter.makegraph()
     
@@ -207,6 +246,35 @@ for cfg in configurations[:]:
                     colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed])
     plotters.append(plotter)
 ## End of loop over configurations.
+
+#==============================================================================
+for cfg in resolution_configurations[:]:
+    ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
+    plotter = FitResultPlotter(cfg.sources1, cfg.getters1, cfg.xtitle, 
+                               cfg.ytitle, title = 'MC Truth')                          
+    plotter.getdata()
+    plotter.makegraph()
+    
+    plotter.sources = cfg.sources2
+    plotter.getters = cfg.getters2
+    plotter.title = 'MC Fit'
+    plotter.getdata()
+    plotter.makegraph()
+
+    plotter.sources = cfg.sources3
+    plotter.getters = cfg.getters3
+    plotter.title = 'Data Fit'
+    plotter.getdata()
+    plotter.makegraph()
+    
+    canvases.next('c_' + cfg.name).SetGrid()
+    plotter.plotall(title = cfg.title,
+                    styles = [20, 25, 26],
+                    colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed])
+    plotters.append(plotter)
+## End of loop over configurations.
+
+
 # print 'sources:', sources
 
 #file = ROOT.TFile.Open(filepath)
