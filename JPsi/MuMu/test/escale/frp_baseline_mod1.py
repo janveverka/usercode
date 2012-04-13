@@ -16,9 +16,10 @@ canvases.wwidth = 400
 canvases.wheight = 400
 canvases.yperiod = 10
 
-filename = '/raid2/veverka/esFitResults/mc_sreco_strue_Baseline_V1.root'
-filename = '/Users/veverka/Work/Talks/11-11-04/mc_sreco_strue_Baseline_V1.root'
-filename = '/Users/veverka/Work/Talks/11-11-09/Baseline_mod1/mc_sreco_strue_Baseline_mod1.root'
+# filename = '/raid2/veverka/esFitResults/mc_sreco_strue_Baseline_V1.root'
+# filename = '/Users/veverka/Work/Talks/11-11-04/mc_sreco_strue_Baseline_V1.root'
+filename = '/raid2/veverka/esFitResults/mc_sreco_strue_Baseline_mod1.root'
+# filename = '/Users/veverka/Work/Talks/11-11-09/Baseline_mod1/mc_sreco_strue_Baseline_mod1.root'
 
 plotters = []
 
