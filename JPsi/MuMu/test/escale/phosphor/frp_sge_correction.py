@@ -152,7 +152,7 @@ configurations = [
     ## Barrel 2011A
     Config(
         ## Canvas name
-        name = 'corr_EB_2011A',
+        name = 'corr_scale_EB_2011A',
         ## Canvas title
         title = 'Barrel, 2011A',
         ## 1 : MC truth, 2: MC fit, 3: data fit
@@ -169,7 +169,7 @@ configurations = [
     ## Endcaps 2011A
     Config(
         ## Canvas name
-        name = 'corr_EE_2011A',
+        name = 'corr_scale_EE_2011A',
         ## Canvas title
         title = 'Endcaps, 2011A',
         ## 1 : MC truth, 2: MC fit, 3: data fit
@@ -186,7 +186,7 @@ configurations = [
     ## Barrel 2011B
     Config(
         ## Canvas name
-        name = 'corr_EB_2011B',
+        name = 'corr_scale_EB_2011B',
         ## Canvas title
         title = 'Barrel, 2011B',
         ## 1 : MC truth, 2: MC fit, 3: data fit
@@ -203,7 +203,7 @@ configurations = [
     ## Endcaps 2011B
     Config(
         ## Canvas name
-        name = 'corr_EE_2011B',
+        name = 'corr_scale_EE_2011B',
         ## Canvas title
         title = 'Endcaps, 2011B',
         ## 1 : MC truth, 2: MC fit, 3: data fit
@@ -220,7 +220,7 @@ configurations = [
     ## Barrel 2011A+B
     Config(
         ## Canvas name
-        name = 'corr_EB_2011AB',
+        name = 'corr_scale_EB_2011AB',
         ## Canvas title
         title = 'Barrel, 2011A+B',
         ## 1 : MC truth, 2: MC fit, 3: data fit
@@ -237,7 +237,7 @@ configurations = [
     ## Endcaps 2011A+B
     Config(
         ## Canvas name
-        name = 'corr_EE_2011AB',
+        name = 'corr_scale_EE_2011AB',
         ## Canvas title
         title = 'Endcaps, 2011A+B',
         ## 1 : MC truth, 2: MC fit, 3: data fit
@@ -249,13 +249,120 @@ configurations = [
         getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
                                                       'phoScale'),
         ),
-    ] # cfgs
+    
+        
+    ] # configurations
 
 
+resolution_configurations  = [
+    ###########################################################################
+    ## Barrel 2011A, Resolution
+    Config(
+        ## Canvas name
+        name = 'corr_resoln_EB_2011A',
+        ## Canvas title
+        title = 'Barrel, 2011A',
+        ## 1 : MC truth, 2: MC fit, 3: data fit
+        sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
+        sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
+        sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v14'),
+        getters1 = var_vs_pt_getter_factory('phoResTrue'),
+        getters2 = var_vs_pt_getter_factory('phoRes'),
+        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
+                                                      'phoRes'),
+        ),
+
+    ###########################################################################
+    ## Endcaps 2011A, Resolution
+    Config(
+        ## Canvas name
+        name = 'corr_resoln_EE_2011A',
+        ## Canvas title
+        title = 'Endcaps, 2011A',
+        ## 1 : MC truth, 2: MC fit, 3: data fit
+        sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
+        sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
+        sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v14'),
+        getters1 = var_vs_pt_getter_factory('phoResTrue'),
+        getters2 = var_vs_pt_getter_factory('phoRes'),
+        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
+                                                      'phoRes'),
+        ),
+        
+    ###########################################################################
+    ## Barrel 2011B, Resolution
+    Config(
+        ## Canvas name
+        name = 'corr_resoln_EB_2011B',
+        ## Canvas title
+        title = 'Barrel, 2011B',
+        ## 1 : MC truth, 2: MC fit, 3: data fit
+        sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
+        sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
+        sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v15'),
+        getters1 = var_vs_pt_getter_factory('phoResTrue'),
+        getters2 = var_vs_pt_getter_factory('phoRes'),
+        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
+                                                      'phoRes'),
+        ),
+
+    ###########################################################################
+    ## Endcaps 2011B, Resolution
+    Config(
+        ## Canvas name
+        name = 'corr_resoln_EE_2011B',
+        ## Canvas title
+        title = 'Endcaps, 2011B',
+        ## 1 : MC truth, 2: MC fit, 3: data fit
+        sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
+        sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
+        sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v15'),
+        getters1 = var_vs_pt_getter_factory('phoResTrue'),
+        getters2 = var_vs_pt_getter_factory('phoRes'),
+        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
+                                                      'phoRes'),
+        ),
+        
+    ###########################################################################
+    ## Barrel 2011A+B, Resolution
+    Config(
+        ## Canvas name
+        name = 'corr_resoln_EB_2011AB',
+        ## Canvas title
+        title = 'Barrel, 2011A+B',
+        ## 1 : MC truth, 2: MC fit, 3: data fit
+        sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
+        sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
+        sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v13'),
+        getters1 = var_vs_pt_getter_factory('phoResTrue'),
+        getters2 = var_vs_pt_getter_factory('phoRes'),
+        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
+                                                      'phoRes'),
+        ),
+
+    ###########################################################################
+    ## Endcaps 2011A, Resolution
+    Config(
+        ## Canvas name
+        name = 'corr_resoln_EE_2011AB',
+        ## Canvas title
+        title = 'Endcaps, 2011A+B',
+        ## 1 : MC truth, 2: MC fit, 3: data fit
+        sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
+        sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
+        sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v13'),
+        getters1 = var_vs_pt_getter_factory('phoResTrue'),
+        getters2 = var_vs_pt_getter_factory('phoRes'),
+        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
+                                                      'phoRes'),
+        ),
+        
+    ] ## resolution_configurations
+    
 plotters = []
 
 #==============================================================================
-for cfg in configurations[:]:
+for cfg in configurations[:0]:
     ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
     xtitle = 'E_{T}^{#gamma} (GeV)'
     ytitle = 'E^{#gamma} Scale (%)'
@@ -282,8 +389,33 @@ for cfg in configurations[:]:
                     colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed])
     plotters.append(plotter)
 ## End of loop over configurations.
-# print 'sources:', sources
 
-#file = ROOT.TFile.Open(filepath)
-#workspace = file.Get(jobname + '_workspace')
-#workspace.Print()
+
+#==============================================================================
+for cfg in resolution_configurations[:]:
+    ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
+    xtitle = 'E_{T}^{#gamma} (GeV)'
+    ytitle = 'E^{#gamma} Resolution (%)'
+    plotter = FitResultPlotter(cfg.sources1, cfg.getters1, xtitle, ytitle, 
+                               title = 'MC Truth')                          
+    plotter.getdata()
+    plotter.makegraph()
+    
+    plotter.sources = cfg.sources2
+    plotter.getters = cfg.getters2
+    plotter.title = 'MC Fit'
+    plotter.getdata()
+    plotter.makegraph()
+
+    plotter.sources = cfg.sources3
+    plotter.getters = cfg.getters3
+    plotter.title = 'Data Fit'
+    plotter.getdata()
+    plotter.makegraph()
+    
+    canvases.next('c_' + cfg.name).SetGrid()
+    plotter.plotall(title = cfg.title,
+                    styles = [20, 25, 26],
+                    colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed])
+    plotters.append(plotter)
+## End of loop over configurations.
