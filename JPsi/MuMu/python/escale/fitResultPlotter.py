@@ -10,7 +10,8 @@ from ROOT import RooCruijff
 import math
 
 class FitResultPlotter():
-    def __init__(self, sources, getters, **kwargs):
+    def __init__(self, sources, getters, xtitle='x', ytitle='y', title='', 
+                 **kwargs):
         ## Initialize data
         ## List of 3-tuples (filename, workspace name, parameter snapshot)
         self.sources = sources
@@ -19,9 +20,9 @@ class FitResultPlotter():
         self.getters = getters
 
         ##
-        self.xtitle = 'x'
-        self.ytitle = 'y'
-        self.title = ''
+        self.xtitle = xtitle
+        self.ytitle = ytitle
+        self.title = title
 
         self.labels = []
         self.graphs = []
@@ -84,7 +85,8 @@ class FitResultPlotter():
             else:
                 wspace = file.Get(wsname)
 
-            wspace.loadSnapshot(snapshot)
+            if snapshot:
+                wspace.loadSnapshot(snapshot)
 
             x = []
             for f in getters:
