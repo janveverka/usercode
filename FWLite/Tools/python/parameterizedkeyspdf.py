@@ -20,7 +20,7 @@ Last update: 4 February 2012
 
 import ROOT
 import FWLite.Tools.roofit as roo
-import JPsi.MuMu.tools as tools
+import FWLite.Tools.tools as tools
 
 
 ##------------------------------------------------------------------------------
