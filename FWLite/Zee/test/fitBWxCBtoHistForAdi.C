@@ -17,9 +17,9 @@ void createToyDataHist(RooWorkspace & w, const char *hname, const char *fname);
 TH1* getHistFromFile(const char *hname, const char *fname);
 TH1* getHistFromCanvasInFile(const char *hname, const char *cname, 
                              const char *fname);
-void importBinnedData(TH1 *hist, RooWorkspace & w);
-void fitModelToData(RooWorkspace & w);
-void plotFittedModel(RooWorkspace & w);
+void importBinnedData(TH1 *hist, RooWorkspace & w, const char *name="data");
+void fitModelToData(RooWorkspace & w, const char *dataName="data");
+void plotFittedModel(RooWorkspace & w, const char *dataName="data");
 
 
 ///_____________________________________________________________________________
@@ -34,7 +34,6 @@ void fitBWxCBtoHistForAdi() {
   TH1 *hist = getHistFromCanvasInFile("dataZmass", "c1", "ZplotData.root");
   importBinnedData(hist, w);
   fitModelToData(w);
-  w.Print();
   plotFittedModel(w);
 } /// fitBWxCBtoHistForAdi()
 
@@ -121,24 +120,25 @@ TH1* getHistFromCanvasInFile(const char *hname, const char *cname,
 
 
 ///_____________________________________________________________________________
-void importBinnedData(TH1 *hist, RooWorkspace & w){
-  RooDataHist data("data", hist->GetTitle(), RooArgList(*w.var("m")), hist);
+void importBinnedData(TH1 *hist, RooWorkspace & w, const char *name){
+  RooDataHist data(name, hist->GetTitle(), RooArgList(*w.var("m")), hist);
   w.import(data);
 } /// importBinnedData()
 
 
 ///_____________________________________________________________________________
-void fitModelToData(RooWorkspace & w) {
-  w.pdf("model")->fitTo(*w.data("data"), RooFit::Range(60, 120));
+void fitModelToData(RooWorkspace & w, const char *dataName) {
+  w.pdf("model")->fitTo(*w.data(dataName), RooFit::Range(60, 120));
 } /// fitModelToData()
 
 
 ///_____________________________________________________________________________
-void plotFittedModel(RooWorkspace & w) {
+void plotFittedModel(RooWorkspace & w, const char *dataName) {
   RooPlot * plot = w.var("m")->frame();
-  w.data("data")->plotOn(plot);
+  plot->SetTitle(dataName);
+  w.data(dataName)->plotOn(plot);
   w.pdf("model")->plotOn(plot);
   w.pdf("model")->paramOn(plot);
-  TCanvas * canvas = new TCanvas();
+  TCanvas * canvas = new TCanvas(dataName, dataName);
   plot->Draw();
 } /// plotFittedModel()
