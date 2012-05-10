@@ -5,7 +5,12 @@
 // #include "T.h"
 
 #include "RooAbsPdf.h"
+#include "RooArgList.h"
+#include "RooDataHist.h"
+#include "RooPlot.h"
+#include "RooRealVar.h"
 #include "RooWorkspace.h"
+
 
 void setupModel(RooWorkspace & w);
 void createToyDataHist(RooWorkspace & w, const char *hname, const char *fname);
