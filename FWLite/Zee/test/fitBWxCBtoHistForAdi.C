@@ -16,12 +16,12 @@ void importBinnedData(TH1 *hist, RooWorkspace & w);
 void fitModelToData(RooWorkspace & w);
 void plotFittedModel(RooWorkspace & w);
 
-RooWorkspace w("w", "Fit BWxCB to a histogram");
 
 ///_____________________________________________________________________________
 /// Main entry point to execution.
 void fitBWxCBtoHistForAdi() {
   /// Create a workspace to collect all the relevant objects.
+  RooWorkspace w("w", "Fit BWxCB to a histogram");
 
   setupModel(w);
   // createToyDataHist(w, "toyData", "fitBWxCBHistForAdi.root");
@@ -61,7 +61,6 @@ TH1* getHistFromFile(const char *hname, const char *fname){
 
   /// Make sure we got the hist:
   assert(hist);
-  hist->Draw();
 
   /// Get our own clone of the hist in our directory so that we can 
   /// close the original file.
@@ -74,8 +73,8 @@ TH1* getHistFromFile(const char *hname, const char *fname){
   histClone->SetDirectory(currentDirectory);
 
   /// Clean up the file:
-  // file->Close();
-  // delete file;
+  file->Close();
+  delete file;
 
   /// Voila
   return histClone;
@@ -96,7 +95,6 @@ TH1* getHistFromCanvasInFile(const char *hname, const char *cname,
 
   /// Make sure we got the hist:
   assert(hist);
-  hist->Draw();
 
   /// Get our own clone of the hist in our directory so that we can 
   /// close the original file.
