@@ -1,3 +1,4 @@
+import commands
 import JPsi.MuMu.escale.egmdecorator as decorator
 
 #decorator.basepath = '/raid2/veverka/jobs/outputs/eg_paper_dr0p1'
@@ -13,7 +14,19 @@ for name in '''
             '''.split():
     plot = decorator.EgmDecorator(name)
     plot.new_canvas.Draw()
-    plot.new_canvas.Print(plot.name + '.eps')
-    plot.new_canvas.Print(plot.name + '.C')
-    plot.new_canvas.Print(plot.name + '.png')
+    outputname = plot.name.replace('egm', 'egm_phosphor').replace('_yyv3', '')
+    plot.new_canvas.Print(outputname + '.eps')
+    plot.new_canvas.Print(outputname + '.C')
+    plot.new_canvas.Print(outputname + '.png')
+    
+    command = 'ps2pdf -dEPSCrop ' + outputname + '.eps'
+    (exitstatus, outtext) = commands.getstatusoutput(command)
+    if  exitstatus != 0:
+        raise RuntimeError, '"%s" failed: "%s"!' % (command, outtext)
+    
     plots.append(plot)
+    
+## Print the apparent peak positions
+print 'Apparent peak positions (GeV)'
+for plot in plots:
+    print "%.3f   %s" % (plot.peak_position, plot.name)
