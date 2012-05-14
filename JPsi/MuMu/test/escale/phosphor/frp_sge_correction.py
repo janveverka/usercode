@@ -24,6 +24,7 @@ bincenters    = [0.5 * (lo + hi) for lo, hi in binedges]
 binhalfwidths = [0.5 * (hi - lo) for lo, hi in binedges]
 xgetter_factory  = lambda: lambda workspace, i = iter(bincenters)    : i.next()
 exgetter_factory = lambda: lambda workspace, i = iter(binhalfwidths) : i.next()
+plotters = []
 
 
 #______________________________________________________________________________
@@ -165,275 +166,319 @@ class Config():
             setattr(self, name, value)
 ## end of Config
 
-configurations = [
-    ###########################################################################
-    ## Barrel 2011A
-    Config(
-        ## Canvas name
-        name = 'corr_scale_EB_2011A',
-        ## Canvas title
-        title = 'Barrel, 2011A',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v14'),
-        getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
-        getters2 = var_vs_pt_getter_factory('phoScale'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
-                                                      'phoScale'),
-        ),
 
-    ###########################################################################
-    ## Endcaps 2011A
-    Config(
-        ## Canvas name
-        name = 'corr_scale_EE_2011A',
-        ## Canvas title
-        title = 'Endcaps, 2011A',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v14'),
-        getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
-        getters2 = var_vs_pt_getter_factory('phoScale'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
-                                                      'phoScale'),
-        ),
-        
-    ###########################################################################
-    ## Barrel 2011B
-    Config(
-        ## Canvas name
-        name = 'corr_scale_EB_2011B',
-        ## Canvas title
-        title = 'Barrel, 2011B',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v15'),
-        getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
-        getters2 = var_vs_pt_getter_factory('phoScale'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
-                                                      'phoScale'),
-        ),
+#______________________________________________________________________________
+def get_scale_configs():
+    '''
+    Returns a list of configurations for the scale plots.
+    '''
+    configurations = [
+        ###########################################################################
+        ## Barrel 2011A
+        Config(
+            ## Canvas name
+            name = 'corr_scale_EB_2011A',
+            ## Canvas title
+            title = 'Barrel, 2011A',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v14'),
+            getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
+            getters2 = var_vs_pt_getter_factory('phoScale'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
+                                                          'phoScale'),
+            ),
 
-    ###########################################################################
-    ## Endcaps 2011B
-    Config(
-        ## Canvas name
-        name = 'corr_scale_EE_2011B',
-        ## Canvas title
-        title = 'Endcaps, 2011B',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v15'),
-        getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
-        getters2 = var_vs_pt_getter_factory('phoScale'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
-                                                      'phoScale'),
-        ),
-        
-    ###########################################################################
-    ## Barrel 2011A+B
-    Config(
-        ## Canvas name
-        name = 'corr_scale_EB_2011AB',
-        ## Canvas title
-        title = 'Barrel, 2011A+B',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v13'),
-        getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
-        getters2 = var_vs_pt_getter_factory('phoScale'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
-                                                      'phoScale'),
-        ),
+        ###########################################################################
+        ## Endcaps 2011A
+        Config(
+            ## Canvas name
+            name = 'corr_scale_EE_2011A',
+            ## Canvas title
+            title = 'Endcaps, 2011A',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v14'),
+            getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
+            getters2 = var_vs_pt_getter_factory('phoScale'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
+                                                          'phoScale'),
+            ),
 
-    ###########################################################################
-    ## Endcaps 2011A+B
-    Config(
-        ## Canvas name
-        name = 'corr_scale_EE_2011AB',
-        ## Canvas title
-        title = 'Endcaps, 2011A+B',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v13'),
-        getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
-        getters2 = var_vs_pt_getter_factory('phoScale'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
-                                                      'phoScale'),
-        ),
-    
-        
-    ] # configurations
+        #######################################################################
+        ## Barrel 2011B
+        Config(
+            ## Canvas name
+            name = 'corr_scale_EB_2011B',
+            ## Canvas title
+            title = 'Barrel, 2011B',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v15'),
+            getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
+            getters2 = var_vs_pt_getter_factory('phoScale'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
+                                                          'phoScale'),
+            ),
 
+        #######################################################################
+        ## Endcaps 2011B
+        Config(
+            ## Canvas name
+            name = 'corr_scale_EE_2011B',
+            ## Canvas title
+            title = 'Endcaps, 2011B',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v15'),
+            getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
+            getters2 = var_vs_pt_getter_factory('phoScale'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
+                                                          'phoScale'),
+            ),
 
-resolution_configurations  = [
-    ###########################################################################
-    ## Barrel 2011A, Resolution
-    Config(
-        ## Canvas name
-        name = 'corr_resoln_EB_2011A',
-        ## Canvas title
-        title = 'Barrel, 2011A',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v14'),
-        getters1 = var_vs_pt_getter_factory('phoResTrue'),
-        getters2 = var_vs_pt_getter_factory('phoRes'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
-                                                      'phoRes'),
-        ),
+        #######################################################################
+        ## Barrel 2011A+B
+        Config(
+            ## Canvas name
+            name = 'corr_scale_EB_2011AB',
+            ## Canvas title
+            title = 'Barrel, 2011A+B',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v13'),
+            getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
+            getters2 = var_vs_pt_getter_factory('phoScale'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
+                                                          'phoScale'),
+            ),
 
-    ###########################################################################
-    ## Endcaps 2011A, Resolution
-    Config(
-        ## Canvas name
-        name = 'corr_resoln_EE_2011A',
-        ## Canvas title
-        title = 'Endcaps, 2011A',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v14'),
-        getters1 = var_vs_pt_getter_factory('phoResTrue'),
-        getters2 = var_vs_pt_getter_factory('phoRes'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
-                                                      'phoRes'),
-        ),
-        
-    ###########################################################################
-    ## Barrel 2011B, Resolution
-    Config(
-        ## Canvas name
-        name = 'corr_resoln_EB_2011B',
-        ## Canvas title
-        title = 'Barrel, 2011B',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v15'),
-        getters1 = var_vs_pt_getter_factory('phoResTrue'),
-        getters2 = var_vs_pt_getter_factory('phoRes'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
-                                                      'phoRes'),
-        ),
-
-    ###########################################################################
-    ## Endcaps 2011B, Resolution
-    Config(
-        ## Canvas name
-        name = 'corr_resoln_EE_2011B',
-        ## Canvas title
-        title = 'Endcaps, 2011B',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v15'),
-        getters1 = var_vs_pt_getter_factory('phoResTrue'),
-        getters2 = var_vs_pt_getter_factory('phoRes'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
-                                                      'phoRes'),
-        ),
-        
-    ###########################################################################
-    ## Barrel 2011A+B, Resolution
-    Config(
-        ## Canvas name
-        name = 'corr_resoln_EB_2011AB',
-        ## Canvas title
-        title = 'Barrel, 2011A+B',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v13'),
-        getters1 = var_vs_pt_getter_factory('phoResTrue'),
-        getters2 = var_vs_pt_getter_factory('phoRes'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
-                                                      'phoRes'),
-        ),
-
-    ###########################################################################
-    ## Endcaps 2011A, Resolution
-    Config(
-        ## Canvas name
-        name = 'corr_resoln_EE_2011AB',
-        ## Canvas title
-        title = 'Endcaps, 2011A+B',
-        ## 1 : MC truth, 2: MC fit, 3: data fit
-        sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
-        sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
-        sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v13'),
-        getters1 = var_vs_pt_getter_factory('phoResTrue'),
-        getters2 = var_vs_pt_getter_factory('phoRes'),
-        getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
-                                                      'phoRes'),
-        ),
-        
-    ] ## resolution_configurations
-    
-plotters = []
-
-#==============================================================================
-for cfg in configurations[:]:
-    ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
-    xtitle = 'E_{T}^{#gamma} (GeV)'
-    ytitle = 'E^{#gamma} Scale (%)'
-    plotter = FitResultPlotter(cfg.sources1, cfg.getters1, xtitle, ytitle, 
-                               title = 'MC Truth')                          
-    plotter.getdata()
-    plotter.makegraph()
-    
-    plotter.sources = cfg.sources2
-    plotter.getters = cfg.getters2
-    plotter.title = 'MC Fit'
-    plotter.getdata()
-    plotter.makegraph()
-
-    plotter.sources = cfg.sources3
-    plotter.getters = cfg.getters3
-    plotter.title = 'Data Fit'
-    plotter.getdata()
-    plotter.makegraph()
-    
-    canvases.next('c_' + cfg.name).SetGrid()
-    plotter.plotall(title = cfg.title,
-                    styles = [20, 25, 26],
-                    colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed])
-    plotters.append(plotter)
-## End of loop over configurations.
+        #######################################################################
+        ## Endcaps 2011A+B
+        Config(
+            ## Canvas name
+            name = 'corr_scale_EE_2011AB',
+            ## Canvas title
+            title = 'Endcaps, 2011A+B',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v13'),
+            getters1 = var_vs_pt_getter_factory('phoScaleTrue'),
+            getters2 = var_vs_pt_getter_factory('phoScale'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
+                                                          'phoScale'),
+            ),
 
 
-#==============================================================================
-for cfg in resolution_configurations[:]:
-    ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
-    xtitle = 'E_{T}^{#gamma} (GeV)'
-    ytitle = 'E^{#gamma} Resolution (%)'
-    plotter = FitResultPlotter(cfg.sources1, cfg.getters1, xtitle, ytitle, 
-                               title = 'MC Truth')                          
-    plotter.getdata()
-    plotter.makegraph()
-    
-    plotter.sources = cfg.sources2
-    plotter.getters = cfg.getters2
-    plotter.title = 'MC Fit'
-    plotter.getdata()
-    plotter.makegraph()
+        ] # configurations
+    return configurations
+## End of get_scale_configs().
 
-    plotter.sources = cfg.sources3
-    plotter.getters = cfg.getters3
-    plotter.title = 'Data Fit'
-    plotter.getdata()
-    plotter.makegraph()
-    
-    canvases.next('c_' + cfg.name).SetGrid()
-    plotter.plotall(title = cfg.title,
-                    styles = [20, 25, 26],
-                    colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed])
-    plotters.append(plotter)
-## End of loop over configurations.
+
+#______________________________________________________________________________
+def get_resolution_configs():
+    '''
+    Returns the list of configurations for the resolution plots.
+    '''
+    configurations  = [
+        ###########################################################################
+        ## Barrel 2011A, Resolution
+        Config(
+            ## Canvas name
+            name = 'corr_resoln_EB_2011A',
+            ## Canvas title
+            title = 'Barrel, 2011A',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v14_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v14'),
+            getters1 = var_vs_pt_getter_factory('phoResTrue'),
+            getters2 = var_vs_pt_getter_factory('phoRes'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
+                                                          'phoRes'),
+            ),
+
+        ###########################################################################
+        ## Endcaps 2011A, Resolution
+        Config(
+            ## Canvas name
+            name = 'corr_resoln_EE_2011A',
+            ## Canvas title
+            title = 'Endcaps, 2011A',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v14_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v14'),
+            getters1 = var_vs_pt_getter_factory('phoResTrue'),
+            getters2 = var_vs_pt_getter_factory('phoRes'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011A',
+                                                          'phoRes'),
+            ),
+
+        ###########################################################################
+        ## Barrel 2011B, Resolution
+        Config(
+            ## Canvas name
+            name = 'corr_resoln_EB_2011B',
+            ## Canvas title
+            title = 'Barrel, 2011B',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v15_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v15'),
+            getters1 = var_vs_pt_getter_factory('phoResTrue'),
+            getters2 = var_vs_pt_getter_factory('phoRes'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
+                                                          'phoRes'),
+            ),
+
+        ###########################################################################
+        ## Endcaps 2011B, Resolution
+        Config(
+            ## Canvas name
+            name = 'corr_resoln_EE_2011B',
+            ## Canvas title
+            title = 'Endcaps, 2011B',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v15_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v15'),
+            getters1 = var_vs_pt_getter_factory('phoResTrue'),
+            getters2 = var_vs_pt_getter_factory('phoRes'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_2011B',
+                                                          'phoRes'),
+            ),
+
+        ###########################################################################
+        ## Barrel 2011A+B, Resolution
+        Config(
+            ## Canvas name
+            name = 'corr_resoln_EB_2011AB',
+            ## Canvas title
+            title = 'Barrel, 2011A+B',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EB_pt{lo}to{hi}_v13_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EB_pt{lo}to{hi}_v13'),
+            getters1 = var_vs_pt_getter_factory('phoResTrue'),
+            getters2 = var_vs_pt_getter_factory('phoRes'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
+                                                          'phoRes'),
+            ),
+
+        ###########################################################################
+        ## Endcaps 2011A, Resolution
+        Config(
+            ## Canvas name
+            name = 'corr_resoln_EE_2011AB',
+            ## Canvas title
+            title = 'Endcaps, 2011A+B',
+            ## 1 : MC truth, 2: MC fit, 3: data fit
+            sources1 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
+            sources2 = make_list_of_sources('sge_mc_EE_pt{lo}to{hi}_v13_evt1of4'),
+            sources3 = make_list_of_sources('sge_data_EE_pt{lo}to{hi}_v13'),
+            getters1 = var_vs_pt_getter_factory('phoResTrue'),
+            getters2 = var_vs_pt_getter_factory('phoRes'),
+            getters3 = var_vs_pt_fitresult_getter_factory('fitresult_data',
+                                                          'phoRes'),
+            ),
+
+        ] ## configurations
+    return configurations
+## End of get_resolution_configs()
+
+
+#______________________________________________________________________________
+def make_scale_plots():
+    '''
+    Makes the canvases with the scale plots.
+    '''
+    global plotters
+    #==========================================================================
+    for cfg in get_scale_configs()[:]:
+        ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
+        xtitle = 'E_{T}^{#gamma} (GeV)'
+        ytitle = 'E^{#gamma} Scale (%)'
+        plotter = FitResultPlotter(cfg.sources1, cfg.getters1, xtitle, ytitle, 
+                                   title = 'MC Truth')                          
+        plotter.getdata()
+        plotter.makegraph()
+
+        plotter.sources = cfg.sources2
+        plotter.getters = cfg.getters2
+        plotter.title = 'MC Fit'
+        plotter.getdata()
+        plotter.makegraph()
+
+        plotter.sources = cfg.sources3
+        plotter.getters = cfg.getters3
+        plotter.title = 'Data Fit'
+        plotter.getdata()
+        plotter.makegraph()
+
+        canvases.next('c_' + cfg.name).SetGrid()
+        plotter.plotall(title = cfg.title,
+                        styles = [20, 25, 26],
+                        colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed])
+        plotters.append(plotter)
+    ## End of loop over configurations.
+## End of make_scale_plots().
+
+
+#______________________________________________________________________________
+def make_resolution_plots():
+    '''
+    Makes canvases with resolution plots.
+    '''
+    global plotters
+    #==========================================================================
+    for cfg in get_resolution_configs()[:]:
+        ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
+        xtitle = 'E_{T}^{#gamma} (GeV)'
+        ytitle = 'E^{#gamma} Resolution (%)'
+        plotter = FitResultPlotter(cfg.sources1, cfg.getters1, xtitle, ytitle, 
+                                   title = 'MC Truth')                          
+        plotter.getdata()
+        plotter.makegraph()
+
+        plotter.sources = cfg.sources2
+        plotter.getters = cfg.getters2
+        plotter.title = 'MC Fit'
+        plotter.getdata()
+        plotter.makegraph()
+
+        plotter.sources = cfg.sources3
+        plotter.getters = cfg.getters3
+        plotter.title = 'Data Fit'
+        plotter.getdata()
+        plotter.makegraph()
+
+        canvases.next('c_' + cfg.name).SetGrid()
+        plotter.plotall(title = cfg.title,
+                        styles = [20, 25, 26],
+                        colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed])
+        plotters.append(plotter)
+    ## End of loop over configurations.
+## Ens of make_resolution_plots()
+
+
+#______________________________________________________________________________
+def main():
+    '''
+    Main entry point of execution.
+    '''
+    make_scale_plots()
+    make_resolution_plots()
+## End of main()
+
+
+#______________________________________________________________________________
+if __name__ == '__main__':
+    main()
+    import user
