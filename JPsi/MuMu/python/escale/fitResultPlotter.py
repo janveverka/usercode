@@ -216,9 +216,13 @@ class FitResultPlotter():
         ## Get the axis ranges.
         if xrange == 'auto':
             (xmin, xmax) = self.get_auto_range('x', logy)
-
+        else:
+            (xmin, xmax) = xrange
+            
         if yrange == 'auto':
             (ymin, ymax) = self.get_auto_range('y', logy)
+        else:
+            (ymin, ymax) = yrange  
             
         graph = self.graphs[0]
         graph.SetTitle('%s;%s;%s' % (self.title, self.xtitle, self.ytitle))
