@@ -51,7 +51,7 @@ class EgmDecorator:
         
         self.old_canvas = self.get_old_canvas()
         self.new_canvas = self.get_new_canvas()
-        self.curve = self.get_curve()
+        self.peak_position = self.get_peak_position()
         self.decorate_canvas(self.new_canvas)
     ## End of __init__()
     
@@ -116,7 +116,7 @@ class EgmDecorator:
                 phoRes.getVal(), phoRes.getError()
                 ),
             ],
-            position=(0.65, 0.8), textsize=22, rowheight=0.0825
+            position=(0.65, 0.8), textsize=22, rowheight=0.07
             ).draw()
         
         ## CMS Preliminary:
@@ -141,7 +141,7 @@ class EgmDecorator:
             labels.append('R_{9} > 0.94')
             
         Latex(labels, position=(0.22, 0.8), textsize=22, 
-              rowheight=0.0825
+              rowheight=0.07
               ).draw()
         
         canvas.Modified()
@@ -151,14 +151,14 @@ class EgmDecorator:
     ## End of decorate_new_canvas()
         
     #__________________________________________________________________________
-    def get_curve(self):
+    def get_peak_position(self):
         '''
-        Returns the curve of the model plotted on the old canvas.
-        Preconditions: attribute old_canvas has already been defined.
+        Returns the apparent position of the peak of the fitted PDF.
+        Preconditions: attribute self.workspace is defined.
         '''
-        name = 'pm_Norm[mmgMass]_Range[plot]_NormRange[plot]'
-        return self.old_canvas.GetListOfPrimitives().FindObject(name)
-    ## End of get_curve
+        return tools.pdf_mode(self.workspace.pdf('pm'), 
+                              self.workspace.var('mmgMass'))
+    ## End of peak_position
     
 ## End of EgmDecorator.
 
