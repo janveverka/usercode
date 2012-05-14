@@ -158,13 +158,6 @@ def var_vs_pt_fitresult_getter_factory(fitresult, varname):
 
 
 #______________________________________________________________________________
-def adjust_ranges(graph, xrange, yrange):
-    graph.GetXaxis().SetLimits(*xrange)
-    graph.GetHistogram().SetMinimum(yrange[0])
-    graph.GetHistogram().SetMaximum(yrange[1])
-## End of adjust_ranges
-
-#______________________________________________________________________________
 class Config():
     """Holds fitResultPlotter configuration data."""
     def __init__(self, **kwargs):
@@ -176,12 +169,6 @@ scale_configurations = []
 for cat in categories:
     for period, version in zip('2011A 2011B 2011AB'.split(),
                                'v14 v15 v13'.split()):        
-        name_base = '%s_pt{lo}to{hi}_%s' % (cat.name, version)
-        jobname_template0 = 'sgetest_mc_%s_evt3of4' % name_base
-        jobname_template1 = 'sgetest_mc_%s_evt1of4' % name_base
-        jobname_template2 = 'sgetest_mc_%s_evt2of4' % name_base
-        jobname_template3 = 'sgetest_mc_%s_evt3of4' % name_base
-        jobname_template4 = 'sgetest_mc_%s_evt4of4' % name_base
         if period == '2011AB':
             fitresult = 'fitresult_data'
             period_title = '2011A+B'
@@ -196,18 +183,19 @@ for cat in categories:
             ## Axis titles
             xtitle = 'E_{T}^{#gamma} (GeV)',
             ytitle = 'E^{#gamma} Scale (%)',
-            ## 0 : MC truth, 1-4: MC fit 1-4
-            sources0 = make_list_of_sources(jobname_template0),
-            sources1 = make_list_of_sources(jobname_template1),
-            sources2 = make_list_of_sources(jobname_template2),
-            sources3 = make_list_of_sources(jobname_template3),
-            sources4 = make_list_of_sources(jobname_template4),
-            getters0 = var_vs_pt_getter_factory('phoScaleTrue'),
-            getters1 = var_vs_pt_getter_factory('phoScale'),
-            getters2 = var_vs_pt_getter_factory('phoScale'),
-            getters3 = var_vs_pt_getter_factory('phoScale'),
-            getters4 = var_vs_pt_getter_factory('phoScale'),
+            ## Initialize maps for sources and getters
+            ## keys 1-4 correspond to evt1of4, evt2of4, ..., evt4of4
+            sources = {},
+            getters_fit = {},
+            getters_true = {}
             )
+        ## Add the sources and getters
+        name_base = '%s_pt{lo}to{hi}_%s' % (cat.name, version)
+        for i in range(1, 5):
+            jobname_template = 'sgetest_mc_%s_evt%dof4' % (name_base, i)
+            cfg.sources[i] = make_list_of_sources(jobname_template)
+            cfg.getters_true[i] = var_vs_pt_getter_factory('phoScaleTrue')
+            cfg.getters_fit[i] = var_vs_pt_getter_factory('phoScale')
         scale_configurations.append(cfg)
 ## End of loop categories
 
@@ -216,12 +204,6 @@ resolution_configurations = []
 for cat in categories:
     for period, version in zip('2011A 2011B 2011AB'.split(),
                                'v14 v15 v13'.split()):        
-        name_base = '%s_pt{lo}to{hi}_%s' % (cat.name, version)
-        jobname_template0 = 'sgetest_mc_%s_evt3of4' % name_base
-        jobname_template1 = 'sgetest_mc_%s_evt1of4' % name_base
-        jobname_template2 = 'sgetest_mc_%s_evt2of4' % name_base
-        jobname_template3 = 'sgetest_mc_%s_evt3of4' % name_base
-        jobname_template4 = 'sgetest_mc_%s_evt4of4' % name_base
         if period == '2011AB':
             fitresult = 'fitresult_data'
             period_title = '2011A+B'
@@ -230,25 +212,26 @@ for cat in categories:
             period_title = period
         cfg = Config(
             ## Canvas name
-            name = 'validation4x_resoln_%s_%s' % (cat.name, period),
-            
+            name = '4xvalidation_resoln_%s_%s' % (cat.name, period), 
             ## Canvas title
             title = ', '.join(cat.labels + (period_title,)),
             ## Axis titles
             xtitle = 'E_{T}^{#gamma} (GeV)',
             ytitle = 'E^{#gamma} Resolution (%)',
-            ## 0 : MC truth, 1-4: MC fit 1-4
-            sources0 = make_list_of_sources(jobname_template0),
-            sources1 = make_list_of_sources(jobname_template1),
-            sources2 = make_list_of_sources(jobname_template2),
-            sources3 = make_list_of_sources(jobname_template3),
-            sources4 = make_list_of_sources(jobname_template4),
-            getters0 = var_vs_pt_getter_factory('phoResTrue'),
-            getters1 = var_vs_pt_getter_factory('phoRes'),
-            getters2 = var_vs_pt_getter_factory('phoRes'),
-            getters3 = var_vs_pt_getter_factory('phoRes'),
-            getters4 = var_vs_pt_getter_factory('phoRes'),
+            ## Initialize maps for sources and getters
+            ## keys 1-4 correspond to evt1of4, evt2of4, ..., evt4of4
+            sources = {},
+            getters_fit = {},
+            getters_true = {}
             )
+        ## Add the sources and getters
+        name_base = '%s_pt{lo}to{hi}_%s' % (cat.name, version)
+        for i in range(1, 5):
+            jobname_template = 'sgetest_mc_%s_evt%dof4' % (name_base, i)
+            cfg.sources[i] = make_list_of_sources(jobname_template)
+            cfg.getters_true[i] = var_vs_pt_getter_factory('phoResTrue')
+            cfg.getters_fit[i] = var_vs_pt_getter_factory('phoRes')
+
         resolution_configurations.append(cfg)
 ## End of loop categories
 
@@ -257,26 +240,34 @@ plotters = []
 
 #==============================================================================
 for cfg in scale_configurations[:]:
+    ## Only check EE 2011AB
+    #if (not 'EE_lowR9' in cfg.name) or (not 'AB' in cfg.name):
+        #continue
+    ## Only check 2011AB
+    if not 'AB' in cfg.name:
+        continue
     ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
-    plotter = FitResultPlotter(cfg.sources0, cfg.getters0, cfg.xtitle, 
-                               cfg.ytitle, title = 'MC Truth', name=cfg.name)                          
-    plotter.getdata()
-    plotter.makegraph()
+    plotter = FitResultPlotter(cfg.sources[1], cfg.getters_true[1], cfg.xtitle, 
+                               cfg.ytitle, title = 'MC Truth 1', name=cfg.name)                          
 
     for i in range(1,5):
-        plotter.sources = getattr(cfg, 'sources%d' % i)
-        plotter.getters = getattr(cfg, 'getters%d' % i)
+        plotter.sources = cfg.sources[i]
+        plotter.getters = cfg.getters_true[i]
+        plotter.title = 'MC Truth %d' % i
+        plotter.getdata()
+        plotter.makegraph()
+
+    for i in range(1,5):
+        plotter.sources = cfg.sources[i]
+        plotter.getters = cfg.getters_fit[i]
         plotter.title = 'MC Fit %d' % i
         plotter.getdata()
         plotter.makegraph()
 
     canvases.next('c_' + cfg.name).SetGrid()
     plotter.plotall(title = cfg.title,
-                    styles = [20, 25, 26, 27, 28],
-                    colors = [getattr(ROOT, 'k' + c) for c in
-                              'Black Red Orange Green Blue'.split()],
+                    xrange = (0, 80),
                     legend_position = 'topright')
-    #adjust_ranges(plotter.graphs[0], (0, 60), (-11, 17))
     plotter.graphs[0].Draw('p')
     canvases.canvases[-1].Modified()
     canvases.canvases[-1].Update()
@@ -286,27 +277,32 @@ for cfg in scale_configurations[:]:
 
 #==============================================================================
 for cfg in resolution_configurations[:]:
+    ## Only check 2011AB
+    if not 'AB' in cfg.name:
+        continue
     ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
-    plotter = FitResultPlotter(cfg.sources0, cfg.getters0, cfg.xtitle, 
-                               cfg.ytitle, title = 'MC Truth', name=cfg.name)                          
-    plotter.getdata()
-    plotter.makegraph()
+    plotter = FitResultPlotter(cfg.sources[1], cfg.getters_true[1], cfg.xtitle, 
+                               cfg.ytitle, title = 'MC Truth 1', name=cfg.name)                          
     
     for i in range(1,5):
-        plotter.sources = getattr(cfg, 'sources%d' % i)
-        plotter.getters = getattr(cfg, 'getters%d' % i)
+        plotter.sources = cfg.sources[i]
+        plotter.getters = cfg.getters_true[i]
+        plotter.title = 'MC Truth %d' % i
+        plotter.getdata()
+        plotter.makegraph()
+
+    for i in range(1,5):
+        plotter.sources = cfg.sources[i]
+        plotter.getters = cfg.getters_fit[i]
         plotter.title = 'MC Fit %d' % i
         plotter.getdata()
         plotter.makegraph()
     
     canvases.next('c_' + cfg.name).SetGrid()
     plotter.plotall(title = cfg.title,
-                    styles = [20, 25, 26, 27, 28],
-                    colors = [getattr(ROOT, 'k' + c) for c in
-                              'Black Red Orange Green Blue'.split()],
+                    xrange = (0, 80),
                     legend_position = 'topright')
           
-    #adjust_ranges(plotter.graphs[0], (0, 100), (-2, 17))
     plotter.graphs[0].Draw('p')
     canvases.canvases[-1].Modified()
     canvases.canvases[-1].Update()
@@ -330,11 +326,9 @@ for plot in plotters:
     hist.GetXaxis().SetTitle(xtitle)
     hist.GetYaxis().SetTitle("Fits")
 
-    ymc = plot.graphs[0].GetY()
-
-    for graph in plot.graphs[1:]:
-        for i in range(graph.GetN()):
-            residual = graph.GetY()[i] - ymc[i]
+    for gtrue, gfit in zip(plot.graphs[:4], plot.graphs[4:]):
+        for i in range(gtrue.GetN()):
+            residual = gfit.GetY()[i] - gtrue.GetY()[i]
             hist.Fill(residual)
     canvases.next(plot.residual_histogram.GetName())
     # hist.GetXaxis().SetRangeUser(hist.GetMean() - 3 * hist.GetRMS(),
