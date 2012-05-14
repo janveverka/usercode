@@ -133,24 +133,25 @@ class FitResultPlotter():
 
     ## end of plot()
 
+
     #--------------------------------------------------------------------------
-    def plotall(self, logy = False, **kwargs):
-        '''Plots the current graphs with appropriate ranges and labels.'''
+    def get_auto_range(self, mode, logy=False):
+        '''
+        Get the automatic range for all graphs.  Works for both x- and
+        y-axis depending on the value of mode = "x" or "y".
+        '''
+        if not mode in 'x y'.split():
+            raise ValueError('mode = %s' % mode)
 
         ## Calculate the range of the y axis depending on the logy flag.
         ## Add a 10% margin on top of the (min, max) range.
         if logy:
-            yrange = lambda ymin, ymax: (ymin / pow(ymax / ymin, 0.1),
-                                         ymax * pow(ymax / ymin, 0.1))
+            auto_yrange = lambda ymin, ymax: (ymin / pow(ymax / ymin, 0.1),
+                                              ymax * pow(ymax / ymin, 0.1))
         else:        
-            yrange = lambda ymin, ymax: (ymin - 0.1 * (ymax - ymin),
-                                         ymax + 0.1 * (ymax - ymin))
+            auto_yrange = lambda ymin, ymax: (ymin - 0.1 * (ymax - ymin),
+                                              ymax + 0.1 * (ymax - ymin))
             
-
-        ## Use optional arguments to update instance data
-        for name, value in kwargs.items():
-            setattr(self, name, value)
-
         ## Find the axis ranges
         xlo, xhi, ylo, yhi = [], [], [], []
         for graph in self.graphs:
@@ -178,15 +179,50 @@ class FitResultPlotter():
         xmin, xmax = min(xlo), max(xhi)
         ymin, ymax = min(ylo), max(yhi)
 
-        dx = xmax - xmin
         # dy = ymax - ymin
+        dx = xmax - xmin
 
         ## Add the margin to the y axis range
-        ymin, ymax = yrange(ymin, ymax)
+        ymin, ymax = auto_yrange(ymin, ymax)
+        xmin, xmax = xmin - 0.1 * dx, xmax + 0.1 * dx
+        
+        if mode == 'x':
+            return (xmin, xmax)
+        else:
+            return (ymin, ymax)
 
+    ## end of get_auto_range(..)
+
+    
+    #--------------------------------------------------------------------------
+    def plotall(self, logy = False, legend_position='default',
+                xrange='auto', yrange='auto', **kwargs):
+        '''
+        Plots the current graphs with appropriate ranges and labels. Input
+        parameters:
+            logy: Set y-axis to log scale if True
+            legend_position: One of 'default', 'topright'
+            xrange: Either 'auto' or a 2-tuple specifying the range.
+            yrange: Either 'auto or a 2-tuple specifying the range.
+        '''
+        ## Use optional arguments to update instance data
+        for name, value in kwargs.items():
+            setattr(self, name, value)
+
+        ## Check if legend_position has a sane value
+        if not legend_position in 'default topright'.split():
+            raise ValueError('legend_positon = %s' % legend_position) 
+
+        ## Get the axis ranges.
+        if xrange == 'auto':
+            (xmin, xmax) = self.get_auto_range('x', logy)
+
+        if yrange == 'auto':
+            (ymin, ymax) = self.get_auto_range('y', logy)
+            
         graph = self.graphs[0]
         graph.SetTitle('%s;%s;%s' % (self.title, self.xtitle, self.ytitle))
-        graph.GetXaxis().SetLimits(xmin - 0.1 * dx, xmax + 0.1 * dx)
+        graph.GetXaxis().SetLimits(xmin, xmax)
         graph.GetHistogram().SetMinimum(ymin)
         graph.GetHistogram().SetMaximum(ymax)
 
@@ -206,8 +242,13 @@ class FitResultPlotter():
                 graph.Draw("p")
 
         ## Make the legend
-        self.legend = legend = TLegend(0.6, 0.3 + 0.075 * len(self.graphs),
-                                       0.9, 0.3)
+        legend_coordinates = (0.6, 0.3 + 0.075 * len(self.graphs),
+                              0.9, 0.3)
+
+        if legend_position == 'topright':
+            legend_coordinates = (0.68, 0.98, 0.98, 0.98 - 0.075 * len(self.graphs))
+            
+        self.legend = legend = TLegend(*legend_coordinates)
         legend.SetFillColor(0)
         legend.SetShadowColor(0)
         legend.SetBorderSize(0)
