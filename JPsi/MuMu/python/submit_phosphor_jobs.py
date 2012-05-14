@@ -4,10 +4,56 @@
 import os
 import commands
 
-project_name = 'phosphor_baseline_s6mc_v2'
+# project_name = 'phosphor_baseline_s6mc_v2'
 # project_name = 'test6'
-output_base = '/raid2/veverka/jobs'
+project_name = 'eg_paper_dr0p1'
+
+output_base = '/raid2/veverka/jobs/outputs'
 template_filename='JPsi/MuMu/scripts/phosphor-job.template'
+
+#______________________________________________________________________________
+def get_egpaper_list():
+    '''
+    Returns a list of job names for plots for the EGM-11-001 paper.
+    '''
+    job_names = []
+
+    total_sections = 4
+
+    for subdet in 'EB EE'.split():
+        for pt in '25to999'.split():
+            for version in 'yyv3'.split():
+                ## real data inclusive r9 job name
+                name = '_'.join(['egm_data', subdet, 'pt'+pt, version])
+                job_names.append(name)
+
+                ## real data high r9 job name
+                name = '_'.join(['egm_data', subdet, 'pt'+pt, 
+                                 version, 'highR9'])
+                job_names.append(name)
+
+                ## monte carlo job names - same events of training and fit
+                ## inclusive R9
+                name = '_'.join(['egm_mc', subdet, 'pt'+pt, version])
+                job_names.append(name)
+
+                ## high r9
+                name = '_'.join(['egm_mc', subdet, 'pt'+pt, 
+                                 version, 'highR9'])
+                job_names.append(name)
+                
+                
+    ## Use only subsection of events for the training 
+    ## and indepenedent events for MC fit
+    for basename in job_names[:]:
+        for section in range(1, total_sections + 1):
+            part = 'evt%dof%d' % (section, total_sections)
+            name = basename + '_' + part
+            job_names.append(name)
+            
+    return job_names
+## End of get_egpaper_list()
+
 
 #______________________________________________________________________________
 def get_large_list():
@@ -57,7 +103,8 @@ def get_baseline_list():
 ## End of get_large_list()
 
 
-job_names = get_baseline_list()
+job_names = get_egpaper_list()
+# job_names = get_baseline_list()
 # job_names = get_large_list()
 
 submission_dir = os.path.join(os.curdir, project_name)
