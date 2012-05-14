@@ -245,6 +245,7 @@ def getChains(version='v4'):
                                mu1Phi          mphi[0]
                                mu2Phi          mphi[1]
                                pileup.weight   evtweight
+                               minDeltaR       mdrg[0]<mdrg[1]?mdrg[0]:mdrg[1]
                                isFSR           gametrue>0'''.split('\n')
         if version == 'yyv1':
             ## Use the default CMSSW cluster corrections
