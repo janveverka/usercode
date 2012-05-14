@@ -4,6 +4,7 @@ fits for the EGM-11-001 paper.
 '''
 
 import os
+import socket
 import ROOT
 
 import JPsi.MuMu.tools as tools
@@ -13,14 +14,22 @@ import JPsi.MuMu.common.canvases as canvases
 from JPsi.MuMu.common.cmsstyle import cmsstyle
 from JPsi.MuMu.common.latex import Latex
 
+_hostname_to_hostpath_map = {
+    't3-susy.ultralight.org': '/raid2/veverka/jobs/outputs',
+    'Jan-Veverkas-MacBook-Pro.local': '/Users/veverka/Work/Data/phosphor'
+    }
+
+## Path specific to host
+_hostpath = _hostname_to_hostpath_map[socket.gethostname()]
+
 ## Initial values are set to MC truth for data only
-basepath = '/raid2/veverka/jobs/outputs/eg_paper'
+basepath = os.path.join(_hostpath, 'eg_paper')
 
 ## Initial values are set to MC truth for both data and MC
-# basepath = '/raid2/veverka/jobs/outputs/eg_paper_v2'
+# basepath = os.path.join(_hostpath, 'eg_paper_v2')
 
-## In addition to eg_paper_v2, us dr > 0.1 to reduce muon bias
-# basepath = '/raid2/veverka/jobs/outputs/eg_paper_dr0p1'
+## In addition to eg_paper_v2, use dr > 0.1 to reduce muon bias
+# basepath = os.path.join(_hostpath, 'eg_paper_dr0p1')
 
 ###############################################################################
 class EgmDecorator:
