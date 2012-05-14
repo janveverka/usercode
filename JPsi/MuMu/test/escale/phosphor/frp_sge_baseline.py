@@ -5,6 +5,7 @@ with the PHOSPHOR method
 '''
 
 import os
+import socket
 import ROOT
 import JPsi.MuMu.common.roofit as roo
 import JPsi.MuMu.common.canvases as canvases
@@ -25,6 +26,23 @@ binhalfwidths = [0.5 * (hi - lo) for lo, hi in binedges]
 xgetter_factory  = lambda: lambda workspace, i = iter(bincenters)    : i.next()
 exgetter_factory = lambda: lambda workspace, i = iter(binhalfwidths) : i.next()
 
+
+#______________________________________________________________________________
+def get_basepath():
+    '''
+    Return the common part of the path to data files depending
+    on the host machine.
+    '''
+    hostname_to_basepath_map = {
+        't3-susy.ultralight.org':
+            '/raid2/veverka/phosphor/sge_baseline',
+        'Jan-Veverkas-MacBook-Pro.local':
+            '/Users/veverka/Work/Data/phosphor/sge_baseline',
+        }
+    return hostname_to_basepath_map[socket.gethostname()]
+## End of get_basepath()
+
+
 #______________________________________________________________________________
 def make_list_of_sources(jobname_template):
     '''
@@ -38,7 +56,7 @@ def make_list_of_sources(jobname_template):
     filenames, workspaces, snapshots = [], [], []
 
     ## Common path to all the fit result.
-    basepath = '/raid2/veverka/phosphor/sge_baseline'
+    basepath = get_basepath()
     ## Allways the same (due to a bug).
     basefilename = ('phosphor5_model_and_fit_'
                     'test_mc_EE_highR9_pt30to999_v13_evt1of4.root')
