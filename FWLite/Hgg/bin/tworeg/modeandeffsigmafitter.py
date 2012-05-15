@@ -107,7 +107,7 @@ class ModeAndEffSigmaFitter:
     def get_data(self):
         'Gets the RooDataSet with deltaE data.'
         chain = ROOT.TChain('Analysis')
-        datapath = os.path.join(os.environ['CMSSW_BASE'], 'src/FWLite/Hgg/data')
+        datapath = '/raid2/veverka/yyTrees/tworeg'
 
         if self.emtype == 'pho':
             self.filenames = '''
