@@ -1,4 +1,5 @@
-"""Utility to extract RooDataSet from a TTree.
+"""
+Utility to extract RooDataSet from a TTree.
 
 Data:
   - tree: source TTree
@@ -32,37 +33,48 @@ This module has several design flaws and should be rewritten along these lines:
 import os
 import sys
 import ROOT
+import FWLite.Tools.roofit as roo
 
-from JPsi.MuMu.common.basicRoot import *
-from JPsi.MuMu.common.roofit import *
+## from JPsi.MuMu.common.basicRoot import *
+## from JPsi.MuMu.common.roofit import *
 
 ## Configuration
 ## tree = TTree()
 ## variable = RooRealVar( 'x', '0', 0, -10, 10)
-tree = None
-variable = None
 
-## Default values
-variables = []
-weight = RooRealVar( 'w', '1', 1 )
-name, title = 'data', 'data'
+#------------------------------------------------------------------------------
+def init():
+    '''
+    Initializes global variables and sets them to their default values.
+    '''
+    global tree, variable, variables, weight, name, title, categories, cuts
+    tree = None
+    variable = None
 
-## Default/example categories
-categories = []
+    ## Default values
+    variables = []
+    weight = ROOT.RooRealVar( 'w', '1', 1 )
+    name, title = 'data', 'data'
 
-cuts = []
+    ## Default/example categories
+    categories = []
 
-dataset = RooDataSet()
+    cuts = []
+    
+    global dataset
+    dataset = ROOT.RooDataSet()
+## End of init_globals().
+    
 
 #------------------------------------------------------------------------------
 def set(**kwargs):
     """set(tree, variable, variables, weight, cuts, categories, dataset,
     name, title)"""
+    init()
+    
     global tree, variable, weight, cuts, categories, dataset, name, title
     global variables
-
-    categories = []
-    variables = []
+    
 
     ## require that tree and variable must be set
     if (not (tree or 'tree' in kwargs) or 
@@ -97,8 +109,12 @@ def get(**kwargs):
 
     ## Initialize
     set(**kwargs)
-    varSet = RooArgSet(*(variables + categories + [weight]))
-    dataset = RooDataSet(name, title, varSet, WeightVar( weight.GetName() ) )
+    # print '+++ DEBUG before varSet ctor:', str(variables + categories + [weight])
+    varSet = ROOT.RooArgSet(*(variables + categories + [weight]))
+    # print '+++ DEBUG after varSet ctor: ', 
+    varSet.Print()
+    dataset = ROOT.RooDataSet(name, title, varSet, 
+                              roo.WeightVar(weight.GetName()))
     #dataset.setWeightVar( weight )
     #dataset = RooDataSet('data', 'data', varSet )
 
@@ -160,7 +176,7 @@ def main():
 
     #gROOT.Set
 
-    w = RooWorkspace('w', 'w')
+    w = ROOT.RooWorkspace('w', 'w')
     #s = w.factory('s[-5,5]')
     kRatio = w.factory('kRatio[-20,20]')
     mmgMass = w.factory('mmgMass[40,140]')
@@ -176,7 +192,7 @@ def main():
     canvases.append( TCanvas('mmMass', 'mmMass') )
     plot(mmMass)
 
-    ## get( variable = RooRealVar('k', 'kRatio', 0.5, 1.5) )
+    ## get( variable = ROOT.RooRealVar('k', 'kRatio', 0.5, 1.5) )
     ## canvases.append( TCanvas('k_noweights', 'k_noweights') )
     ## frame = plot()
     ## dataset.plotOn( frame, Cut('subdet==subdet::Barrel'), MarkerColor(kBlue),
@@ -188,12 +204,12 @@ def main():
     ## canvases.append( TCanvas('k_withweights', 'k_withweights') )
     ## frame = plot()
     ## dataset.plotOn( frame, Cut('subdet==subdet::Barrel'), MarkerColor(kBlue),
-    ##                 LineColor(kBlue), DataError(RooAbsData.SumW2) )
+    ##                 LineColor(kBlue), DataError(ROOT.RooAbsData.SumW2) )
     ## dataset.plotOn( frame, Cut('subdet==subdet::Endcaps'), MarkerColor(kRed),
     ##                 LineColor(kRed) )
     ## frame.Draw()
 
-    ## get( variable = RooRealVar('logik', '-log(kRatio)', -0.5, 0.5) )
+    ## get( variable = ROOT.RooRealVar('logik', '-log(kRatio)', -0.5, 0.5) )
     ## canvases.append( TCanvas() )
     ## frame = plot()
     ## dataset.plotOn( frame, Cut('r9==r9::High'), MarkerColor(kBlue),
@@ -206,3 +222,4 @@ def main():
 if __name__ == "__main__":
     main()
     import user
+
