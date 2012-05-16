@@ -19,8 +19,8 @@ import FWLite.Tools.cmsstyle as cmsstyle
 import FWLite.Tools.canvases as canvases
 import FWLite.Tools.legend as legend
 import FWLite.Tools.latex as latex
-
-from FWLite.Tools.parameterizedkeyspdf import ParameterizedKeysPdfs
+#ParameterizedKeysPdf
+from FWLite.Tools.parameterizedkeyspdf import ParameterizedKeysPdf
 
 
 #______________________________________________________________________________
@@ -35,8 +35,9 @@ def getdata():
     workspacename = 'zeeShape'
     datasetname = 'rds_mpair_ebeb'
     
-    with ROOT.TFile.Open(os.path.join(path, filename)) as f:
-        data = f.Get(workspacename).data(datasetname).Clone()
+    rootfile = ROOT.TFile.Open(os.path.join(path, filename))
+    data = rootfile.Get(workspacename).data(datasetname).Clone()
+    rootfile.Close()
         
     return data        
 ## End of getdata().
@@ -47,6 +48,7 @@ def main():
     '''This is the entry point to execution.'''
     print 'Welcome to parameterized_keys_pdf_fit_example'
     data = getdata()
+    data.Print()
     print 'Exiting parameterized_keys_pdf_fit_example with success!'
 ## End of main().
 
