@@ -19,29 +19,30 @@ import FWLite.Tools.cmsstyle as cmsstyle
 import FWLite.Tools.canvases as canvases
 import FWLite.Tools.legend as legend
 import FWLite.Tools.latex as latex
-#ParameterizedKeysPdf
+
 from FWLite.Tools.parameterizedkeyspdf import ParameterizedKeysPdf
 
 
-#______________________________________________________________________________
-## CONFIGURATION DATA BEGIN
-# path = '/raid2/veverka/yyTrees/escale'
-path = '/Users/veverka/Work/Data/zeeDataYong'
+## CONFIGURATION BEGIN ========================================================
+path = '/raid2/veverka/yyTrees/escale'
+# path = '/Users/veverka/Work/Data/zeeDataYong'
 filename = ('zeeWsShapev1Smear.DoubleElectronRun2011AB16Jan2012v1AOD.'
             'etcut25.corr451.eleid1.datapu0.mcpu0.m70to110.scale2.'
             'smear0.root')
 workspace = 'zeeShape'
 dataset = 'rds_mpair_ebeb_tenmcat_0'
 variable = 'rv_mass'
-## CONFIGURATION DATA END
+## CONFIGURATION END ==========================================================
 
+#______________________________________________________________________________
+## Parameters to be fitted
 mode = ROOT.RooRealVar('mode', 'mode', 0, -1, 1)
 effsigma = ROOT.RooRealVar('effsigma', 'effsigma', 1, 1e-6, 10) 
 
 #______________________________________________________________________________
 def getdata():
     '''
-    Returns the RooDataSet to be used.
+    Clones the dataset from the file, closes the file and returns the clone.
     '''    
     rootfile = ROOT.TFile.Open(os.path.join(path, filename))
     data = rootfile.Get(workspace).data(dataset).Clone()
