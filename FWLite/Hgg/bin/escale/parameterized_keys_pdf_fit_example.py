@@ -1,14 +1,33 @@
 '''
-This example takes a RooDataSet from a RooWorkspace in TFile,
-splits it in two halfs by odd and even events,
+This example takes a RooDataSet from a RooWorkspace in a TFile,
+trains a ParameterizedKeysPdf on it and then fits its mode
+and effective sigma to the same data.  This is a robust way
+to estimate the mode and effective sigma and their uncertainties
+for a binned sample.
+
+It creates plots showing the data with the fitted
+model and resulting values and prints the result of the fit.
+
+TODO:
+- It should split the data in two halfs by odd and even events,
 trains ParameterizedKeysPdfs to both halfs and fits
 their mode and effective sigmas to the independent halfs to
-get their estimates.  It creates plots showing the data with the fitted
-model and resulting values.
+get their estimates.
+- Factor it out in a class
+- Wrap it in a command line tool
+- Include interface with simple text config files
+- Deal with very large datasets by merging neighboring
+evnets
+- Reduce the amount of the output
+- Port to C++ only
+- Fit in a limited range only
+
+Origianlly developed for the PHOSPHOR Fit
+https://twiki.cern.ch/twiki/bin/view/CMS/VGamma2011PhosphorFit
 
 USAGE: python -i parameterized_keys_pdf_fit_example.py
 
-Jan Veverka, Caltech, 16 March 2012
+Jan Veverka, Caltech, 16 May 2012
 '''
 
 import os
