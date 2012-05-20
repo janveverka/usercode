@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Project: RooFit                                                           *
  * Package: RooFitModels                                                     *
- * @(#)root/roofit:$Id$
+ * @(#)root/roofit:$Id: RooRhoKeysPdf.cxx,v 1.2 2012/05/20 12:15:38 veverka Exp $
  * Authors:                                                                  *
  *   GR, Gerhard Raven,   UC San Diego,        raven@slac.stanford.edu       *
  *   DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu                 *
@@ -65,16 +65,17 @@ RooRhoKeysPdf::RooRhoKeysPdf(const char *name, const char *title,
 			     Mirror mirror) :
   RooAbsPdf(name,title),
   _x("x","Dependent",this,x),
-  _rhoVar("rho", "rho", this, rho),
+  _rho("rho", "rho", this, rho),
   _nEvents(0),
   _dataPts(0),
   _dataWgts(0),
   _weights(0),
+  _lookupTable(new Double_t[_nPoints+1]),
   _mirrorLeft(mirror==MirrorLeft || mirror==MirrorBoth || mirror==MirrorLeftAsymRight),
   _mirrorRight(mirror==MirrorRight || mirror==MirrorBoth || mirror==MirrorAsymLeftRight),
   _asymLeft(mirror==MirrorAsymLeft || mirror==MirrorAsymLeftRight || mirror==MirrorAsymBoth),
   _asymRight(mirror==MirrorAsymRight || mirror==MirrorLeftAsymRight || mirror==MirrorAsymBoth),
-  _rho(rho.getVal())
+  _rhoSnapshot(new Double_t(rho.getVal()))
 {
   // cache stuff about x
   snprintf(_varName, 128,"%s", x.GetName());
@@ -92,12 +93,13 @@ RooRhoKeysPdf::RooRhoKeysPdf(const char *name, const char *title,
 //_____________________________________________________________________________
 RooRhoKeysPdf::RooRhoKeysPdf(const RooRhoKeysPdf& other, const char* name):
   RooAbsPdf(other,name), _x("x",this,other._x), 
-  _rhoVar("rho", this, other._rhoVar),
+  _rho("rho", this, other._rho),
   _nEvents(other._nEvents),
-  _dataPts(0), _dataWgts(0), _weights(0), _sumWgt(0),
+  _dataPts(0), _dataWgts(0), _weights(0), 
+  _sumWgt(other._sumWgt), _sigmav(other._sigmav),
   _mirrorLeft( other._mirrorLeft ), _mirrorRight( other._mirrorRight ),
   _asymLeft(other._asymLeft), _asymRight(other._asymRight),
-  _rho( other._rho ) {
+  _rhoSnapshot( new Double_t(*other._rhoSnapshot) ) {
 
   // cache stuff about x
   snprintf(_varName, 128, "%s", other._varName );
@@ -106,14 +108,16 @@ RooRhoKeysPdf::RooRhoKeysPdf(const RooRhoKeysPdf& other, const char* name):
   _binWidth = other._binWidth;
 
   // copy over data and weights... not necessary, commented out for speed
-//    _dataPts = new Double_t[_nEvents];
-//    _weights = new Double_t[_nEvents];  
-//    for (Int_t i= 0; i<_nEvents; i++) {
-//      _dataPts[i]= other._dataPts[i];
-//      _weights[i]= other._weights[i];
-//    }
+  // in fact, necessary to introduce dependence or rho ... (JV)
+   _dataPts = new Double_t[_nEvents];
+   _weights = new Double_t[_nEvents];  
+   for (Int_t i= 0; i<_nEvents; i++) {
+     _dataPts[i]= other._dataPts[i];
+     _weights[i]= other._weights[i];
+   }
 
   // copy over the lookup table
+   _lookupTable = new Double_t[_nPoints+1];
   for (Int_t i= 0; i<_nPoints+1; i++)
     _lookupTable[i]= other._lookupTable[i];
   
@@ -125,6 +129,8 @@ RooRhoKeysPdf::~RooRhoKeysPdf() {
   delete[] _dataPts;
   delete[] _dataWgts;
   delete[] _weights;
+  delete[] _lookupTable;
+  delete _rhoSnapshot;
 }
 
 
@@ -132,8 +138,6 @@ void
 
 //_____________________________________________________________________________
 RooRhoKeysPdf::LoadDataSet( RooDataSet& data) {
-  _rho = _rhoVar;
-
   delete[] _dataPts;
   delete[] _dataWgts;
   delete[] _weights;
@@ -178,20 +182,30 @@ RooRhoKeysPdf::LoadDataSet( RooDataSet& data) {
     }
   }
 
-  Double_t meanv=x1/x0;
-  Double_t sigmav=sqrt(x2/x0-meanv*meanv);
+  Double_t meanv = x1/x0;
+  _sigmav = sqrt(x2/x0-meanv*meanv);
+
+  calculateLookupTable();
+}
+
+
+
+//_____________________________________________________________________________
+void RooRhoKeysPdf::calculateLookupTable() const {
+  *_rhoSnapshot = _rho;
+
   Double_t h=TMath::Power(Double_t(4)/Double_t(3),0.2)*TMath::Power(_nEvents,-0.2)*_rho;
-  Double_t hmin=h*sigmav*sqrt(2.)/10;
-  Double_t norm=h*sqrt(sigmav)/(2.0*sqrt(3.0));
+  Double_t hmin=h*_sigmav*sqrt(2.)/10;
+  Double_t norm=h*sqrt(_sigmav)/(2.0*sqrt(3.0));
 
   // _weights=new Double_t[_nEvents];
   for(Int_t j=0;j<_nEvents;++j) {
-    _weights[j]=norm/sqrt(g(_dataPts[j],h*sigmav));
+    _weights[j]=norm/sqrt(g(_dataPts[j],h*_sigmav));
     if (_weights[j]<hmin) _weights[j]=hmin;
   }
   
-  for (i=0;i<_nPoints+1;++i) 
-    _lookupTable[i]=evaluateFull( _lo+Double_t(i)*_binWidth );
+  for (Int_t i=0;i<_nPoints+1;++i) 
+    *(_lookupTable + i) = evaluateFull( _lo+Double_t(i)*_binWidth );
 
   
 }

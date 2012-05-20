@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Project: RooFit                                                           *
  * Package: RooFitModels                                                     *
- *    File: $Id: RooKeysPdf.h,v 1.10 2007/05/11 09:13:07 verkerke Exp $
+ *    File: $Id: RooRhoKeysPdf.h,v 1.2 2012/05/20 12:15:37 veverka Exp $
  * Authors:                                                                  *
  *   GR, Gerhard Raven,   UC San Diego,        raven@slac.stanford.edu       *
  *   DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu                 *
@@ -46,21 +46,24 @@ public:
 protected:
   
   RooRealProxy _x ;
-  RooRealProxy _rhoVar ;
+  RooRealProxy _rho ;
   Double_t evaluate() const;
 
 private:
   
   Double_t evaluateFull(Double_t x) const;
+  void calculateLookupTable() const;
 
   Int_t _nEvents;
   Double_t *_dataPts;  //[_nEvents]
   Double_t *_dataWgts; //[_nEvents]
   Double_t *_weights;  //[_nEvents]
   Double_t _sumWgt ;
+  Double_t _sigmav;
   
   enum { _nPoints = 1000 };
-  Double_t _lookupTable[_nPoints+1];
+  // Double_t *_lookupTable[_nPoints+1];
+  Double_t *_lookupTable;
   
   Double_t g(Double_t x,Double_t sigma) const;
 
@@ -70,7 +73,7 @@ private:
   // cached info on variable
   Char_t _varName[128];
   Double_t _lo, _hi, _binWidth;
-  Double_t _rho;
+  Double_t *_rhoSnapshot;
   
   ClassDef(RooRhoKeysPdf,1) // One-dimensional non-parametric kernel estimation p.d.f.
 };
