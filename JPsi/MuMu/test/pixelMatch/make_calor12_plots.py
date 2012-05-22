@@ -1,0 +1,17 @@
+import os
+import JPsi.MuMu.pmvplotter as plotter
+
+for varname in 'r9 r9_zoom sihih'.split():
+    for subdet in 'EB EE'.split():
+        name = '_'.join([varname, subdet])
+        plotter.make_plot(name)
+    
+
+    
+plotter.canvases.update()
+
+
+##______________________________________________________________________________
+if __name__ == '__main__':
+    import user
+    
