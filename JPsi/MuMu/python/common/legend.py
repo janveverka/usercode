@@ -11,15 +11,19 @@ import ROOT
 
 class Legend(ROOT.TLegend):
     def __init__(self, histos, titles,
-                 position = (0.7, 0.95, 0.95, 0.8), opt = 'pl'):
+                 position = (0.7, 0.95, 0.95, 0.8), opt = 'pl',
+                 optlist = None):
         ROOT.TLegend.__init__(self, *position)
         self.histos = histos
         self.titles = titles
         self.opt = opt
+        if not optlist:
+            optlist = [opt] * len(histos)
+        self.optlist = optlist
         self.SetFillColor(0)
         self.SetShadowColor(0)
         self.SetBorderSize(0)
-        for h, t in zip(histos, titles):
+        for h, t, opt in zip(histos, titles, optlist):
             self.AddEntry(h, t, opt)
     ## end of __init__
 
