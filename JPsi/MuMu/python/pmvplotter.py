@@ -73,26 +73,31 @@ def get_selection():
     '''
     Return the TTree selection expression based on the name.
     '''
-    if 'EB' in name:
-        selection = '&'.join([
-            'phoIsEB',
-            'phoPt > 25',
-            'scEt > 10',
-            'phoHoE < 0.5',
-            ])
-    else:
-        selection = '&'.join([
-            '!phoIsEB',
-            'phoPt > 25',
-            'scEt > 10',
-            'phoHoE < 0.5',
-            # 'abs(abs(muNearIEtaX - phoIEtaX) - 2) > 1'
-            ])
+    tags = name.split('_')
+
+    cuts = [
+        'phoPt > 25',
+        'scEt > 10',
+        'phoHoE < 0.5',
+        ]
+    
+    if 'EB' in tags:
+        cuts.append('phoIsEB')
+    elif 'EE' in tags:
+        cuts.append('!phoIsEB')
     
     ## Muon bias removal for sihih in EB
-    if 'EB' in name.split('_') and 'sihih' in name.split('_'):
-          selection += '& abs(abs(muNearIEtaX - phoIEtaX) - 2) > 1'
-    return selection
+    if 'EB' in tags and 'sihih' in tags:
+        cuts.append('abs(abs(muNearIEtaX - phoIEtaX) - 2) > 1')
+
+    ## Apply the high R9 based on the subdetector
+    if 'highR9' in tags:
+        if 'EE' in tags:
+            cuts.append('phoR9 > 0.95')
+        else:
+            cuts.append('phoR9 > 0.94')
+
+    return '&'.join(cuts)
 ## End of get_selection(..)
 
 
@@ -222,11 +227,19 @@ def get_yrange():
     '''
     Returns the y-axis range based on name.
     '''
-    if 'sihih' in name.split('_'):
-        if 'EB' in name:
-            yrange = (1e-4, 700.)
+    tags = name.split('_')
+    
+    if 'sihih' in tags:
+        if 'EB' in tags:
+            if 'highR9' in tags:
+                yrange = (1e-4, 450.)
+            else:
+                yrange = (1e-4, 700.)
         else:
-            yrange = (1e-4, 375.)
+            if 'highR9' in tags:
+                yrange = (1e-4, 140.)
+            else:
+                yrange = (1e-4, 375.)
     elif 'r9' in name.split('_'):
         if 'zoom' in name.split('_'):
             if 'EB' in name:
@@ -278,6 +291,8 @@ def decorate_canvas():
     '''
     Writes various Latex labels on the current canvas.
     '''
+    tags = name.split('_')
+  
     ## CMS Preliminary:
     Latex(['CMS Preliminary 2011,  #sqrt{s} = 7 TeV'], 
           position=(0.17, 0.93), textsize=22).draw()
@@ -288,9 +303,13 @@ def decorate_canvas():
         ]
 
     ## EB or EE
-    if 'EB' in name:
+    if 'EB' in tags:
+        if 'highR9' in tags:
+            labels.append('R_{9} > 0.94')
         labels.append('ECAL Barrel')
-    else:
+    elif 'EE' in tags:
+        if 'highR9' in tags:
+            labels.append('R_{9} > 0.95')
         labels.append('ECAL Endcaps')
 
     Latex(labels, position=(0.22, 0.8), textsize=22, 
