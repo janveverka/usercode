@@ -9,6 +9,10 @@ data perfectly but the out-of-time (OOT) PU interactions are mismodeled.
 The mean reweighting uses the Poisson mean of the IT PU in MC to calculate
 the weights to match the Poisson mean of the PU in data.  This way, both
 IT and OOT PU spectrum matches the one in data.
+
+USAGE: python -i ootputoy.py
+
+Jan Veverka, Caltech, 15 May 2012
 '''
 import ROOT
 import FWLite.Tools.roofit as roo
