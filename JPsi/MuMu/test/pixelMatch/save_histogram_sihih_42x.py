@@ -1,5 +1,5 @@
 import ROOT
-import plotSihih_42x as plotter
+import JPsi.MuMu.pmvplotter as plotter
 
 output_filename = 'Zmmg_Zee_sihih.root'
 
@@ -32,17 +32,17 @@ def get_histograms():
     in data and MC.
     '''
     ## Make the Zmmg histograms
-    plotter.make_plot('sihih_EB')
-    plotter.make_plot('sihih_EE')
+    plotter.make_plot('sihih_highR9_EB')
+    plotter.make_plot('sihih_highR9_EE')
     hist_map = {
         'pho_eb_data': 
-            plotter.histograms['sihih_EB'][0].Clone('hist_sihih_pho_eb_data'),
+            plotter.histograms['sihih_highR9_EB'][0].Clone('hist_sihih_pho_eb_data'),
         'pho_eb_mc':
-            plotter.histograms['sihih_EB'][1][0].Clone('hist_sihih_pho_eb_mc'),
+            plotter.histograms['sihih_highR9_EB'][1][0].Clone('hist_sihih_pho_eb_mc'),
         'pho_ee_data': 
-            plotter.histograms['sihih_EE'][0].Clone('hist_sihih_pho_ee_data'),
+            plotter.histograms['sihih_highR9_EE'][0].Clone('hist_sihih_pho_ee_data'),
         'pho_ee_mc':
-            plotter.histograms['sihih_EE'][1][0].Clone('hist_sihih_pho_ee_mc'),
+            plotter.histograms['sihih_highR9_EE'][1][0].Clone('hist_sihih_pho_ee_mc'),
     }
     
     ## Make the Zee histograms
