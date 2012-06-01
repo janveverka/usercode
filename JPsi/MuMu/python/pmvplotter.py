@@ -108,11 +108,17 @@ def get_plotted_variable_in_mc_and_data():
     Plotted expression is in the name, title, ranges in number of bins for 
     the histogram are taken from the RooRealVar    
     '''
-    if 'sihih' in name.split('_'):
-        if 'EB' in name.split('_'):
+    tags = name.split('_')
+
+    if 'sihih' in tags:
+        if 'EB' in tags:
             ## Shifting for Barrel from AN 11/251 Vg
-            var = RooRealVar("1000*phoSigmaIetaIeta - 0.11",
-                            "Photon #sigma_{i#etai#eta} #times 10^{3}", 3, 15)
+            if 'nocorrection' in tags: 
+                var = RooRealVar("1000*phoSigmaIetaIeta",
+                                 "Photon #sigma_{i#etai#eta} #times 10^{3}", 3, 15)
+            else:
+                var = RooRealVar("1000*phoSigmaIetaIeta - 0.11",
+                                 "Photon #sigma_{i#etai#eta} #times 10^{3}", 3, 15)
             varData = RooRealVar("1000*phoSigmaIetaIeta",
                                 "Photon #sigma_{i#etai#eta} #times 10^{3}", 3, 15)
             var.setBins(48)
@@ -124,19 +130,29 @@ def get_plotted_variable_in_mc_and_data():
             #varData = RooRealVar("1000*phoSigmaIetaIeta",
                                 #"Photon #sigma_{i#etai#eta} #times 10^{3}", 10, 40)
             ## Same binning as Poter
-            var = RooRealVar("1000*phoSigmaIetaIeta - 0.16",
-                            "Photon #sigma_{i#etai#eta} #times 10^{3}", 9.5, 39.5)
+            if 'nocorrection' in tags: 
+                var = RooRealVar("1000*phoSigmaIetaIeta",
+                                 "Photon #sigma_{i#etai#eta} #times 10^{3}", 9.5, 39.5)
+            else:
+                var = RooRealVar("1000*phoSigmaIetaIeta - 0.16",
+                                 "Photon #sigma_{i#etai#eta} #times 10^{3}", 9.5, 39.5)
             varData = RooRealVar("1000*phoSigmaIetaIeta",
                                 "Photon #sigma_{i#etai#eta} #times 10^{3}", 9.5, 39.5)
             var.setBins(40)
     
-    elif 'r9' in name.split('_'):    
-        if 'zoom' in name.split('_'):
-            var = RooRealVar("1.0035*phoR9", "photon R_{9}", 0.85, 1.)
+    elif 'r9' in tags:
+        if 'zoom' in tags:
+            if 'nocorrection' in tags: 
+                var = RooRealVar("phoR9", "photon R_{9}", 0.85, 1.)
+            else:
+                var = RooRealVar("1.0035*phoR9", "photon R_{9}", 0.85, 1.)
             varData = RooRealVar("phoR9", "photon R_{9}", 0.85, 1.)
             var.setBins(60)
         else:
-            var = RooRealVar("1.0035*phoR9", "photon R_{9}", 0.3, 1.1)
+            if 'nocorrection' in tags:
+                var = RooRealVar("phoR9", "photon R_{9}", 0.3, 1.1)
+            else:
+                var = RooRealVar("1.0035*phoR9", "photon R_{9}", 0.3, 1.1)              
             varData = RooRealVar("phoR9", "photon R_{9}", 0.3, 1.1)
             var.setBins(80)
     
@@ -311,6 +327,9 @@ def decorate_canvas():
         if 'highR9' in tags:
             labels.append('R_{9} > 0.95')
         labels.append('ECAL Endcaps')
+
+    if 'nocorrection' in tags:
+        labels.append('No MC Correction')
 
     Latex(labels, position=(0.22, 0.8), textsize=22, 
           rowheight=0.07
