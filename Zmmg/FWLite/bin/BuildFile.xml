@@ -1,0 +1,5 @@
+<use name="Zmmg/FWLite" />
+<environment>
+  <bin   file="analyzeVecBos.cc" name="analyze-vecbos">
+  </bin>
+</environment>
