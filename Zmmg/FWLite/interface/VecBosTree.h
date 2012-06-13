@@ -2068,7 +2068,7 @@ namespace cit {
         chain->Add("/mnt/tier2/store/user/veverka/DYToMuMu_M_20_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1_AOD_VecBosV16-5_2_X/v1/default_MC_1_1_DaX.root/ntp1");
         chain->Add("/mnt/tier2/store/user/veverka/DYToMuMu_M_20_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1_AOD_VecBosV16-5_2_X/v1/default_MC_3_1_wPQ.root/ntp1");
         chain->Add("/mnt/tier2/store/user/veverka/DYToMuMu_M_20_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1_AOD_VecBosV16-5_2_X/v1/default_MC_4_1_zjx.root/ntp1");
-        chain->Add("/mnt/tier2/store/user/veverka/DYToMuMu_M_20_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1_AOD_VecBosV16-5_2_X/v1/default_MC_5_1_rd4.root/ntp1");
+        // chain->Add("/mnt/tier2/store/user/veverka/DYToMuMu_M_20_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1_AOD_VecBosV16-5_2_X/v1/default_MC_5_1_rd4.root/ntp1");
         tree = chain;
   #endif // SINGLE_TREE
 

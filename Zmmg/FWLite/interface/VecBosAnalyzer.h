@@ -12,6 +12,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "TFile.h"
+
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "Zmmg/FWLite/interface/VecBosTree.h"
@@ -21,11 +23,19 @@ namespace cit {
 
   class VecBosAnalyzer {
   public:
-    VecBosAnalyzer(boost::shared_ptr<edm::ParameterSet>);
-    ~VecBosAnalyzer();    
+    typedef edm::ParameterSet PSet;
+    VecBosAnalyzer(boost::shared_ptr<PSet>);
+    ~VecBosAnalyzer();
+    void run();
   private:
-    void init();    
-    boost::shared_ptr<edm::ParameterSet> cfg_;    
+    void init();
+    void parseConfiguration();
+    void parseInputs();
+    void parseOutputs();
+    boost::shared_ptr<PSet> cfg_;
+    VecBosTree *tree_;
+    TFile *output_;
+    Long64_t maxEventsInput_;
   }; // VecBosAnalyzer
 
 } // namespace cit
