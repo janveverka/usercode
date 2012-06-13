@@ -5,8 +5,10 @@
  */
 
 #include <iostream>
-#include "TTree.h"
 #include "TChain.h"
+#include "TDirectory.h"
+#include "TH1F.h"
+#include "TTree.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockRange.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "Zmmg/FWLite/interface/VecBosAnalyzer.h"
@@ -65,9 +67,11 @@ VecBosAnalyzer::run()
   // Loop over the events
   for (Long64_t ientry=0; ientry < tree_->fChain->GetEntriesFast(); ientry++) {
     if (maxEventsInput_ >= 0 && ientry >= maxEventsInput_) break;
-    cout << ientry << endl;
+    cout << "Processing record " << ientry + 1 << " of " 
+         << maxEventsInput_ << endl;
     if (tree_->LoadTree(ientry) < 0) break;
     tree_->fChain->GetEntry(ientry);
+    fillHistograms();
     // if (pass(ientry) == false) continue;
   } // end of loop over the events
   
@@ -165,6 +169,60 @@ VecBosAnalyzer::parseOutputs()
 } // parseConfiguration
 
 
+//_____________________________________________________________________________
+/**
+ * Sets the status of the unused branches to 0 to save time.
+ */
+void
+VecBosAnalyzer::setBranchesStatus()
+{
+  TTree *chain = tree_->fChain;
+  chain->SetBranchStatus("*", 0);  // disable all branches  
+  chain->SetBranchStatus("nPU", 1);
+} // setBranchesStatus
+
+
+//_____________________________________________________________________________
+/**
+ * Books the histograms to be filled.
+ */
+void
+VecBosAnalyzer::bookHistograms()
+{
+  TDirectory *cwd = gDirectory;
+  output_->cd();  
+  
+  histos_["nPU0"] = new TH1F(
+    "nPU0", "Early OOT Pileup;True number of interactions;Events", 
+    101, -0.5, 100.5
+  );
+  
+  histos_["nPU1"] = new TH1F(
+    "nPU1", "In-Time Pileup;True number of interactions;Events", 
+    101, -0.5, 100.5
+  );
+  
+  histos_["nPU2"] = new TH1F(
+    "nPU2", "Late OOT Pileup;True number of interactions;Events", 
+    101, -0.5, 100.5
+  );
+  
+  cwd->cd();
+} // bookHistograms
+
+
+//_____________________________________________________________________________
+/**
+ * Fills the histograms.
+ */
+void
+VecBosAnalyzer::fillHistograms()
+{
+  histos_["nPU0"]->Fill(tree_->nPU[0]);
+  histos_["nPU1"]->Fill(tree_->nPU[1]);
+  histos_["nPU2"]->Fill(tree_->nPU[2]);
+} // fillHistograms
+
 
 //_____________________________________________________________________________
 /**
@@ -174,6 +232,7 @@ void
 VecBosAnalyzer::init()
 {
   parseConfiguration();
-  tree_->fChain->SetBranchStatus("*", 0);  // disable all branches  
+  bookHistograms();
+  setBranchesStatus();
 } // init
 

@@ -10,9 +10,12 @@
 #ifndef ZMMG_FWLITE_VECBOSANALYZER_H
 #define ZMMG_FWLITE_VECBOSANALYZER_H
 
+#include <map>
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 #include "TFile.h"
+#include "TH1.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
@@ -32,10 +35,15 @@ namespace cit {
     void parseConfiguration();
     void parseInputs();
     void parseOutputs();
+    void setBranchesStatus();
+    void bookHistograms();
+    void fillHistograms();
     boost::shared_ptr<PSet> cfg_;
     VecBosTree *tree_;
     TFile *output_;
     Long64_t maxEventsInput_;
+    std::map<std::string, TH1*> histos_;
+    
   }; // VecBosAnalyzer
 
 } // namespace cit

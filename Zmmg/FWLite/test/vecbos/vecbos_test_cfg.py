@@ -19,4 +19,4 @@ process.outputs = cms.PSet(
     outputName = cms.string('test.root')
     )
     
-process.maxEvents = cms.PSet(input = cms.untracked.int64(10))
+process.maxEvents = cms.PSet(input = cms.untracked.int64(1000))
