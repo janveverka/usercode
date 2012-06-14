@@ -8,6 +8,7 @@
 #include "TChain.h"
 #include "TDirectory.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TMath.h"
 #include "TTree.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockRange.h"
@@ -194,6 +195,19 @@ VecBosAnalyzer::setBranchesStatus()
   chain->SetBranchStatus("energyPho", 1);
   chain->SetBranchStatus("etaPho", 1);
   chain->SetBranchStatus("phiPho", 1);
+  chain->SetBranchStatus("dr03HollowTkSumPtPho", 1);
+  chain->SetBranchStatus("dr03EcalRecHitSumEtPho", 1);
+  chain->SetBranchStatus("dr03HcalTowerSumEtPho", 1);
+  chain->SetBranchStatus("hasPixelSeedPho", 1);
+  chain->SetBranchStatus("hOverEPho", 1);
+  chain->SetBranchStatus("superClusterIndexPho", 1);
+  
+  chain->SetBranchStatus("nSC", 1);
+  chain->SetBranchStatus("rawEnergySC", 1);
+  chain->SetBranchStatus("etaWidthSC", 1);
+  chain->SetBranchStatus("e3x3SC", 1);
+  chain->SetBranchStatus("covIEtaIEtaSC", 1);
+  // chain->SetBranchStatus("", 1);
   
   chain->SetBranchStatus("nMuon", 1);
   chain->SetBranchStatus("etaMuon", 1);
@@ -212,6 +226,21 @@ VecBosAnalyzer::bookHistograms()
   TDirectory *cwd = gDirectory;
   output_->cd();  
   
+  bookPileupHistograms();
+  bookPhotonHistograms();
+  bookMuonHistograms();  
+  
+  cwd->cd();
+} // bookHistograms
+
+
+//_____________________________________________________________________________
+/**
+ * Books the pielup histograms.
+ */
+void
+VecBosAnalyzer::bookPileupHistograms()
+{
   histos_["nPU0"] = new TH1F(
     "nPU0", "Early OOT Pileup;True number of interactions;Events", 
     101, -0.5, 100.5
@@ -227,11 +256,58 @@ VecBosAnalyzer::bookHistograms()
     101, -0.5, 100.5
   );
   
+  histos_["nPU0v1"] = new TH2F(
+    "nPU0v1", 
+    "True number of interactions;Early OOT Pileup;In-Time Pileup;Events", 
+    31, -0.5, 61.5, 31, -0.5, 61.3
+  );
+  
+  histos_["nPU0v2"] = new TH2F(
+    "nPU0v1", 
+    "True number of interactions;Early OOT Pileup;Late OOT Pileup;Events",
+    31, -0.5, 61.5, 31, -0.5, 61.3
+  );
+  
+  histos_["nPU1v2"] = new TH2F(
+    "nPU0v1", 
+    "True number of interactions;In-Time Pileup;Late OOT Pileup;Events", 
+    31, -0.5, 61.5, 31, -0.5, 61.3
+  );
+  
   histos_["nPV"] = new TH1F(
     "nPV", "Reconstructed Primary Vertices;Number of Vertices;Events", 
     101, -0.5, 100.5
   );
   
+  histos_["rhoFastJet"] = new TH1F("rhoFastJet", ";#rho;Events", 100, 0, 100);
+  histos_["rhoJetsFastJet"] = new TH1F("rhoJetsFastJet", "Jets;#rho;Events", 
+                                       100, 0, 100);
+} // bookPileupHistograms
+
+
+//_____________________________________________________________________________
+/**
+ * Books the muon histograms.
+ */
+void
+VecBosAnalyzer::bookMuonHistograms()
+{
+  histos_["nMuon"] = new TH1F("nMuon", "Muon;Multiplicity;Events", 
+                              101, -0.5, 100.5);
+  histos_["ptMuon"] = new TH1F("ptMuon", "Muon;pt;Events", 100, -0.5, 100.5);
+  histos_["etaMuon"] = new TH1F("etaMuon", "Muon;#eta;Events", 100, -3, 3);
+  histos_["phiMuon"] = new TH1F("phiMuon", "Muon;#phi;Events", 
+                                100, -TMath::Pi(), TMath::Pi());
+} // bookMuonHistograms
+
+
+//_____________________________________________________________________________
+/**
+ * Books the photon histograms.
+ */
+void
+VecBosAnalyzer::bookPhotonHistograms()
+{
   histos_["nPho"] = new TH1F("nPho", "Photon;Multiplicity;Events", 
                              101, -0.5, 100.5);  
   histos_["ptPho"] = new TH1F("ptPho", "Photon;pt;Events", 101, -0.5, 100.5);
@@ -239,15 +315,67 @@ VecBosAnalyzer::bookHistograms()
   histos_["phiPho"] = new TH1F("phiPho", "Photon;#phi;Events", 
                                100, -TMath::Pi(), TMath::Pi());
   
-  histos_["nMuon"] = new TH1F("nMuon", "Muon;Multiplicity;Events", 
-                              101, -0.5, 100.5);
-  histos_["ptMuon"] = new TH1F("ptMuon", "Muon;pt;Events", 100, -0.5, 100.5);
-  histos_["etaMuon"] = new TH1F("etaMuon", "Muon;#eta;Events", 100, -3, 3);
-  histos_["phiMuon"] = new TH1F("phiMuon", "Muon;#phi;Events", 
-                                100, -TMath::Pi(), TMath::Pi());
+  histos_["trkIsoPho"] = new TH1F(
+    "trkIsoPho", "Photon;Track Isolation (GeV);Events", 
+    100, 0, 20
+  );
+
+  histos_["ecalIsoPho"] = new TH1F(
+    "ecalIsoPho", "Photon;ECAL Isolation (GeV);Events", 
+    100, 0, 20
+  );
   
-  cwd->cd();
-} // bookHistograms
+  histos_["hcalIsoPho"] = new TH1F(
+    "hcalIsoPho", "Photon;Track Isolation (GeV);Events", 
+    100, 0, 20
+  );
+  
+  histos_["hasPixelSeedPhoEB"] = new TH1F(
+    "hasPixelSeedPhoEB", "Barrel;Photon Pixel Seed Match;Events",
+    2, -0.5, 1.5
+  );
+    
+  histos_["hasPixelSeedPhoEE"] = new TH1F(
+    "hasPixelSeedPhoEE", "Barrel;Photon Pixel Seed Match;Events",
+    2, -0.5, 1.5
+  );
+    
+  histos_["hOverEPho"] = new TH1F(
+    "hOverEPho", ";Photon H/E;Events",
+    100, 0, 100
+  );
+    
+  histos_["etaWidthPhoEB"] = new TH1F(
+    "etaWidthPhoEB", "Barrel;Photon #sigma_{#eta};Events",
+    100, 0, 1
+  );
+    
+  histos_["etaWidthPhoEE"] = new TH1F(
+    "etaWidthPhoEE", "Endcaps;Photon #sigma_{#eta};Events",
+    100, 0, 1
+  );
+    
+  histos_["r9PhoEB"] = new TH1F(
+    "r9PhoEB", "Barrel;Photon R_{9};Events",
+    60, 0.85, 1
+  );
+    
+  histos_["r9PhoEE"] = new TH1F(
+    "r9PhoEE", "Endcaps;Photon R_{9};Events",
+    60, 0.85, 1
+  );
+    
+  histos_["sihihPhoEB"] = new TH1F(
+    "sihihPhoEB", "Barrel;Photon #sigma_{i#eta i#eta} #times 10^{3};Events",
+    48, 3, 15
+  );
+    
+  histos_["sihihPhoEE"] = new TH1F(
+    "sihihPhoEE", "Endcaps;Photon #sigma_{i#eta i#eta} #times 10^{3};Events",
+    60, 10, 40
+  );
+    
+} // bookPhotonHistograms
 
 
 //_____________________________________________________________________________
@@ -257,30 +385,104 @@ VecBosAnalyzer::bookHistograms()
 void
 VecBosAnalyzer::fillHistograms()
 {
-  histos_["nPU0"]->Fill(tree_->nPU[0]);
-  histos_["nPU1"]->Fill(tree_->nPU[1]);
-  histos_["nPU2"]->Fill(tree_->nPU[2]);
+  /// Shorthand notation
+  VecBosTree const& t = *tree_;
 
-  histos_["nPV"]->Fill(tree_->nPV);
-  histos_["nPho"]->Fill(tree_->nPho);
-  histos_["nMuon"]->Fill(tree_->nMuon);
+  fillPileupHistograms();
+  
+  histos_["nPho"]->Fill(t.nPho);
+  histos_["nMuon"]->Fill(t.nMuon);
   
   /// Fill the photons
-  for (Int_t i=0; i < tree_->nPho; ++i) {
-    histos_["ptPho"]->Fill(tree_->energyPho[i] / 
-                           TMath::CosH(tree_->etaPho[i]));
-    histos_["etaPho"]->Fill(tree_->etaPho[i]);
-    histos_["phiPho"]->Fill(tree_->phiPho[i]);
+  for (Int_t i=0; i < t.nPho; ++i) {
+    fillHistogramsForPhotonIndex(i);
   }
 
   /// Fill the muons
-  for (Int_t i=0; i < tree_->nMuon; ++i) {
-    histos_["ptMuon"]->Fill(tree_->energyMuon[i] / 
-                            TMath::CosH(tree_->etaMuon[i]));
-    histos_["etaMuon"]->Fill(tree_->etaMuon[i]);
-    histos_["phiMuon"]->Fill(tree_->phiMuon[i]);
+  for (Int_t i=0; i < t.nMuon; ++i) {
+    fillHistogramsForMuonIndex(i);
   }
 } // fillHistograms
+
+
+//_____________________________________________________________________________
+/**
+ * Fills the pileup histograms.
+ */
+void
+VecBosAnalyzer::fillPileupHistograms()
+{
+  /// Shorthand notation
+  VecBosTree const& t = *tree_;
+
+  histos_["nPU0"]->Fill(t.nPU[0]);
+  histos_["nPU1"]->Fill(t.nPU[1]);
+  histos_["nPU2"]->Fill(t.nPU[2]);
+
+  histos_["nPU0v1"]->Fill(t.nPU[0], t.nPU[1]);
+  histos_["nPU0v2"]->Fill(t.nPU[0], t.nPU[2]);
+  histos_["nPU1v2"]->Fill(t.nPU[1], t.nPU[2]);
+
+  histos_["rhoFastJet"]->Fill(t.rhoFastjet);
+  histos_["rhoJetsFastJet"]->Fill(t.rhoJetsFastJet);
+
+  histos_["nPV"]->Fill(t.nPV);
+} // fillPileupHistograms
+
+
+//_____________________________________________________________________________
+/**
+ * Fills the photon histograms.
+ */
+void
+VecBosAnalyzer::fillHistogramsForPhotonIndex(Int_t iPho)
+{
+  /// Shorthand notation
+  VecBosTree const& t = *tree_;
+  
+  /// Some of the variables are supercluster related. Get the SC index.
+  Int_t iSC = t.superClusterIndexPho[iPho];
+  
+  histos_["ptPho"]->Fill(t.energyPho[iPho] / 
+                          TMath::CosH(t.etaPho[iPho]));
+  histos_["etaPho"]->Fill(t.etaPho[iPho]);
+  histos_["phiPho"]->Fill(t.phiPho[iPho]);
+  histos_["trkIsoPho"]->Fill(t.dr03HollowTkSumPtPho[iPho]);
+  histos_["ecalIsoPho"]->Fill(t.dr03EcalRecHitSumEtPho[iPho]);
+  histos_["hcalIsoPho"]->Fill(t.dr03HcalTowerSumEtPho[iPho]);
+  histos_["hOverEPho"]->Fill(t.hOverEPho[iPho]);
+  
+  if (TMath::Abs(t.etaSC[iSC]) < 1.5) {
+    /// Barrel
+    histos_["hasPixelSeedPhoEB"]->Fill(t.hasPixelSeedPho[iPho]);
+    histos_["etaWidthPhoEB"]->Fill(t.etaWidthSC[iSC]);
+    histos_["r9PhoEB"]->Fill(t.e3x3SC[iSC] / t.rawEnergySC[iSC]);
+    histos_["sihihPhoEB"]->Fill(t.covIEtaIEtaSC[iSC]);
+  } else {
+    /// Endcaps
+    histos_["hasPixelSeedPhoEE"]->Fill(t.hasPixelSeedPho[iPho]);
+    histos_["etaWidthPhoEE"]->Fill(t.etaWidthSC[iSC]);
+    histos_["r9PhoEE"]->Fill(t.e3x3SC[iSC] / t.rawEnergySC[iSC]);
+    histos_["sihihPhoEE"]->Fill(t.covIEtaIEtaSC[iSC]);
+  }
+} // fillHistogramsForPhotonIndex
+
+
+//_____________________________________________________________________________
+/**
+ * Fills the muon histograms.
+ */
+void
+VecBosAnalyzer::fillHistogramsForMuonIndex(Int_t i)
+{
+  /// Shorthand notation
+  VecBosTree const& t = *tree_;
+
+  histos_["ptMuon"]->Fill(t.energyMuon[i] / 
+                          TMath::CosH(t.etaMuon[i]));
+  histos_["etaMuon"]->Fill(t.etaMuon[i]);
+  histos_["phiMuon"]->Fill(t.phiMuon[i]);
+} // fillHistogramsForMuonIndex
 
 
 //_____________________________________________________________________________

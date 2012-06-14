@@ -37,13 +37,20 @@ namespace cit {
     void parseOutputs();
     void setBranchesStatus();
     void bookHistograms();
+    void bookPileupHistograms();
+    void bookPhotonHistograms();
+    void bookMuonHistograms();
     void fillHistograms();
+    void fillPileupHistograms();
+    void fillHistogramsForPhotonIndex(Int_t);
+    void fillHistogramsForMuonIndex(Int_t);
+    void reportEvent(Long64_t);
     boost::shared_ptr<PSet> cfg_;
     VecBosTree *tree_;
     TFile *output_;
     Long64_t maxEventsInput_;
+    Long64_t reportEvery_;    
     std::map<std::string, TH1*> histos_;
-    
   }; // VecBosAnalyzer
 
 } // namespace cit
