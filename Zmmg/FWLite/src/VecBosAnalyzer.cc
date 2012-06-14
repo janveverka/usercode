@@ -8,6 +8,7 @@
 #include "TChain.h"
 #include "TDirectory.h"
 #include "TH1F.h"
+#include "TMath.h"
 #include "TTree.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockRange.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -47,7 +48,6 @@ VecBosAnalyzer::~VecBosAnalyzer()
   }
   
   if (output_ != 0) {
-    output_->Write();
     output_->Close();
     delete output_;
   }
@@ -64,16 +64,25 @@ VecBosAnalyzer::run()
   // Make sure we have a tree connected.
   if (tree_->fChain == 0) return;
 
-  // Loop over the events
-  for (Long64_t ientry=0; ientry < tree_->fChain->GetEntriesFast(); ientry++) {
-    if (maxEventsInput_ >= 0 && ientry >= maxEventsInput_) break;
-    cout << "Processing record " << ientry + 1 << " of " 
-         << maxEventsInput_ << endl;
+  // Get the number of events to loop over.
+  Long64_t maxEntry = tree_->fChain->GetEntriesFast();
+  if (0 <= maxEventsInput_ && maxEventsInput_ < maxEntry) {
+    maxEntry = maxEventsInput_;
+  }
+
+  // Loop over the events.
+  Long64_t ientry=0;
+  for (; ientry < maxEntry; ientry++) {
     if (tree_->LoadTree(ientry) < 0) break;
+    if (ientry % reportEvery_ == 0) reportEvent(ientry);
     tree_->fChain->GetEntry(ientry);
-    fillHistograms();
     // if (pass(ientry) == false) continue;
+    fillHistograms();
   } // end of loop over the events
+  
+  cout << "Processed " << ientry << " records." << endl;
+  cout << "Writing " << output_->GetName() << "." << endl;
+  output_->Write();
   
 } // run
 
@@ -90,10 +99,10 @@ VecBosAnalyzer::parseConfiguration()
 
   if (cfg_->existsAs<PSet>("maxEvents")) {
     PSet const& maxEvents = cfg_->getParameter<PSet>("maxEvents");
-    if (maxEvents.existsAs<Long64_t>("input", false)) {
-      maxEventsInput_ = maxEvents.getUntrackedParameter<Long64_t>("input", -1);
-    } // exists input
+    maxEventsInput_ = maxEvents.getUntrackedParameter<Long64_t>("input", -1);
+    reportEvery_ = maxEvents.getUntrackedParameter<Long64_t>("reportEvery", 1);
   } // exists maxEvents
+  
 } // parseConfiguration
 
 
@@ -179,6 +188,17 @@ VecBosAnalyzer::setBranchesStatus()
   TTree *chain = tree_->fChain;
   chain->SetBranchStatus("*", 0);  // disable all branches  
   chain->SetBranchStatus("nPU", 1);
+  chain->SetBranchStatus("nPV", 1);
+  
+  chain->SetBranchStatus("nPho", 1);
+  chain->SetBranchStatus("energyPho", 1);
+  chain->SetBranchStatus("etaPho", 1);
+  chain->SetBranchStatus("phiPho", 1);
+  
+  chain->SetBranchStatus("nMuon", 1);
+  chain->SetBranchStatus("etaMuon", 1);
+  chain->SetBranchStatus("energyMuon", 1);
+  chain->SetBranchStatus("phiMuon", 1);
 } // setBranchesStatus
 
 
@@ -207,6 +227,25 @@ VecBosAnalyzer::bookHistograms()
     101, -0.5, 100.5
   );
   
+  histos_["nPV"] = new TH1F(
+    "nPV", "Reconstructed Primary Vertices;Number of Vertices;Events", 
+    101, -0.5, 100.5
+  );
+  
+  histos_["nPho"] = new TH1F("nPho", "Photon;Multiplicity;Events", 
+                             101, -0.5, 100.5);  
+  histos_["ptPho"] = new TH1F("ptPho", "Photon;pt;Events", 101, -0.5, 100.5);
+  histos_["etaPho"] = new TH1F("etaPho", "Photon;#eta;Events", 100, -3, 3);
+  histos_["phiPho"] = new TH1F("phiPho", "Photon;#phi;Events", 
+                               100, -TMath::Pi(), TMath::Pi());
+  
+  histos_["nMuon"] = new TH1F("nMuon", "Muon;Multiplicity;Events", 
+                              101, -0.5, 100.5);
+  histos_["ptMuon"] = new TH1F("ptMuon", "Muon;pt;Events", 100, -0.5, 100.5);
+  histos_["etaMuon"] = new TH1F("etaMuon", "Muon;#eta;Events", 100, -3, 3);
+  histos_["phiMuon"] = new TH1F("phiMuon", "Muon;#phi;Events", 
+                                100, -TMath::Pi(), TMath::Pi());
+  
   cwd->cd();
 } // bookHistograms
 
@@ -221,6 +260,26 @@ VecBosAnalyzer::fillHistograms()
   histos_["nPU0"]->Fill(tree_->nPU[0]);
   histos_["nPU1"]->Fill(tree_->nPU[1]);
   histos_["nPU2"]->Fill(tree_->nPU[2]);
+
+  histos_["nPV"]->Fill(tree_->nPV);
+  histos_["nPho"]->Fill(tree_->nPho);
+  histos_["nMuon"]->Fill(tree_->nMuon);
+  
+  /// Fill the photons
+  for (Int_t i=0; i < tree_->nPho; ++i) {
+    histos_["ptPho"]->Fill(tree_->energyPho[i] / 
+                           TMath::CosH(tree_->etaPho[i]));
+    histos_["etaPho"]->Fill(tree_->etaPho[i]);
+    histos_["phiPho"]->Fill(tree_->phiPho[i]);
+  }
+
+  /// Fill the muons
+  for (Int_t i=0; i < tree_->nMuon; ++i) {
+    histos_["ptMuon"]->Fill(tree_->energyMuon[i] / 
+                            TMath::CosH(tree_->etaMuon[i]));
+    histos_["etaMuon"]->Fill(tree_->etaMuon[i]);
+    histos_["phiMuon"]->Fill(tree_->phiMuon[i]);
+  }
 } // fillHistograms
 
 
@@ -235,4 +294,15 @@ VecBosAnalyzer::init()
   bookHistograms();
   setBranchesStatus();
 } // init
+
+
+//_____________________________________________________________________________
+/**
+ * Report event being processed inside the event loop.
+ */
+void
+VecBosAnalyzer::reportEvent(Long64_t ientry)
+{
+  cout << "Processing record " << ientry + 1 << endl;
+} // reportEvent
 
