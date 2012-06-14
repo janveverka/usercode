@@ -352,13 +352,13 @@ VecBosAnalyzer::bookPhotonHistograms()
   );
     
   histos_["etaWidthPhoEB"] = new TH1F(
-    "etaWidthPhoEB", "Barrel;Photon #sigma_{#eta};Events",
-    120, 0, 0.12
+    "etaWidthPhoEB", "Barrel;Photon #sigma_{#eta} #times 10^{3};Events / 0.2",
+    150, 0, 30
   );
     
   histos_["etaWidthPhoEE"] = new TH1F(
-    "etaWidthPhoEE", "Endcaps;Photon #sigma_{#eta};Events",
-    150, 0, 0.3
+    "etaWidthPhoEE", "Endcaps;Photon #sigma_{#eta} #times 10^{3};Events / 1",
+    150, 0, 150
   );
     
   histos_["r9PhoEB"] = new TH1F(
@@ -461,15 +461,15 @@ VecBosAnalyzer::fillHistogramsForPhotonIndex(Int_t iPho)
   if (TMath::Abs(t.etaSC[iSC]) < 1.5) {
     /// Barrel
     histos_["hasPixelSeedPhoEB"]->Fill(t.hasPixelSeedPho[iPho]);
-    histos_["etaWidthPhoEB"]->Fill(t.etaWidthSC[iSC]);
+    histos_["etaWidthPhoEB"]->Fill(1000 * t.etaWidthSC[iSC]);
     histos_["r9PhoEB"]->Fill(t.e3x3SC[iSC] / t.rawEnergySC[iSC]);
-    histos_["sihihPhoEB"]->Fill(t.covIEtaIEtaSC[iSC]);
+    histos_["sihihPhoEB"]->Fill(1000 * t.covIEtaIEtaSC[iSC]);
   } else {
     /// Endcaps
     histos_["hasPixelSeedPhoEE"]->Fill(t.hasPixelSeedPho[iPho]);
-    histos_["etaWidthPhoEE"]->Fill(t.etaWidthSC[iSC]);
+    histos_["etaWidthPhoEE"]->Fill(1000 * t.etaWidthSC[iSC]);
     histos_["r9PhoEE"]->Fill(t.e3x3SC[iSC] / t.rawEnergySC[iSC]);
-    histos_["sihihPhoEE"]->Fill(t.covIEtaIEtaSC[iSC]);
+    histos_["sihihPhoEE"]->Fill(1000 * t.covIEtaIEtaSC[iSC]);
   }
 } // fillHistogramsForPhotonIndex
 
