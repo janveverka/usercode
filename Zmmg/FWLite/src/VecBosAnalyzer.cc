@@ -188,6 +188,10 @@ VecBosAnalyzer::setBranchesStatus()
 {
   TTree *chain = tree_->fChain;
   chain->SetBranchStatus("*", 0);  // disable all branches  
+  
+  chain->SetBranchStatus("rhoFastjet", 1);
+  chain->SetBranchStatus("rhoJetsFastJet", 1);
+
   chain->SetBranchStatus("nPU", 1);
   chain->SetBranchStatus("nPV", 1);
   
@@ -201,8 +205,10 @@ VecBosAnalyzer::setBranchesStatus()
   chain->SetBranchStatus("hasPixelSeedPho", 1);
   chain->SetBranchStatus("hOverEPho", 1);
   chain->SetBranchStatus("superClusterIndexPho", 1);
+  chain->SetBranchStatus("hOverEPho", 1);
   
   chain->SetBranchStatus("nSC", 1);
+  chain->SetBranchStatus("etaSC", 1);
   chain->SetBranchStatus("rawEnergySC", 1);
   chain->SetBranchStatus("etaWidthSC", 1);
   chain->SetBranchStatus("e3x3SC", 1);
@@ -293,7 +299,7 @@ void
 VecBosAnalyzer::bookMuonHistograms()
 {
   histos_["nMuon"] = new TH1F("nMuon", "Muon;Multiplicity;Events", 
-                              101, -0.5, 100.5);
+                              51, -0.5, 50.5);
   histos_["ptMuon"] = new TH1F("ptMuon", "Muon;pt;Events", 100, -0.5, 100.5);
   histos_["etaMuon"] = new TH1F("etaMuon", "Muon;#eta;Events", 100, -3, 3);
   histos_["phiMuon"] = new TH1F("phiMuon", "Muon;#phi;Events", 
@@ -309,7 +315,7 @@ void
 VecBosAnalyzer::bookPhotonHistograms()
 {
   histos_["nPho"] = new TH1F("nPho", "Photon;Multiplicity;Events", 
-                             101, -0.5, 100.5);  
+                             21, -0.5, 20.5);  
   histos_["ptPho"] = new TH1F("ptPho", "Photon;pt;Events", 101, -0.5, 100.5);
   histos_["etaPho"] = new TH1F("etaPho", "Photon;#eta;Events", 100, -3, 3);
   histos_["phiPho"] = new TH1F("phiPho", "Photon;#phi;Events", 
@@ -347,12 +353,12 @@ VecBosAnalyzer::bookPhotonHistograms()
     
   histos_["etaWidthPhoEB"] = new TH1F(
     "etaWidthPhoEB", "Barrel;Photon #sigma_{#eta};Events",
-    100, 0, 1
+    120, 0, 0.12
   );
     
   histos_["etaWidthPhoEE"] = new TH1F(
     "etaWidthPhoEE", "Endcaps;Photon #sigma_{#eta};Events",
-    100, 0, 1
+    150, 0, 0.3
   );
     
   histos_["r9PhoEB"] = new TH1F(
