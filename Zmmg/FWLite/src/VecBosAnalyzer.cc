@@ -263,13 +263,13 @@ VecBosAnalyzer::bookPileupHistograms()
   );
   
   histos_["nPU0v2"] = new TH2F(
-    "nPU0v1", 
+    "nPU0v2", 
     "True number of interactions;Early OOT Pileup;Late OOT Pileup;Events",
     31, -0.5, 61.5, 31, -0.5, 61.3
   );
   
   histos_["nPU1v2"] = new TH2F(
-    "nPU0v1", 
+    "nPU1v2", 
     "True number of interactions;In-Time Pileup;Late OOT Pileup;Events", 
     31, -0.5, 61.5, 31, -0.5, 61.3
   );
