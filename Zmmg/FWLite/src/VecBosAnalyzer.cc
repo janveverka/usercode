@@ -248,17 +248,17 @@ void
 VecBosAnalyzer::bookPileupHistograms()
 {
   histos_["nPU0"] = new TH1F(
-    "nPU0", "Early OOT Pileup;True number of interactions;Events", 
+    "nPU0", "Early OOT Pileup;True number of interactions;Events / 1", 
     101, -0.5, 100.5
   );
   
   histos_["nPU1"] = new TH1F(
-    "nPU1", "In-Time Pileup;True number of interactions;Events", 
+    "nPU1", "In-Time Pileup;True number of interactions;Events / 1", 
     101, -0.5, 100.5
   );
   
   histos_["nPU2"] = new TH1F(
-    "nPU2", "Late OOT Pileup;True number of interactions;Events", 
+    "nPU2", "Late OOT Pileup;True number of interactions;Events / 1", 
     101, -0.5, 100.5
   );
   
@@ -281,7 +281,7 @@ VecBosAnalyzer::bookPileupHistograms()
   );
   
   histos_["nPV"] = new TH1F(
-    "nPV", "Reconstructed Primary Vertices;Number of Vertices;Events", 
+    "nPV", "Reconstructed Primary Vertices;Number of Vertices;Events / 1", 
     101, -0.5, 100.5
   );
   
@@ -298,11 +298,13 @@ VecBosAnalyzer::bookPileupHistograms()
 void
 VecBosAnalyzer::bookMuonHistograms()
 {
-  histos_["nMuon"] = new TH1F("nMuon", "Muon;Multiplicity;Events", 
+  histos_["nMuon"] = new TH1F("nMuon", "Muon;Multiplicity;Events / 1", 
                               51, -0.5, 50.5);
-  histos_["ptMuon"] = new TH1F("ptMuon", "Muon;pt;Events", 100, -0.5, 100.5);
-  histos_["etaMuon"] = new TH1F("etaMuon", "Muon;#eta;Events", 100, -3, 3);
-  histos_["phiMuon"] = new TH1F("phiMuon", "Muon;#phi;Events", 
+  histos_["ptMuon"] = new TH1F("ptMuon", "Muon;pt (GeV);Events / GeV", 
+                               100, -0.5, 100.5);
+  histos_["etaMuon"] = new TH1F("etaMuon", "Muon;#eta;Events / 0.1", 
+                                60, -3, 3);
+  histos_["phiMuon"] = new TH1F("phiMuon", "Muon;#phi;Events / #frac{#pi}{50}", 
                                 100, -TMath::Pi(), TMath::Pi());
 } // bookMuonHistograms
 
@@ -314,11 +316,12 @@ VecBosAnalyzer::bookMuonHistograms()
 void
 VecBosAnalyzer::bookPhotonHistograms()
 {
-  histos_["nPho"] = new TH1F("nPho", "Photon;Multiplicity;Events", 
+  histos_["nPho"] = new TH1F("nPho", "Photon;Multiplicity;Events / 1", 
                              21, -0.5, 20.5);  
-  histos_["ptPho"] = new TH1F("ptPho", "Photon;pt;Events", 101, -0.5, 100.5);
-  histos_["etaPho"] = new TH1F("etaPho", "Photon;#eta;Events", 100, -3, 3);
-  histos_["phiPho"] = new TH1F("phiPho", "Photon;#phi;Events", 
+  histos_["ptPho"] = new TH1F("ptPho", 
+                              "Photon;pt (GeV);Events / GeV", 101, -0.5, 100.5);
+  histos_["etaPho"] = new TH1F("etaPho", "Photon;#eta;Events / 0.1", 60, -3, 3);
+  histos_["phiPho"] = new TH1F("phiPho", "Photon;#phi;Events / #frac{#pi}{50}", 
                                100, -TMath::Pi(), TMath::Pi());
   
   histos_["trkIsoPho"] = new TH1F(
@@ -332,23 +335,23 @@ VecBosAnalyzer::bookPhotonHistograms()
   );
   
   histos_["hcalIsoPho"] = new TH1F(
-    "hcalIsoPho", "Photon;Track Isolation (GeV);Events", 
+    "hcalIsoPho", "Photon;Track Isolation (GeV);Events / 0.2 GeV", 
     100, 0, 20
   );
   
   histos_["hasPixelSeedPhoEB"] = new TH1F(
-    "hasPixelSeedPhoEB", "Barrel;Photon Pixel Seed Match;Events",
+    "hasPixelSeedPhoEB", "Barrel;Photon Pixel Seed Match;Events / 1",
     2, -0.5, 1.5
   );
     
   histos_["hasPixelSeedPhoEE"] = new TH1F(
-    "hasPixelSeedPhoEE", "Barrel;Photon Pixel Seed Match;Events",
+    "hasPixelSeedPhoEE", "Barrel;Photon Pixel Seed Match;Events / 1",
     2, -0.5, 1.5
   );
     
   histos_["hOverEPho"] = new TH1F(
-    "hOverEPho", ";Photon H/E;Events",
-    100, 0, 100
+    "hOverEPho", ";Photon H/E;Events / 0.005",
+    100, 0, 0.5
   );
     
   histos_["etaWidthPhoEB"] = new TH1F(
@@ -362,23 +365,25 @@ VecBosAnalyzer::bookPhotonHistograms()
   );
     
   histos_["r9PhoEB"] = new TH1F(
-    "r9PhoEB", "Barrel;Photon R_{9};Events",
+    "r9PhoEB", "Barrel;Photon R_{9};Events / 0.0025",
     60, 0.85, 1
   );
     
   histos_["r9PhoEE"] = new TH1F(
-    "r9PhoEE", "Endcaps;Photon R_{9};Events",
+    "r9PhoEE", "Endcaps;Photon R_{9};Events / 0.0025",
     60, 0.85, 1
   );
     
   histos_["sihihPhoEB"] = new TH1F(
-    "sihihPhoEB", "Barrel;Photon #sigma_{i#eta i#eta} #times 10^{3};Events",
-    48, 3, 15
+    "sihihPhoEB", 
+    "Barrel;Photon #sigma_{i#eta i#eta} #times 10^{3};Events / 0.25",
+    100, 0, 25
   );
     
   histos_["sihihPhoEE"] = new TH1F(
-    "sihihPhoEE", "Endcaps;Photon #sigma_{i#eta i#eta} #times 10^{3};Events",
-    60, 10, 40
+    "sihihPhoEE",
+    "Endcaps;Photon #sigma_{i#eta i#eta} #times 10^{3};Events / 1",
+    100, 0, 100
   );
     
 } // bookPhotonHistograms
