@@ -322,12 +322,12 @@ VecBosAnalyzer::bookPhotonHistograms()
                                100, -TMath::Pi(), TMath::Pi());
   
   histos_["trkIsoPho"] = new TH1F(
-    "trkIsoPho", "Photon;Track Isolation (GeV);Events", 
+    "trkIsoPho", "Photon;Track Isolation (GeV);Events / 0.2 GeV", 
     100, 0, 20
   );
 
   histos_["ecalIsoPho"] = new TH1F(
-    "ecalIsoPho", "Photon;ECAL Isolation (GeV);Events", 
+    "ecalIsoPho", "Photon;ECAL Isolation (GeV);Events / 0.2 GeV", 
     100, 0, 20
   );
   
@@ -463,13 +463,13 @@ VecBosAnalyzer::fillHistogramsForPhotonIndex(Int_t iPho)
     histos_["hasPixelSeedPhoEB"]->Fill(t.hasPixelSeedPho[iPho]);
     histos_["etaWidthPhoEB"]->Fill(1000 * t.etaWidthSC[iSC]);
     histos_["r9PhoEB"]->Fill(t.e3x3SC[iSC] / t.rawEnergySC[iSC]);
-    histos_["sihihPhoEB"]->Fill(1000 * t.covIEtaIEtaSC[iSC]);
+    histos_["sihihPhoEB"]->Fill(1000 * TMath::Sqrt(t.covIEtaIEtaSC[iSC]));
   } else {
     /// Endcaps
     histos_["hasPixelSeedPhoEE"]->Fill(t.hasPixelSeedPho[iPho]);
     histos_["etaWidthPhoEE"]->Fill(1000 * t.etaWidthSC[iSC]);
     histos_["r9PhoEE"]->Fill(t.e3x3SC[iSC] / t.rawEnergySC[iSC]);
-    histos_["sihihPhoEE"]->Fill(1000 * t.covIEtaIEtaSC[iSC]);
+    histos_["sihihPhoEE"]->Fill(1000 * TMath::Sqrt(t.covIEtaIEtaSC[iSC]));
   }
 } // fillHistogramsForPhotonIndex
 
