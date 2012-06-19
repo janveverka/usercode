@@ -202,6 +202,14 @@ VecBosAnalyzer::setBranchesStatus()
   chain->SetBranchStatus("nPU", 1);
   chain->SetBranchStatus("nPV", 1);
   
+  chain->SetBranchStatus("PVxPV", 1);
+  chain->SetBranchStatus("PVyPV", 1);
+  chain->SetBranchStatus("PVzPV", 1);
+  
+  chain->SetBranchStatus("beamSpotX", 1);
+  chain->SetBranchStatus("beamSpotY", 1);
+  chain->SetBranchStatus("beamSpotZ", 1);
+  
   chain->SetBranchStatus("nPho", 1);
   chain->SetBranchStatus("energyPho", 1);
   chain->SetBranchStatus("etaPho", 1);
@@ -298,6 +306,33 @@ VecBosAnalyzer::bookPileupHistograms()
   histos_["rhoFastJet"] = new TH1F("rhoFastJet", ";#rho;Events", 100, 0, 100);
   histos_["rhoJetsFastJet"] = new TH1F("rhoJetsFastJet", "Jets;#rho;Events", 
                                        100, 0, 100);
+
+  histos_["beamSpotX"] = new TH1F(
+    "beamSpotX", ";Beam Spot x (cm);Events / 0.1 mm", 
+    100, -0.5, 0.5
+  );
+  histos_["beamSpotY"] = new TH1F(
+    "beamSpotY", ";Beam Spot y (cm);Events / 0.1 mm", 
+    100, -0.5, 0.5
+  );
+  histos_["beamSpotZ"] = new TH1F(
+    "beamSpotZ", ";Beam Spot z (cm);Events / 0.1 mm", 
+    100, -0.5, 0.5
+  );
+  
+  histos_["PVxPV"] = new TH1F(
+    "PVxPV", ";Reconstructed Vertex x (cm);Events / 0.1 mm", 
+    100, -0.5, 0.5
+  );
+  histos_["PVyPV"] = new TH1F(
+    "PVyPV", ";Reconstructed Vertex y (cm);Events / 0.1 mm", 
+    100, -0.5, 0.5
+  );
+  histos_["PVzPV"] = new TH1F(
+    "PVzPV", ";Reconstructed Vertex z (cm);Events / 0.5 cm", 
+    100, -50, 50
+  );
+  
 } // bookPileupHistograms
 
 
@@ -308,13 +343,13 @@ VecBosAnalyzer::bookPileupHistograms()
 void
 VecBosAnalyzer::bookMuonHistograms()
 {
-  histos_["nMuon"] = new TH1F("nMuon", "Muon;Multiplicity;Events / 1", 
+  histos_["nMuon"] = new TH1F("nMuon", ";Muon Multiplicity;Events / 1", 
                               51, -0.5, 50.5);
-  histos_["ptMuon"] = new TH1F("ptMuon", "Muon;pt (GeV);Events / GeV", 
+  histos_["ptMuon"] = new TH1F("ptMuon", ";Muon P_{T} (GeV);Events / GeV", 
                                100, -0.5, 100.5);
-  histos_["etaMuon"] = new TH1F("etaMuon", "Muon;#eta;Events / 0.1", 
+  histos_["etaMuon"] = new TH1F("etaMuon", ";Muon #eta;Events / 0.1", 
                                 60, -3, 3);
-  histos_["phiMuon"] = new TH1F("phiMuon", "Muon;#phi;Events / #frac{#pi}{50}", 
+  histos_["phiMuon"] = new TH1F("phiMuon", ";Muon #phi;Events / #frac{#pi}{50}", 
                                 100, -TMath::Pi(), TMath::Pi());
 } // bookMuonHistograms
 
@@ -326,26 +361,31 @@ VecBosAnalyzer::bookMuonHistograms()
 void
 VecBosAnalyzer::bookPhotonHistograms()
 {
-  histos_["nPho"] = new TH1F("nPho", "Photon;Multiplicity;Events / 1", 
+  histos_["nPho"] = new TH1F("nPho", ";Photon Multiplicity;Events / 1", 
                              21, -0.5, 20.5);  
-  histos_["ptPho"] = new TH1F("ptPho", 
-                              "Photon;pt (GeV);Events / GeV", 101, -0.5, 100.5);
-  histos_["etaPho"] = new TH1F("etaPho", "Photon;#eta;Events / 0.1", 60, -3, 3);
-  histos_["phiPho"] = new TH1F("phiPho", "Photon;#phi;Events / #frac{#pi}{50}", 
-                               100, -TMath::Pi(), TMath::Pi());
+  histos_["ptPho"] = new TH1F(
+    "ptPho", ";Photon P_{T} (GeV);Events / GeV", 101, -0.5, 100.5
+  );
+  histos_["etaPho"] = new TH1F(
+    "etaPho", ";Photon #eta;Events / 0.1", 60, -3, 3
+  );
+  histos_["phiPho"] = new TH1F(
+    "phiPho", ";Photon #phi;Events / #frac{#pi}{50}", 
+    100, -TMath::Pi(), TMath::Pi()
+  );
   
   histos_["trkIsoPho"] = new TH1F(
-    "trkIsoPho", "Photon;Track Isolation (GeV);Events / 0.2 GeV", 
+    "trkIsoPho", ";Photon Track Isolation (GeV);Events / 0.2 GeV", 
     100, 0, 20
   );
 
   histos_["ecalIsoPho"] = new TH1F(
-    "ecalIsoPho", "Photon;ECAL Isolation (GeV);Events / 0.2 GeV", 
+    "ecalIsoPho", ";Photon ECAL Isolation (GeV);Events / 0.2 GeV", 
     100, 0, 20
   );
   
   histos_["hcalIsoPho"] = new TH1F(
-    "hcalIsoPho", "Photon;Track Isolation (GeV);Events / 0.2 GeV", 
+    "hcalIsoPho", ";Photon Track Isolation (GeV);Events / 0.2 GeV", 
     100, 0, 20
   );
   
@@ -419,6 +459,8 @@ VecBosAnalyzer::setMplStyleTitles()
 void
 VecBosAnalyzer::setMplStyleTitlesForPileupHistograms()
 {
+  histos_["rhoFastJet"]->GetXaxis()->SetTitle("$\\rho$");
+  histos_["rhoJetsFastJet"]->GetXaxis()->SetTitle("$\\rho$");
 } // setMplStyleTitlesForPileupHistograms
 
 
@@ -429,7 +471,24 @@ VecBosAnalyzer::setMplStyleTitlesForPileupHistograms()
 void
 VecBosAnalyzer::setMplStyleTitlesForPhotonHistograms()
 {
+  histos_["ptPho"]->GetXaxis()->SetTitle("Photon $P_{T}$ (GeV)");
+  histos_["etaPho"]->GetXaxis()->SetTitle("Photon $\\eta$");
+  histos_["phiPho"]->GetXaxis()->SetTitle("Photon $\\phi$");
+  histos_["phiPho"]->GetYaxis()->SetTitle("Events / $\\frac{\\pi}{50}$");
   histos_["r9PhoEB"]->GetXaxis()->SetTitle("Photon $R_{9}$");
+  histos_["r9PhoEE"]->GetXaxis()->SetTitle("Photon $R_{9}$");
+  histos_["etaWidthPhoEB"]->GetXaxis()->SetTitle(
+    "Photon $\\sigma_{\\eta} \\times 10^{3}$"
+  );
+  histos_["etaWidthPhoEE"]->GetXaxis()->SetTitle(
+    "Photon $\\sigma_{\\eta} \\times 10^{3}$"
+  );
+  histos_["sihihPhoEB"]->GetXaxis()->SetTitle(
+    "Photon $\\sigma_{i\\eta i\\eta} \\times 10^{3}$"
+  );
+  histos_["sihihPhoEE"]->GetXaxis()->SetTitle(
+    "Photon $\\sigma_{i\\eta i\\eta} \\times 10^{3}$"
+  );
 } // setMplStyleTitlesForPhotonHistograms
 
 
@@ -440,6 +499,10 @@ VecBosAnalyzer::setMplStyleTitlesForPhotonHistograms()
 void
 VecBosAnalyzer::setMplStyleTitlesForMuonHistograms()
 {
+  histos_["ptMuon"]->GetXaxis()->SetTitle("Muon $P_{T}$ (GeV)");
+  histos_["etaMuon"]->GetXaxis()->SetTitle("Muon $\\eta$");
+  histos_["phiMuon"]->GetXaxis()->SetTitle("Muon $\\phi$");
+  histos_["phiMuon"]->GetYaxis()->SetTitle("Events / $\\frac{\\pi}{50}$");
 } // setMplStyleTitlesForMuonHistograms
 
 
@@ -490,8 +553,19 @@ VecBosAnalyzer::fillPileupHistograms()
 
   histos_["rhoFastJet"]->Fill(t.rhoFastjet);
   histos_["rhoJetsFastJet"]->Fill(t.rhoJetsFastJet);
+ 
+  histos_["beamSpotX"]->Fill(t.beamSpotX);
+  histos_["beamSpotY"]->Fill(t.beamSpotY);
+  histos_["beamSpotZ"]->Fill(t.beamSpotZ);
 
   histos_["nPV"]->Fill(t.nPV);
+  
+  /// Loop over the vertices
+  for (int i=0; i < t.nPV; ++i) {
+    histos_["PVxPV"]->Fill(t.PVxPV[i]);
+    histos_["PVyPV"]->Fill(t.PVyPV[i]);
+    histos_["PVzPV"]->Fill(t.PVzPV[i]);
+  }
 } // fillPileupHistograms
 
 
