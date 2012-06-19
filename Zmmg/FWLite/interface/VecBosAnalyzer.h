@@ -40,6 +40,9 @@ namespace cit {
     void bookPileupHistograms();
     void bookPhotonHistograms();
     void bookMuonHistograms();
+    void setMplStyleTitlesForPileupHistograms();
+    void setMplStyleTitlesForPhotonHistograms();
+    void setMplStyleTitlesForMuonHistograms();
     void fillHistograms();
     void fillPileupHistograms();
     void fillHistogramsForPhotonIndex(Int_t);
@@ -51,6 +54,7 @@ namespace cit {
     Long64_t maxEventsInput_;
     Long64_t reportEvery_;    
     std::map<std::string, TH1*> histos_;
+    std::string titleStyle_;
   }; // VecBosAnalyzer
 
 } // namespace cit
