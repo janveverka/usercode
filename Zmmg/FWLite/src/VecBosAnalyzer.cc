@@ -108,7 +108,8 @@ VecBosAnalyzer::parseConfiguration()
   
   if (cfg_->existsAs<PSet>("options")) {
     PSet const& options = cfg_->getParameter<PSet>("options");
-    titleStyle_ = options.getParameter<string>("titleStyle", "");
+    if (options.existsAs<string>("titleStyle"))
+      titleStyle_ = options.getParameter<string>("titleStyle");
   }
 } // parseConfiguration
 
@@ -240,7 +241,10 @@ VecBosAnalyzer::bookHistograms()
   
   bookPileupHistograms();
   bookPhotonHistograms();
-  bookMuonHistograms();  
+  bookMuonHistograms();
+  
+  if (titleStyle_ == "mpl")
+    setMplStyleTitles();
   
   cwd->cd();
 } // bookHistograms
@@ -425,6 +429,7 @@ VecBosAnalyzer::setMplStyleTitlesForPileupHistograms()
 void
 VecBosAnalyzer::setMplStyleTitlesForPhotonHistograms()
 {
+  histos_["r9PhoEB"]->GetXaxis()->SetTitle("Photon $R_{9}$");
 } // setMplStyleTitlesForPhotonHistograms
 
 

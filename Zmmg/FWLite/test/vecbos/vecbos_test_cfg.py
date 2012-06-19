@@ -27,4 +27,8 @@ process.maxEvents = cms.PSet(
     input = cms.untracked.int64(1000),
     reportEvery = cms.untracked.int64(100)
     )
+    
+process.options = cms.PSet(
+    titleStyle = cms.string("mpl")
+    )
 
