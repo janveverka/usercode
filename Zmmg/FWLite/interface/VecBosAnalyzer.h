@@ -49,6 +49,7 @@ namespace cit {
     void fillHistogramsForPhotonIndex(Int_t);
     void fillHistogramsForMuonIndex(Int_t);
     void reportEvent(Long64_t);
+    int hasMatchedElectronPho(Int_t);
     boost::shared_ptr<PSet> cfg_;
     VecBosTree *tree_;
     TFile *output_;

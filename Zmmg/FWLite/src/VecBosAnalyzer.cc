@@ -234,6 +234,16 @@ VecBosAnalyzer::setBranchesStatus()
   chain->SetBranchStatus("etaMuon", 1);
   chain->SetBranchStatus("energyMuon", 1);
   chain->SetBranchStatus("phiMuon", 1);
+
+  // electron veto branches
+  chain->SetBranchStatus("nEle", 1);
+  chain->SetBranchStatus("superClusterIndexEle", 1);
+  chain->SetBranchStatus("superClusterIndexPho", 1);
+  chain->SetBranchStatus("hasMatchedConversionEle", 1);
+  chain->SetBranchStatus("gsfTrackIndexEle", 1);
+  chain->SetBranchStatus("nGsfTrack", 1);
+  chain->SetBranchStatus("expInnerLayersGsfTrack", 1);
+  
 } // setBranchesStatus
 
 
@@ -395,7 +405,19 @@ VecBosAnalyzer::bookPhotonHistograms()
   );
     
   histos_["hasPixelSeedPhoEE"] = new TH1F(
-    "hasPixelSeedPhoEE", "Barrel;Photon Pixel Seed Match;Events / 1",
+    "hasPixelSeedPhoEE", "Endcaps;Photon Pixel Seed Match;Events / 1",
+    2, -0.5, 1.5
+  );
+    
+  histos_["hasMatchedElectronPhoEB"] = new TH1F(
+    "hasMatchedElectronPhoEB", 
+    "Barrel;Photon Has Electron Match;Events / 1",
+    2, -0.5, 1.5
+  );
+    
+  histos_["hasMatchedElectronPhoEE"] = new TH1F(
+    "hasMatchedElectronPhoEE", 
+    "Endcaps;Photon Has Electron Match;Events / 1",
     2, -0.5, 1.5
   );
     
@@ -594,12 +616,14 @@ VecBosAnalyzer::fillHistogramsForPhotonIndex(Int_t iPho)
   if (TMath::Abs(t.etaSC[iSC]) < 1.5) {
     /// Barrel
     histos_["hasPixelSeedPhoEB"]->Fill(t.hasPixelSeedPho[iPho]);
+    histos_["hasMatchedElectronPhoEB"]->Fill(hasMatchedElectronPho(iPho));
     histos_["etaWidthPhoEB"]->Fill(1000 * t.etaWidthSC[iSC]);
     histos_["r9PhoEB"]->Fill(t.e3x3SC[iSC] / t.rawEnergySC[iSC]);
     histos_["sihihPhoEB"]->Fill(1000 * TMath::Sqrt(t.covIEtaIEtaSC[iSC]));
   } else {
     /// Endcaps
     histos_["hasPixelSeedPhoEE"]->Fill(t.hasPixelSeedPho[iPho]);
+    histos_["hasMatchedElectronPhoEE"]->Fill(hasMatchedElectronPho(iPho));
     histos_["etaWidthPhoEE"]->Fill(1000 * t.etaWidthSC[iSC]);
     histos_["r9PhoEE"]->Fill(t.e3x3SC[iSC] / t.rawEnergySC[iSC]);
     histos_["sihihPhoEE"]->Fill(1000 * TMath::Sqrt(t.covIEtaIEtaSC[iSC]));
@@ -622,6 +646,35 @@ VecBosAnalyzer::fillHistogramsForMuonIndex(Int_t i)
   histos_["etaMuon"]->Fill(t.etaMuon[i]);
   histos_["phiMuon"]->Fill(t.phiMuon[i]);
 } // fillHistogramsForMuonIndex
+
+
+//_____________________________________________________________________________
+/**
+ * Retruns the electron veto for photon i, 0 = pass, 1 = fail (has a matched
+ * electron)
+ */
+int
+VecBosAnalyzer::hasMatchedElectronPho(Int_t iPho)
+{
+  /// Shorthand notation
+  VecBosTree const& t = *tree_;
+  
+  bool match = false;
+  for(int i=0; i < t.nEle; i++){ 
+    // copied from UserCode/amott/HggApp/src/HggReducer.cc,
+    //   HggReducer::matchPhotonsElectrons()
+    //copied from  ConversionTools::hasMatchedPromptElectron
+    if (t.superClusterIndexEle[i] != t.superClusterIndexPho[iPho]) continue;
+    if (t.hasMatchedConversionEle[i]) continue;
+    if (t.gsfTrackIndexEle[i] < 0 || 
+        t.gsfTrackIndexEle[i] >= t.nGsfTrack) continue;
+    if (t.expInnerLayersGsfTrack[t.gsfTrackIndexEle[i]] > 0) continue;
+    match = true;
+    break;    
+  }
+  
+  return (int) match;  
+} // hasMatchedElectronPho
 
 
 //_____________________________________________________________________________
