@@ -40,6 +40,7 @@ namespace cit {
     void bookPileupHistograms();
     void bookPhotonHistograms();
     void bookMuonHistograms();
+    void setMplStyleTitles();
     void setMplStyleTitlesForPileupHistograms();
     void setMplStyleTitlesForPhotonHistograms();
     void setMplStyleTitlesForMuonHistograms();

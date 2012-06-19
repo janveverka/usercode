@@ -28,7 +28,9 @@ VecBosAnalyzer::VecBosAnalyzer(
   cfg_(cfg),
   tree_(0),
   output_(0),
-  maxEventsInput_(-1)
+  maxEventsInput_(-1),
+  reportEvery_(1),
+  titleStyle_("")
 {
   init();
 } // ctor
@@ -104,6 +106,10 @@ VecBosAnalyzer::parseConfiguration()
     reportEvery_ = maxEvents.getUntrackedParameter<Long64_t>("reportEvery", 1);
   } // exists maxEvents
   
+  if (cfg_->existsAs<PSet>("options")) {
+    PSet const& options = cfg_->getParameter<PSet>("options");
+    titleStyle_ = options.getParameter<string>("titleStyle", "");
+  }
 } // parseConfiguration
 
 
@@ -387,6 +393,49 @@ VecBosAnalyzer::bookPhotonHistograms()
   );
     
 } // bookPhotonHistograms
+
+
+//_____________________________________________________________________________
+/**
+ * Sets the matplotlib-style histogram titles.
+ */
+void
+VecBosAnalyzer::setMplStyleTitles()
+{
+  setMplStyleTitlesForPileupHistograms();
+  setMplStyleTitlesForPhotonHistograms();
+  setMplStyleTitlesForMuonHistograms();
+} // setMplStyleTitles
+
+
+//_____________________________________________________________________________
+/**
+ * Sets the matplotlib-style titles for the pileup histograms.
+ */
+void
+VecBosAnalyzer::setMplStyleTitlesForPileupHistograms()
+{
+} // setMplStyleTitlesForPileupHistograms
+
+
+//_____________________________________________________________________________
+/**
+ * Sets the matplotlib-style titles for the photon histograms.
+ */
+void
+VecBosAnalyzer::setMplStyleTitlesForPhotonHistograms()
+{
+} // setMplStyleTitlesForPhotonHistograms
+
+
+//_____________________________________________________________________________
+/**
+ * Sets the matplotlib-style titles for the muon histograms.
+ */
+void
+VecBosAnalyzer::setMplStyleTitlesForMuonHistograms()
+{
+} // setMplStyleTitlesForMuonHistograms
 
 
 //_____________________________________________________________________________
