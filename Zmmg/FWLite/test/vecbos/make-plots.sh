@@ -1,18 +1,22 @@
 # USAGE: . make-plots.sh
 
 rootplotmpl vecbos_official.root \
-    --ymin=0.0 --output=official --legend-entries=Official
+    --ymin=0.0 --output=official --draw2D=colz --legend-entries=Official
 
-rootplot vecbos_private.root \
-    --ymin=0.0 --output=private --legend-entries=Private
+rootplotmpl vecbos_private.root \
+    --ymin=0.0 --output=private  --draw2D=colz --legend-entries=Private
 
-rootplot vecbos_official.root vecbos_private.root \
+rootplotmpl vecbos_official.root vecbos_private.root \
     --normalize=2 --ymin=0.0 --output=liny \
-    --legend-entries=Official,Private --draw2D=colz
+    --legend-entries=Official,Private --data=2 --processors=1
 
-rootplot vecbos_official.root vecbos_private.root \
-    --normalize=2 --ymin=0.0 --output=logy --logy \
-    --legend-entries=Official,Private --draw2D=colz
+rootplotmpl vecbos_official.root vecbos_private.root \
+    --normalize=2 --ymin=0.0 --output=logy --logy --hist \
+    --legend-entries=Official,Private --data=2 --processors=1
+
+# rootplotmpl vecbos_official.root vecbos_private.root \
+#     --ymin=0.0 --output=ratio \
+#     --legend-entries=Official,Private --ratio=1
 
 DIR=public_html/plots/$(date +%Y)/$(date +%y-%m-%d)
 
