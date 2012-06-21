@@ -26,6 +26,7 @@ binhalfwidths = [0.5 * (hi - lo) for lo, hi in binedges]
 xgetter_factory  = lambda: lambda workspace, i = iter(bincenters)    : i.next()
 exgetter_factory = lambda: lambda workspace, i = iter(binhalfwidths) : i.next()
 
+plotters = []
 
 #______________________________________________________________________________
 def get_basepath():
@@ -236,136 +237,185 @@ for cat in categories:
 ## End of loop categories
 
 
-plotters = []
+#==============================================================================
+def make_scale_plots(configurations):
+    '''
+    For each configuration in the given list, overlays the graphs of 
+    scale versus pt for all sets of measurements specified.
+    These measurements are either from the true or the PHOSPHOR fit.
+    '''
+    for cfg in configurations[:]:
+        ## Only check EE 2011AB
+        #if (not 'EE_lowR9' in cfg.name) or (not 'AB' in cfg.name):
+            #continue
+        ### Only check 2011AB
+        #if not 'AB' in cfg.name:
+            #continue
+        ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
+        plotter = FitResultPlotter(cfg.sources[1], cfg.getters_true[1], cfg.xtitle, 
+                                  cfg.ytitle, title = 'MC Truth 1', name=cfg.name)                          
+
+        for i in range(1,5):
+            plotter.sources = cfg.sources[i]
+            plotter.getters = cfg.getters_true[i]
+            plotter.title = 'MC Truth %d' % i
+            plotter.getdata()
+            plotter.makegraph()
+
+        for i in range(1,5):
+            plotter.sources = cfg.sources[i]
+            plotter.getters = cfg.getters_fit[i]
+            plotter.title = 'MC Fit %d' % i
+            plotter.getdata()
+            plotter.makegraph()
+
+        canvases.next('c_' + cfg.name).SetGrid()
+        plotter.plotall(title = cfg.title,
+                        xrange = (0, 80),
+                        legend_position = 'topright')
+        plotter.graphs[0].Draw('p')
+        canvases.canvases[-1].Modified()
+        canvases.canvases[-1].Update()
+        canvases.update()
+        plotters.append(plotter)
+    ## End of loop over configurations.
+## End of make_scale_plots(..)
+
 
 #==============================================================================
-for cfg in scale_configurations[:]:
-    ## Only check EE 2011AB
-    #if (not 'EE_lowR9' in cfg.name) or (not 'AB' in cfg.name):
-        #continue
-    ## Only check 2011AB
-    if not 'AB' in cfg.name:
-        continue
-    ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
-    plotter = FitResultPlotter(cfg.sources[1], cfg.getters_true[1], cfg.xtitle, 
-                               cfg.ytitle, title = 'MC Truth 1', name=cfg.name)                          
+def make_resolution_plots(configurations):
+    '''
+    For each configuration in the given list, overlays the graphs of 
+    resolution versus pt for all sets of measurements specified.
+    These measurements are either from the true or the PHOSPHOR fit.
+    '''
+    for cfg in configurations[:]:
+        ### Only check 2011AB
+        #if not 'AB' in cfg.name:
+            #continue
+        ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
+        plotter = FitResultPlotter(cfg.sources[1], cfg.getters_true[1], cfg.xtitle, 
+                                  cfg.ytitle, title = 'MC Truth 1', name=cfg.name)                          
+        
+        for i in range(1,5):
+            plotter.sources = cfg.sources[i]
+            plotter.getters = cfg.getters_true[i]
+            plotter.title = 'MC Truth %d' % i
+            plotter.getdata()
+            plotter.makegraph()
 
-    for i in range(1,5):
-        plotter.sources = cfg.sources[i]
-        plotter.getters = cfg.getters_true[i]
-        plotter.title = 'MC Truth %d' % i
-        plotter.getdata()
-        plotter.makegraph()
+        for i in range(1,5):
+            plotter.sources = cfg.sources[i]
+            plotter.getters = cfg.getters_fit[i]
+            plotter.title = 'MC Fit %d' % i
+            plotter.getdata()
+            plotter.makegraph()
+        
+        canvases.next('c_' + cfg.name).SetGrid()
+        plotter.plotall(title = cfg.title,
+                        xrange = (0, 80),
+                        legend_position = 'topright')
+              
+        plotter.graphs[0].Draw('p')
+        canvases.canvases[-1].Modified()
+        canvases.canvases[-1].Update()
+        canvases.update()
+        plotters.append(plotter)
+    ## End of loop over configurations.
+## End of make_resolution_plots(..)
 
-    for i in range(1,5):
-        plotter.sources = cfg.sources[i]
-        plotter.getters = cfg.getters_fit[i]
-        plotter.title = 'MC Fit %d' % i
-        plotter.getdata()
-        plotter.makegraph()
 
-    canvases.next('c_' + cfg.name).SetGrid()
-    plotter.plotall(title = cfg.title,
-                    xrange = (0, 80),
-                    legend_position = 'topright')
-    plotter.graphs[0].Draw('p')
-    canvases.canvases[-1].Modified()
-    canvases.canvases[-1].Update()
+#==============================================================================
+def histogram_residuals():
+    '''
+    Makes and plots histograms of residuals for the given plotters.
+    Relies on the fact that the plotters are in particular order:
+    1. scale plotters
+      1.1. crossvalidation 1
+        1.1.1. Pt 10-12 GeV
+        1.1.2. Pt 12-15 GeV
+        ...
+        1.1.6. Pt > 30 GeV
+      1.2. crossvalidation 2
+      ...
+      1.4. crossvalidation 4
+    2. resolution plotters
+      2.1. crossvalidation 1
+        2.1.1. Pt 10-12 GeV
+        2.1.2. Pt 12-15 GeV
+        ...
+        2.1.6. Pt > 30 GeV
+      2.2. crossvalidation 2
+      ...
+      2.4. crossvalidation 4
+    '''
+    for plot in plotters:
+        if 'scale' in plot.name:
+            xtitle = 'Fitted - True Scale (%)'
+            title = 'Scale Residuals'
+        else:
+            xtitle = 'Fitted - True Resolution (%)'
+            title = 'Resolution Residuals'
+
+        plot.residual_histogram = hist = ROOT.TH1F("h_" + plot.name,
+                                                  plot.title + ", " + title,
+                                                  21, -5.25, 5.25)
+        hist.GetXaxis().SetTitle(xtitle)
+        hist.GetYaxis().SetTitle("Fits")
+
+        for gtrue, gfit in zip(plot.graphs[:4], plot.graphs[4:]):
+            for i in range(gtrue.GetN()):
+                residual = gfit.GetY()[i] - gtrue.GetY()[i]
+                hist.Fill(residual)
+        canvases.next(plot.residual_histogram.GetName())
+        # hist.GetXaxis().SetRangeUser(hist.GetMean() - 3 * hist.GetRMS(),
+        #                              hist.GetMean() + 3 * hist.GetRMS())
+        hist.Draw()
+        hist.Fit("gaus")
+    ## End of loop over plotters
     canvases.update()
-    plotters.append(plotter)
-## End of loop over configurations.
+
+    h_scale_residuals = ROOT.TH1F("h_scale_residuals",
+                                  "Scale Residuals",
+                                  21, -5.25, 5.25)
+
+    h_scale_residuals_eb = ROOT.TH1F("h_scale_residuals_eb",
+                                    "Barrel, Scale Residuals",
+                                    21, -5.25, 5.25)
+
+    h_scale_residuals_ee = ROOT.TH1F("h_scale_residuals_ee",
+                                    "Endcaps, Scale Residuals",
+                                    21, -5.25, 5.25)
+
+    for i in range(4):
+        h_scale_residuals.Add(plotters[i*3 + 2].residual_histogram)
+    for i in range(2):
+        h_scale_residuals.Add(plotters[i*3 + 2].residual_histogram)
+    for i in range(2):
+        h_scale_residuals.Add(plotters[i*3 + 8].residual_histogram)
+
+    for hist in [h_scale_residuals,
+                h_scale_residuals_eb,
+                h_scale_residuals_ee]:
+        canvases.next(hist.GetName())
+        hist.Fit("gaus")
+        hist.Draw()
+## End of histogram_residuals(..)
+
 
 #==============================================================================
-for cfg in resolution_configurations[:]:
-    ## Only check 2011AB
-    if not 'AB' in cfg.name:
-        continue
-    ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
-    plotter = FitResultPlotter(cfg.sources[1], cfg.getters_true[1], cfg.xtitle, 
-                               cfg.ytitle, title = 'MC Truth 1', name=cfg.name)                          
-    
-    for i in range(1,5):
-        plotter.sources = cfg.sources[i]
-        plotter.getters = cfg.getters_true[i]
-        plotter.title = 'MC Truth %d' % i
-        plotter.getdata()
-        plotter.makegraph()
+def main():
+    '''
+    Main entry point of execution.
+    '''
+    make_scale_plots(scale_configurations)
+    make_resolution_plots(resolution_configurations)
+    histogram_residuals()
+## End of main(..)
 
-    for i in range(1,5):
-        plotter.sources = cfg.sources[i]
-        plotter.getters = cfg.getters_fit[i]
-        plotter.title = 'MC Fit %d' % i
-        plotter.getdata()
-        plotter.makegraph()
-    
-    canvases.next('c_' + cfg.name).SetGrid()
-    plotter.plotall(title = cfg.title,
-                    xrange = (0, 80),
-                    legend_position = 'topright')
-          
-    plotter.graphs[0].Draw('p')
-    canvases.canvases[-1].Modified()
-    canvases.canvases[-1].Update()
-    canvases.update()
-    plotters.append(plotter)
-## End of loop over configurations.
 
 #==============================================================================
-## Make histogram of the residuals
-for plot in plotters:
-    if 'scale' in plot.name:
-        xtitle = 'Fitted - True Scale (%)'
-        title = 'Scale Residuals'
-    else:
-        xtitle = 'Fitted - True Resolution (%)'
-        title = 'Resolution Residuals'
-
-    plot.residual_histogram = hist = ROOT.TH1F("h_" + plot.name,
-                                               plot.title + ", " + title,
-                                               21, -5.25, 5.25)
-    hist.GetXaxis().SetTitle(xtitle)
-    hist.GetYaxis().SetTitle("Fits")
-
-    for gtrue, gfit in zip(plot.graphs[:4], plot.graphs[4:]):
-        for i in range(gtrue.GetN()):
-            residual = gfit.GetY()[i] - gtrue.GetY()[i]
-            hist.Fill(residual)
-    canvases.next(plot.residual_histogram.GetName())
-    # hist.GetXaxis().SetRangeUser(hist.GetMean() - 3 * hist.GetRMS(),
-    #                              hist.GetMean() + 3 * hist.GetRMS())
-    hist.Draw()
-    hist.Fit("gaus")
-## End of loop over plotters
-
-canvases.update()
-
-h_scale_residuals = ROOT.TH1F("h_scale_residuals",
-                              "Scale Residuals",
-                              21, -5.25, 5.25)
-
-h_scale_residuals_eb = ROOT.TH1F("h_scale_residuals_eb",
-                                 "Barrel, Scale Residuals",
-                                 21, -5.25, 5.25)
-
-h_scale_residuals_ee = ROOT.TH1F("h_scale_residuals_ee",
-                                 "Endcaps, Scale Residuals",
-                                 21, -5.25, 5.25)
-
-for i in range(4):
-    h_scale_residuals.Add(plotters[i*3 + 2].residual_histogram)
-for i in range(2):
-    h_scale_residuals.Add(plotters[i*3 + 2].residual_histogram)
-for i in range(2):
-    h_scale_residuals.Add(plotters[i*3 + 8].residual_histogram)
-
-for hist in [h_scale_residuals,
-             h_scale_residuals_eb,
-             h_scale_residuals_ee]:
-    canvases.next(hist.GetName())
-    hist.Fit("gaus")
-    hist.Draw()
-# print 'sources:', sources
-
-#file = ROOT.TFile.Open(filepath)
-#workspace = file.Get(jobname + '_workspace')
-#workspace.Print()
+if __name__ == '__main__':
+    main()
+    import user
+    
