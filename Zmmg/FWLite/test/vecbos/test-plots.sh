@@ -1,5 +1,6 @@
-rootplotmpl vecbos_test.root \
-    --ymin=0.0 --legend-entries=Test --ymin=0.0 --draw2D=colz --output=test
+rootplotmpl test_rootplot_cfg.py \
+    --ymin=0.0 --legend-entries=Test --ymin=0.0 --draw2D=colz --output=test \
+    --normalize=1 --ratio-split=2
 
 DIR=public_html/plots/$(date +%Y)/$(date +%y-%m-%d)
 

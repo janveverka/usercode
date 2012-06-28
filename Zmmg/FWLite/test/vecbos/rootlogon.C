@@ -1,5 +1,7 @@
 {
-  cout << "Processing ./rootlogon.C";
-  G__loadfile("CMSStyle.C"); 
-  CMSstyle();
+  if (strcmp(gStyle->GetName(), "Plain") == 0) {
+    cout << "Loading CMS Style ..." << endl << flush;
+    G__loadfile("CMSStyle.C"); 
+    CMSstyle();
+  }
 }

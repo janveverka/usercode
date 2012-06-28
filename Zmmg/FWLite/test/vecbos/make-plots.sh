@@ -1,18 +1,22 @@
 # USAGE: . make-plots.sh
 
-rootplotmpl vecbos_official.root \
+rootplotmpl vecbos_official.root Pileup2D \
     --ymin=0.0 --output=official --draw2D=colz --legend-entries=Official
 
-rootplotmpl vecbos_private.root \
+rootplotmpl vecbos_private.root Pileup2D \
     --ymin=0.0 --output=private  --draw2D=colz --legend-entries=Private
 
-rootplotmpl vecbos_official.root vecbos_private.root \
-    --normalize=2 --ymin=0.0 --output=liny \
-    --legend-entries=Official,Private --data=2 --processors=1
+# rootplotmpl rootplot_config.py \
+#     --normalize=2 --ymin=0.0 --output=liny --grid \
+#     --legend-entries=Official,Private --data=2 --ratio-split=1
 
-rootplotmpl vecbos_official.root vecbos_private.root \
-    --normalize=2 --ymin=0.0 --output=logy --logy --hist \
-    --legend-entries=Official,Private --data=2 --processors=1
+# rootplot rootplot_config.py \
+#     --normalize=2 --ymin=0.0 --output=logy --grid --logy --hist \
+#     --legend-entries=Official,Private --data=2 --ratio-split=1
+
+rootplotmpl rootplot_config.py --output=liny 
+
+rootplotmpl rootplot_config.py --output=logy --logy --hist
 
 # rootplotmpl vecbos_official.root vecbos_private.root \
 #     --ymin=0.0 --output=ratio \

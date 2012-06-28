@@ -30,15 +30,15 @@ import ROOT         # allows access to ROOT colors (e.g. ROOT.kRed)
 
 ## You can specify the files to run on through the 'filenames' variable rather
 ## than entering them at the command-line, for example:
-filenames = ['vecbos_official.root', 'vecbos_private.root']
+filenames = ['vecbos_private.root', 'vecbos_official.root']
 
 ## Likewise, you can specify target histograms or directories here rather than 
 ## on the command-line, for example:
-# targets = ['Muons', 'Pileup', 'Photons']
+#targets = ['Pileup2D', 'Muons']
 
 ## You might also want to specify fancy labels for the legend here rather 
 ## than on the command-line:
-legend_entries = [r'Official', r'Private']
+legend_entries = [r'Private', r'Official']
 
 ##############################################################################
 ######## Different Options for Different Targets #############################
@@ -88,28 +88,24 @@ marker_styles = [
     ]
 
 #### Styles for --data
-data = 2
 data_linestyle = 1
 data_color = (0,0,0)      # black
 # mc_color = (50, 150, 150) # used when there are exactly 2 targets; set to
 mc_color = (  0, 122, 255)
                           # None to pick up the normal color
-# data_marker = 4           # marker style (circle)
-data_marker = 'o'           # mpl marker style (circle)
+data_marker = 4           # marker style (circle)
 
 #### Settings for --ratio-split or --efficiency-split
-ratio_split = True
-ratio_max  = 2.0
-ratio_min  = 0.0
+ratio_max  = None
+ratio_min  = None
 ratio_logy = False
 ratio_fraction = 0.3  # Fraction of the canvas that bottom plot occupies
-ratio_label = 'Private / Official' # Label for the bottom plot
+ratio_label = 'Ratio to %(ratio_file)s' # Label for the bottom plot
 efficiency_label = 'Efficiency vs. %(ratio_file)s'
 
 #### Titles produced by --area-normalize and --normalize
 area_normalized_title = 'Fraction of Events in Bin'
-#target_normalized_title = 'Events Normalized to %(norm_file)s'
-target_normalized_title = '%(ylabel)s'
+target_normalized_title = 'Events Normalized to %(norm_file)s'
 
 #### Overflow and underflow text labels
 overflow_text = ' Overflow'
@@ -167,14 +163,6 @@ decoration_root = '''
 #tt = ROOT.TText()
 #tt.DrawTextNDC(0.6, 0.15, "CMS Preliminary")
 '''
-
-##############################################################################
-######## From the Command Line ###############################################
-
-normalize = 2 
-ymin = 0.0 
-grid = True
-
 
 ##############################################################################
 ######## HTML Output #########################################################
