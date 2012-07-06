@@ -104,6 +104,7 @@ ratio_min  = 0.0
 ratio_logy = False
 ratio_fraction = 0.3  # Fraction of the canvas that bottom plot occupies
 ratio_label = 'Private / Official' # Label for the bottom plot
+ratio_grid = True
 efficiency_label = 'Efficiency vs. %(ratio_file)s'
 
 #### Titles produced by --area-normalize and --normalize
