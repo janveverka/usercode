@@ -28,16 +28,19 @@ process.load('DPGAnalysis.Skims.ZmmgSkim_cff')
 # process.ecalRecHit.pathInterCalibFileEE = "lib/slc5_amd64_gcc434/interCalibConstants.pizetaRun2011Brun175832to177878.EcalEndcap.txtlaserdata_20111122_158851_180363lto420-620_progr_data_20111122"
 
 process.maxEvents = cms.untracked.PSet(
-    #input = cms.untracked.int32(200),
-    output = cms.untracked.int32(10)
+    input = cms.untracked.int32(100),
+    #output = cms.untracked.int32(2)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
    # fileNames = cms.untracked.vstring('/store/data/Run2011A/DoubleElectron/RAW-RECO/ZElectron-05Jul2011ReReco-ECAL-v1/0000/7ED4D0EC-97A7-E011-9282-003048678FF4.root'),
    fileNames = cms.untracked.vstring(
-      '/store/data/Run2011B/DoubleMu/RAW-RECO/ZMu-PromptSkim-v1/0000/A4352A59-51DD-E011-902F-00261894393C.root',
-      '/store/data/Run2011B/DoubleMu/RAW-RECO/ZMu-PromptSkim-v1/0000/4A4D3933-46DD-E011-8EEB-003048678F62.root'
+      '/store/data/Run2011B/DoubleMu/RAW-RECO/ZMu-PromptSkim-v1/0000/000684CE-7DFB-E011-8C14-002618FDA279.root',
+      # '/store/data/Run2011A/DoubleMu/RAW-RECO/ZMu-05Jul2011ReReco-ECAL-v1/0000/FE5A9A13-B9A8-E011-B79D-002618943900.root',
+      # '/store/data/Run2011A/DoubleMu/RAW-RECO/ZMu-08Nov2011-v1/0000/B0B117A2-2C1B-E111-8BCE-003048679008.root',
+      # '/store/data/Run2011B/DoubleMu/RAW-RECO/ZMu-PromptSkim-v1/0000/A4352A59-51DD-E011-902F-00261894393C.root',
+      # '/store/data/Run2011B/DoubleMu/RAW-RECO/ZMu-PromptSkim-v1/0000/4A4D3933-46DD-E011-8EEB-003048678F62.root'
    ),
    inputCommands = cms.untracked.vstring('keep *', 
                                          #'drop *_*_*_RECO'
@@ -51,7 +54,7 @@ process.options = cms.untracked.PSet(
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.303 $'),
+    version = cms.untracked.string('$Revision: 1.1 $'),
     annotation = cms.untracked.string('step2 nevts:1'),
     name = cms.untracked.string('PyReleaseValidation')
 )
