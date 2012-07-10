@@ -30,7 +30,7 @@ import ROOT         # allows access to ROOT colors (e.g. ROOT.kRed)
 
 ## You can specify the files to run on through the 'filenames' variable rather
 ## than entering them at the command-line, for example:
-filenames = ['vecbos_official.root', 'vecbos_private.root']
+filenames = ['vecbos_official.root', 'vecbos_private_v3.root']
 
 ## Likewise, you can specify target histograms or directories here rather than 
 ## on the command-line, for example:
@@ -38,7 +38,7 @@ filenames = ['vecbos_official.root', 'vecbos_private.root']
 
 ## You might also want to specify fancy labels for the legend here rather 
 ## than on the command-line:
-legend_entries = [r'Official', r'Private']
+legend_entries = [r'Official', r'Private v3']
 
 ##############################################################################
 ######## Different Options for Different Targets #############################

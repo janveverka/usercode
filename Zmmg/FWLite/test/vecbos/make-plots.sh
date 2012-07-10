@@ -3,8 +3,8 @@
 rootplotmpl vecbos_official.root Pileup2D \
     --ymin=0.0 --output=official --draw2D=colz --legend-entries=Official
 
-rootplotmpl vecbos_private.root Pileup2D \
-    --ymin=0.0 --output=private  --draw2D=colz --legend-entries=Private
+rootplotmpl vecbos_private_v3.root Pileup2D \
+    --ymin=0.0 --output=private_v3  --draw2D=colz --legend-entries='Private v3'
 
 # rootplotmpl rootplot_config.py \
 #     --normalize=2 --ymin=0.0 --output=liny --grid \
@@ -27,6 +27,6 @@ DIR=public_html/plots/$(date +%Y)/$(date +%y-%m-%d)
 ssh positron01.hep.caltech.edu \
     "echo \"if [[ ! -d $DIR ]]; then mkdir -p $DIR; fi\" | bash"
 
-tar czf plots.tgz liny/ logy/ official/ private/ && \
+tar czf plots.tgz liny/ logy/ official/ private_v3/ && \
     scp plots.tgz positron01.hep.caltech.edu:$DIR && \
     ssh positron01.hep.caltech.edu "cd $DIR && tar xzf plots.tgz"
