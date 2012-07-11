@@ -9,7 +9,9 @@ struct Config {
   TFile * outputFile;
   enum Period {k2011AplusB, k2011A, k2011B} period;
   enum Subdetector {EcalBarrel, EcalEndcaps} subdetector;
-  enum R9Category {LowR9, HighR9, AllR9} r9Category;
+  enum R9Category {LowR9=0, HighR9, AllR9} r9Category;
+  enum EtaCategory {Eta1of4=0, Eta2of4, Eta3of4, Eta4of4} etaCategory;
+  bool doEtaCategories;
 };
 
 string calculateEfficiencies(const Config &);
@@ -28,9 +30,11 @@ void cutAndCount_42x(){
   cfg.host       = Config::JansMacBookPro;
   cfg.analysis   = Config::k16Jan2012ReReco;
   // cfg.analysis   = Config::k30Nov2011ReReco;
-  cfg.veto       = Config::kMvaVeto;
+  // cfg.veto       = Config::kMvaVeto;
+  cfg.veto       = Config::kPixelMatch;
   // cfg.veto       = Config::kCiCVeto;
   cfg.outputFile = new TFile("cutAndCount_42x_devel.root", "RECREATE");
+  cfg.doEtaCategories = true;
 
   string latex = "";  
 
@@ -59,10 +63,16 @@ string latexHeader(Config const & cfg) {
     break;
   }
   
-  caption += ("efficiency\n"
-	      "         for photons in four different categories\n"
-	      "         measured for the ");
-  
+  if (cfg.doEtaCategories) {
+    caption += ("efficiency\n"
+		"         for photons in eight different categories\n"
+		"         measured for the ");
+  } else {
+    caption += ("efficiency\n"
+		"         for photons in four different categories\n"
+		"         measured for the ");
+  }
+
   switch (cfg.analysis) {
   case Config::k30Nov2011ReReco:
     caption += "30-Nov-2011 re-reco dataset.";
@@ -101,6 +111,10 @@ string latexFooter(Config const & cfg) {
   switch (cfg.analysis) {
   case Config::k30Nov2011ReReco: label += "_30Nov2011ReReco"; break;
   case Config::k16Jan2012ReReco: label += "_16Jan2012ReReco"; break;
+  }
+
+  if (cfg.doEtaCategories == true) {
+    label += "_EtaCategories";
   }
 
   string latex = ("\\hline\n"
@@ -146,6 +160,11 @@ string loopOverPeriods(Config &cfg) {
 
 ///____________________________________________________________________________
 string loopOverCategories(Config& cfg) {  
+
+  if (cfg.doEtaCategories) {
+    return loopOverEtaR9Categories(cfg);
+  }
+
   string row = "";
   string latex = "";
     
@@ -154,9 +173,9 @@ string loopOverCategories(Config& cfg) {
   cfg.r9Category  = Config::HighR9;
   row = calculateEfficiencies(cfg);
   switch(cfg.veto) {
-  case Config::kCiCVeto:              latex += " 1 & "; break;
-  case Config::kMvaVeto: latex += " 5 & "; break;
-  case Config::kPixelMatch:                 latex += "  1 & "; break;
+  case Config::kCiCVeto:    latex += " 1 & "; break;
+  case Config::kMvaVeto:    latex += " 5 & "; break;
+  case Config::kPixelMatch: latex += "  1 & "; break;
   }
   latex += row + " \\\\\n";
   
@@ -165,9 +184,9 @@ string loopOverCategories(Config& cfg) {
   cfg.r9Category = Config::LowR9;
   row = calculateEfficiencies(cfg);
   switch(cfg.veto) {
-  case Config::kCiCVeto:              latex += " 2 & "; break;
-  case Config::kMvaVeto: latex += " 6 & "; break;
-  case Config::kPixelMatch:                 latex += "  2 & "; break;
+  case Config::kCiCVeto:    latex += " 2 & "; break;
+  case Config::kMvaVeto:    latex += " 6 & "; break;
+  case Config::kPixelMatch: latex += "  2 & "; break;
   }
   latex += row + " \\\\\n";
   
@@ -176,9 +195,9 @@ string loopOverCategories(Config& cfg) {
   cfg.r9Category = Config::HighR9;
   row = calculateEfficiencies(cfg);
   switch(cfg.veto) {
-  case Config::kCiCVeto:              latex += " 3 & "; break;
-  case Config::kMvaVeto: latex += " 7 & "; break;
-  case Config::kPixelMatch:                 latex += "  9 & "; break;
+  case Config::kCiCVeto:    latex += " 3 & "; break;
+  case Config::kMvaVeto:    latex += " 7 & "; break;
+  case Config::kPixelMatch: latex += "  9 & "; break;
   }
   latex += row + " \\\\\n";
 
@@ -187,14 +206,79 @@ string loopOverCategories(Config& cfg) {
   cfg.r9Category = Config::LowR9;
   row = calculateEfficiencies(cfg);
   switch(cfg.veto) {
-  case Config::kCiCVeto:              latex += " 4 & "; break;
-  case Config::kMvaVeto: latex += " 8 & "; break;
-  case Config::kPixelMatch:                 latex += " 10 & "; break;
+  case Config::kCiCVeto:    latex += " 4 & "; break;
+  case Config::kMvaVeto:    latex += " 8 & "; break;
+  case Config::kPixelMatch: latex += " 10 & "; break;
   }
   latex += row + " \\\\\n";
   
   return latex;
 } // loopOverCategories(..)
+
+
+///____________________________________________________________________________
+string loopOverEtaR9Categories(Config& cfg) {  
+  string row = "";
+  string latex = "";
+    
+  /// Category 11
+  cfg.subdetector = Config::EcalBarrel;  
+  cfg.etaCategory = Config::Eta1of4;
+  cfg.r9Category  = Config::HighR9;
+  row = calculateEfficiencies(cfg);
+  latex += " 11 &" + row + " \\\\\n";
+  
+  /// Category 12
+  cfg.subdetector = Config::EcalBarrel;  
+  cfg.etaCategory = Config::Eta1of4;
+  cfg.r9Category  = Config::LowR9;
+  row = calculateEfficiencies(cfg);
+  latex += " 12 &" + row + " \\\\\n";
+  
+  /// Category 13
+  cfg.subdetector = Config::EcalBarrel;  
+  cfg.etaCategory = Config::Eta2of4;
+  cfg.r9Category  = Config::HighR9;
+  row = calculateEfficiencies(cfg);
+  latex += " 13 &" + row + " \\\\\n";
+  
+  /// Category 14
+  cfg.subdetector = Config::EcalBarrel;  
+  cfg.etaCategory = Config::Eta2of4;
+  cfg.r9Category  = Config::LowR9;
+  row = calculateEfficiencies(cfg);
+  latex += " 14 &" + row + " \\\\\n";
+  
+  /// Category 15
+  cfg.subdetector = Config::EcalEndcaps;  
+  cfg.etaCategory = Config::Eta3of4;
+  cfg.r9Category  = Config::HighR9;
+  row = calculateEfficiencies(cfg);
+  latex += " 15 &" + row + " \\\\\n";
+  
+  /// Category 16
+  cfg.subdetector = Config::EcalEndcaps;  
+  cfg.etaCategory = Config::Eta3of4;
+  cfg.r9Category  = Config::LowR9;
+  row = calculateEfficiencies(cfg);
+  latex += " 16 &" + row + " \\\\\n";
+  
+  /// Category 17
+  cfg.subdetector = Config::EcalEndcaps;  
+  cfg.etaCategory = Config::Eta4of4;
+  cfg.r9Category  = Config::HighR9;
+  row = calculateEfficiencies(cfg);
+  latex += " 17 &" + row + " \\\\\n";
+  
+  /// Category 18
+  cfg.subdetector = Config::EcalEndcaps;  
+  cfg.etaCategory = Config::Eta4of4;
+  cfg.r9Category  = Config::LowR9;
+  row = calculateEfficiencies(cfg);
+  latex += " 18 &" + row + " \\\\\n";
+    
+  return latex;
+} // loopOverEtaR9Categories(..)
 
 
 ///____________________________________________________________________________
@@ -370,6 +454,10 @@ string calculateEfficiencies(const Config &cfg)
   TCut phoPt5to10("5 <= phoPt & phoPt < 10");
   TCut phoPt10to20("10 <= phoPt & phoPt < 20");
   TCut phoPt20up("20 <= phoPt");
+  TCut etaBin1of4("abs(scEta) < 0.9");
+  TCut etaBin2of4("0.9 <= abs(scEta) & abs(scEta) < 1.5");
+  TCut etaBin3of4("1.5 <= abs(scEta) & abs(scEta) < 2.1");
+  TCut etaBin4of4("2.1 <= abs(scEta)");
   
   TCut vetoCut, ebLowR9, eeLowR9, ebHighR9, eeHighR9, ebSelection, eeSelection;
   switch (cfg.veto) {
@@ -411,7 +499,7 @@ string calculateEfficiencies(const Config &cfg)
     eeSelection = ("(minDEta > 0.08 | minDPhi > 0.3) & !phoIsEB");
     break;   
   }
-    
+
   TCut run2011A("id.run < 175860");
   TCut run2011B("id.run >= 175860");
 
@@ -437,6 +525,27 @@ string calculateEfficiencies(const Config &cfg)
       break;
   }
   
+  if (cfg.doEtaCategories) {
+    switch (cfg.etaCategory) {
+    case Config::Eta1of4 :
+      selection = selection && etaBin1of4;
+      label += "_eta1of4";
+      break;
+    case Config::Eta2of4 :
+      selection = selection && etaBin2of4;
+      label += "_eta2of4";
+      break;
+    case Config::Eta3of4 :
+      selection = selection && etaBin3of4;
+      label += "_eta3of4";
+      break;
+    case Config::Eta4of4 :
+      selection = selection && etaBin4of4;
+      label += "_eta4of4";
+      break;
+    } // switch over eta categories
+  }
+
   switch (cfg.r9Category) {
     case Config::LowR9 : label += "_lowR9" ; break;
     case Config::HighR9: label += "_highR9"; break;
