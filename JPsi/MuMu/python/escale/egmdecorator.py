@@ -159,6 +159,18 @@ class EgmDecorator:
         return tools.pdf_mode(self.workspace.pdf('pm'), 
                               self.workspace.var('mmgMass'))
     ## End of peak_position
+
+    #__________________________________________________________________________
+    def get_fit_range_num_events(self):
+        if not self.old_canvas:
+            return None
+        primitives = self.old_canvas.GetListOfPrimitives()
+        if 'mc' in self.name.split('_'):
+            hist_name = 'h_fitdata1'
+        else:
+            hist_name = 'h_data'
+        return primitives.FindObject(hist_name).getFitRangeNEvt()
+    ## End of get_fit_range_num_events
     
 ## End of EgmDecorator.
 
