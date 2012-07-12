@@ -19,6 +19,7 @@ for name in '''
     plot.new_canvas.Print(outputname + '.C')
     plot.new_canvas.Print(outputname + '.png')
     
+    
     command = 'ps2pdf -dEPSCrop ' + outputname + '.eps'
     (exitstatus, outtext) = commands.getstatusoutput(command)
     if  exitstatus != 0:
@@ -27,6 +28,8 @@ for name in '''
     plots.append(plot)
     
 ## Print the apparent peak positions
-print 'Apparent peak positions (GeV)'
+print 'Apparent peak positions (GeV), Number events in the fit'
 for plot in plots:
-    print "%.3f   %s" % (plot.peak_position, plot.name)
+    print "%.3f   %g   %s" % (plot.peak_position, 
+                              plot.get_fit_range_num_events(),
+                              plot.name)
