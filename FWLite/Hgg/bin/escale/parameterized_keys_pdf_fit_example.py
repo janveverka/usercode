@@ -51,6 +51,7 @@ filename = ('zeeWsShapev1Smear.DoubleElectronRun2011AB16Jan2012v1AOD.'
 workspace = 'zeeShape'
 dataset = 'rds_mpair_ebeb_tenmcat_0'
 variable = 'rv_mass'
+output_filename = 'result.root'
 ## CONFIGURATION END ==========================================================
 
 #______________________________________________________________________________
@@ -128,24 +129,39 @@ def make_plot(x, data, model):
 
 
 #______________________________________________________________________________
+def save_result(fitresult):
+    '''
+    Stores the fit result in the root file under the output_filename name.
+    '''
+    w = ROOT.RooWorkspace('fitresults')
+    w.Import(fitresult)
+    w.writeToFile(output_filename)
+## End of save_result(..)
+
+
+#______________________________________________________________________________
 def main():
     '''This is the entry point to execution.'''
     print 'Welcome to parameterized_keys_pdf_fit_example!'
-    global data, model, x
+    global data, model, x, fitresult
     data = getdata()
+    data.SetName('zeeDataYong')
     ## Reduce data for debugging
-    # data = data.reduce(roo.EventRange(0, 1000))
+    data = data.reduce(roo.EventRange(0, 5000))
     x = data.get()[variable]
     initialize_fit_parameters(data, x)
     old_precision = set_default_integrator_precision(1e-8, 1e-8)
     model = ParameterizedKeysPdf('model', 'model', x, mode, effsigma, data,
                                  rho=1, forcerange=True)
-    model.fitTo(data, roo.SumW2Error(True), roo.NumCPU(8), roo.Strategy(2))
+                                 
+    fitresult = model.fitTo(data, roo.SumW2Error(True), roo.NumCPU(8), 
+                            roo.Strategy(2), roo.Save())
     set_default_integrator_precision(*old_precision)
     make_plot(x, data, model)
     print '\n==  Fitted parameters =='
     mode.Print()
     effsigma.Print()
+    save_result(fitresult)
     print '\nExiting parameterized_keys_pdf_fit_example with success.'
 ## End of main().
 
@@ -154,5 +170,10 @@ def main():
 if __name__ == '__main__':
     main()
     import user
+    print '== Initial'
+    fitresult.floatParsInit().Print('v')
+    print '== Final'
+    fitresult.floatParsFinal().Print('v')
+    
 
 ## End of the module
