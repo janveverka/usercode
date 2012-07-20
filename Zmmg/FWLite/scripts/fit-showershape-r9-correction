@@ -1,0 +1,7 @@
+#!/bin/bash
+## This is just a wrapper around the relevant a python script
+
+PYTHON_SCRIPT=Zmmg/FWLite/python/showershape/r9_correction_fitter.py
+python -i $CMSSW_BASE/src/$PYTHON_SCRIPT $@
+
+

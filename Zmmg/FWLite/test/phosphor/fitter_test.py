@@ -19,7 +19,7 @@ output_filename = 'test.root'
 
 
 #______________________________________________________________________________
-def get_configuration(filename)
+def get_configuration(filename):
     '''
     cfg get_configuration()
     
@@ -32,18 +32,20 @@ def get_configuration(filename)
 
 
 #______________________________________________________________________________
-def main()
+def main():
     cfg = get_configuration(cfg_filename)
+    
+    global fitter
     fitter = Fitter('phosphor')
 
     fitter.build_model(cfg['model'])
     fitter.validate_model()
 
     fitter.fit_data(cfg['monte_carlo'])
-    fitter.validate_fit()
+    fitter.validate_fit(cfg)
 
     fitter.fit_data(cfg['real_data'])
-    fitter.validate_fit()
+    fitter.validate_fit(cfg)
 
     fitter.w.writeToFile(output_filename)
 ## End of main()
