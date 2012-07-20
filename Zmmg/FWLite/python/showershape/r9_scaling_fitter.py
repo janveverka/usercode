@@ -139,7 +139,7 @@ def make_plot(x, data, model, name=name):
 
 
 #______________________________________________________________________________
-def save_results(fitresult, name):
+def save_result(fitresult, name):
     '''
     Stores the fit result in the root file under the output_filename name.
     '''
@@ -181,7 +181,7 @@ def print_report(fitresults):
 #______________________________________________________________________________
 def main():
     '''This is the entry point to execution.'''
-    print 'Welcome to parameterized_keys_pdf_fit_example!'
+    print 'Welcome to r9_scaling_fitter!'
     global data, model, x, fitresults
     data = getdata()
     ## Reduce data for debugging
@@ -213,7 +213,7 @@ def main():
 
     print_report(fitresults)
     set_default_integrator_precision(*old_precision)
-    print '\nExiting r9scaler with success.'
+    print '\nExiting r9_scaling_fitter with success.'
 ## End of main().
 
 
