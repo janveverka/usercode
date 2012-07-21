@@ -10,8 +10,12 @@ struct Config {
   enum Period {k2011AplusB, k2011A, k2011B} period;
   enum Subdetector {EcalBarrel, EcalEndcaps} subdetector;
   enum R9Category {LowR9=0, HighR9, AllR9} r9Category;
-  enum EtaCategory {Eta1of4=0, Eta2of4, Eta3of4, Eta4of4} etaCategory;
-  bool doEtaCategories;
+  enum EtaCategory {
+    Eta1of4=0, Eta2of4, Eta3of4, Eta4of4, 
+    Eta1of6, Eta2of6, Eta3of6, Eta4of6, Eta5of6, Eta6of6                    
+  } etaCategory;
+  bool do4EtaCategories;
+  bool do6EtaCategories;
   bool doR9Categories;
 };
 
@@ -27,15 +31,19 @@ void cutAndCount_42x(){
   
   /// Common configuration
   Config cfg;
-  // cfg.host        = Config::t3_susy;
-  cfg.host       = Config::JansMacBookPro;
-  // cfg.analysis   = Config::k16Jan2012ReReco;
-  cfg.analysis   = Config::k30Nov2011ReReco;
+  cfg.host        = Config::t3_susy;
+  // cfg.host       = Config::JansMacBookPro;
+  
+  cfg.analysis   = Config::k16Jan2012ReReco;
+  // cfg.analysis   = Config::k30Nov2011ReReco;
+
+  // cfg.veto       = Config::kPixelMatch;
+  cfg.veto       = Config::kCiCVeto;
   // cfg.veto       = Config::kMvaVeto;
-  cfg.veto       = Config::kPixelMatch;
-  // cfg.veto       = Config::kCiCVeto;
+  
   cfg.outputFile = new TFile("cutAndCount_42x_devel.root", "RECREATE");
-  cfg.doEtaCategories = true;
+  cfg.do4EtaCategories = false;
+  cfg.do6EtaCategories = true;
   cfg.doR9Categories = false;
 
   string latex = "";  
@@ -68,17 +76,19 @@ string latexHeader(Config const & cfg) {
   caption += "efficiency\n";
   caption += "         for photons in ";
 
-  if (cfg.doEtaCategories == true && cfg.doR9Categories == true)  {
-    caption += "eight different $|eta|\times R_9$ ";
-  } else if (cfg.doEtaCategories == true && cfg.doR9Categories == false) {
-    caption += "         for photons in four different $|\eta|$";
-  } else if (cfg.doEtaCategories == false && cfg.doR9Categories == true) {
-    caption += "four different subdetector $\times R_9$";
+  if (cfg.do4EtaCategories == true && cfg.doR9Categories == true)  {
+    caption += "eight different $|eta|\\times R_9$ ";
+  } else if (cfg.do4EtaCategories == true && cfg.doR9Categories == false) {
+    caption += "four different $|\\eta|$";
+  } else if (cfg.do4EtaCategories == false && cfg.doR9Categories == true) {
+    caption += "four different subdetector $\\times R_9$";
+  } else if (cfg.do6EtaCategories == true){
+    caption += "six different $|\\eta|$";
   } else {
     caption += "two different subdetector categories\n";
   }
 
-  caption += "categories\n";
+  caption += " categories\n";
   caption += "         measured for the ";
 
   switch (cfg.analysis) {
@@ -121,10 +131,15 @@ string latexFooter(Config const & cfg) {
   case Config::k16Jan2012ReReco: label += "_16Jan2012ReReco"; break;
   }
 
-  if (cfg.doEtaCategories == true) {
-    label += "_EtaCategories";
+  if (cfg.do4EtaCategories == true) {
+    label += "_4EtaCategories";
   }
 
+  if (cfg.do6EtaCategories == true) {
+    label += "_6EtaCategories";
+  }
+
+  
   // if (cfg.doR9Categories == true) {
   //   label += "_R9Categories";
   // }
@@ -173,14 +188,21 @@ string loopOverPeriods(Config &cfg) {
 ///____________________________________________________________________________
 string loopOverCategories(Config& cfg) {  
 
-  if (cfg.doEtaCategories == true && cfg.doR9Categories == true) {
+  if (cfg.do4EtaCategories == true && cfg.doR9Categories == true) {
     return loopOverEtaR9Categories(cfg);
   }
 
-  if (cfg.doEtaCategories == true && cfg.doR9Categories == false) {
+  if (cfg.do4EtaCategories == true && cfg.doR9Categories == false) {
     cfg.r9Category  = Config::AllR9;
-    return loopOverEtaCategories(cfg);
+    return loopOver4EtaCategories(cfg);
   }
+  
+  if (cfg.do6EtaCategories == true) {
+    cfg.r9Category  = Config::AllR9;
+    return loopOver6EtaCategories(cfg);
+  }
+  
+  
   string row = "";
   string latex = "";
     
@@ -233,7 +255,7 @@ string loopOverCategories(Config& cfg) {
 
 
 ///____________________________________________________________________________
-string loopOverEtaCategories(Config& cfg) {  
+string loopOver4EtaCategories(Config& cfg) {  
   string row = "";
   string latex = "";
     
@@ -263,6 +285,30 @@ string loopOverEtaCategories(Config& cfg) {
 
   return latex;
 } // loopOverEtaCategories(..)
+
+
+///____________________________________________________________________________
+string loopOver6EtaCategories(Config& cfg) {  
+  string row = "";
+  string latex = "";
+    
+  for (unsigned cat = Config::Eta1of6; cat <= Config::Eta6of6; ++cat) {    
+    /// Categories 23-28
+    if (cat <= Config::Eta4of6)
+      cfg.subdetector = Config::EcalBarrel;
+    else
+      cfg.subdetector = Config::EcalEndcaps;
+    cfg.etaCategory = cat;
+    row = calculateEfficiencies(cfg);
+    unsigned catNumber = cat + 23 - Config::Eta1of6;
+    cout << row << endl;
+    string rowWithCatNumber = Form(" %u & %s \\\\\n", catNumber, row.c_str());
+    cout << rowWithCatNumber << endl;
+    latex += rowWithCatNumber;
+  }
+
+  return latex;
+} // loopOver6EtaCategories(..)
 
 
 ///____________________________________________________________________________
@@ -333,6 +379,7 @@ string loopOverEtaR9Categories(Config& cfg) {
 ///____________________________________________________________________________
 string calculateEfficiencies(const Config &cfg)
 { 
+  
   switch (cfg.host) {
     case Config::t3_susy:
       const char *path = "/raid2/veverka/pmvTrees/";
@@ -382,9 +429,15 @@ string calculateEfficiencies(const Config &cfg)
   /// Build the label specific to the analysis and period.
   string label = "";
 
+  switch (cfg.veto) {
+  case Config::kMvaVeto:    label = "MVAVeto"; break;
+  case Config::kCiCVeto:    label = "CiCVeto"; break;
+  case Config::kPixelMatch: label = "PMVeto" ; break;
+  }
+
   switch (cfg.analysis) {
-  case Config::k30Nov2011ReReco: label = "k30Nov2011ReReco"; break;
-  case Config::k16Jan2012ReReco      : label = "k16Jan2012ReReco"      ; break;
+  case Config::k30Nov2011ReReco: label += "_k30Nov2011ReReco"; break;
+  case Config::k16Jan2012ReReco: label += "_k16Jan2012ReReco"; break;
   }
 
   switch (cfg.period) {
@@ -507,6 +560,12 @@ string calculateEfficiencies(const Config &cfg)
   TCut etaBin2of4("0.9 <= abs(scEta) & abs(scEta) < 1.5");
   TCut etaBin3of4("1.5 <= abs(scEta) & abs(scEta) < 2.1");
   TCut etaBin4of4("2.1 <= abs(scEta) & abs(scEta) < 2.5");
+  TCut etaBin1of6("phoIsEB & abs(phoIEtaX) <= 25"); // module 1
+  TCut etaBin2of6("phoIsEB & 25 < abs(phoIEtaX) & abs(phoIEtaX) <= 45"); // module 2
+  TCut etaBin3of6("phoIsEB & 45 < abs(phoIEtaX) & abs(phoIEtaX) <= 65"); // module 3
+  TCut etaBin4of6("phoIsEB & 65 < abs(phoIEtaX) & abs(phoIEtaX) <= 85"); // module 4
+  TCut etaBin5of6("!phoIsEB & 1.5 <= abs(scEta) & abs(scEta) < 2.0");
+  TCut etaBin6of6("!phoIsEB & 2.0 <= abs(scEta) & abs(scEta) < 2.5");
   
   TCut vetoCut, ebLowR9, eeLowR9, ebHighR9, eeHighR9, ebSelection, eeSelection;
   switch (cfg.veto) {
@@ -574,7 +633,7 @@ string calculateEfficiencies(const Config &cfg)
       break;
   }
   
-  if (cfg.doEtaCategories) {
+  if (cfg.do4EtaCategories || cfg.do6EtaCategories) {
     switch (cfg.etaCategory) {
     case Config::Eta1of4 :
       selection = selection && etaBin1of4;
@@ -591,6 +650,30 @@ string calculateEfficiencies(const Config &cfg)
     case Config::Eta4of4 :
       selection = selection && etaBin4of4;
       label += "_eta4of4";
+      break;
+    case Config::Eta1of6 :
+      selection = selection && etaBin1of6;
+      label += "_eta1of6";
+      break;
+    case Config::Eta2of6 :
+      selection = selection && etaBin2of6;
+      label += "_eta2of6";
+      break;
+    case Config::Eta3of6 :
+      selection = selection && etaBin3of6;
+      label += "_eta3of6";
+      break;
+    case Config::Eta4of6 :
+      selection = selection && etaBin4of6;
+      label += "_eta4of6";
+      break;
+    case Config::Eta5of6 :
+      selection = selection && etaBin5of6;
+      label += "_eta5of6";
+      break;
+    case Config::Eta6of6 :
+      selection = selection && etaBin6of6;
+      label += "_eta6of6";
       break;
     } // switch over eta categories
   }
