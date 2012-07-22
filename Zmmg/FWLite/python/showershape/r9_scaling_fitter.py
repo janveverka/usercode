@@ -1,5 +1,5 @@
 '''
-Extracts a linear correctin for R9 in MC through a parametrized KEYS
+Extracts a scaling correctin for R9 in MC through a parametrized KEYS
 PDF fit.
 
 It creates plots showing the data with the fitted
@@ -22,11 +22,12 @@ evnets
 Origianlly developed for the PHOSPHOR Fit
 https://twiki.cern.ch/twiki/bin/view/CMS/VGamma2011PhosphorFit
 
-USAGE: python -i parameterized_keys_pdf_fit_example.py
+USAGE: python -i r9_scaling_fitter.py
 
-Jan Veverka, Caltech, 16 May 2012
+Jan Veverka, Caltech, 20 July 2012
 '''
 
+import math
 import os
 import ROOT
 import FWLite.Tools.roofit as roo
@@ -42,20 +43,28 @@ from FWLite.Tools.parameterizedkeyspdf import ParameterizedKeysPdf
 
 
 ## CONFIGURATION BEGIN ========================================================
-name = 'r9_EB_pt25up_v15reco'
+name = 'r9_EB_pt25up_v15reco_muOutsidePhoton'
+title = 'Barrel'
 tree_version = 'v15reco'
-variable = ROOT.RooRealVar('R9', 'phoR9', 0.3, 1.1)
+variable = ROOT.RooRealVar('R9', 'Photon R_{9}', 0.3, 1.1)
+varexpression = 'phoR9'
 weight = {
     'z'   : ROOT.RooRealVar('weight', 'pileup.weight', 0, 100),
     'data': ROOT.RooRealVar('weight', '1', 0, 100),
     }
 cuts = [
-    'phoIsEB',
-    'phoPt > 25',
+    '!phoIsEB',
+    'phoPt > 10',
     'mmMass + mmgMass < 180',
+    ## Exclude photons with muon hitting the 3x3 central crystals
+    'abs(muNearIEtaX - phoIEtaX) >= 2 & abs(muNearIPhiY - phoIPhiY) >= 2',
+    ## Include only photons with muon hitting the 3x3 central crystals
+    # 'abs(muNearIEtaX - phoIEtaX) <= 1 & abs(muNearIPhiY - phoIPhiY) <= 1',
+    ## Exclude photons with muon hitting the clustering region
+    #'(abs(muNearIEtaX - phoIEtaX) > 6 | abs(muNearIPhiY - phoIPhiY) > 6)',
     ]
-fit_range = (0.9, 1.0)
-plot_range = (0.9, 1.0)
+fit_range = (0.3, 1.1)
+plot_range = (0.85, 1.0)
 output_filename = 'r9fit.root'
 ## CONFIGURATION END ==========================================================
 
@@ -65,7 +74,7 @@ variable.setRange('plot', *plot_range)
 #______________________________________________________________________________
 ## Parameters to be fitted
 mode = ROOT.RooRealVar('mode', 'mode', 0, -1, 1)
-effsigma = ROOT.RooRealVar('effsigma', 'effsigma', 1, 1e-6, 10) 
+effsigma = ROOT.RooRealVar('effsigma', 's', 1, 1e-6, 10) 
 
 #______________________________________________________________________________
 def getdata():
@@ -73,10 +82,13 @@ def getdata():
     Clones the dataset from the file, closes the file and returns the clone.
     '''    
     trees = get_trees(tree_version)
+    vartitle = variable.GetTitle()
+    variable.SetTitle(varexpression)
     data = {}
     for source, tree in trees.items():
         data[source] = dataset.get(tree=tree, variable=variable,
                                    weight=weight[source], cuts = cuts)
+    variable.SetTitle(vartitle)
     return data
 ## End of getdata().
 
@@ -123,15 +135,16 @@ def set_default_integrator_precision(eps_abs, eps_rel):
 
 
 #______________________________________________________________________________
-def make_plot(x, data, model, name=name):
+def make_plot(x, data, model, name=name, title=name):
     '''
     Plot x data with the overlayed fitted model.
     '''
     global plot
     plot = x.frame(roo.Range('plot'))
+    plot.SetTitle(title)
     data.plotOn(plot)
-    model.plotOn(plot)
-    model.paramOn(plot)
+    model.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
+    #model.paramOn(plot)
     canvases.next(name)
     plot.Draw()
     canvases.update()
@@ -155,28 +168,44 @@ def save_result(fitresult, name):
 def print_report(fitresults):
     print '\n==  Fitted parameters =='
     ## As scale and resolution
-    s, r = {}, {}
+    r, er = {}, {}
     for name, res in fitresults.items():
         print name
         for pars in [res.floatParsFinal(), res.constPars()]:
             for i in range(pars.getSize()):
                 pars[i].Print()
-                if pars[i].GetName() == 'mode':
-                    s[name] = pars[i].getVal()
-                elif pars[i].GetName() == 'effsigma':
+                if pars[i].GetName() == 'effsigma':
                     r[name] = pars[i].getVal()
+                    er[name] = pars[i].getError()
             
     ## (x-s)/r = (x0-s0)/r0
     ## x = s + (x0-s0)*r/r0
     ##   = s - s0 * r/r0 + x0 * r/r0
+    oplus = lambda x, y: math.sqrt(x * x + y * y)
     scaling = r['Data'] / r['MC']
-    print "s =", s
-    print "r =", r
+    error = scaling * oplus(er['Data']/r['Data'], er['MC']/r['MC'])
+    
     print "== Correction for MC =="
-    print "R9corr = %g + %g * R9" % (s['Data'] - s['MC'] * scaling, scaling)
+    print "R9corr = (%.5f +/- %.5f) * R9" % (scaling, error)
     
 ## End of print_report(..)
 
+
+#______________________________________________________________________________
+def fix_model_parameters(model):
+    '''
+    Sets and fixes the model parameters such that only the scaling is fitted.
+    That is R9_corrected = s * R9
+    '''
+    mode.setConstant(True)
+    
+
+    mode.setVal(0)
+    effsigma.setVal(1)
+    
+    model.shapemodevar.setVal(0)
+    model.shapewidthvar.setVal(1)
+## End of fix_model_parameters(model)
 
 #______________________________________________________________________________
 def main():
@@ -188,28 +217,26 @@ def main():
     for source, dataset in data.items():
         # data[source] = dataset.reduce(roo.EventRange(0, 1000))
         pass
-    x = data['data'].get()[variable.GetName()]
+    x = variable
     old_precision = set_default_integrator_precision(1e-8, 1e-8)
     model = ParameterizedKeysPdf('model', 'model', x, mode, effsigma, data['z'],
-                                 rho=0.6, forcerange=True)
-    #initialize_fit_parameters(data['data'], x)
-    for var, varname in zip([mode, effsigma], ['mode', 'width']):
-        var.setVal(getattr(model, 'shape' + varname + 'var').getVal())
-    make_plot(x, data['z'], model.shape, 'MC_Shape')
+                                 rho=0.7, forcerange=True)
+    fix_model_parameters(model)
+    # make_plot(x, data['z'], model.shape, name + 'MC_Shape', '')
     fitresults = {}
     for source in 'z data'.split():
         dataset = data[source]
-        name = {'z': 'MC', 'data': 'Data'}[source]
-        dataset.SetName(name)
+        label = {'z': 'MC', 'data': 'Data'}[source]
+        dataset.SetName(label)
         if source == 'data':
             # mode.setConstant(True)
             pass
         fitresult = model.fitTo(dataset, roo.SumW2Error(True),
                                 roo.NumCPU(8), roo.Strategy(2), 
                                 roo.Save(), roo.Range('fit'))
-        fitresults[name] = fitresult
-        make_plot(x, dataset, model, name)
-        save_result(fitresult, name)
+        fitresults[label] = fitresult
+        make_plot(x, dataset, model, '_'.join([name,label]), '')
+        # save_result(fitresult, label)
 
     print_report(fitresults)
     set_default_integrator_precision(*old_precision)
