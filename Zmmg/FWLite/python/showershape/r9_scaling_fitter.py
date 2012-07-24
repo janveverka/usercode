@@ -5,20 +5,6 @@ PDF fit.
 It creates plots showing the data with the fitted
 model and resulting values and prints the result of the fit.
 
-TODO:
-- It should split the data in two halfs by odd and even events,
-trains ParameterizedKeysPdfs to both halfs and fits
-their mode and effective sigmas to the independent halfs to
-get their estimates.
-- Factor it out in a class
-- Wrap it in a command line tool
-- Include interface with simple text config files
-- Deal with very large datasets by merging neighboring
-evnets
-- Reduce the amount of the output
-- Port to C++ only
-- Fit in a limited range only
-
 Origianlly developed for the PHOSPHOR Fit
 https://twiki.cern.ch/twiki/bin/view/CMS/VGamma2011PhosphorFit
 
@@ -35,15 +21,16 @@ import FWLite.Tools.roofit as roo
 import FWLite.Tools.cmsstyle as cmsstyle
 import FWLite.Tools.canvases as canvases
 import FWLite.Tools.legend as legend
-import FWLite.Tools.latex as latex
 import FWLite.Tools.dataset as dataset
-
-from Zmmg.FWLite.pmvtrees import get_trees
+import FWLite.Tools.latex as latex
+from FWLite.Tools.latex import Latex
 from FWLite.Tools.parameterizedkeyspdf import ParameterizedKeysPdf
+from Zmmg.FWLite.pmvtrees import get_trees
 
+latex.remove_empty_lines = False
 
 ## CONFIGURATION BEGIN ========================================================
-name = 'r9_EB_pt25up_v15reco_muOutsidePhoton'
+name = 'r9_EE_pt25up_v15reco_muOutside15x15'
 title = 'Barrel'
 tree_version = 'v15reco'
 variable = ROOT.RooRealVar('R9', 'Photon R_{9}', 0.3, 1.1)
@@ -54,27 +41,46 @@ weight = {
     }
 cuts = [
     '!phoIsEB',
-    'phoPt > 10',
+    'phoPt > 25',
     'mmMass + mmgMass < 180',
-    ## Exclude photons with muon hitting the 3x3 central crystals
-    'abs(muNearIEtaX - phoIEtaX) >= 2 & abs(muNearIPhiY - phoIPhiY) >= 2',
-    ## Include only photons with muon hitting the 3x3 central crystals
-    # 'abs(muNearIEtaX - phoIEtaX) <= 1 & abs(muNearIPhiY - phoIPhiY) <= 1',
-    ## Exclude photons with muon hitting the clustering region
-    #'(abs(muNearIEtaX - phoIEtaX) > 6 | abs(muNearIPhiY - phoIPhiY) > 6)',
+    ## Require photons to be in squre of side N-1 = 0, 1, ..., centered
+    ## on the central crystal.
+    '!muNearIsEB',
+    'TMath::Max(abs(muNearIEtaX - phoIEtaX), abs(muNearIPhiY - phoIPhiY)) > 3',
+    ]
+labels = [
+    # '#mu in SC outside 3#times3',
+    # '(R_{9} denominator)',
+    # '#mu in 3#times3',
+    # '(R_{9} numerator)',
+    '#mu outside 15x15',
+    '',
+    '',
+    'E_{T}^{#gamma} > 25 GeV',
+    'Endcaps',
     ]
 fit_range = (0.3, 1.1)
 plot_range = (0.85, 1.0)
 output_filename = 'r9fit.root'
+canvases.wwidth = 600
+canvases.wheight = 600
 ## CONFIGURATION END ==========================================================
-
-variable.setRange('fit', *fit_range)
-variable.setRange('plot', *plot_range)
 
 #______________________________________________________________________________
 ## Parameters to be fitted
 mode = ROOT.RooRealVar('mode', 'mode', 0, -1, 1)
 effsigma = ROOT.RooRealVar('effsigma', 's', 1, 1e-6, 10) 
+
+
+#______________________________________________________________________________
+def init():
+    '''
+    Initialize global variables.
+    '''
+    variable.setRange('fit', *fit_range)
+    variable.setRange('plot', *plot_range)
+## End of init
+    
 
 #______________________________________________________________________________
 def getdata():
@@ -140,6 +146,7 @@ def make_plot(x, data, model, name=name, title=name):
     Plot x data with the overlayed fitted model.
     '''
     global plot
+    x.setBins(30)
     plot = x.frame(roo.Range('plot'))
     plot.SetTitle(title)
     data.plotOn(plot)
@@ -150,6 +157,21 @@ def make_plot(x, data, model, name=name, title=name):
     canvases.update()
 ## End of make_plot
 
+
+#______________________________________________________________________________
+def decorate_plot(labels = []):
+    '''
+    Plot. latex labels on the current canvas.
+    '''
+    mylabels = labels[:]
+    for tok in ROOT.gPad.GetName().split('_'):
+        if 'Data' in tok:
+            mylabels.append('L = 4.9 fb^{-1}')
+        if 'MC' in tok:
+            mylabels.append('Simulation')
+    Latex(mylabels, textsize=30, position=(0.25, 0.85)).draw()
+## End of decorate_plot(...)
+    
 
 #______________________________________________________________________________
 def save_result(fitresult, name):
@@ -165,15 +187,14 @@ def save_result(fitresult, name):
 
 
 #______________________________________________________________________________
-def print_report(fitresults):
-    print '\n==  Fitted parameters =='
+def get_scaling(fitresults):
     ## As scale and resolution
     r, er = {}, {}
     for name, res in fitresults.items():
         print name
         for pars in [res.floatParsFinal(), res.constPars()]:
             for i in range(pars.getSize()):
-                pars[i].Print()
+                # pars[i].Print()
                 if pars[i].GetName() == 'effsigma':
                     r[name] = pars[i].getVal()
                     er[name] = pars[i].getError()
@@ -184,10 +205,14 @@ def print_report(fitresults):
     oplus = lambda x, y: math.sqrt(x * x + y * y)
     scaling = r['Data'] / r['MC']
     error = scaling * oplus(er['Data']/r['Data'], er['MC']/r['MC'])
-    
+    return (scaling, error)
+## End of get_scaling(..)
+
+
+#______________________________________________________________________________
+def print_report(fitresults):
     print "== Correction for MC =="
-    print "R9corr = (%.5f +/- %.5f) * R9" % (scaling, error)
-    
+    print "R9corr = (%.5f +/- %.5f) * R9" % get_scaling(fitresults)    
 ## End of print_report(..)
 
 
@@ -198,7 +223,6 @@ def fix_model_parameters(model):
     That is R9_corrected = s * R9
     '''
     mode.setConstant(True)
-    
 
     mode.setVal(0)
     effsigma.setVal(1)
@@ -212,6 +236,7 @@ def main():
     '''This is the entry point to execution.'''
     print 'Welcome to r9_scaling_fitter!'
     global data, model, x, fitresults
+    init()
     data = getdata()
     ## Reduce data for debugging
     for source, dataset in data.items():
@@ -236,11 +261,14 @@ def main():
                                 roo.Save(), roo.Range('fit'))
         fitresults[label] = fitresult
         make_plot(x, dataset, model, '_'.join([name,label]), '')
+        decorate_plot(labels)
         # save_result(fitresult, label)
 
+    canvases.update()
     print_report(fitresults)
     set_default_integrator_precision(*old_precision)
     print '\nExiting r9_scaling_fitter with success.'
+    return(get_scaling(fitresults))
 ## End of main().
 
 
