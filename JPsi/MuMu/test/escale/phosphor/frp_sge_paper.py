@@ -15,8 +15,8 @@ from JPsi.MuMu.scaleFitter import subdet_r9_categories
 from JPsi.MuMu.escale.fitResultPlotter import FitResultPlotter
 
 ROOT.gStyle.SetPadTopMargin(0.1)
-#canvases.wwidth = 640
-#canvases.wheight = 480
+canvases.wwidth = 800
+canvases.wheight = 600
 canvases.yperiod = 10
 
 binedges  = list(BinEdges([10, 12, 15, 20, 50]))
@@ -224,7 +224,9 @@ def make_scale_plots():
         plotter.makegraph()
 
         canvas = canvases.next(cfg.name)
-        plotter.plotall(title = cfg.title, legend_position = 'topright',
+        plotter.plotall(title = cfg.title, 
+                        legend_position = (0.68, 0.64, 0.92, 0.86),
+                        yrange = (-3, 3),
                         styles = [20, 25, 26],
                         colors = [ROOT.kBlack, ROOT.kBlue, ROOT.kRed])
         plotters.append(plotter)
@@ -239,10 +241,12 @@ def decorate(canvas):
     '''
     canvas.cd()
     labels = []
-    labels.append(Latex(['CMS Preliminary 2011'], 
-                        position=(0.175, 0.915),
-                        textsize=28))
-    # labels.append(Latex(['#sqrt{s} = 7 TeV'], position=(0.75, 0.96)))
+    labels.append(Latex(['CMS Preliminary 2011,  #sqrt{s} = 7 TeV'], 
+                        position=(0.17, 0.93),
+                        textsize=22))
+                        
+    labels.append(Latex(['L = 4.89 fb^{-1}'], position=(0.22, 0.8), 
+                        textsize=22))
     for l in labels:
         l.draw()
     
@@ -259,7 +263,8 @@ def main():
     '''
     make_scale_plots()
     canvases
-    canvases.make_plots('eps C'.split())
+    canvases.make_pdf_from_eps()
+    canvases.make_plots('eps C png'.split())
 ## End of main()
 
 

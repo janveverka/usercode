@@ -151,7 +151,7 @@ pullEpsilon = 0.1
 mwindows = {}
 
 ## Loop over plots
-for fitter in _fits[:]:
+for fitter in _fits[:1]:
     ## Log the current fit configuration
     print "++ Processing", fitter.title
     print "++ Configuration:"
@@ -317,7 +317,7 @@ for plot in _fits:
 
 # ws1.writeToFile('test.root')
 # ws1.writeToFile('mc_mmMass80_EB_lowR9_PhoEt_mmgMass87.2-95.2_cbShape.root')
-ws1.writeToFile('mc_sreco_strue_Baseline.root')
+ws1.writeToFile('an_mc_sreco_strue_Baseline.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt15-20.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt20-25.root')
 # ws1.writeToFile('mc_mmMass85_EB_lowR9_PhoEt25-30.root')

@@ -49,13 +49,17 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 
 ##  Fits events passing Event$ % 4 == 0 and uses all the other events to build 
 ##+ the model.
-name = 'test_mc_EE_highR9_pt30to999_v13_evt1of4'
+# name = 'test_mc_EE_highR9_pt30to999_v13_evt1of4'
 
 ## Fits the same MC events that were used for the model training
 # name = 'test_mc_EE_highR9_pt30to999_v13'
 
 ## Fits real data
 # name = 'test_data_EE_highR9_pt30to999_v13'
+
+# name = 'test_data_EE_pt25to999_yyv3'
+# name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
+name = 'egm_data_EE_pt25to999_highR9_yyv3'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -152,7 +156,10 @@ def parse_name_to_cuts():
     global name
     
     global cuts
+    ## For EGM-11-001 to help with regression
+    # cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5', 'minDeltaR > 0.1']
     cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5']
+    # cuts = ['mmMass + mmgMass < 180']
     if 'EB' in name:
         cuts.append('phoIsEB')
         if 'highR9' in name:
@@ -184,7 +191,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 v11 v13 v14 v15'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON v11 v13 v14 v15'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -215,7 +222,7 @@ def parse_name_to_title():
     if model_tree_version in 'v11'.split():
         tokens.append('2011A+B PU S4 MC Model')
         latex_labels.append('2011A+B PU S4 MC Model')
-    elif model_tree_version in 'v13 yyv1 yyv2 yyv3'.split():
+    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON'.split():
         tokens.append('2011A+B PU S6 MC Model')
         latex_labels.append('2011A+B PU S6 MC Model')
     elif model_tree_version == 'v14':
@@ -224,6 +231,12 @@ def parse_name_to_title():
     elif model_tree_version == 'v15':
         tokens.append('2011B PU')
         latex_labels.append('2011B PU S6 MC Model')
+    elif model_tree_version in 'yyv1 yyv2 yyv3'.split():
+        tokens.append('16 Jan Re-reco')
+        latex_labels.append('16 Jan Re-reco')
+    elif model_tree_version in 'yyv4 yyv4NoJSON'.split():
+        tokens.append('14 Jul Re-reco')
+        latex_labels.append('14 Jul Re-reco')
     
     if 'EB' in name:
         tokens.append('Barrel')
@@ -268,7 +281,7 @@ def parse_name_to_title():
     elif model_tree_version == 'yyv2':        
         tokens.append('Caltech Regression')
         latex_labels.append('Caltech Regression')
-    elif model_tree_version == 'yyv3':        
+    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON'.split():        
         tokens.append('Hgg v2 Regression')
         latex_labels.append('Hgg v2 Regression')
 
@@ -669,6 +682,10 @@ def build_signal_model():
 
     ## This was used as a default for Adi's placeholders plots
     phortargets = [0.1, 0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
+ 
+    ## Trying to find something that would not converge to the reference value
+    ## for the EGM plots
+    # phortargets = [0.1, 0.5, 1, 3, 5, 7, 10, 15, 25]
 
     # phortargets = [0.5, 6, 7, 7.5, 8, 8.5, 8.75, 9, 9.5, 10, 10.5, 11, 11.5, 11.75, 12, 12.5, 13, 14]
     # phortargets = [0.5, fit_calibrator.r0.getVal(), 10, 20]
@@ -790,6 +807,7 @@ def get_real_data(label):
     "2011A" or "2011B".
     '''
     global model_tree_version
+    global data_tree_version
     if model_tree_version == 'v11':
         data_tree_version = 'v12'
     if model_tree_version in 'v13 v14 v15'.split():
@@ -820,6 +838,10 @@ def fit_real_data(label):
     Fit dataset specified by the label: "data" (full 2011A+B),
     "2011A" or "2011B".
     '''
+    ## Set initial values to MC truth
+    phoScale.setVal(fit_calibrator.s.getVal())
+    phoRes.setVal(fit_calibrator.r.getVal())
+    ## Do the fit
     fit_result = pm.fitTo(data[label], roo.Range('fit'),  roo.NumCPU(8),
                              roo.Timer(), # roo.Verbose()
                              roo.InitialHesse(True), roo.Minos(),
@@ -907,11 +929,11 @@ def process_real_data():
     Get, fit and plot real data for all 3 dataset specified:
     "data" (full 2011A+B), "2011A" or "2011B".
     '''
-    process_real_data_single_dataset('2011A')
-    check_timer('13.1 get, fit and plot 2011A real data')
+    #process_real_data_single_dataset('2011A')
+    #check_timer('13.1 get, fit and plot 2011A real data')
 
-    process_real_data_single_dataset('2011B')
-    check_timer('13.2 get, fit and plot 2011B real data')
+    #process_real_data_single_dataset('2011B')
+    #check_timer('13.2 get, fit and plot 2011B real data')
 
     process_real_data_single_dataset('data')
     check_timer('13.3 get, fit and plot 2011A+B real data')
@@ -946,7 +968,7 @@ def process_monte_carlo():
 
     if reduce_data == True:
         fitdata1 = fitdata1.reduce(roo.Range(reduced_entries,
-                                           fitdata1.numEntries()))
+                                             fitdata1.numEntries()))
     check_timer('3. get fit data (%d entries)' % fitdata1.numEntries())
 
     nll = pm.createNLL(fitdata1, roo.Range('fit'), roo.NumCPU(8))
@@ -957,6 +979,10 @@ def process_monte_carlo():
 
     phoScale.setError(1)
     phoRes.setError(1)
+    
+    ## Set initial values equal to MC truth
+    phoScale.setVal(calibrator0.s.getVal())
+    phoRes.setVal(calibrator0.r.getVal())
 
     ## Initial HESSE
     status = minuit.hesse()
