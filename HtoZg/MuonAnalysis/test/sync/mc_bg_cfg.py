@@ -1,5 +1,6 @@
 import copy
 import FWCore.ParameterSet.Config as cms
+import PhysicsTools.PatAlgos.tools.coreTools as patcore
 import HtoZg.CommonAnalysis.process_cfi
 
 process = copy.deepcopy(HtoZg.CommonAnalysis.process_cfi.process)
@@ -19,6 +20,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.load('HtoZg.MuonAnalysis.skimSequence_cff')
 
 process.p = cms.Path(process.skimSequence)
+
+patcore.removeAllPATObjectsBut(process, ['Muons'])
 
 if __name__ == '__main__':
     ## Adds tab-completion and history for interactive testing.
