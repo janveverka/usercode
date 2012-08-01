@@ -1,0 +1,4 @@
+This package contains software for the H->Zg analysis that is
+common for both the muon and the electron channels and need the full 
+CMSSW framework.
+
