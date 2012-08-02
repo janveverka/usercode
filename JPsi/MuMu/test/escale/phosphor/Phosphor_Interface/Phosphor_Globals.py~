@@ -1,0 +1,18 @@
+#!/usr/bin/python
+
+version = '1.0'
+outputfile = ''
+inputfile = ''
+verbose = True
+debug = False
+cfg_file = 'empty'
+cuts = []
+title = ''
+latex_title = ''
+latex_labels = ''
+use_real_data = False
+plots = []
+model_tree_version  = 'yyv3'
+use_independent_fake_data = ''
+data_tree_version = 'yyv3'
+DataType = 'not_defined'
