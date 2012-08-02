@@ -1,0 +1,18 @@
+#this is a comment
+#comment cristian
+
+DataType = data
+#DetectorType can be EB or EE	
+
+DetectorType = EB
+# Tree Types can be v3, yyv3, ...
+TreeVersion = yyv3 
+
+PtLow = 25
+PtHigh = 999
+R9Low = .3
+R9High = .9
+option0 = 22	
+
+option1 = value1  # another comment
+option2 : value2
