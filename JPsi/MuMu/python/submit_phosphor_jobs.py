@@ -6,7 +6,9 @@ import commands
 
 # project_name = 'phosphor_baseline_s6mc_v2'
 # project_name = 'test6'
-project_name = 'eg_paper_dr0p1'
+# project_name = 'eg_paper_dr0p1'
+# project_name = 'eg_paper_jul2012rereco'
+project_name = 'vg_baseline_rerecos'
 
 output_base = '/raid2/veverka/jobs/outputs'
 template_filename='JPsi/MuMu/scripts/phosphor-job.template'
@@ -22,26 +24,16 @@ def get_egpaper_list():
 
     for subdet in 'EB EE'.split():
         for pt in '25to999'.split():
-            for version in 'yyv3'.split():
-                ## real data inclusive r9 job name
-                name = '_'.join(['egm_data', subdet, 'pt'+pt, version])
-                job_names.append(name)
-
-                ## real data high r9 job name
-                name = '_'.join(['egm_data', subdet, 'pt'+pt, 
-                                 version, 'highR9'])
-                job_names.append(name)
-
-                ## monte carlo job names - same events of training and fit
-                ## inclusive R9
-                name = '_'.join(['egm_mc', subdet, 'pt'+pt, version])
-                job_names.append(name)
-
-                ## high r9
-                name = '_'.join(['egm_mc', subdet, 'pt'+pt, 
-                                 version, 'highR9'])
-                job_names.append(name)
-                
+            for version in 'yyv3 yyv4 yyv4NoJSON'.split():
+                for source in 'data mc'.split():
+                    ## inclusive r9 job name
+                    name = '_'.join(['egm', source, subdet, 'pt'+pt, version])
+                    job_names.append(name)
+                    for r9 in 'lowR9 highR9'.split():
+                        ## job name
+                        name = '_'.join(['egm', source, subdet, 'pt'+pt, 
+                                         version, r9])
+                        job_names.append(name)                
                 
     ## Use only subsection of events for the training 
     ## and indepenedent events for MC fit
@@ -88,7 +80,7 @@ def get_baseline_list():
 
     for subdet in 'EB EE'.split():
         for pt in '10to12 12to15 15to20 20to999'.split():
-            for version in 'v13 v14 v15'.split():
+            for version in 'yyv1 yyv4'.split():
                 ## real data job name
                 name = '_'.join(['sge_data', subdet, 'pt'+pt, version])
                 job_names.append(name)
@@ -103,8 +95,8 @@ def get_baseline_list():
 ## End of get_large_list()
 
 
-job_names = get_egpaper_list()
-# job_names = get_baseline_list()
+# job_names = get_egpaper_list()
+job_names = get_baseline_list()
 # job_names = get_large_list()
 
 submission_dir = os.path.join(os.curdir, project_name)
