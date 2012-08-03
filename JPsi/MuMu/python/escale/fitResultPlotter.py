@@ -201,7 +201,7 @@ class FitResultPlotter():
         Plots the current graphs with appropriate ranges and labels. Input
         parameters:
             logy: Set y-axis to log scale if True
-            legend_position: One of 'default', 'topright'
+            legend_position: One of 'default', 'topright', tuple(x1, y1, x2, y2)
             xrange: Either 'auto' or a 2-tuple specifying the range.
             yrange: Either 'auto or a 2-tuple specifying the range.
         '''
@@ -210,7 +210,9 @@ class FitResultPlotter():
             setattr(self, name, value)
 
         ## Check if legend_position has a sane value
-        if not legend_position in 'default topright'.split():
+        if (not legend_position in 'default topright'.split() and
+            not (type(legend_position) == tuple and 
+                 len(legend_position) == 4)):
             raise ValueError('legend_positon = %s' % legend_position) 
 
         ## Get the axis ranges.
@@ -246,8 +248,11 @@ class FitResultPlotter():
                 graph.Draw("p")
 
         ## Make the legend
-        legend_coordinates = (0.6, 0.3 + 0.075 * len(self.graphs),
-                              0.9, 0.3)
+        if type(legend_position) == tuple:
+            legend_coordinates = legend_position
+        else:
+            legend_coordinates = (0.6, 0.3 + 0.075 * len(self.graphs),
+                                  0.9, 0.3)
 
         if legend_position == 'topright':
             legend_coordinates = (0.68, 0.98, 0.98, 0.98 - 0.075 * len(self.graphs))
