@@ -324,8 +324,8 @@ def getChains(version='v4'):
                            'cosh(meta[1] - gameta) - cos(mphi[1] - gamphi)'
                            ')')
             m2_m = '0.106*0.106'
-            mmgMassFormula = 'sqrt(2 * {m2a} + {m2b} + {m2c} + {m2d})'.format(
-                m2a=m2_m, m2b=m2_m0m1, m2c=m2_m0g, m2d=m2_m1g
+            mmgMassFormula = 'sqrt(2 * ({a} + {b} + {c} + {d}))'.format(
+                a=m2_m, b=m2_m0m1, c=m2_m0g, d=m2_m1g
                 )
                 
             es_to_yy_name_map.extend([
