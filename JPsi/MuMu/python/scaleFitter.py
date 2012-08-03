@@ -267,6 +267,9 @@ class ScaleFitter(PlotData):
 
         self.useCustomChi2Calculator = False
 
+        self.pullRangeMode = 'fitRange'
+        self.residRangeMode = 'fitRange'
+        
         PlotData.__init__( self, name, title, source, xExpression, cuts,
                            labels, **kwargs )
 
@@ -516,6 +519,9 @@ class ScaleFitter(PlotData):
                 raise RuntimeError, message
             self.fitRange =  tuple(mi.bounds())
             print "++++ fit range changed to:", self.fitRange
+        
+        self.pullRange = getattr(self, self.pullRangeMode)
+        self.residRange = getattr(self, self.residRangeMode)
     # end of _updateRanges
 
 
@@ -626,19 +632,21 @@ class ScaleFitter(PlotData):
             plot.Draw()
 
         ## Add labels
+        # rowsize = 0.055
+        rowsize = 0.06
         canvas.cd(1)
         for i in range( len( self.labels ) ):
             latexLabel.DrawLatex(self.labelsLayout[0],
-                                 self.labelsLayout[1] - i*0.055, self.labels[i])
+                                 self.labelsLayout[1] - i*rowsize, self.labels[i])
 
         ## Add the total number of events used
         numLabels = len( self.labels )
         latexLabel.DrawLatex( self.labelsLayout[0],
-                              self.labelsLayout[1] - numLabels * 0.055,
+                              self.labelsLayout[1] - numLabels * rowsize,
                               '%d events' % self.data.numEntries() )
         ## Add the reduced chi2
         latexLabel.DrawLatex( self.labelsLayout[0],
-                              self.labelsLayout[1] - (numLabels+1) * 0.055,
+                              self.labelsLayout[1] - (numLabels+1) * rowsize,
                               '#chi^{2}/ndof: %.2g' % self.reducedChi2.getVal() )
         ## Add the chi2 and ndof
         canvas.cd(2)
@@ -738,14 +746,14 @@ class ScaleFitter(PlotData):
 
         ## Make frames
         self.plot = self.x.frame(Range(*self.xRange))
-        self.pullPlot = self.x.frame(Range(*self.xRange))
+        self.pullPlot = self.x.frame(Range(*self.pullRange))
 
         ## Make zoom frames
 #         self.x.setBins(int (self.nBins *
 #                             (self.xRangeZoom[1] - self.xRangeZoom[0]) /
 #                             (self.xRange[1] - self.xRange[0])))
         self.plotZoom = self.x.frame(Range(*self.xRangeZoom))
-        self.residPlot = self.x.frame(Range(*self.xRangeZoom))
+        self.residPlot = self.x.frame(Range(*self.residRange))
 
         ## Add the data and model to the frame
         for p in [self.plot, self.plotZoom]:
@@ -837,7 +845,7 @@ class ScaleFitter(PlotData):
         for p in [self.plot, self.plotZoom, self.residPlot, self.pullPlot,
                   self.pullDistPlot]:
             p.SetTitle('')
-            self._customizeAxis(p.GetYaxis(), 0.01, 3)
+            self._customizeAxis(p.GetYaxis(), 0.01, 2.5)
         ## end of loop over plots
         #self._customizeAxis( self.pullPlot.GetXaxis(), 0.01, 3.5 )
 
