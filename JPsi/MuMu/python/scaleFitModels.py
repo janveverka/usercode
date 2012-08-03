@@ -39,6 +39,7 @@ ws1.factory('''{
     #Deltas[0, -50, 50],
     #Deltas2[0, -50, 50],
     #Deltas3[0, -50, 50],
+    #mu[0, -50, 50],
     #sigma[20, 0.1, 100],
     #sigma2[30, 0.1, 100],
     #sigma3[40, 0.1, 100],
@@ -67,8 +68,8 @@ ws1.factory('''{
     FormulaVar::m0("(1+#Deltas/100)*pow(k,log(k))", {#Deltas, k}),
     FormulaVar::#gamma("exp(ln#gamma)", {ln#gamma}),
     FormulaVar::#beta("#sigma/(100*sqrt(#gamma))", {#sigma, #gamma}),
-    FormulaVar::#mu("1+#Deltas/100-#beta*(#gamma-1)", {#Deltas, #beta, #gamma}),
-    FormulaVar::ik_gamma("max(#mu, 1+s/100)", {#mu, s})
+    FormulaVar::#nu("1+#Deltas/100-#beta*(#gamma-1)", {#Deltas, #beta, #gamma}),
+    FormulaVar::ik_gamma("max(#nu, 1+s/100)", {#nu, s})
 }''')
 
 sModels = [
@@ -76,15 +77,19 @@ sModels = [
     ws1.factory('Gaussian::gauss(s, #Deltas, #sigma)'),
     ws1.factory('Gaussian::gauss2(s, #Deltas2, #sigma2)'),
     ws1.factory('Gaussian::gauss3(s, #Deltas3, #sigma3)'),
+    ## Same notation as in the AN
+    ws1.factory('Gaussian::gauss_an(s, #mu, #sigma)'),
     ws1.factory('Lognormal::lognormal(ik, m0, k)'),
     ws1.factory('BifurGauss::model(s, #Deltas, #sigmaL, #sigmaR)'),
     ws1.factory('CBShape::cbShape(s, #Deltas, #sigma, #alpha, n)'),
+    ws1.factory('CBShape::cbShape_an(s, #mu, #sigma, #alpha, n)'),
     ## Didn't figure out how to compile new models in FWLite yet.
     ## Comment this out to be able to run on FWLite
     ws1.factory('''RooCruijff::cruijff(s, #Deltas, #sigmaL, #sigmaR, #alphaL,
                                        #alphaR)'''),
     ws1.factory('BifurGauss::bifurGauss(s, #Deltas, #sigmaL, #sigmaR)'),
-    ws1.factory('Gamma::gamma(ik_gamma, #gamma, #beta, #mu)'),
+    ws1.factory('BifurGauss::bifurGauss_an(s, #mu, #sigmaL, #sigmaR)'),
+    ws1.factory('Gamma::gamma(ik_gamma, #gamma, #beta, #nu)'),
     ## Custom PDF's
     ws1.factory('RooBifurGshPdf::bifurGsh(s, #Deltas, #sigmaL, tL, #sigmaR, tR)'),
     ws1.factory('RooBifurSechPdf::bifurSech(s, #Deltas, #sigmaL, #sigmaR)'),
