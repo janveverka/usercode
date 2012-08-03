@@ -157,6 +157,58 @@ _files['yyv3'] = {
               'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
     }
     
+## Yong's trees with e5x5 for the photon energy
+_files['yyv3_e5x5'] = {
+    'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AOD.'
+              'muid2.phtid1.phtcorr96.datapu0.mcpu0.r1to129.root')],
+    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
+              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
+              'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
+    }
+    
+## Yong's trees with the Hgg photon regression v2 for Jul2012 private rereco
+_files['yyv4'] = {
+    'data': 
+        '''
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r2.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r3.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r4.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r5.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011AZMuPromptSkimv5ZmmgSkim11Jul2011ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011AZMu03OctZmmg11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r2.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r3.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r4.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r5.scale0.root
+        Jul2012ReReco/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r6.scale0.root'''.split(),
+    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
+              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
+              'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
+    }
+    
+_files['yyv4NoJSON'] = {
+    'data': 
+        '''
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r2.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r3.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r4.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r5.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011AZMuPromptSkimv5ZmmgSkim11Jul2011ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011AZMu03OctZmmg11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r2.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r3.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r4.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r5.scale0.root
+        Jul2012ReReco_noJSON/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.r6.scale0.root'''.split(),
+    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
+              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
+              'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
+    }
+    
 _files['v13'] = {
     'z' : [('esTree_V13_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
             'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
@@ -218,6 +270,9 @@ _treeNames = {
     'yyv1' : 'Analysis',
     'yyv2' : 'Analysis',    
     'yyv3' : 'Analysis',    
+    'yyv3_e5x5' : 'Analysis',    
+    'yyv4' : 'Analysis',    
+    'yyv4NoJSON' : 'Analysis',    
 }
 
 
@@ -229,7 +284,7 @@ def getChains(version='v4'):
             print "Loading ", name, ":", f
             chains[name].Add( os.path.join(_path, f) )
 
-    if version in 'yyv1 yyv2 yyv3'.split():
+    if version in 'yyv1 yyv2 yyv3 yyv3_e5x5 yyv4 yyv4NoJSON'.split():
         ## On each line corresponding to a list item, 
         ## 1st is esTree name, 2nd is YY tree name in Yong's trees.
         es_to_yy_name_map = '''mmMass          mm 
@@ -253,12 +308,30 @@ def getChains(version='v4'):
                 '''mmgMass         mmg
                   phoPt           gamenergy/cosh(gameta)'''.split('\n')
                   )
-        elif version in 'yyv2 yyv3'.split():
+        elif version in 'yyv2 yyv3 yyv4 yyv4NoJSON'.split():
             ## Use the regression cluster corrections
             es_to_yy_name_map.extend(
                 '''mmgMass         mmgcorr
                    phoPt           gamscenergycorr/cosh(gameta)'''.split('\n')
                    )
+        elif version in ['yyv3_e5x5']:
+            ## Use the regression cluster corrections
+            m2_m0m1 = 'mpt[0]*mpt[1]*(cosh(meta[0]-meta[1]) - cos(mphi[0]-mphi[1]))'
+            m2_m0g  = ('mpt[0] * game5x5 / cosh(gameta) * ('
+                           'cosh(meta[0] - gameta) - cos(mphi[0] - gamphi)'
+                           ')')
+            m2_m1g  = ('mpt[1] * game5x5 / cosh(gameta) * ('
+                           'cosh(meta[1] - gameta) - cos(mphi[1] - gamphi)'
+                           ')')
+            m2_m = '0.106*0.106'
+            mmgMassFormula = 'sqrt(2 * {m2a} + {m2b} + {m2c} + {m2d})'.format(
+                m2a=m2_m, m2b=m2_m0m1, m2c=m2_m0g, m2d=m2_m1g
+                )
+                
+            es_to_yy_name_map.extend([
+                'mmgMass         %s' % mmgMassFormula.replace(' ', ''),
+                'phoPt           game5x5/cosh(gameta)'
+                ])
         ## Set aliases for Yong's trees so that one can use the same names
         ## as in esTrees
         for ch in chains.values():

@@ -213,7 +213,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 v11 v13 v14 v15'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 yyv3_e5x5 v11 v13 v14 v15'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -247,7 +247,7 @@ def parse_name_to_title():
     if model_tree_version in 'v11'.split():
         tokens.append('2011A+B PU S4 MC Model')
         latex_labels.append('2011A+B PU S4 MC Model')
-    elif model_tree_version in 'v13 yyv1 yyv2 yyv3'.split():
+    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv3_e5x5'.split():
         tokens.append('2011A+B PU S6 MC Model')
         latex_labels.append('2011A+B PU S6 MC Model')
     elif model_tree_version == 'v14':
@@ -303,6 +303,9 @@ def parse_name_to_title():
     elif model_tree_version == 'yyv3':        
         tokens.append('Hgg v2 Regression')
         latex_labels.append('Hgg v2 Regression')
+    elif model_tree_version == 'yyv3_e5x5':        
+        tokens.append('E5x5')
+        latex_labels.append('E5x5')
 
     title = ', '.join(tokens)
     latex_title = ', '.join(latex_labels)
