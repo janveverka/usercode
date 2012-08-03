@@ -9,13 +9,13 @@ class Globals:
     use_independent_fake_data = ''
     data_tree_version = 'yyv3'
     DataType = 'not_defined'
+    version = '1.0'
+    debug = False
+    version = '1.0'
+    verbose = True
+    cfg_file = 'empty'
 
-version = '1.0'
-debug = False
-version = '1.0'
-verbose = True
-debug = False
-cfg_file = 'empty'
+
 plots = []
 use_real_data = False
 use_independent_fake_data = ''

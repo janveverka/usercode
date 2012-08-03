@@ -45,7 +45,7 @@ from JPsi.MuMu.escale.logphoereskeyspdf import LogPhoeresKeysPdf
 from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 
-from globals import Globals, debug, verbose, use_independent_fake_data, latex_title, latex_labels
+from globals import Globals, use_independent_fake_data
 
 ##-- Configuration -------------------------------------------------------------
 ## Selection
@@ -226,6 +226,9 @@ def parse_name_to_cuts():
 
     global use_real_data
     use_real_data = parse_name_to_use_real_data(name)
+
+    ##Need to add this line to implement Global variable outside phosphor calculator
+    Globals.use_real_data = use_real_data
         
 ## End of parse_name_to_cuts().
 
@@ -526,8 +529,9 @@ def get_data(chains = getChains('v11')):
     Get the nominal data that is used for smearing.
     '''
     global cuts
+    if Globals.debug:
+        print '====== CUTS INSIDE phosphorcalculator ======', cuts
 
-    print '++++++++++++++++++++++++++++++++++++++++++++++++++++ CUTS+++++++++++++++++++++++++++', cuts
     ## TODO: Break this down into several smaller methods.
     ## Map of variable names and corresponding TTree expressions to
     ## calculate it.
@@ -554,7 +558,6 @@ def get_data(chains = getChains('v11')):
     ## Have to copy aliases by hand
     
     for a in chains['z'].GetListOfAliases():
-        print '=================CUTS=========================----->', cuts
         tree['z'].SetAlias(a.GetName(), a.GetTitle())
 
     cuts0 = cuts[:]
@@ -802,14 +805,18 @@ def init_cfg_file():
     '''
     Initialize workspace and common variables and functions.
     '''
-    #define_globals()
-    #from common import *
-    global cuts
+    global cuts, model_tree_version, data_tree_version, latex_title, latex_labels, outputfile, name
     cuts = Globals.cuts
-    print '===============CUTS======================', cuts
-    global model_tree_version, data_tree_version
     data_tree_version = model_tree_version = Globals.model_tree_version
-    print '====================Model Tree Version===========================', model_tree_version
+    name = latex_title = latex_labels = Globals.latex_title
+    outputfile = Globals.outputfile
+    if Globals.debug:
+        print '======Model Tree Version======', model_tree_version
+        print '======Cuts Inside phosphorcalculator======', cuts
+        print '======Latex Title Inside phosphorcalculator======', latex_title
+        print '======Output File Inside phosphorcalculator======', outputfile
+        print '===== name =====', name
+        
     define_workspace()
     define_data_observables()
     define_model_parameters()
