@@ -60,7 +60,7 @@ def parse_cfg_file(cfg_file):
     The format will be 'phosphor_DATA_EB_tree_version_yyv3_R9_from_0.6_to_0.9'
     """
     
-    Globals.latex_title = "phosphor___tree_version__R9_from__to_"
+    #Globals.latex_title = "phosphor___tree_version__R9_from__to_"
     print '===== finding phosphor_',Globals.latex_title.find('version') 
     """
     Starting to parse
@@ -137,7 +137,7 @@ def parse_cfg_file(cfg_file):
             continue
 
 
-        Globals.latex_title = latex_title1 + latex_title2 + latex_title3 + latex_title4 + latex_title5
-        Globals.outputfile = Globals.latex_title + '.root'
-        if Globals.debug:
-            print '====== Latex Label=====', Globals.latex_title
+    Globals.latex_title = latex_title1 + latex_title2 + latex_title3 + latex_title4 + latex_title5
+    Globals.outputfile = Globals.latex_title + '.root'
+    if Globals.debug:
+        print '====== Latex Label=====', Globals.latex_title
