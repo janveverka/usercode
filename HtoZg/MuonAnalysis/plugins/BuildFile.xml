@@ -1,0 +1,8 @@
+<use   name="DataFormats/MuonReco"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/ParameterSet"/>
+<flags   EDM_PLUGIN="1"/>
+<library   name="HtoZgMuonAnalysis_plugins" file="*.cc">
+</library>
+

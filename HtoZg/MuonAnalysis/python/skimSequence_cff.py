@@ -7,7 +7,10 @@ from PhysicsTools.PatAlgos.patSequences_cff import *
 allInputEvents   = cms.EDProducer('EventCountProducer')
 passHltFilter    = cms.EDProducer('EventCountProducer')
 
-selectedPatMuons.cut = looseMuons.cut.value() + '&& dB < 0.2'
+selectedPatMuons.cut = looseMuons.cut.value() + '''&& 
+    abs(userFloat("muonVertexing::dxy")) < 0.2 &&
+    abs(userFloat("muonVertexing::dz")) < 0.5
+    '''
 countPatMuons.minNumber = 2
 
 selectedDimuons = looseDimuons.clone(

@@ -19,7 +19,14 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 ## The HtoZg sequence
 process.load('HtoZg.MuonAnalysis.skimSequence_cff')
 
-process.p = cms.Path(process.skimSequence)
+## The muon tree maker
+process.load('HtoZg.MuonAnalysis.muonTree_cfi')
+
+## TFileService for the ntuple output
+process.load('HtoZg.CommonAnalysis.TFileService_cfi')
+
+process.p = cms.Path(process.skimSequence + 
+                     process.muonTree)
 
 patcore.removeAllPATObjectsBut(process, ['Muons'])
 

@@ -50,7 +50,7 @@ namespace cit {
     class MuonVertexingValueMapProducer : public edm::EDProducer {
     public:
       explicit MuonVertexingValueMapProducer(const edm::ParameterSet&);
-      ~EgammaUserDataProducer();
+      ~MuonVertexingValueMapProducer();
     private:
       virtual void produce(edm::Event&, const edm::EventSetup&);
       
@@ -106,13 +106,25 @@ namespace cit {
       std::vector<float> dxy;
       std::vector<float> dz;
      
-      reco::Vertex::Point const& vtx = vertices->begin()->position();
-
-      for (MuonView::const_iterator mi = muons->begin(); mi < muons->end();
-           ++mi) {
-        dxy.push_back(mi->dxy(vtx));
-        dz .push_back(mi->dz (vtx));
+      bool foundVertex = false;
+      
+      if (vertices->size() > 0) {
+        foundVertex = true;
       }
+      reco::Vertex::Point const& vtx = vertices->begin()->position();
+ 
+      typename edm::View<MuonType>::const_iterator iMu = muons->begin();
+      for (; iMu < muons->end(); ++iMu) {
+        const reco::TrackRef trk = iMu->innerTrack();
+        if (!foundVertex || trk.isNull()) {
+          /// Cannot compute vertexing info, use dummy values.
+          dxy.push_back(-999);
+          dz .push_back(-999);
+          continue;
+        }
+        dxy.push_back(iMu->innerTrack()->dxy(vtx));
+        dz .push_back(iMu->innerTrack()->dz (vtx));
+      } // loop over muons
 
       putMap(iEvent, muons, dxy, "dxy");
       putMap(iEvent, muons, dz , "dz" );
