@@ -2,19 +2,14 @@ import FWCore.ParameterSet.Config as cms
 from HtoZg.CommonAnalysis.vertexFilterSequence_cff import *
 from HtoZg.MuonAnalysis.hltFilter_cfi import hltFilter
 from HtoZg.MuonAnalysis.looseDimuonSequence_cff import *
-from PhysicsTools.PatAlgos.patSequences_cff import *
+from HtoZg.MuonAnalysis.patSequence_cff import *
 
 allInputEvents   = cms.EDProducer('EventCountProducer')
 passHltFilter    = cms.EDProducer('EventCountProducer')
 
-selectedPatMuons.cut = looseMuons.cut.value() + '''&& 
-    abs(userFloat("muonVertexing::dxy")) < 0.2 &&
-    abs(userFloat("muonVertexing::dz")) < 0.5
-    '''
-countPatMuons.minNumber = 2
 
 selectedDimuons = looseDimuons.clone(
-    src = cms.InputTag('cleanPatMuons')
+    src = cms.InputTag('selectedPatMuons')
     )
 
 selectedDimuonFilter = looseDimuonFilter.clone(
@@ -31,7 +26,7 @@ skimSequence = cms.Sequence(allInputEvents +
                             hltFilter + passHltFilter +
                             vertexFilterSequence +
                             looseDimuonSequence + 
-                            patDefaultSequence +
+                            patSequence +
                             selectedDimuonSequence)
 
 # print repr(patMuons)
