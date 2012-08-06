@@ -59,7 +59,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
-name = 'egm_data_EE_pt25to999_highR9_yyv3'
+name = 'egm_data_EE_pt25to999_highR9_v13'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -920,6 +920,10 @@ def process_real_data_single_dataset(label):
     fit_real_data(label)
     plot_fit_to_real_data(label)
     draw_latex_for_fit_to_real_data()
+    ## Store the the mc truth values in the workspace
+    set_mc_truth(fit_calibrator.s, fit_calibrator.r)
+    w.saveSnapshot('_'.join(['mc_truth', label]), 
+                   ROOT.RooArgSet(phoScaleTrue, phoResTrue))    
 ## End of get_fit_and_plot_real_data_single_dataset().
 
 
