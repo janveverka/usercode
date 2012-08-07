@@ -5,7 +5,7 @@ from HtoZg.MuonAnalysis.looseMuons_cfi import looseMuons
 ## can be implemented by the string parser. 
 ## [1] https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId
 
-selectedMuons = cms.EDFilter('PATMuonSelector',
+tightMuons = cms.EDFilter('PATMuonSelector',
     src = cms.InputTag('selectedPatMuons'),
     cut = cms.string(looseMuons.cut.value() + '''&&
         abs(userFloat("muonVertexing:dxy")) < 0.2 &&

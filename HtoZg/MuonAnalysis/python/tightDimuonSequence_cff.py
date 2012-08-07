@@ -1,22 +1,22 @@
 import FWCore.ParameterSet.Config as cms
 
-from HtoZg.MuonAnalysis.selectedMuons_cfi import selectedMuons
+from HtoZg.MuonAnalysis.tightMuons_cfi import tightMuons
 from HtoZg.MuonAnalysis.looseDimuons_cfi import looseDimuons
 from HtoZg.MuonAnalysis.looseDimuonFilter_cfi import looseDimuonFilter
 
 
-selectedDimuons = looseDimuons.clone(
-    src   = cms.InputTag('selectedMuons'),
-    decay = cms.string('selectedMuons@+ selectedMuons@-')
+tightDimuons = looseDimuons.clone(
+    src   = cms.InputTag('tightMuons'),
+    decay = cms.string('tightMuons@+ tightMuons@-')
     )
 
-selectedDimuonFilter = looseDimuonFilter.clone(
-    src = cms.InputTag('selectedDimuons')
+tightDimuonFilter = looseDimuonFilter.clone(
+    src = cms.InputTag('tightDimuons')
     )
 
-hasSelectedDimuon = cms.EDProducer('EventCountProducer')
+hasTightDimuon = cms.EDProducer('EventCountProducer')
 
-selectedDimuonSequence = cms.Sequence(selectedMuons + 
-                                      selectedDimuons +
-                                      selectedDimuonFilter +
-                                      hasSelectedDimuon)
+tightDimuonSequence = cms.Sequence(tightMuons + 
+                                   tightDimuons +
+                                   tightDimuonFilter +
+                                   hasTightDimuon)
