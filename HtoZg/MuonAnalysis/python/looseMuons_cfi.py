@@ -8,13 +8,16 @@ looseMuons = cms.EDFilter('MuonSelector',
     src = cms.InputTag('muons'),
     cut = cms.string('''
         pt > 20 &&
+        abs(eta) < 2.4 &&
         isGlobalMuon = 1 && 
         isPFMuon = 1 && 
+        !globalTrack().isNull &&
+        !innerTrack().isNull &&
         globalTrack().normalizedChi2 < 10. &&
         globalTrack().hitPattern().numberOfValidMuonHits > 0  &&
         numberOfMatchedStations > 1 &&
         innerTrack().hitPattern().numberOfValidPixelHits > 0 &&
-        track().hitPattern().trackerLayersWithMeasurement > 5
+        innerTrack().hitPattern().trackerLayersWithMeasurement > 5
         '''),
     filter = cms.bool(True)                                
     )
