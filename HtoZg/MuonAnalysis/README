@@ -1,3 +1,12 @@
 This package contains software for the H->Zg->mmg analysis that is
 specific for the muon channel and need the full CMSSW framework.
 
+To checkout and compile the package you can do:
+ssh lxplus.cern.ch
+bash
+cd $(mktemp -d -p /tmp/$(whoami))
+scram project CMSSW CMSSW_5_2_6
+cd CMSSW_5_2_6/src
+cvs co -d setup.sh UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
+source setup.sh
+
