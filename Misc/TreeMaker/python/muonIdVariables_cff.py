@@ -14,13 +14,21 @@ import Misc.TreeMaker.tools as tools
 ## Revision: r35
 ## Accessed: 6 Aug 2012, 22:41 CEST.
 muonIdVariables = tools.get_variables_from_map([
-    ('isGlobal', 'isGlobalMuon'                                     ),
-    ('isPF'    , 'isPFMuon'                                         ),
-    ('normChi2', 'globalTrack().normalizedChi2'                     ),
-    ('nHit'    , 'globalTrack().hitPattern().numberOfValidMuonHits' ),
-    ('nMatch'  , 'numberOfMatchedStations'                          ),
-    ('dxy'     , 'userFloat("muonVertexing:dxy")'                   ),
-    ('dz'      , 'userFloat("muonVertexing:dz")'                    ),
-    ('nPixel'  , 'innerTrack().hitPattern().numberOfValidPixelHits' ),
-    ('nLayer'  , 'track().hitPattern().trackerLayersWithMeasurement'),
+    ('isGlobal',   'isGlobalMuon'                                          ),
+    ('isPF'    ,   'isPFMuon'                                              ),
+    ('normChi2', '''? !globalTrack().isNull ?
+                        globalTrack().normalizedChi2 :
+                        -999'''                                            ),
+    ('nHit'    , '''? !globalTrack().isNull ?
+                        globalTrack().hitPattern().numberOfValidMuonHits:
+                        -999'''                                            ),
+    ('nMatch'  , 'numberOfMatchedStations'                                 ),
+    ('dxy'     , 'userFloat("muonVertexing:dxy")'                          ),
+    ('dz'      , 'userFloat("muonVertexing:dz")'                           ),
+    ('nPixel'  , '''? !innerTrack().isNull ?
+                        innerTrack().hitPattern().numberOfValidPixelHits :
+                        -999'''                                            ),
+    ('nLayer'  , '''? !innerTrack().isNull ?
+                        innerTrack().hitPattern().trackerLayersWithMeasurement :
+                        -999'''                                            ),
     ])
