@@ -5,8 +5,12 @@
 
 RTAG=HtoZg_sync_2012_cutbased_muons_uptoId
 cd $CMSSW_BASE/src && \
-    cvs co -r $RTAG -d HtoZg/CommonAnalysis UserCode/JanVeverka/HtoZg/CommonAnalysis && \
-    cvs co -r $RTAG -d HtoZg/MuonAnalysis UserCode/JanVeverka/HtoZg/MuonAnalysis && \
-    cvs co -r $RTAG -d Misc/TreeMaker && \
-    cvs co -D 8/8/12 -d Muon/MuonAnalysisTools UserCode/sixie/Muon/MuonAnalysisTools && \
+    cvs co -r $RTAG -d HtoZg/CommonAnalysis \
+        UserCode/JanVeverka/HtoZg/CommonAnalysis && \
+    cvs co -r $RTAG -d HtoZg/MuonAnalysis \
+        UserCode/JanVeverka/HtoZg/MuonAnalysis && \
+    cvs co -r $RTAG -d Misc/TreeMaker \
+        UserCode/JanVeverka/Misc/TreeMaker && \
+    cvs co -D 8/8/12 -d Muon/MuonAnalysisTools \
+        UserCode/sixie/Muon/MuonAnalysisTools && \
     scramv1 build -j4

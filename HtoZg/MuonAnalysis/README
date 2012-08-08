@@ -5,8 +5,10 @@ To checkout and compile the package you can do:
 ssh lxplus.cern.ch
 bash
 cd $(mktemp -d -p /tmp/$(whoami))
+export SCRAM_ARCH=slc5_amd64_gcc462
 scram project CMSSW CMSSW_5_2_6
 cd CMSSW_5_2_6/src
-cvs co -d setup.sh UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
-source setup.sh
+cvs co -d HtoZg/MuonAnalysis/scripts \\
+    UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
+source HtoZg/MuonAnalysis/scripts/setup.sh
 
