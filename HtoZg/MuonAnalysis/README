@@ -3,9 +3,15 @@ This package contains software for the H->Zg->mmg analysis that is
 specific for the muon channel and need the full CMSSW framework.
 
 ---+ Production Recipe
-To checkout and compile the package for production you can do:
+To checkout and compile the package at FNAL to reproduce selection
+yields on the sync twiki https://twiki.cern.ch/twiki/bin/view/CMS/HtoZgtoMUMU
+you can do:
+
 ssh cmslpc-sl5.fnal.gov
 bash
+source /uscmst1/prod/sw/cms/bashrc uaf
+## To be able to use CVS at FNAL. Requires typing CERN username and password.
+kserver_init
 if [[ ! -d /tmp/$(whoami) ]]; then
     mkdir /tmp/$(whoami)
 fi
@@ -19,7 +25,11 @@ cvs co -r $RTAG -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
 eval $(scram runtime -sh)
 source tmp/setup.sh
 
+
 ---+ Development Recipe
+To checkout and compile the package at LXPLUS so that you can continue 
+develepment you can do:
+
 ssh lxplus.cern.ch
 bash
 if [[ ! -d /tmp/$(whoami) ]]; then
