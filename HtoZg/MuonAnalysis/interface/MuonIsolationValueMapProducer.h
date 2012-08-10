@@ -38,6 +38,8 @@
 #include "DataFormats/Common/interface/ValueMap.h"
 #include "DataFormats/Common/interface/OwnVector.h"
 
+#include "Muon/MuonAnalysisTools/interface/MuonEffectiveArea.h"
+
 namespace cit {
   namespace hzg {
     /**
@@ -46,6 +48,8 @@ namespace cit {
     template <typename MuonType>
     class MuonIsolationValueMapProducer : public edm::EDProducer {
     public:
+      typedef MuonEffectiveArea::MuonEffectiveAreaType   EAType;
+      typedef MuonEffectiveArea::MuonEffectiveAreaTarget EATarget;
       explicit MuonIsolationValueMapProducer(const edm::ParameterSet&);
       ~MuonIsolationValueMapProducer();
     private:
@@ -70,8 +74,9 @@ namespace cit {
       muonSource_(iConfig.getParameter<edm::InputTag>("muonSource")),
       rhoSource_ (iConfig.getParameter<edm::InputTag>("rhoSource" ))
     {
-      produces<edm::ValueMap<float> >("rho");
-      produces<edm::ValueMap<float> >("EA" );
+      produces<edm::ValueMap<float> >("rho"    );
+      produces<edm::ValueMap<float> >("EA"     );
+      produces<edm::ValueMap<float> >("combIso");
     } /// Constructor
     
     /**
@@ -100,20 +105,39 @@ namespace cit {
       iEvent.getByLabel(muonSource_, muons    );
       iEvent.getByLabel(rhoSource_ , rhoHandle);
 
-      std::vector<float> rho;
-      std::vector<float> EA ;
+      std::vector<float> rho    ;
+      std::vector<float> EA     ;
+      std::vector<float> combIso;
      
-      bool foundVertex = false;
+      
+      EAType   eaType   = MuonEffectiveArea::kMuGammaAndNeutralHadronIso04;
+      EATarget eaTarget = MuonEffectiveArea::kMuEAData2012;
       
       typename edm::View<MuonType>::const_iterator iMu = muons->begin();
       for (; iMu < muons->end(); ++iMu) {
-        rho.push_back(float(*rhoHandle));
-        /// TODO: Add EA calculation here
-        EA .push_back(-999);
+        float iRho = float(*rhoHandle);
+        float iEA  = MuonEffectiveArea::GetMuonEffectiveArea(eaType, iMu->eta(),
+                                                             eaTarget);
+        double chIso04 = iMu->pfIsolationR04().sumChargedHadronPt;   
+        double phIso04 = iMu->pfIsolationR04().sumPhotonEt;          
+        double nhIso04 = iMu->pfIsolationR04().sumNeutralHadronEt;
+        
+//         float iCombIso = nhIso04 + phIso04 - iEA * iRho;
+//         if (iCombIso < 0.) {
+//           iCombIso = 0.;
+//         }
+//         iCombIso += chIso04;
+        
+        float iCombIso = chIso04 + max(0., nhIso04 + phIso04 - iEA * iRho);
+        
+        rho    .push_back(iRho    );
+        EA     .push_back(iEA     );
+        combIso.push_back(iCombIso);
       } // loop over muons
 
-      putMap(iEvent, muons, rho, "rho");
-      putMap(iEvent, muons, EA , "EA" );
+      putMap(iEvent, muons, rho    , "rho"    );
+      putMap(iEvent, muons, EA     , "EA"     );
+      putMap(iEvent, muons, combIso, "combIso");
 
     } /// produce(..)
     
