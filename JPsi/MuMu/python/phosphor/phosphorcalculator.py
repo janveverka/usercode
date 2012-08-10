@@ -45,7 +45,7 @@ from JPsi.MuMu.escale.logphoereskeyspdf import LogPhoeresKeysPdf
 from JPsi.MuMu.escale.montecarlocalibrator import MonteCarloCalibrator
 from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 
-from globals import Globals, use_independent_fake_data
+from JPsi.MuMu.phosphor.globals import Globals, use_independent_fake_data
 
 ##-- Configuration -------------------------------------------------------------
 ## Selection

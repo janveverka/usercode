@@ -8,7 +8,10 @@ import commands
 # project_name = 'test6'
 # project_name = 'eg_paper_dr0p1'
 # project_name = 'eg_paper_jul2012rereco'
-project_name = 'vg_baseline_rerecos'
+# project_name = 'vg_baseline_rerecos'
+# project_name = 'regressions_no_muon_bias_12cat'
+# project_name = 'regressions_no_muon_bias_8cat'
+project_name = 'regressions_no_muon_bias_8cat'
 
 output_base = '/raid2/veverka/jobs/outputs'
 template_filename='JPsi/MuMu/scripts/phosphor-job.template'
@@ -73,6 +76,103 @@ def get_large_list():
 
 
 #______________________________________________________________________________
+def get_large_list_regression():
+    job_names = []
+
+    total_sections = 4
+
+    for subdet in 'EB EE'.split():
+        for r9 in 'highR9 lowR9'.split():
+            for pt in '10to12 12to15 15to20 20to25 25to30 30to999'.split():
+                for version in 'yyv1 yyv2 yyv3 v13'.split():
+                    ## real data job name
+                    name = '_'.join(['sge_data', subdet, r9, 'pt'+pt,
+                                     version])
+                    job_names.append(name)
+
+                    ## monte carlo job names
+                    for section in range(1, total_sections + 1):
+                        part = 'evt%dof%d' % (section, total_sections)
+                        name = '_'.join(['sge_mc', subdet, r9, 
+                                        'pt'+pt, version, part])
+                        job_names.append(name)
+    return job_names
+## End of get_large_list_regression()
+
+
+#______________________________________________________________________________
+def get_12cat_regression_list():
+    job_names = []
+
+    total_sections = 4
+
+    for subdet in 'EB EE'.split():
+        for pt in '10to12 12to15 15to20 20to25 25to30 30to999'.split():
+            for version in 'yyv1 yyv2 yyv3 v13'.split():
+                ## real data job name
+                name = '_'.join(['sge_data', subdet, 'pt'+pt,
+                                  version])
+                job_names.append(name)
+
+                ## monte carlo job names
+                for section in range(1, total_sections + 1):
+                    part = 'evt%dof%d' % (section, total_sections)
+                    name = '_'.join(['sge_mc', subdet, 
+                                     'pt'+pt, version, part])
+                    job_names.append(name)
+    return job_names
+## End of get_12cat_regression_list()
+
+
+#______________________________________________________________________________
+def get_8cat_regression_list():
+    job_names = []
+
+    total_sections = 4
+
+    for subdet in 'EB EE'.split():
+        for pt in '10to12 12to15 15to25 25to999'.split():
+            for version in 'yyv1 yyv2 yyv3 v13'.split():
+                ## real data job name
+                name = '_'.join(['sge_data', subdet, 'pt'+pt,
+                                  version])
+                job_names.append(name)
+
+                ## monte carlo job names
+                for section in range(1, total_sections + 1):
+                    part = 'evt%dof%d' % (section, total_sections)
+                    name = '_'.join(['sge_mc', subdet, 
+                                     'pt'+pt, version, part])
+                    job_names.append(name)
+    return job_names
+## End of get_8cat_regression_list()
+
+
+#______________________________________________________________________________
+def get_6cat_regression_list():
+    job_names = []
+
+    total_sections = 4
+
+    for subdet in 'EB EE'.split():
+        for pt in '10to15 15to25 25to999'.split():
+            for version in 'yyv1 yyv2 yyv3 v13'.split():
+                ## real data job name
+                name = '_'.join(['sge_data', subdet, 'pt'+pt,
+                                  version])
+                job_names.append(name)
+
+                ## monte carlo job names
+                for section in range(1, total_sections + 1):
+                    part = 'evt%dof%d' % (section, total_sections)
+                    name = '_'.join(['sge_mc', subdet, 
+                                     'pt'+pt, version, part])
+                    job_names.append(name)
+    return job_names
+## End of get_6cat_regression_list()
+
+
+#______________________________________________________________________________
 def get_baseline_list():
     job_names = []
 
@@ -96,8 +196,12 @@ def get_baseline_list():
 
 
 # job_names = get_egpaper_list()
-job_names = get_baseline_list()
+# job_names = get_baseline_list()
 # job_names = get_large_list()
+# job_names = get_large_list_regression()
+# job_names = get_12cat_regression_list()
+# job_names = get_8cat_regression_list()
+job_names = get_6cat_regression_list()
 
 submission_dir = os.path.join(os.curdir, project_name)
 output_dir = os.path.join(output_base, project_name)

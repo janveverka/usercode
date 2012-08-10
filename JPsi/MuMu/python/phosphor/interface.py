@@ -5,9 +5,11 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 #import ConfigParser, StringIO
-from configparser import parse_cfg_file
-from phosphorcalculator import init, init_cfg_file, process_real_data, process_monte_carlo, outro
-from globals import Globals
+from JPsi.MuMu.phosphor.configparser import parse_cfg_file
+from JPsi.MuMu.phosphor.phosphorcalculator import init, init_cfg_file 
+from JPsi.MuMu.phosphor.phosphorcalculator import process_real_data 
+from JPsi.MuMu.phosphor.phosphorcalculator import process_monte_carlo, outro
+from JPsi.MuMu.phosphor.globals import Globals
 #from Phosphor_Globals import debug, version, verbose, cfg_file, use_real_data
 #from globals import version, verbose, debug, cfg_file, use_real_data
 

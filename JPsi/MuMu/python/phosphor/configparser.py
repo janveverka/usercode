@@ -1,7 +1,7 @@
 #=== IMPORTS ==================================================================
 import sys
 import ConfigParser, StringIO
-from globals import Globals
+from JPsi.MuMu.phosphor.globals import Globals
 
 #=== CONSTANTS ================================================================
 
