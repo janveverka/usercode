@@ -5,7 +5,8 @@
 
 # RTAG=HtoZg_sync_2012_cutbased_muons_uptoId
 # RTAG=HtoZg_sync_2012_cutbased_muons_uptoPhotonId
-RTAG=HEAD
+RTAG=HtoZg_sync_2012_cutbased_muons_round1
+# RTAG=HEAD
 cd $CMSSW_BASE/src && \
     cvs co -r $RTAG -d HtoZg/CommonAnalysis \
         UserCode/JanVeverka/HtoZg/CommonAnalysis && \
