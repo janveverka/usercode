@@ -7,8 +7,8 @@ Jan Veverka, Caltech, 6 Aug 2012 - 8 Aug 2012
 import FWCore.ParameterSet.Config as cms
 
 from Misc.TreeMaker.kinematicVariables_cff import kinematicVariables
-from Misc.TreeMaker.muonIdVariables_cff import muonIdVariables
-from Misc.TreeMaker.muonIsolationVariables_cff import muonIsolationVariables
+from HtoZg.MuonAnalysis.muonIdVariables_cff import muonIdVariables
+from HtoZg.MuonAnalysis.muonIsolationVariables_cff import muonIsolationVariables
 
 muonTree = cms.EDAnalyzer('CandViewTreeMaker',
   name      = cms.untracked.string('muons'),
