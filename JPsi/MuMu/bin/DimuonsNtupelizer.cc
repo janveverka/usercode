@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
       muonPt_ ->Fill( (*muons)[i].pt()  );
       muonEta_->Fill( (*muons)[i].eta() );
       muonPhi_->Fill( (*muons)[i].phi() );
-      muonsTree.pt[i] = (*muons)[i].pt();
+      muonsTree.pt = (*muons)[i].pt();
       muonsTree.Fill();
     }
   }  

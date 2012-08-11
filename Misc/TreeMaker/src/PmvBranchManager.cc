@@ -9,14 +9,10 @@
 #include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionFactory.h"
 
 #include "Misc/TreeMaker/interface/PmvBranchManager.h"
 
 PmvBranchManager::PmvBranchManager(edm::ParameterSet const& iConfig) :
-  crackCorrector_( EcalClusterFunctionFactory::get()->create(
-                     "EcalClusterCrackCorrection",
-                     iConfig ) ),
   src_( iConfig.getParameter<edm::InputTag>("src") ),
   genParticleSrc_( iConfig.getParameter<edm::InputTag>("genParticleSrc") ),
   primaryVertexSrc_( iConfig.getParameter<edm::InputTag>("primaryVertexSrc") ),
@@ -31,17 +27,13 @@ PmvBranchManager::PmvBranchManager(edm::ParameterSet const& iConfig) :
   b_muNearIEtaX_(0),
   b_muNearIPhiY_(0),
   b_muNearIsEB_(0),
-  b_muNearIndex_(0),
-  b_phoGenE_(0),
-  b_phoGenEt_(0),
-  b_phoGenEta_(0),
-  b_phoCrackCorr_(0)
+  b_muNearIndex_(0)
 {}
 
 PmvBranchManager::~PmvBranchManager() {}
 
 void
-PmvBranchManager::init(TTree& tree)
+PmvBranchManager::makeBranches(TTree& tree) 
 {
   tree.Branch("nVertices", &nVertices_, "nVertices/I");
 
@@ -75,26 +67,12 @@ PmvBranchManager::init(TTree& tree)
 
   leafList = std::string("muNearIndex") + "[" + sizeName_ + "]/I";
   b_muNearIndex_ = tree.Branch("muNearIndex", &(muNearIndex_[0]), leafList.c_str() );
-
-  leafList = std::string("phoGenE") + "[" + sizeName_ + "]/F";
-  b_phoGenE_ = tree.Branch("phoGenE", &(phoGenE_[0]), leafList.c_str() );
-
-  leafList = std::string("phoGenEt") + "[" + sizeName_ + "]/F";
-  b_phoGenEt_ = tree.Branch("phoGenEt", &(phoGenEt_[0]), leafList.c_str() );
-
-  leafList = std::string("phoGenEta") + "[" + sizeName_ + "]/F";
-  b_phoGenEta_ = tree.Branch("phoGenEta", &(phoGenEta_[0]), leafList.c_str() );
-
-  leafList = std::string("phoCrackCorr") + "[" + sizeName_ + "]/F";
-  b_phoCrackCorr_ = tree.Branch("phoCrackCorr", &(phoCrackCorr_[0]), leafList.c_str() );
 }
 
 void
 PmvBranchManager::getData( const edm::Event& iEvent,
                            const edm::EventSetup& iSetup )
 {
-  crackCorrector_->init( iSetup );
-
   LogDebug("SegFault") << "entering PmvBranchManager::getData(...) ";
   edm::Handle<edm::View<reco::Vertex> > primaryVertices;
   edm::Handle<reco::CompositeCandidateView> mmgCands;
@@ -128,18 +106,10 @@ PmvBranchManager::getData( const edm::Event& iEvent,
   muNearIsEB_.reserve( mmgCands->size() );
   muNearIndex_.reserve( mmgCands->size() );
 
-  phoGenE_.reserve( mmgCands->size() );
-  phoGenEt_.reserve( mmgCands->size() );
-  phoGenEta_.reserve( mmgCands->size() );
-  phoCrackCorr_.reserve( mmgCands->size() );
 
   LogDebug("SegFault") << "loop over candidates ";
   // loop over mmg candidates
   for (size_t i=0; i < mmgCands->size(); ++i) {
-    phoGenE_[i] = -1;
-    phoGenEt_[i] = -1;
-    phoGenEta_[i] = -99;
-    phoCrackCorr_[i] = 1.;
     LogDebug("SegFault") << "getting photon ";
     const pat::Photon &
     photon = * ((const pat::Photon *)
@@ -158,9 +128,6 @@ PmvBranchManager::getData( const edm::Event& iEvent,
         {
           LogDebug("SegFault") << "Found gen match";
           // found the gen match in gen particles.
-          phoGenE_[i] = genMatch->energy();
-          phoGenEt_[i] = genMatch->pt();
-          phoGenEta_[i] = genMatch->eta();
           if (genMatch->numberOfMothers() > 0) {
               found = true;
 
@@ -183,18 +150,16 @@ PmvBranchManager::getData( const edm::Event& iEvent,
         } // if found the gen match in gen particles.
       } // for loop over genParticles
     } // if found gen match
-
+    
     LogDebug("SegFault") << "didn't find photon gen match mother";
 
     if (!found) {
       // didn't find photon gen match mother
-      phoMomPdgId_[i] = 0;
+      phoMomPdgId_[i] = 0; 
       phoMomStatus_[i] = 0;
       isISR_[i] = 0;
       isFSR_[i] = 0;
     }
-
-    phoCrackCorr_[i] = getCrackCorrectionFactor( * photon.superCluster() );
 
     DetId id = photon.superCluster()->seed()->seed();
     phoIEtaX_[i] = photon.isEB() ? EBDetId(id).ieta() : EEDetId(id).ix();
@@ -207,7 +172,7 @@ PmvBranchManager::getData( const edm::Event& iEvent,
     const pat::Muon * nearMuon;
     const pat::Muon * farMuon;
 
-    dimuon = (const reco::CompositeCandidate*) mmgCands->at(i).daughter("dimuon")->masterClonePtr().get();
+    dimuon = (const reco::CompositeCandidate*) mmgCands->at(i).daughter("dimuon");
     muon1 = (const pat::Muon*) dimuon->daughter("muon1")->masterClonePtr().get();
     muon2 = (const pat::Muon*) dimuon->daughter("muon2")->masterClonePtr().get();
 
@@ -216,13 +181,13 @@ PmvBranchManager::getData( const edm::Event& iEvent,
     double dr1 = deltaR(*muon1, photon);
     double dr2 = deltaR(*muon2, photon);
     double drNear = dr1;
-
+  
     if (dr1 < dr2) {
       nearMuon = muon1; farMuon  = muon2; drNear = dr1; muNearIndex_[i] = 1;
     } else {
       nearMuon = muon2; farMuon  = muon1; drNear = dr2; muNearIndex_[i] = 2;
     }
-
+    
     if ( nearMuon->isEnergyValid() ) {
       DetId id = nearMuon->calEnergy().ecal_id;
       if (id.subdetId() == EcalBarrel) {
@@ -255,32 +220,6 @@ PmvBranchManager::getData( const edm::Event& iEvent,
   if (b_muNearIPhiY_ != 0) b_muNearIPhiY_->SetAddress( &(muNearIPhiY_[0]) );
   if (b_muNearIsEB_ != 0) b_muNearIsEB_->SetAddress( &(muNearIsEB_[0]) );
   if (b_muNearIndex_ != 0) b_muNearIndex_->SetAddress( &(muNearIndex_[0]) );
-  if (b_phoGenE_ != 0) b_phoGenE_->SetAddress( &(phoGenE_[0]) );
-  if (b_phoGenEt_ != 0) b_phoGenEt_->SetAddress( &(phoGenEt_[0]) );
-  if (b_phoGenEta_ != 0) b_phoGenEta_->SetAddress( &(phoGenEta_[0]) );
-  if (b_phoCrackCorr_ != 0) b_phoCrackCorr_->SetAddress( &(phoCrackCorr_[0]) );
 
   LogDebug("SegFault") << "exitting";
 }
-
-float
-PmvBranchManager::getCrackCorrectionFactor( const reco::SuperCluster & sc )
-const
-{
-//   double crackcor = 1.;
-  double correctedEnergy = 0.;
-  for ( reco::CaloCluster_iterator cIt = sc.clustersBegin();
-        cIt != sc.clustersEnd(); ++cIt )
-  {
-    const reco::CaloCluster & cc = **cIt;
-/*    crackcor *= (
-                  (
-                    sc.rawEnergy() +
-                    cc.energy() * ( crackCorrector_->getValue(cc) - 1. )
-                  ) / sc.rawEnergy()
-                );*/
-    correctedEnergy += cc.energy() * crackCorrector_->getValue(cc); // new way
-  }
-  return correctedEnergy / sc.rawEnergy(); // new way
-//   return crackcor;
-} // PmvBranchManager::getClusterCorrectionFactor

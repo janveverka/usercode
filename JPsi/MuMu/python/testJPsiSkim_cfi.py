@@ -30,12 +30,12 @@ dimuonsOSHistos = makeHistoAnalyzer("CandViewHistoAnalyzer",
 )
 
 dimuonsSSHistos = dimuonsOSHistos.clone(src = "dimuonsSS")
-dimuonsGGOSHistos = dimuonsOSHistos.clone(src = "dimuonsGGOS")
-dimuonsGGSSHistos = dimuonsOSHistos.clone(src = "dimuonsGGSS")
-dimuonsGTOSHistos = dimuonsOSHistos.clone(src = "dimuonsGTOS")
-dimuonsGTSSHistos = dimuonsOSHistos.clone(src = "dimuonsGTSS")
-dimuonsTTOSHistos = dimuonsOSHistos.clone(src = "dimuonsTTOS")
-dimuonsTTSSHistos = dimuonsOSHistos.clone(src = "dimuonsTTSS")
+dimuonsGlbGlbOSHistos = dimuonsOSHistos.clone(src = "dimuonsGlbGlbOS")
+dimuonsGlbGlbSSHistos = dimuonsOSHistos.clone(src = "dimuonsGlbGlbSS")
+dimuonsGlbTrkOSHistos = dimuonsOSHistos.clone(src = "dimuonsGlbTrkOS")
+dimuonsGlbTrkSSHistos = dimuonsOSHistos.clone(src = "dimuonsGlbTrkSS")
+dimuonsTrkTrkOSHistos = dimuonsOSHistos.clone(src = "dimuonsTrkTrkOS")
+dimuonsTrkTrkSSHistos = dimuonsOSHistos.clone(src = "dimuonsTrkTrkSS")
 
 counts = cms.EDAnalyzer("CandViewCountAnalyzer",
   nbins = cms.untracked.uint32(21),
@@ -46,12 +46,12 @@ counts = cms.EDAnalyzer("CandViewCountAnalyzer",
     cms.PSet( src = cms.untracked.InputTag("trkMuons") ),
     cms.PSet( src = cms.untracked.InputTag("dimuonsOS") ),
     cms.PSet( src = cms.untracked.InputTag("dimuonsSS") ),
-    cms.PSet( src = cms.untracked.InputTag("dimuonsGGOS") ),
-    cms.PSet( src = cms.untracked.InputTag("dimuonsGGSS") ),
-    cms.PSet( src = cms.untracked.InputTag("dimuonsGTOS") ),
-    cms.PSet( src = cms.untracked.InputTag("dimuonsGTSS") ),
-    cms.PSet( src = cms.untracked.InputTag("dimuonsTTOS") ),
-    cms.PSet( src = cms.untracked.InputTag("dimuonsTTSS") ),
+    cms.PSet( src = cms.untracked.InputTag("dimuonsGlbGlbOS") ),
+    cms.PSet( src = cms.untracked.InputTag("dimuonsGlbGlbSS") ),
+    cms.PSet( src = cms.untracked.InputTag("dimuonsGlbTrkOS") ),
+    cms.PSet( src = cms.untracked.InputTag("dimuonsGlbTrkSS") ),
+    cms.PSet( src = cms.untracked.InputTag("dimuonsTrkTrkOS") ),
+    cms.PSet( src = cms.untracked.InputTag("dimuonsTrkTrkSS") ),
     #cms.PSet( src = cms.untracked.InputTag("goodTracks") ),
   )
 )
@@ -62,13 +62,13 @@ jpsiSequence = cms.Sequence(muonHistos +
     + trkMuons * trkMuonHistos
     + dimuonsOS * dimuonsOSHistos
     + dimuonsSS * dimuonsSSHistos
-    + dimuonsGGOS * dimuonsGGOSHistos
-    + dimuonsGGSS * dimuonsGGSSHistos
-    + dimuonsGTOS * dimuonsGTOSHistos
-    + dimuonsGTSS * dimuonsGTSSHistos
-    + dimuonsTTOS * dimuonsTTOSHistos
-    + dimuonsTTSS * dimuonsTTSSHistos ) +
-  counts
+    + dimuonsGlbGlbOS * dimuonsGlbGlbOSHistos
+    + dimuonsGlbGlbSS * dimuonsGlbGlbSSHistos
+    + dimuonsGlbTrkOS * dimuonsGlbTrkOSHistos
+    + dimuonsGlbTrkSS * dimuonsGlbTrkSSHistos
+    + dimuonsTrkTrkOS * dimuonsTrkTrkOSHistos
+    + dimuonsTrkTrkSS * dimuonsTrkTrkSSHistos )
+  + counts
 )
 
 #goodTrackHistos = makeHistoAnalyzer("CandViewHistoAnalyzer",

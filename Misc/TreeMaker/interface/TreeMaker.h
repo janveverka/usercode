@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Veverka
 //      Created:  Mon Apr  4 21:25:02 CEST 2011
-// $Id: TreeMaker.h,v 1.2 2011/04/19 09:01:25 veverka Exp $
+// $Id: TreeMaker.cc,v 1.8 2011/04/17 22:14:12 veverka Exp $
 //
 //
 
@@ -38,7 +38,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "Misc/TreeMaker/interface/EventIdBranchManager.h"
-#include "Misc/TreeMaker/interface/PileupBranchManager.h"
 #include "Misc/TreeMaker/interface/BranchManager.h"
 
 namespace cit {
@@ -62,7 +61,6 @@ namespace cit {
 
     /// branch managers
     EventIdBranchManager eventId_;
-    PileupBranchManager pileup_;
     BranchManager<Collection, T> vars_;
   //   PmvBranchManager pmv_;
   }; // of TreeMaker class declaration
@@ -75,7 +73,6 @@ namespace cit {
     title_( iConfig.getUntrackedParameter<std::string>( "title",
                                                         "TreeMaker tree" ) ),
     eventId_(iConfig),
-    pileup_(iConfig),
     vars_(iConfig)
   //   pmv_( iConfig )
   {
@@ -85,7 +82,6 @@ namespace cit {
 
     // initialize branch managers
     eventId_.init( *tree_ );
-    pileup_ .init( *tree_ );
     vars_   .init( *tree_ );
   } // end of constructor
 
@@ -108,9 +104,8 @@ namespace cit {
   {
     using namespace edm;
 
-    eventId_.getData( iEvent, iSetup );
-    pileup_ .getData( iEvent, iSetup );
-    vars_   .getData( iEvent, iSetup );
+    eventId_.getData(iEvent, iSetup);
+    vars_   .getData(iEvent, iSetup);
 
     tree_->Fill();
   }

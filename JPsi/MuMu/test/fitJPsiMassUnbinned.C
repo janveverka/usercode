@@ -1,6 +1,6 @@
 /** \macro fitJPsiMassUnbinned.C
  *
- * $Id: fitJPsiMassUnbinned.C,v 1.3 2010/07/07 20:07:53 veverka Exp $
+ * $Id: fitJPsiMassUnbinned.C,v 1.1 2010/07/04 23:54:06 veverka Exp $
  *
  *
  * Macro implementing unbinned Maximum-likelihood fit of
@@ -34,17 +34,13 @@ double NormalizedIntegral(RooAbsPdf & function, RooRealVar & integrationVar, dou
 
 }
 
-fitJPsiMassUnbinned(const char *filename = "JPsiMassOS_186nb.txt",
+fitJPsiMassUnbinned(const char *filename = "dimuonMassOS.txt",
   const char* plotOpt = "NEU",
   const int nbins = 50,
-  const char* filenameB = "JPsiMassSS_186nb.txt")
+  const char* filenameB = "dimuonMassSS.txt")
 {
 
-  gROOT->ProcessLine(".L tdrstyle.C");
-  setTDRStyle();
-  gStyle->SetPadRightMargin(0.05);
-
-  RooRealVar  mass("mass","M^{#mu#mu}", 2.6, 3.5,"GeV/c^{2}");
+  RooRealVar  mass("mass","M(#mu^{+}#mu^{-})", 2.6, 3.5,"GeV/c^{2}");
 
   // Read data set
 
@@ -119,13 +115,11 @@ fitJPsiMassUnbinned(const char *filename = "JPsiMassOS_186nb.txt",
 
   plot->Draw();
 
-  TLatex *   tex = new TLatex(0.2,0.8,"CMS preliminary");
-  tex->SetTextFont(42);
+  TLatex *   tex = new TLatex(0.15,0.8,"CMS preliminary");
   tex->SetNDC();
   tex->SetLineWidth(2);
   tex->Draw();
-  tex->DrawLatex(0.2, 0.725, "#sqrt{s} = 7 TeV");
-  tex->DrawLatex(0.2, 0.650, "L = 186 nb^{-1}");
+  tex->DrawLatex(0.15, 0.725, "7 TeV Data, L = 19 pb^{-1}");
 
   float fsig_peak = NormalizedIntegral(signal,
                       mass,
@@ -151,22 +145,8 @@ fitJPsiMassUnbinned(const char *filename = "JPsiMassOS_186nb.txt",
     << (nsigVal/nbkgVal)*sqrt(nsigErrRel*nsigErrRel + nbkgErrRel*nbkgErrRel)
     << endl;
 
-  tex->DrawLatex(0.2, 0.5, Form("N_{S} = %.0f#pm%.0f", nsigVal, nsigErr) );
-  tex->DrawLatex(0.2, 0.425, Form("S/B_{#pm2.5#sigma} = %.1f", nsigVal/nbkgVal) );
-
-  leg = new TLegend(0.65,0.6,0.9,0.75);
-  leg->SetFillColor(kWhite);
-  leg->SetLineColor(kWhite);
-  leg->SetShadowColor(kWhite);
-  leg->SetTextFont(42);
-
-  TLegendEntry * ldata  = leg->AddEntry(data, "Opposite Sign");
-  TLegendEntry * ldataB = leg->AddEntry(dataB, "Same Sign");
-  ldata->SetMarkerStyle(20);
-  ldataB->SetMarkerStyle(20);
-  ldataB->SetMarkerColor(kRed);
-
-  leg->Draw();
+  tex->DrawLatex(0.15, 0.6, Form("N_{S} = %.0f#pm%.0f", nsigVal, nsigErr) );
+  tex->DrawLatex(0.15, 0.525, Form("S/B_{#pm2.5#sigma} = %.1f", nsigVal/nbkgVal) );
 
 }
 

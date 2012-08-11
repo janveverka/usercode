@@ -5,12 +5,10 @@
 #include <vector>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "FWCore/Framework/interface/Event.h"
+#include "TTree.h"
 
 #include "Misc/TreeMaker/interface/ConditionalSingleBranchManager.h"
 #include "Misc/TreeMaker/interface/SingleBranchManager.h"
-
-#include "TTree.h"
 
 namespace cit {
 
