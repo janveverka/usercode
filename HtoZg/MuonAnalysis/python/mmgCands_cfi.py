@@ -10,7 +10,7 @@ mmgCands = cms.EDProducer('CandViewShallowClonePtrCombiner',
             deltaR(daughter("dimuon").daughter(1).eta,
                    daughter("dimuon").daughter(1).phi,
                    daughter("photon").eta,
-                   daughter("photon").phi)) > 0.7
+                   daughter("photon").phi)) > 0.4
         '''),
     decay = cms.string("isolatedDimuons loosePhotons"),
     roles = cms.vstring("dimuon", "photon")

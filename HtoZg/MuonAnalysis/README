@@ -23,7 +23,8 @@ eval $(scram runtime -sh)
 ## Reproduce yields for 2012 muons
 # RTAG=HtoZg_sync_2012_cutbased_muons_uptoId
 # RTAG=HtoZg_sync_2012_cutbased_muons_uptoPhotonId
-RTAG=HtoZg_sync_2012_cutbased_muons_round1
+# RTAG=HtoZg_sync_2012_cutbased_muons_round1
+RTAG=HtoZg_sync_2012_cutbased_muons_round2
 cvs co -r $RTAG -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
 source tmp/setup.sh
 

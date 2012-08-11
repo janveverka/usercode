@@ -28,7 +28,7 @@ patcore.removeMCMatching(process)
 
 ## TFileService for the ntuple output
 process.load('HtoZg.CommonAnalysis.TFileService_cfi')
-# process.TFileService.fileName = 'zg_data.root'
+process.TFileService.fileName = 'data.root'
 
 process.p = cms.Path(process.skimSequence)
 

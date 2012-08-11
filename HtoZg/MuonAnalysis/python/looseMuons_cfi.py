@@ -7,7 +7,7 @@ import FWCore.ParameterSet.Config as cms
 looseMuons = cms.EDFilter('MuonSelector',
     src = cms.InputTag('muons'),
     cut = cms.string('''
-        pt > 20 &&
+        pt > 10 &&
         abs(eta) < 2.4 &&
         isGlobalMuon = 1 && 
         isPFMuon = 1 && 

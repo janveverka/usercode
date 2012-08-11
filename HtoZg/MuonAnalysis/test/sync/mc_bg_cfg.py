@@ -22,6 +22,7 @@ patcore.removeAllPATObjectsBut(process, ['Muons', 'Photons'])
 
 ## TFileService for the ntuple output
 process.load('HtoZg.CommonAnalysis.TFileService_cfi')
+process.TFileService.fileName = 'mc.root'
 
 process.p = cms.Path(process.skimSequence)
 
