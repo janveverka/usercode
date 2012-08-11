@@ -70,7 +70,7 @@ Implementation: Wrapper around RecoEgamma/EgammaTools/interface/ConversionTools.
 
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 
-#include "HtoZg/CommonAnalysis/interface/PluginTools.h"
+#include "HtoZg/CommonAnalysis/interface/ValueMapPutter.h"
 
 namespace cit {
   namespace hzg {
@@ -194,30 +194,13 @@ ConversionToolsProducer::produce (
 
   } // end loop over source photons
 
-  using cit::putValueMap;
+  ValueMapPutter putMap;
 
-  putValueMap<reco::GsfElectronCollection, int>( iEvent,
-                                                 electrons,
-                                                 passConversionVeto,
-                                                 "passConversionVeto" );
-
-  putValueMap<reco::PhotonCollection, int>( iEvent,
-                                            photons,
-                                            passElectronVeto,
-                                            "passElectronVeto" );
-
-  putValueMap<reco::PhotonCollection, int>( iEvent,
-                                            photons,
-                                            hasMatchedConversion,
-                                            "hasMatchedConversion" );
-
+  putMap(iEvent, electrons, passConversionVeto  , "passConversionVeto"  );
+  putMap(iEvent, photons  , passElectronVeto    , "passElectronVeto"    );
+  putMap(iEvent, photons  , hasMatchedConversion, "hasMatchedConversion");
 //   iEvent.put( matchedConversions, "matchedConversions" );
-
-  putValueMap<reco::PhotonCollection, float>( iEvent,
-                                              photons,
-                                              deltaRToTrack,
-                                              "deltaRToTrack" );
-
+  putMap(iEvent, photons  , deltaRToTrack       , "deltaRToTrack"       );
 
 } // ConversionToolsProducer::produce
 
