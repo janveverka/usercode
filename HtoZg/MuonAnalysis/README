@@ -1,6 +1,6 @@
 ---+ Introduction
 This package contains software for the H->Zg->mmg analysis that is
-specific for the muon channel and need the full CMSSW framework.
+specific for the muon channel and needs the full CMSSW framework.
 
 ---+ Production Setup Recipe
 To checkout and compile the package at FNAL to reproduce selection
@@ -20,12 +20,13 @@ export SCRAM_ARCH=slc5_amd64_gcc462
 scram project CMSSW CMSSW_5_2_6
 cd CMSSW_5_2_6/src
 eval $(scram runtime -sh)
-## Reproduce yields for 2012 muons
+cvs co -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
+## Set the tag of the package to get a production release
+## to reproduce yields for 2012 muons
 # RTAG=HtoZg_sync_2012_cutbased_muons_uptoId
 # RTAG=HtoZg_sync_2012_cutbased_muons_uptoPhotonId
 # RTAG=HtoZg_sync_2012_cutbased_muons_round1
 RTAG=HtoZg_sync_2012_cutbased_muons_round2
-cvs co -r $RTAG -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
 source tmp/setup.sh
 
 
@@ -44,6 +45,7 @@ scram project CMSSW CMSSW_5_2_6
 cd CMSSW_5_2_6/src
 eval $(scram runtime -sh)
 cvs co -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
+RTAG=HEAD
 source tmp/setup.sh
 
 ---+ Synchronization Exercise
