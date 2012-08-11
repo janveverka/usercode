@@ -9,6 +9,8 @@
  * Configuration parameters:
  *      muonSource - InputTag of the source muon collection
  *      rhoSource - InputTag of the source vertex collection
+ *      target - string describing the target of isolation; one of
+ *              Data2011, Data2012
  *      
  * \author Jan Veverka, Caltech
  * \date 8 August 2012
@@ -21,6 +23,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 /// user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -31,6 +34,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
@@ -48,8 +52,8 @@ namespace cit {
     template <typename MuonType>
     class MuonIsolationValueMapProducer : public edm::EDProducer {
     public:
-      typedef MuonEffectiveArea::MuonEffectiveAreaType   EAType;
-      typedef MuonEffectiveArea::MuonEffectiveAreaTarget EATarget;
+      typedef MuonEffectiveArea::MuonEffectiveAreaType   Type;
+      typedef MuonEffectiveArea::MuonEffectiveAreaTarget Target;
       explicit MuonIsolationValueMapProducer(const edm::ParameterSet&);
       ~MuonIsolationValueMapProducer();
     private:
@@ -62,6 +66,8 @@ namespace cit {
                   const std::string& name);
       edm::InputTag muonSource_;
       edm::InputTag rhoSource_ ;
+      Type   type_  ;
+      Target target_;
     }; /// class MuonIsolationValueMapProducer
     
     /**
@@ -74,6 +80,21 @@ namespace cit {
       muonSource_(iConfig.getParameter<edm::InputTag>("muonSource")),
       rhoSource_ (iConfig.getParameter<edm::InputTag>("rhoSource" ))
     {
+      type_   = MuonEffectiveArea::kMuGammaAndNeutralHadronIso04;
+      
+      std::string target;
+      target = iConfig.getUntrackedParameter<std::string>("target", 
+                                                          "Data2012");
+      if (target == "Data2011") {
+        target_ = MuonEffectiveArea::kMuEAData2011;
+      } else if (target == "Data2012") {
+        target_ = MuonEffectiveArea::kMuEAData2012;
+      } else {
+        throw cms::Exception("InvalidInput")
+                << "\'target\' must be one of: "
+                << "Data2011 Data2012";
+      }
+        
       produces<edm::ValueMap<float> >("rho"    );
       produces<edm::ValueMap<float> >("EA"     );
       produces<edm::ValueMap<float> >("combIso");
@@ -109,27 +130,19 @@ namespace cit {
       std::vector<float> EA     ;
       std::vector<float> combIso;
      
-      
-      EAType   eaType   = MuonEffectiveArea::kMuGammaAndNeutralHadronIso04;
-      EATarget eaTarget = MuonEffectiveArea::kMuEAData2012;
-      
+            
       typename edm::View<MuonType>::const_iterator iMu = muons->begin();
       for (; iMu < muons->end(); ++iMu) {
         float iRho = float(*rhoHandle);
-        float iEA  = MuonEffectiveArea::GetMuonEffectiveArea(eaType, iMu->eta(),
-                                                             eaTarget);
+        float iEA  = MuonEffectiveArea::GetMuonEffectiveArea(type_, iMu->eta(),
+                                                             target_);
         double chIso04 = iMu->pfIsolationR04().sumChargedHadronPt;   
         double phIso04 = iMu->pfIsolationR04().sumPhotonEt;          
         double nhIso04 = iMu->pfIsolationR04().sumNeutralHadronEt;
         
-//         float iCombIso = nhIso04 + phIso04 - iEA * iRho;
-//         if (iCombIso < 0.) {
-//           iCombIso = 0.;
-//         }
-//         iCombIso += chIso04;
-        
-        float iCombIso = chIso04 + max(0., nhIso04 + phIso04 - iEA * iRho);
-        
+        float iCombIso = chIso04 + std::max(0., 
+                                            nhIso04 + phIso04 - iEA * iRho);
+
         rho    .push_back(iRho    );
         EA     .push_back(iEA     );
         combIso.push_back(iCombIso);

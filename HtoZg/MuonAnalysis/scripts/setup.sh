@@ -13,4 +13,10 @@ cd $CMSSW_BASE/src && \
         UserCode/JanVeverka/Misc/TreeMaker && \
     cvs co -D 8/8/12 -d Muon/MuonAnalysisTools \
         UserCode/sixie/Muon/MuonAnalysisTools && \
+    cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools \
+        UserCode/EGamma/EGammaAnalysisTools && \
+    cvs up -r 1.13 \
+        EGamma/EGammaAnalysisTools/interface/PFIsolationEstimator.h && \
+    cvs up -r 1.20 \
+        EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc && \
     scramv1 build -j4

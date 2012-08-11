@@ -26,23 +26,11 @@ process.load('HtoZg.MuonAnalysis.skimSequence_cff')
 patcore.removeAllPATObjectsBut(process, ['Muons'])
 patcore.removeMCMatching(process)
 
-## The muon tree maker
-process.load('HtoZg.MuonAnalysis.muonTree_cfi')
-process.muonsAfterVertexFilter = process.muonTree.clone()
-process.muonsAfterId = process.muonTree.clone(
-    src = cms.InputTag('tightMuons')
-    )
-
 ## TFileService for the ntuple output
 process.load('HtoZg.CommonAnalysis.TFileService_cfi')
+# process.TFileService.fileName = 'zg_data.root'
 
-process.p = cms.Path(process.allInputEvents +
-                     process.hltFilterSequence + 
-                     process.vertexFilterSequence +
-                     process.patSequence +
-                     process.muonsAfterVertexFilter +
-                     process.tightDimuonSequence +
-                     process.muonsAfterId) 
+process.p = cms.Path(process.skimSequence)
 
 if __name__ == '__main__':
     ## Adds tab-completion and history for interactive testing.

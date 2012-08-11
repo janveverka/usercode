@@ -1,0 +1,9 @@
+<use name="DataFormats/EgammaCandidates"/>
+<use name="DataFormats/PatCandidates"/>
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="EGamma/EGammaAnalysisTools"/>
+<flags EDM_PLUGIN="1"/>
+<library name="HtoZgCommonAnalysis_plugins" file="*.cc">
+</library>
+

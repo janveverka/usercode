@@ -21,12 +21,13 @@ isolatedDimuonFilter = tightDimuonFilter.clone(
     
 hasIsolatedDimuon = cms.EDProducer('EventCountProducer')
 
-muonsAfterIso = muonTree.clone(
-    src = cms.InputTag('isolatedMuons')
-    )
+#muonsAfterIso = muonTree.clone(
+    #src = cms.InputTag('isolatedMuons')
+    #)
 
 isolatedDimuonSequence = cms.Sequence(isolatedMuons +
                                       isolatedDimuons +
                                       isolatedDimuonFilter +
-                                      hasIsolatedDimuon + 
-                                      muonsAfterIso)
+                                      hasIsolatedDimuon #+ 
+                                      #muonsAfterIso
+                                      )

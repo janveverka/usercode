@@ -4,6 +4,7 @@ from HtoZg.MuonAnalysis.filterSequence_cff import *
 from HtoZg.MuonAnalysis.patSequence_cff import *
 from HtoZg.MuonAnalysis.tightDimuonSequence_cff import *
 from HtoZg.MuonAnalysis.isolatedDimuonSequence_cff import *
+from HtoZg.CommonAnalysis.loosePhotonSequence_cff import *
 
 allInputEvents   = cms.EDProducer('EventCountProducer')
 
@@ -14,7 +15,8 @@ skimSequence = cms.Sequence(allInputEvents +
                             patSequence +
                             muonsAfterVtx +
                             tightDimuonSequence +
-                            isolatedDimuonSequence)
+                            isolatedDimuonSequence + 
+                            loosePhotonSequence)
 
 if __name__ == '__main__':
     import user
