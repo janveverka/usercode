@@ -15,7 +15,7 @@ TFile *_file0 = TFile::Open("$SOURCE")
 photonsBeforeId->cd()
 photons->SetScanField(0)
 photons->Scan(
-  "id.event:pt:eta:hoe:sihih:"
+  "id.event:pt:eta:eleVeto:hoe:sihih:"
   "chIso:nhIso:phIso:rho:chEA:nhEA:phEA", "n > 0"
   ); >dump.txt
 

@@ -23,7 +23,7 @@ json.apply(jsonfile, process.source)
 
 ## The HtoZg sequence
 process.load('HtoZg.MuonAnalysis.skimSequence_cff')
-patcore.removeAllPATObjectsBut(process, ['Muons'])
+patcore.removeAllPATObjectsBut(process, ['Muons', 'Photons'])
 patcore.removeMCMatching(process)
 
 ## TFileService for the ntuple output

@@ -11,6 +11,8 @@ loosePhotons = cms.EDFilter('PATPhotonSelector',
     src = cms.InputTag('selectedPatPhotons'),
     cut = cms.string('''
         (isEB &&
+         pt > 15 &&
+         userInt("conversionTools:passElectronVeto") > 0 &&
          hadTowOverEm < 0.05 &&
          sigmaIetaIeta < 0.012 &&
          userFloat("photonIsolation:pfChargedHadronRhoCorrected") < 2.6 &&
@@ -20,6 +22,9 @@ loosePhotons = cms.EDFilter('PATPhotonSelector',
              < 1.3 + 0.005 * pt
          ) ||
         (!isEB &&
+         pt > 15 &&
+         abs(eta) < 2.4 &&
+         userInt("conversionTools:passElectronVeto") > 0 &&
          hadTowOverEm < 0.05 &&
          sigmaIetaIeta < 0.034 &&
          userFloat("photonIsolation:pfChargedHadronRhoCorrected") < 2.3 &&
