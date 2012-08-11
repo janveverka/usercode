@@ -51,6 +51,7 @@
 
 #include "EGamma/EGammaAnalysisTools/interface/PFIsolationEstimator.h"
 #include "HtoZg/CommonAnalysis/interface/PhotonEffectiveArea.h"
+#include "HtoZg/CommonAnalysis/interface/ValueMapPutter.h"
 
 namespace cit {
   namespace hzg {
@@ -66,10 +67,6 @@ namespace cit {
       virtual void produce(edm::Event&, const edm::EventSetup&);
       
       // ----------member data ---------------------------
-      void putMap(edm::Event & iEvent,
-                  edm::Handle<edm::View<PhotonType> >& photons,
-                  std::vector<float>& vertexingData,
-                  const std::string& name);
       edm::InputTag photonSource_;
       edm::InputTag rhoSource_   ;
       edm::InputTag pfSource_    ;
@@ -106,6 +103,8 @@ namespace cit {
       isolator_.setDeltaRVetoBarrelCharged(.02);
       isolator_.setDeltaRVetoEndcapCharged(.02);
       isolator_.setRectangleDeltaEtaVetoBarrelPhotons(.015);
+      isolator_.setUseCrystalSize(kTRUE);
+      isolator_.setNumberOfCrystalEndcapPhotons(4);
       //isolator_.setDeltaRVetoEndcapPhotons(0.00864 * fabs(sinh(1.5)) * 4);
     } /// Constructor
     
@@ -126,10 +125,10 @@ namespace cit {
       edm::Event& iEvent, const edm::EventSetup& iSetup
       )
     {
-      edm::Handle<edm::View<PhotonType> >      photons     ;
-      edm::Handle<double>                      rhoHandle   ; 
-      edm::Handle<reco::PFCandidateCollection> pfHandle    ; 
-      edm::Handle<reco::VertexCollection>      vertices    ; 
+      edm::Handle<edm::View<PhotonType> >      photons  ;
+      edm::Handle<double>                      rhoHandle; 
+      edm::Handle<reco::PFCandidateCollection> pfHandle ; 
+      edm::Handle<reco::VertexCollection>      vertices ; 
       
       iEvent.getByLabel(photonSource_, photons  );
       iEvent.getByLabel(rhoSource_   , rhoHandle);
@@ -152,7 +151,7 @@ namespace cit {
      
       float rho = float(*rhoHandle);
       const reco::PFCandidateCollection * pfCandidates = pfHandle.product();
-      edm::Ref<reco::VertexCollection> vertex(vertices, 0);
+      edm::Ref<reco::VertexCollection> phoVtxRef(vertices, 0);
       
       const PhotonEffectiveArea::Type chType = PhotonEffectiveArea::kCharged03;
       const PhotonEffectiveArea::Type nhType = PhotonEffectiveArea::kNeutral03;
@@ -168,8 +167,8 @@ namespace cit {
         double nhEA = PhotonEffectiveArea::get(nhType, scEta);
         double phEA = PhotonEffectiveArea::get(phType, scEta);
         
-        isolator_.setDeltaRVetoEndcapPhotons(0.00864 * fabs(sinh(scEta)) * 4);
-        isolator_.fGetIsolation(pho, pfCandidates, vertex, vertices); 
+        //isolator_.setDeltaRVetoEndcapPhotons(0.00864 * fabs(sinh(scEta)) * 4);
+        isolator_.fGetIsolation(pho, pfCandidates, phoVtxRef, vertices); 
         
         double chIso = isolator_.getIsolationCharged();
         double nhIso = isolator_.getIsolationNeutral();
@@ -195,6 +194,8 @@ namespace cit {
                 
       } // loop over photons
 
+      ValueMapPutter putMap;
+      
       putMap(iEvent, photons, rhoValues         , "rho"                        );
       
       putMap(iEvent, photons, chEAValues        , "chargedHadronEA"            );
@@ -211,27 +212,6 @@ namespace cit {
 
     } /// produce(..)
     
-    /**
-     * Helper method that puts one value map in the event.
-     */
-    template <typename PhotonType>
-    void
-    PhotonIsolationValueMapProducer<PhotonType>::putMap (
-      edm::Event & iEvent,
-      edm::Handle<edm::View<PhotonType> >& photons,
-      std::vector<float>& data,
-      const std::string& name
-      )
-    {
-      using namespace std;
-      using namespace edm;
-
-      auto_ptr<ValueMap<float> > prod(new ValueMap<float>());
-      typename ValueMap<float>::Filler filler (*prod);
-      filler.insert(photons, data.begin(), data.end());
-      filler.fill();
-      iEvent.put(prod, name);
-    } // PhotonIsolationValueMapProducer<PhotonType>::putMap(...)    
   } // namespace cit::hzg
 } // namespace cit
 
