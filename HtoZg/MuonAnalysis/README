@@ -19,10 +19,12 @@ cd $(mktemp -d -p /tmp/$(whoami))
 export SCRAM_ARCH=slc5_amd64_gcc462
 scram project CMSSW CMSSW_5_2_6
 cd CMSSW_5_2_6/src
-## Reproduce yields for 2012 muons up to the ID
-RTAG=HtoZg_sync_2012_cutbased_muons_uptoId
-cvs co -r $RTAG -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
 eval $(scram runtime -sh)
+## Reproduce yields for 2012 muons up to the ID
+# RTAG=HtoZg_sync_2012_cutbased_muons_uptoId
+RTAG=HtoZg_sync_2012_cutbased_muons_uptoPhotonId
+cvs co -r $RTAG -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
+sed -i 's/HEAD/HtoZg_sync_2012_cutbased_muons_uptoId/' tmp/setup.sh
 source tmp/setup.sh
 
 
