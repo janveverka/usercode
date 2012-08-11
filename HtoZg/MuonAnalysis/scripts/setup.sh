@@ -3,6 +3,8 @@
 ## USAGE: source $CMSSW_BASE/src/HtoZg/MuonAnalysis/scripts/setup.sh
 ## Jan Veverka, Caltech, 8 August 2012
 
+# RTAG=HtoZg_sync_2012_cutbased_muons_uptoId
+# RTAG=HtoZg_sync_2012_cutbased_muons_uptoPhotonId
 RTAG=HEAD
 cd $CMSSW_BASE/src && \
     cvs co -r $RTAG -d HtoZg/CommonAnalysis \
