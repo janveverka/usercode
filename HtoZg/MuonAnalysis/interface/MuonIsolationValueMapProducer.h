@@ -42,6 +42,7 @@
 #include "DataFormats/Common/interface/ValueMap.h"
 #include "DataFormats/Common/interface/OwnVector.h"
 
+#include "HtoZg/CommonAnalysis/interface/ValueMapPutter.h"
 #include "Muon/MuonAnalysisTools/interface/MuonEffectiveArea.h"
 
 namespace cit {
@@ -60,10 +61,6 @@ namespace cit {
       virtual void produce(edm::Event&, const edm::EventSetup&);
       
       // ----------member data ---------------------------
-      void putMap(edm::Event & iEvent,
-                  edm::Handle<edm::View<MuonType> >& muons,
-                  std::vector<float>& vertexingData,
-                  const std::string& name);
       edm::InputTag muonSource_;
       edm::InputTag rhoSource_ ;
       Type   type_  ;
@@ -148,33 +145,13 @@ namespace cit {
         combIso.push_back(iCombIso);
       } // loop over muons
 
+      ValueMapPutter putMap;
+      
       putMap(iEvent, muons, rho    , "rho"    );
       putMap(iEvent, muons, EA     , "EA"     );
       putMap(iEvent, muons, combIso, "combIso");
 
-    } /// produce(..)
-    
-    /**
-     * Helper method that puts one value map in the event.
-     */
-    template <typename MuonType>
-    void
-    MuonIsolationValueMapProducer<MuonType>::putMap (
-      edm::Event & iEvent,
-      edm::Handle<edm::View<MuonType> >& muons,
-      std::vector<float>& data,
-      const std::string& name
-      )
-    {
-      using namespace std;
-      using namespace edm;
-
-      auto_ptr<ValueMap<float> > prod(new ValueMap<float>());
-      typename ValueMap<float>::Filler filler (*prod);
-      filler.insert(muons, data.begin(), data.end());
-      filler.fill();
-      iEvent.put(prod, name);
-    } /// MuonIsolationValueMapProducer<MuonType>::putMap(...)    
+    } /// produce(..)    
   } // namespace cit::hzg
 } // namespace cit
 

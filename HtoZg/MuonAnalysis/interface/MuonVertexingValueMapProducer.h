@@ -41,6 +41,8 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
+#include "HtoZg/CommonAnalysis/interface/ValueMapPutter.h"
+
 namespace cit {
   namespace hzg {
     /**
@@ -55,10 +57,6 @@ namespace cit {
       virtual void produce(edm::Event&, const edm::EventSetup&);
       
       // ----------member data ---------------------------
-      void putMap(edm::Event & iEvent,
-                  edm::Handle<edm::View<MuonType> >& muons,
-                  std::vector<float>& vertexingData,
-                  const std::string& name);
       edm::InputTag muonSource_;
       edm::InputTag vertexSource_;
     }; /// class MuonVertexingValueMapProducer
@@ -126,32 +124,13 @@ namespace cit {
         dz .push_back(iMu->innerTrack()->dz (vtx));
       } // loop over muons
 
+      ValueMapPutter putMap;
+      
       putMap(iEvent, muons, dxy, "dxy");
       putMap(iEvent, muons, dz , "dz" );
 
     } /// produce(..)
     
-    /**
-     * Helper method that puts one value map in the event.
-     */
-    template <typename MuonType>
-    void
-    MuonVertexingValueMapProducer<MuonType>::putMap (
-      edm::Event & iEvent,
-      edm::Handle<edm::View<MuonType> >& muons,
-      std::vector<float>& data,
-      const std::string& name
-      )
-    {
-      using namespace std;
-      using namespace edm;
-
-      auto_ptr<ValueMap<float> > prod(new ValueMap<float>());
-      typename ValueMap<float>::Filler filler (*prod);
-      filler.insert(muons, data.begin(), data.end());
-      filler.fill();
-      iEvent.put(prod, name);
-    } /// MuonVertexingValueMapProducer<MuonType>::putMap(...)    
   } // namespace cit::hzg
 } // namespace cit
 
