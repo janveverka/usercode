@@ -12,8 +12,7 @@ process.source = cms.Source("PoolSource",
 #     "file:/afs/cern.ch/cms/cit/veverka/data/mc/Spring10/Sherpa/ZgMu_0j2/GEN/sherpack_lib3/outputGEN_3.root",
 #     "rfio:/castor/cern.ch/user/v/veverka/mc/Spring10/Sherpa/ZgEle_0j2/GEN/sherpack_lib3/outputGEN_5.root",
 #     "rfio:/castor/cern.ch/user/v/veverka/mc/Spring10/Sherpa/ZgMu_0j2/GEN/sherpack_lib3/outputGEN_5.root",
-#     "rfio:/castor/cern.ch/user/v/veverka/mc/Spring10/Sherpa/ZgTau_0j2/GEN/sherpack_lib3/outputGEN_5.root",
-    "rfio:/afs/cern.ch/cms/cit/veverka/vgamma/sherpa/CMSSW_3_5_8/src/Sherpa/ZgNu_0j/test/sherpa_out.root",
+    "rfio:/castor/cern.ch/user/v/veverka/mc/Spring10/Sherpa/ZgTau_0j2/GEN/sherpack_lib3/outputGEN_5.root",
 
   ),
   duplicateCheckMode = cms.untracked.string("checkEachRealDataFile"),
@@ -25,8 +24,8 @@ process.TFileService = cms.Service(
   "TFileService",
 #   fileName = cms.string("histos_ZgEle_0j2_filter.root")
 #   fileName = cms.string("histos_ZgMu_0j2_filter.root")
-#   fileName = cms.string("histos_ZgTau_0j2_filter.root")
-  fileName = cms.string("zgHistos_test.root")
+  fileName = cms.string("histos_ZgTau_0j2_filter.root")
+#   fileName = cms.string("zgHistos_test.root")
   #fileName = cms.string("histos_ZgEle_0j2.root")
   #fileName = cms.string("histos_ZgEleMu_0j2_Jet10.root")
   #fileName = cms.string("histos_ZgMu_0j2_Jet10.root")

@@ -23,6 +23,6 @@ for vboson in vdecays.keys():
       else:
         job = "%sg%s_0j%d" % (vboson, decay, njets)
       for i in range(nJobs):
-        print "bsub -q %5s sh %s %s" % (queueForNJets[njets], jobFile, job)
+        print "bsub -q %5s %s %s" % (queueForNJets[njets], jobFile, job)
 
 

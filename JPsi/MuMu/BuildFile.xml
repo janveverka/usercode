@@ -1,6 +1,5 @@
 <use name="root"/>
-<use name="roofit"/>
-<use name="rootrflx"/>
 <export>
-   <lib name="1"/>
+   <lib name="JPsiMuMu"/>
+   <use name="root"/>
 </export>

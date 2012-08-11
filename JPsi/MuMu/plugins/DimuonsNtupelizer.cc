@@ -1,6 +1,5 @@
-// #include <map>
-// #include <string>
-#include <iostream>
+#include <map>
+#include <string>
 
 #include "TH1.h"
 #include "TMath.h"
@@ -13,7 +12,6 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/Point3D.h"
 #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
-#include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
@@ -142,160 +140,111 @@ DimuonsNtupelizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   edm::Handle<edm::View<reco::Vertex> > primaryVertices;
   iEvent.getByLabel(primaryVertexSrc_, primaryVertices);
 
-  dimuonsTree_.run   = iEvent.run();
-  dimuonsTree_.lumi  = iEvent.id().luminosityBlock();
-  dimuonsTree_.event = iEvent.id().event();
-
-  // TODO: ADD THE HLT BITS
-/*  dimuonsTree_.L1DoubleMuOpen    = dimuon->L1DoubleMuOpen();
-  dimuonsTree_.HLT_Mu3           = dimuon->HLT_Mu3();
-  dimuonsTree_.HLT_Mu9           = dimuon->HLT_Mu9();*/
-
-  dimuonsTree_.nDimuons = dimuons->size();
-  if (dimuonsTree_.nDimuons > DimuonsTree::maxDimuons)
-    dimuonsTree_.nDimuons = DimuonsTree::maxDimuons;
-
-  dimuonsTree_.nMuons = muons->size();
-  if (dimuonsTree_.nMuons > DimuonsTree::maxMuons)
-    dimuonsTree_.nMuons = DimuonsTree::maxMuons;
-  
-
   // loop over dimuons
   reco::VertexCompositeCandidateView::const_iterator dimuon;
-  int i;
-  for(dimuon = dimuons->begin(), i=0;
-      i < dimuonsTree_.nDimuons; ++dimuon, ++i) {
-
-  
-    dimuonsTree_.mass[i]              = dimuon->mass();
-    dimuonsTree_.pt[i]                = dimuon->pt();
-    dimuonsTree_.eta[i]               = dimuon->eta();
-    dimuonsTree_.phi[i]               = dimuon->phi();
-    dimuonsTree_.y[i]                 = dimuon->y();
-    dimuonsTree_.p[i]                 = dimuon->p();
-    dimuonsTree_.charge[i]            = dimuon->charge();
-
-    dimuonsTree_.vProb [i] = TMath::Prob(dimuon->vertexChi2(),
-                                      dimuon->vertexNdof()
-                                      );
-    dimuonsTree_.vrho  [i] = rho(*dimuon);
-    dimuonsTree_.vrhoBS[i] = rho(*dimuon, beamSpot->position() );
-    dimuonsTree_.vrhoPV[i] = rho(*dimuon, primaryVertices->at(0).position() );
-    dimuonsTree_.vx    [i] = dimuon->vx();
-    dimuonsTree_.vxBS  [i] = dimuon->vx() - beamSpot->position().X();
-    dimuonsTree_.vxPV  [i] = dimuon->vx() - primaryVertices->at(0).position().X();
-    dimuonsTree_.vy    [i] = dimuon->vy();
-    dimuonsTree_.vyBS  [i] = dimuon->vy() - beamSpot->position().Y();
-    dimuonsTree_.vyPV  [i] = dimuon->vy() - primaryVertices->at(0).position().Y();
-    dimuonsTree_.vz    [i] = dimuon->vz();
-    dimuonsTree_.vzBS  [i] = dimuon->vz() - beamSpot->position().Z();
-    dimuonsTree_.vzPV  [i] = dimuon->vz() - primaryVertices->at(0).position().Z();
-
-    dimuonsTree_.d0   [i] = - dxy(*dimuon);
-    dimuonsTree_.d0BS [i] = - dxy(*dimuon, beamSpot->position() );
-    dimuonsTree_.d0PV [i] = - dxy(*dimuon, primaryVertices->at(0).position() );
-    dimuonsTree_.dz   [i] = dz(*dimuon);
-    dimuonsTree_.dzBS [i] = dz(*dimuon, beamSpot->position() );
-    dimuonsTree_.dzPV [i] = dz(*dimuon, primaryVertices->at(0).position() );
-    dimuonsTree_.dsz  [i] = dsz(*dimuon);
-    dimuonsTree_.dszBS[i] = dsz(*dimuon, beamSpot->position() );
-    dimuonsTree_.dszPV[i] = dsz(*dimuon, primaryVertices->at(0).position() );
-    const double pdgMassJPsi  =  3.097,
-                 pdgMassPsi2S =  3.686,
-                 pdgMassY1S   =  9.460,
-                 pdgMassY2S   = 10.023,
-                 pdgMassY3S   = 10.355,
-                 pdgMassZ     = 91.187;
-    const int pdgIdJPsi  =    443,
-              pdgIdPsi2S = 100443,
-              pdgIdY1S   =    553,
-              pdgIdY2S   = 100553,
-              pdgIdY3S   = 200553,
-              pdgIdZ     =     23;
-
-    const double epsilon = 0.025;
-    if ( dimuon->charge() == 0 ) {
-      if ( dimuon->mass() > (1. - epsilon) * pdgMassJPsi &&
-           dimuon->mass() < (1. + epsilon) * pdgMassJPsi )
-        dimuonsTree_.pdgId[i] = pdgIdJPsi;
-      else if ( dimuon->mass() > (1. - epsilon) * pdgMassPsi2S &&
-                dimuon->mass() < (1. + epsilon) * pdgMassPsi2S )
-        dimuonsTree_.pdgId[i] = pdgIdPsi2S;
-      else if ( dimuon->mass() > (1. - epsilon) * pdgMassY1S &&
-                dimuon->mass() < (1. + epsilon) * pdgMassY1S )
-        dimuonsTree_.pdgId[i] = pdgIdY1S;
-      else if ( dimuon->mass() > (1. - epsilon) * pdgMassY2S &&
-                dimuon->mass() < 0.5 * (pdgMassY2S + pdgMassY3S) )
-        dimuonsTree_.pdgId[i] = pdgIdY2S;
-      else if ( dimuon->mass() >= 0.5 * (pdgMassY2S + pdgMassY3S) &&
-                dimuon->mass() < (1. + epsilon) * pdgMassY3S)
-        dimuonsTree_.pdgId[i] = pdgIdY3S;
-      else if ( dimuon->mass() > (1. - epsilon) * pdgMassZ &&
-                dimuon->mass() < (1. + epsilon) * pdgMassZ)
-        dimuonsTree_.pdgId[i] = pdgIdZ;
-    } else {
-      dimuonsTree_.pdgId[i] = 0;
-    }
+  for(dimuon = dimuons->begin(), int i=0;
+      dimuon != dimuons->end(); ++dimuon, ++i) {
 
     // get the daughters
-    const reco::CandidateBaseRef dau1 = dimuon->daughter(0)->masterClone();
-    const reco::CandidateBaseRef dau2 = dimuon->daughter(1)->masterClone();
-    double cosOpeningAngle = dau1->momentum().Dot(dau2->momentum()) /
-                             ( dau1->p() * dau2->p() );
-    dimuonsTree_.backToBack[i] = 0.5 * (1. - cosOpeningAngle);
+    const reco::Candidate * dau1 = dimuon->daughter(0)->masterClone().get();
+    const reco::Candidate * dau2 = dimuon->daughter(1)->masterClone().get();
+    const pat::Muon * mu1 = dynamic_cast<const pat::Muon*>(dau1);
+    const pat::Muon * mu2 = dynamic_cast<const pat::Muon*>(dau2);
+  
+    dimuonsTree_.run   = iEvent.run();
+    dimuonsTree_.lumi  = iEvent.id().luminosityBlock();
+    dimuonsTree_.event = iEvent.id().event();
 
-    dimuonsTree_.dau1[i] = dau1.key();
-    dimuonsTree_.dau2[i] = dau2.key();
-  } // loop over dimuons
+    // set the dimuon variables
+    dimuonsTree_.mass[i]       = dimuon->mass();
+    dimuonsTree_.pt         = dimuon->pt();
+    dimuonsTree_.eta        = dimuon->eta();
+    dimuonsTree_.phi        = dimuon->phi();
+    dimuonsTree_.y          = dimuon->y();
+    dimuonsTree_.p          = dimuon->p();
+    dimuonsTree_.charge     = dimuon->charge();
+    dimuonsTree_.vProb  = TMath::Prob(dimuon->vertexChi2(),
+                                      dimuon->vertexNdof()
+                                      );
 
-  // loop over muons
-  edm::View<pat::Muon>::const_iterator mu;
-  for(mu = muons->begin(), i=0; i < dimuonsTree_.nMuons; ++mu, ++i) {
+    dimuonsTree_.vrho   = rho(*dimuon);
+    dimuonsTree_.vrhoBS = rho(*dimuon, beamSpot->position() );
+    dimuonsTree_.vrhoPV = rho(*dimuon, primaryVertices->at(0).position() );
+    dimuonsTree_.vx     = dimuon->vx();
+    dimuonsTree_.vxBS   = dimuon->vx() - beamSpot->position().X();
+    dimuonsTree_.vxPV   = dimuon->vx() - primaryVertices->at(0).position().X();
+    dimuonsTree_.vy     = dimuon->vy();
+    dimuonsTree_.vyBS   = dimuon->vy() - beamSpot->position().Y();
+    dimuonsTree_.vyPV   = dimuon->vy() - primaryVertices->at(0).position().Y();
+    dimuonsTree_.vz     = dimuon->vz();
+    dimuonsTree_.vzBS   = dimuon->vz() - beamSpot->position().Z();
+    dimuonsTree_.vzPV   = dimuon->vz() - primaryVertices->at(0).position().Z();
+
+    dimuonsTree_.d0    = - dxy(*dimuon);
+    dimuonsTree_.d0BS  = - dxy(*dimuon, beamSpot->position() );
+    dimuonsTree_.d0PV  = - dxy(*dimuon, primaryVertices->at(0).position() );
+    dimuonsTree_.dz    = dz(*dimuon);
+    dimuonsTree_.dzBS  = dz(*dimuon, beamSpot->position() );
+    dimuonsTree_.dzPV  = dz(*dimuon, primaryVertices->at(0).position() );
+    dimuonsTree_.dsz   = dsz(*dimuon);
+    dimuonsTree_.dszBS = dsz(*dimuon, beamSpot->position() );
+    dimuonsTree_.dszPV = dsz(*dimuon, primaryVertices->at(0).position() );
+//    dimuonsTree_.pdgId  = dimuon->pdgId();
+    double cosOpeningAngle = (mu1->momentum().Dot( mu2->momentum() ) ) / ( mu1->p() * mu2->p() );
+    dimuonsTree_.backToBack = 0.5 * (1. - cosOpeningAngle);
+
     // set the daughter leafs
-    dimuonsTree_.muPt[i]                      = mu->pt();
-    dimuonsTree_.muEta[i]                     = mu->eta();
-    dimuonsTree_.muPhi[i]                     = mu->phi();
-    dimuonsTree_.muP[i]                       = mu->p();
-    dimuonsTree_.muCharge[i]                  = mu->charge();
-    dimuonsTree_.muSiNormalizedChi2[i]        = mu->innerTrack()->normalizedChi2();
-    dimuonsTree_.muSiD0[i]                    = mu->innerTrack()->d0();
-    dimuonsTree_.muSiD0BS[i]                  = - mu->innerTrack()->dxy( beamSpot->position() );
-    dimuonsTree_.muSiD0PV[i]                  = - mu->innerTrack()->dxy( primaryVertices->at(0).position() );
-    dimuonsTree_.muSiDz[i]                    = mu->innerTrack()->dz();
-    dimuonsTree_.muSiDzBS[i]                  = mu->innerTrack()->dz( beamSpot->position() );
-    dimuonsTree_.muSiDzPV[i]                  = mu->innerTrack()->dz( primaryVertices->at(0).position() );
-    dimuonsTree_.muSiDsz[i]                   = mu->innerTrack()->dsz();
-    dimuonsTree_.muSiDszBS[i]                 = mu->innerTrack()->dsz( beamSpot->position() );
-    dimuonsTree_.muSiDszPV[i]                 = mu->innerTrack()->dsz( primaryVertices->at(0).position() );
-    dimuonsTree_.muSiHits[i]                  = mu->innerTrack()->found();
-    dimuonsTree_.muPixelHits[i]               = mu->innerTrack()->hitPattern().numberOfValidPixelHits();
-    // count stations
-    unsigned nStations = 0, stationMask = mu->stationMask();
-    for (; stationMask; nStations++) 
-      stationMask &= stationMask - 1; // clear the least significant bit set
-    dimuonsTree_.muStations[i]                = nStations;
-    dimuonsTree_.muVz[i]                      = mu->vz();
-    dimuonsTree_.muIsGlobalMuon[i]            = mu->isGlobalMuon();
-    dimuonsTree_.muIsTrackerMuon[i]           = mu->isTrackerMuon();
-    dimuonsTree_.muIsTMLastStationAngTight[i] = mu->muonID("TMLastStationAngTight");
-    dimuonsTree_.muIsTrackerMuonArbitrated[i] = mu->muonID("TrackerMuonArbitrated");
-    dimuonsTree_.muTrackIso[i]                = mu->trackIso();
-    dimuonsTree_.muEcalIso[i]                 = mu->ecalIso();
-    dimuonsTree_.muHcalIso[i]                 = mu->hcalIso();
-//     dimuonsTree_.muHltMu9Match[i]             = mu->hltMu9Match();
-  } // loop over muons
+    dimuonsTree_.mu1Pt                      = mu1->pt();
+    dimuonsTree_.mu2Pt                      = mu2->pt();
+    dimuonsTree_.mu1Eta                     = mu1->eta();
+    dimuonsTree_.mu2Eta                     = mu2->eta();
+    dimuonsTree_.mu1Phi                     = mu1->phi();
+    dimuonsTree_.mu2Phi                     = mu2->phi();
+    dimuonsTree_.mu1P                       = mu1->p();
+    dimuonsTree_.mu2P                       = mu2->p();
+    dimuonsTree_.mu1Charge                  = mu1->charge();
+    dimuonsTree_.mu2Charge                  = mu2->charge();
+    dimuonsTree_.mu1SiNormalizedChi2        = mu1->innerTrack()->normalizedChi2();
+    dimuonsTree_.mu2SiNormalizedChi2        = mu2->innerTrack()->normalizedChi2();
+    dimuonsTree_.mu1SiD0                    = mu1->innerTrack()->d0();
+    dimuonsTree_.mu2SiD0                    = mu2->innerTrack()->d0();
+    dimuonsTree_.mu1SiD0BS                  = - mu1->innerTrack()->dxy( beamSpot->position() );
+    dimuonsTree_.mu2SiD0BS                  = - mu2->innerTrack()->dxy( beamSpot->position() );
+    dimuonsTree_.mu1SiD0PV                  = - mu1->innerTrack()->dxy( primaryVertices->at(0).position() );
+    dimuonsTree_.mu2SiD0PV                  = - mu2->innerTrack()->dxy( primaryVertices->at(0).position() );
+    dimuonsTree_.mu1SiDz                    = mu1->innerTrack()->dz();
+    dimuonsTree_.mu2SiDz                    = mu2->innerTrack()->dz();
+    dimuonsTree_.mu1SiDzBS                  = mu1->innerTrack()->dz( beamSpot->position() );
+    dimuonsTree_.mu2SiDzBS                  = mu2->innerTrack()->dz( beamSpot->position() );
+    dimuonsTree_.mu1SiDzPV                  = mu1->innerTrack()->dz( primaryVertices->at(0).position() );
+    dimuonsTree_.mu2SiDzPV                  = mu2->innerTrack()->dz( primaryVertices->at(0).position() );
+    dimuonsTree_.mu1SiDsz                   = mu1->innerTrack()->dsz();
+    dimuonsTree_.mu2SiDsz                   = mu2->innerTrack()->dsz();
+    dimuonsTree_.mu1SiDszBS                 = mu1->innerTrack()->dsz( beamSpot->position() );
+    dimuonsTree_.mu2SiDszBS                 = mu2->innerTrack()->dsz( beamSpot->position() );
+    dimuonsTree_.mu1SiDszPV                 = mu1->innerTrack()->dsz( primaryVertices->at(0).position() );
+    dimuonsTree_.mu2SiDszPV                 = mu2->innerTrack()->dsz( primaryVertices->at(0).position() );
+    dimuonsTree_.mu1SiHits                  = mu1->innerTrack()->found();
+    dimuonsTree_.mu2SiHits                  = mu2->innerTrack()->found();
+    dimuonsTree_.mu1PixelHits               = mu1->innerTrack()->hitPattern().numberOfValidPixelHits();
+    dimuonsTree_.mu2PixelHits               = mu2->innerTrack()->hitPattern().numberOfValidPixelHits();
+    dimuonsTree_.mu1IsGlobalMuon            = mu1->isGlobalMuon();
+    dimuonsTree_.mu2IsGlobalMuon            = mu2->isGlobalMuon();
+    dimuonsTree_.mu1IsTrackerMuon           = mu1->isTrackerMuon();
+    dimuonsTree_.mu2IsTrackerMuon           = mu2->isTrackerMuon();
+    dimuonsTree_.mu1IsTMLastStationAngTight = mu1->muonID("TMLastStationAngTight");
+    dimuonsTree_.mu2IsTMLastStationAngTight = mu2->muonID("TMLastStationAngTight");
+    dimuonsTree_.mu1IsTrackerMuonArbitrated = mu1->muonID("TrackerMuonArbitrated");
+    dimuonsTree_.mu2IsTrackerMuonArbitrated = mu2->muonID("TrackerMuonArbitrated");
+    dimuonsTree_.mu1TrackIso                = mu1->trackIso();
+    dimuonsTree_.mu2TrackIso                = mu2->trackIso();
+    dimuonsTree_.mu1EcalIso                 = mu1->ecalIso();
+    dimuonsTree_.mu2EcalIso                 = mu2->ecalIso();
+    dimuonsTree_.mu1HcalIso                 = mu1->hcalIso();
+    dimuonsTree_.mu2HcalIso                 = mu2->hcalIso();
 
-  dimuonsTree_.applyJPsiSelection();
-  dimuonsTree_.applyYSelection();
-  dimuonsTree_.applyZSelection();
-
-  dimuonsTree_.setOrderByMuQAndPt();
-  dimuonsTree_.setOrderByVProb();
-
-  dimuonsTree_.setCorrectedMassJPsi();
-  dimuonsTree_.setCorrectedMassY();
-
-  dimuonsTree_.Fill();
+    dimuonsTree_.Fill();
+  }
 }
 
 void 

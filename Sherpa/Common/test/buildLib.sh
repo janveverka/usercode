@@ -4,8 +4,6 @@ CMSSW_RELEASE=CMSSW_3_5_8
 ##+ none - Sherpa 1.1.2 with CMSSW_3_5_6 in March 2010
 ##+ 2 - Sherpa 1.2.1 with CMSSW_3_5_8 in May 2010
 VERSION=2
-## UserCode/JanVeverka/Sherpa release tag
-TAG=V01-01-00
 
 ## setup CMSSW release area
 scramv1 project CMSSW $CMSSW_RELEASE
@@ -14,11 +12,10 @@ eval `scramv1 ru -sh`
 
 ## get the code
 # cvs co -d Sherpa/Common UserCode/JanVeverka/Sherpa/Common
-cvs co -r $TAG -d Sherpa/$JOB UserCode/JanVeverka/Sherpa/$JOB
-cvs co -r $TAG -d Sherpa/Common UserCode/JanVeverka/Sherpa/Common
-cp Sherpa/Common/test/*SherpaLibs.sh Sherpa/$JOB/test
-rm -rf Sherpa/Common
-scramv1 build
+cvs co -d Sherpa/$JOB UserCode/JanVeverka/Sherpa/$JOB
+cvs co -r V00-03-10 GeneratorInterface/SherpaInterface
+cp GeneratorInterface/SherpaInterface/data/*SherpaLibs.sh Sherpa/$JOB/test
+rm -rf GeneratorInterface/SherpaInterface
 
 ## keep the temporary directory for debugging
 sed -i 's:rm -rf ./SHERPATMP:# rm -rf ./SHERPATMP:' Sherpa/$JOB/test/MakeSherpaLibs.sh
@@ -58,7 +55,7 @@ done
 cd ../..
 tar czf res.tgz $JOB
 rfcp res.tgz $DESTINATION/$NAME
-cd ../../..
+cd ../..
 
 ## done!
-echo "Exiting $0 with great success."
+echo "Exiting $0 with great success!"

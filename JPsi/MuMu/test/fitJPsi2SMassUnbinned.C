@@ -1,6 +1,6 @@
 /** \macro fitJPsi2SMassUnbinned.C
  *
- * $Id: fitJPsi2SMassUnbinned.C,v 1.3 2010/07/07 20:07:53 veverka Exp $
+ * $Id: fitJPsi2SMassUnbinned.C,v 1.2 2010/07/04 23:56:08 veverka Exp $
  *
  *
  * Macro implementing unbinned Maximum-likelihood fit of
@@ -34,18 +34,15 @@ double NormalizedIntegral(RooAbsPdf & function, RooRealVar & integrationVar, dou
 
 }
 
-fitJPsi2SMassUnbinned(const char *filename = "JPsi2SMassOS_186nb.txt",
+fitJPsi2SMassUnbinned(const char *filename = "dimuonMassOS_131511_139375.txt",
   const char* plotOpt = "NEU",
   const int nbins = 25,
-  const char* filenameB = "JPsi2SMassSS_186nb.txt")
+  const char* filenameB = "dimuonMassSS_131511_139375.txt")
 {
-  gROOT->ProcessLine(".L tdrstyle.C");
-  setTDRStyle();
-  gStyle->SetPadRightMargin(0.05);
 
   double minMass = 3.4;
   double maxMass = 4.0;
-  RooRealVar  mass("mass","M^{#mu#mu}", minMass, maxMass,"GeV/c^{2}");
+  RooRealVar  mass("mass","M(#mu^{+}#mu^{-})", minMass, maxMass,"GeV/c^{2}");
 
   // Read data set
 
@@ -120,12 +117,11 @@ fitJPsi2SMassUnbinned(const char *filename = "JPsi2SMassOS_186nb.txt",
 
   plot->Draw();
 
-  TLatex *   tex = new TLatex(0.2,0.8,"CMS preliminary");
+  TLatex *   tex = new TLatex(0.15,0.8,"CMS preliminary");
   tex->SetNDC();
-  tex->SetTextFont(42);
   tex->SetLineWidth(2);
   tex->Draw();
-  tex->DrawLatex(0.2, 0.725, "7 TeV Data, L = 186 pb^{-1}");
+  tex->DrawLatex(0.15, 0.725, "7 TeV Data, L = 19 pb^{-1}");
 
   float fsig_peak = NormalizedIntegral(signal,
                       mass,
@@ -151,23 +147,8 @@ fitJPsi2SMassUnbinned(const char *filename = "JPsi2SMassOS_186nb.txt",
     << (nsigVal/nbkgVal)*sqrt(nsigErrRel*nsigErrRel + nbkgErrRel*nbkgErrRel)
     << endl;
 
-  tex->DrawLatex(0.2, 0.6, Form("N_{S} = %.0f#pm%.0f", nsigVal, nsigErr) );
-  tex->DrawLatex(0.2, 0.525, Form("S/B_{#pm2.5#sigma} = %.1f", nsigVal/nbkgVal) );
-  tex->DrawLatex(0.2, 0.45, Form("#frac{S}{#sqrt{B}}_{#pm2.5#sigma} = %.1f", nsigVal/sqrt(nbkgVal)));
-
-  leg = new TLegend(0.65,0.6,0.9,0.75);
-  leg->SetFillColor(kWhite);
-  leg->SetLineColor(kWhite);
-  leg->SetShadowColor(kWhite);
-  leg->SetTextFont(42);
-
-  TLegendEntry * ldata  = leg->AddEntry(data, "Opposite Sign");
-  TLegendEntry * ldataB = leg->AddEntry(dataB, "Same Sign");
-  ldata->SetMarkerStyle(20);
-  ldataB->SetMarkerStyle(20);
-  ldataB->SetMarkerColor(kRed);
-
-  leg->Draw();
+  tex->DrawLatex(0.15, 0.6, Form("N_{S} = %.0f#pm%.0f", nsigVal, nsigErr) );
+  tex->DrawLatex(0.15, 0.525, Form("S/B_{#pm2.5#sigma} = %.1f", nsigVal/nbkgVal) );
 
 }
 

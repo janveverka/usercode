@@ -7,8 +7,6 @@
   <use   name="FWCore/MessageService"/>
   <use   name="FWCore/ServiceRegistry"/>
   <use   name="FWCore/Utilities"/>
-  <use   name="CondFormats/DataRecord"/>
-  <use   name="CondFormats/EcalObjects"/>
   <use   name="DataFormats/Common"/>
   <use   name="DataFormats/BeamSpot"/>
   <use   name="DataFormats/TrackReco"/>
@@ -21,8 +19,6 @@
   <use   name="PhysicsTools/PatUtils"/>
   <use   name="PhysicsTools/CandUtils"/>
   <use   name="PhysicsTools/UtilAlgos"/>
-  <use   name="RecoEcal/EgammaCoreTools"/>
-
   <use   name="root"/>
   <use   name="JPsi/MuMu"/>
 </library>
