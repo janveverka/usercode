@@ -2,7 +2,7 @@
 This package contains software for the H->Zg->mmg analysis that is
 specific for the muon channel and need the full CMSSW framework.
 
----+ Production Recipe
+---+ Production Setup Recipe
 To checkout and compile the package at FNAL to reproduce selection
 yields on the sync twiki https://twiki.cern.ch/twiki/bin/view/CMS/HtoZgtoMUMU
 you can do:
@@ -29,7 +29,7 @@ cvs co -r $RTAG -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
 source tmp/setup.sh
 
 
----+ Development Recipe
+---+ Development Setup Recipe
 To checkout and compile the package at LXPLUS so that you can continue 
 develepment you can do:
 
@@ -45,3 +45,20 @@ cd CMSSW_5_2_6/src
 eval $(scram runtime -sh)
 cvs co -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
 source tmp/setup.sh
+
+---+ Synchronization Exercise
+To run the selection on the 2012 data and MC, do:
+
+cd $CMSSW_BASE/src/HtoZg/MuonAnalysis/test/sync
+. launch.sh
+
+This launches two jobs, one for data one for mc. They produce
+log files and root files.  The log files contain the number of
+passing events in the cut flow section.  The root files
+contain trees for muons, photons and mmg candidates with 
+the selection variables.  To produce ASCII dumps of these trees,
+you can do:
+
+python dump.sh | sh
+
+This should produce 6 text files Caltech_sync2*.txt with the dumps.
