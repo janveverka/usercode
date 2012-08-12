@@ -1,6 +1,8 @@
 ---+ Introduction
 This package contains software for the H->Zg->mmg analysis that is
 specific for the muon channel and needs the full CMSSW framework.
+For more information, see also 
+https://twiki.cern.ch/twiki/bin/view/CMS/CaltechHtoZg
 
 ---+ Production Setup Recipe
 To checkout and compile the package at FNAL to reproduce selection
