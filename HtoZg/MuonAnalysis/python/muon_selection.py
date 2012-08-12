@@ -25,3 +25,6 @@ tight_id = '''
     '''
 
 tight_isolation = '(userFloat("muonIsolation:combIso")/pt < 0.12)'
+
+htozg_id        = tight_id
+htozg_isolation = tight_isolation

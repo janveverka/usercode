@@ -4,10 +4,11 @@ from HtoZg.MuonAnalysis.tightMuons_cfi import tightMuons
 from HtoZg.MuonAnalysis.tightDimuonSequence_cff import tightDimuons
 from HtoZg.MuonAnalysis.tightDimuonSequence_cff import tightDimuonFilter
 from HtoZg.MuonAnalysis.muonTree_cfi import muonTree
+from HtoZg.MuonAnalysis.muon_selection import htozg_isolation
 
 isolatedMuons = tightMuons.clone(
     src = cms.InputTag('tightMuons'),
-    cut = cms.string('userFloat("muonIsolation:combIso")/pt < 0.12')
+    cut = cms.string(htozg_isolation)
     )
 
 isolatedDimuons = tightDimuons.clone(

@@ -14,6 +14,7 @@ import Misc.TreeMaker.tools as tools
 ## Revision: r8
 ## Accessed: 11 Aug 2012, 04:45 CEST.
 photonIdVariables = tools.get_variables_from_map([
+    ('isEB'   , 'isEB'),
     ('eleVeto', 'userInt("conversionTools:passElectronVeto")'),
     ('hoe'    , 'hadTowOverEm' ),
     ('sihih'  , 'sigmaIetaIeta'),

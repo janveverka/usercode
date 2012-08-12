@@ -8,7 +8,7 @@ Gives expression string that defines photon selection.
 ## [1] https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonID2012
 ##     Revision: r8
 ##     Accessed: 11 Aug 2012, 04:45 CEST.
-loose_id = '''
+cutbased_id_loose = '''
     (
         (
             isEB &&
@@ -33,3 +33,5 @@ loose_id = '''
         )
     )
     '''
+
+htozg_id = cutbased_id_loose

@@ -34,9 +34,9 @@ def dump(source='mc.root', directory = 'mmgAfterDR'):
     variables = {
         'muons'  : ('id.run:id.event:pt:eta:charge:isGlobal:isPF:normChi2:'
                     'nHit:nMatch:dxy:dz:nPixel:nLayer:chIso:nhIso:phIso:'
-                    'combIso:rho:EA'),
+                    'combIso:rho:EA:passID:passIso'),
         'photons': ('id.run:id.event:pt:eta:eleVeto:hoe:sihih:'
-                    'chIso:nhIso:phIso:rho:chEA:nhEA:phEA'),
+                    'chIso:nhIso:phIso:rho:chEA:nhEA:phEA:passID'),
         'mmg'    : ('id.run:id.event:mass:mmMass:deltaR1:deltaR2:'
                     'mu1Pt:mu2Pt:phoPt:mu1Q:mu2Q')
         }[tree]
