@@ -40,7 +40,14 @@ def dump(source='mc.root', directory = 'mmgAfterDR'):
         'mmg'    : ('id.run:id.event:mass:mmMass:deltaR1:deltaR2:'
                     'mu1Pt:mu2Pt:phoPt:mu1Q:mu2Q')
         }[tree]
-    
+        
+    ## Use a map (tree) -> (selection) to set the selection given a tree
+    selection = {
+        'muons'  : 'n > 0 & pt > 10 & abs(eta) < 2.4',
+        'photons': 'n > 0',
+        'mmg'    : 'n > 0',
+        }[tree]
+        
     ## Use a map (source) -> (shortsource) to set the shortsource
     shortsource = {'mc.root': 's12', 'data.root': 'r12'}[source]
     output = 'Caltech_sync2_%(shortsource)s_%(directory)s.txt' % locals()
@@ -50,11 +57,11 @@ def dump(source='mc.root', directory = 'mmgAfterDR'):
     TFile *_file0 = TFile::Open("%(source)s")
     %(directory)s->cd()
     %(tree)s->SetScanField(0)
-    %(tree)s->Scan("%(variables)s", "n>0"); >%(output)s
+    %(tree)s->Scan("%(variables)s", "%(selection)s"); >%(output)s
     .q
     EOF
 
-    ## Remove asterisks, extra message and empty lines
+    ## Remove asterisks, empty lines, and the extra message at the end
     sed -i '{s/*//g; /entries/d; /^ *$/d}' %(output)s
     ''' % locals()
     
