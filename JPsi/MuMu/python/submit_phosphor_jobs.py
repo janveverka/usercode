@@ -9,9 +9,12 @@ import commands
 # project_name = 'eg_paper_dr0p1'
 # project_name = 'eg_paper_jul2012rereco'
 # project_name = 'vg_baseline_rerecos'
+# project_name = 'regressions_no_muon_bias'
+project_name = 'regressions_no_muon_bias_v2'
 # project_name = 'regressions_no_muon_bias_12cat'
 # project_name = 'regressions_no_muon_bias_8cat'
-project_name = 'regressions_no_muon_bias_8cat'
+# project_name = 'regressions_no_muon_bias_6cat'
+# project_name = 'regressions_with_muon_bias_6cat'
 
 output_base = '/raid2/veverka/jobs/outputs'
 template_filename='JPsi/MuMu/scripts/phosphor-job.template'
@@ -198,10 +201,10 @@ def get_baseline_list():
 # job_names = get_egpaper_list()
 # job_names = get_baseline_list()
 # job_names = get_large_list()
-# job_names = get_large_list_regression()
+job_names = get_large_list_regression()
 # job_names = get_12cat_regression_list()
 # job_names = get_8cat_regression_list()
-job_names = get_6cat_regression_list()
+# job_names = get_6cat_regression_list()
 
 submission_dir = os.path.join(os.curdir, project_name)
 output_dir = os.path.join(output_base, project_name)
