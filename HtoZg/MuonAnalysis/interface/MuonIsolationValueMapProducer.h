@@ -13,7 +13,7 @@
  *              Data2011, Data2012
  *      
  * \author Jan Veverka, Caltech
- * \date 8 August 2012
+ * \date 8 August 2012 - 13 August 2012
  */
 
 #ifndef HtoZg_MuonAnalysis_MuonIsolationValueMapProducer_h
@@ -133,10 +133,11 @@ namespace cit {
         float iRho = float(*rhoHandle);
         float iEA  = MuonEffectiveArea::GetMuonEffectiveArea(type_, iMu->eta(),
                                                              target_);
-        double chIso04 = iMu->pfIsolationR04().sumChargedHadronPt;   
-        double phIso04 = iMu->pfIsolationR04().sumPhotonEt;          
-        double nhIso04 = iMu->pfIsolationR04().sumNeutralHadronEt;
-        
+        // FIXME: Implement calculation of the PF isolation in 42x here.
+        double chIso04 = 0;
+        double phIso04 = 0;
+        double nhIso04 = 0;
+
         float iCombIso = chIso04 + std::max(0., 
                                             nhIso04 + phIso04 - iEA * iRho);
 
