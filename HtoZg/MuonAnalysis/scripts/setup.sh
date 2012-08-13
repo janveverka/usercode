@@ -1,12 +1,13 @@
 ## Recipe to check out and compile the Caltech HtoZg analysis cod
 ## Assumes BASH and CMSSW_5_2_x environment.
-## USAGE: source $CMSSW_BASE/src/HtoZg/MuonAnalysis/scripts/setup.sh
+## USAGE: RTAG=HtoZg_42x; $CMSSW_BASE/src/HtoZg/MuonAnalysis/scripts/setup.sh
 ## Jan Veverka, Caltech, 8 August 2012
 
 # RTAG=HtoZg_sync_2012_cutbased_muons_uptoId
 # RTAG=HtoZg_sync_2012_cutbased_muons_uptoPhotonId
 # RTAG=HtoZg_sync_2012_cutbased_muons_round1
 # RTAG=HtoZg_sync_2012_cutbased_muons_round2
+# RTAG=HtoZg_42x
 # RTAG=HEAD
 cd $CMSSW_BASE/src && \
     cvs co -r $RTAG -d HtoZg/CommonAnalysis \

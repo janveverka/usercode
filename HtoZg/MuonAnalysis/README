@@ -29,8 +29,11 @@ fi
 cd $(mktemp -d -p /tmp/$(whoami))
 
 export SCRAM_ARCH=slc5_amd64_gcc434
-scram project -n CMSSW_4_2_8_patch7_HtoZg CMSSW CMSSW_4_2_8_patch7
-cd CMSSW_4_2_8_patch7_HtoZg/src
+RELEASE=CMSSW_4_2_3
+RELEASE_DIR=${RELEASE}_HtoZg
+# RELEASE=CMSSW_4_2_8_patch7
+scram project -n $RELEASE_DIR CMSSW $RELEASE
+cd $RELEASE_DIR/src
 eval $(scram runtime -sh)
 
 cvs co -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
