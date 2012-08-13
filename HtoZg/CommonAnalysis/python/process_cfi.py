@@ -29,10 +29,13 @@ process.source = cms.Source("PoolSource",
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 ## Geometry and Detector Conditions (needed for a few patTuple production steps)
-process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-from Configuration.AlCa.autoCond import autoCond
-process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
+## This is new in 52x
+# from Configuration.AlCa.autoCond import autoCond
+# process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
+## GT for 2011 MC as a default
+process.GlobalTag.globaltag = 'START42_V14B::All'
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
 ## Test JEC from test instances of the global DB

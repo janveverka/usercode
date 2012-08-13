@@ -5,6 +5,9 @@ import HtoZg.CommonAnalysis.process_cfi
 
 process = copy.deepcopy(HtoZg.CommonAnalysis.process_cfi.process)
 
+## Global tag
+process.GlobalTag.globaltag = 'START42_V14B::All'
+
 ## Input files
 process.source.fileNames.append(
     '/store/mc/Fall11/GluGluToHToZG_M-125_7TeV-powheg-pythia6/AODSIM/PU_S6_START42_V14B-v1/0000/4E7D0288-43BA-E111-B933-0026189438F7.root'

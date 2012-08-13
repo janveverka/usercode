@@ -6,9 +6,12 @@ import HtoZg.CommonAnalysis.process_cfi as process_cfi
 
 process = copy.deepcopy(process_cfi.process)
 
+## Global tag
+process.GlobalTag.globaltag = 'FT_R_42_V24::All'
+
 ## Input files
 process.source.fileNames.append(
-    '/store/data/Run2012B/DoubleMu/AOD/29Jun2012-v1/0001/C46FD2A9-3FC3-E111-A1A8-485B39800C00.root'
+    '/store/data/Run2011A/DoubleMu/AOD/16Jan2012-v1/0001/E8EFCAFA-3F44-E111-A9DF-0026189438BC.root'
     )
 
 ## Maximal Number of Events
