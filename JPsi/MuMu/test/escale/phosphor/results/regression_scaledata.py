@@ -36,10 +36,11 @@ def get_basepath():
     '''
     hostname_to_basepath_map = {
         't3-susy.ultralight.org':
-            '/raid2/veverka/jobs/outputs/regressions_no_muon_bias',
-#            '/raid2/veverka/jobs/outputs/regressions_at_low_pt',
-        #'Jan-Veverkas-MacBook-Pro.local':
-            #'/Users/veverka/Work/Data/phosphor/regressions_no_muon_bias',
+            ## Require minDeltR > 0.1 to remove near muon bias
+           '/raid2/veverka/jobs/outputs/regressions_at_low_pt',
+#             '/raid2/veverka/jobs/outputs/regressions_no_muon_bias',
+        'Jan-Veverkas-MacBook-Pro.local':
+            '/Users/veverka/Work/Data/phosphor/regressions_at_low_pt',
         }
     return hostname_to_basepath_map[socket.gethostname()]
 ## End of get_basepath()
@@ -122,6 +123,43 @@ def var_vs_pt_getter_factory(varname):
 
 
 #______________________________________________________________________________
+def low_error_getter_factory(varname):
+    '''
+    Returns a function that takes a workspace and returns the error of the
+    variable of the given name.
+    '''
+    return lambda workspace: -workspace.var(varname).getErrorLo()
+## low_error_getter_factory(name)
+
+
+#______________________________________________________________________________
+def high_error_getter_factory(varname):
+    '''
+    Returns a function that takes a workspace and returns the error of the
+    variable of the given name.
+    '''
+    return lambda workspace: workspace.var(varname).getErrorHi()
+## high_error_getter_factory(name)
+
+
+#______________________________________________________________________________
+def yasymmerrors_var_vs_pt_getter_factory(varname):
+    """
+    Returns a tupler of 5 functions that take a workspace and return
+    x, y, ex, eyl, eyh where y, eyl and eyh correspond to the value 
+    and asymmetric error of a workspace variable of the given name 
+    and x and ex are pt bins defined in the global xgetter_factory function.
+    """
+    xgetter  = xgetter_factory()
+    exgetter = exgetter_factory()
+    ygetter  = value_getter_factory(varname)
+    eylgetter = low_error_getter_factory(varname)
+    eyhgetter = high_error_getter_factory(varname)
+    return (xgetter, ygetter, exgetter, eylgetter, eyhgetter)
+## End of yasymmerrors_var_vs_pt_getter_factory(varname)
+
+
+#______________________________________________________________________________
 def value_fitresult_getter_factory(fitresult, varname):
     '''
     Returns a function that takes a workspace and returns the final value
@@ -173,7 +211,7 @@ for cat in categories:
     fitresult = 'fitresult_data'
     cfg = Config(
         ## Canvas name
-        name = 'regressions_scaletrue_%s' % (cat.name,), 
+        name = 'regressions_scaledata_%s' % (cat.name,), 
         ## Canvas title
         title = ', '.join(cat.labels),
         ## Axis titles
@@ -194,7 +232,7 @@ for cat in categories:
         jobname_template = 'sge_data_%s' % (name_base)
         cfg.sources.append(make_list_of_sources(jobname_template))
         cfg.titles.append(title)
-        cfg.getters.append(var_vs_pt_getter_factory('phoScaleTrue'))
+        cfg.getters.append(yasymmerrors_var_vs_pt_getter_factory('phoScale'))
     configurations.append(cfg)
 ## End of loop categories
 
@@ -216,7 +254,7 @@ def make_plots(configurations):
         ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
         plotter = FitResultPlotter(cfg.sources[0], cfg.getters[0], cfg.xtitle, 
                                    cfg.ytitle, title = cfg.titles[0],
-                                   name=cfg.name)                          
+                                   name=cfg.name, yasymmerrors=True)                          
 
         for isources, igetters, ititle in zip(cfg.sources, 
                                               cfg.getters, 
@@ -228,9 +266,21 @@ def make_plots(configurations):
             plotter.makegraph()
 
         canvases.next('c_' + cfg.name).SetGrid()
+
+        ## Check if there is a problem with the ranges
+        yrange = 'auto'
+        for graph in plotter.graphs:
+            if (graph.GetHistogram().GetMaximum() -
+                graph.GetHistogram().GetMinimum()) < 0.1:
+                print cfg.name, graph.GetTitle(), 'min:', graph.GetMaximum(),
+                print ', max:', graph.GetMaximum
+                yrange = (-5, 10)
+
         plotter.plotall(title = cfg.title,
                         xrange = (5, 55),
+                        yrange = yrange,
                         legend_position = 'topright')
+
         #plotter.graphs[0].Draw('p')
         canvases.canvases[-1].Modified()
         canvases.canvases[-1].Update()

@@ -10,7 +10,7 @@ import ROOT
 import JPsi.MuMu.common.roofit as roo
 import JPsi.MuMu.common.canvases as canvases
 from JPsi.MuMu.common.binedges import BinEdges
-from JPsi.MuMu.scaleFitter import subdet_r9_categories
+from JPsi.MuMu.scaleFitter import subdet_categories
 from JPsi.MuMu.escale.fitResultPlotter import FitResultPlotter
 
 ROOT.gStyle.SetPadTopMargin(0.1)
@@ -18,9 +18,9 @@ canvases.wwidth = 400
 canvases.wheight = 400
 canvases.yperiod = 10
 
-categories = list(subdet_r9_categories)
-binedges  = list(BinEdges([10, 12, 15, 20, 25, 30, 50]))
-binedges2 = list(BinEdges([10, 12, 15, 20, 25, 30, 999]))
+categories = list(subdet_categories)
+binedges  = list(BinEdges([10, 15, 25, 50]))
+binedges2 = list(BinEdges([10, 15, 25, 999]))
 bincenters    = [0.5 * (lo + hi) for lo, hi in binedges]
 binhalfwidths = [0.5 * (hi - lo) for lo, hi in binedges]
 xgetter_factory  = lambda: lambda workspace, i = iter(bincenters)    : i.next()
@@ -36,10 +36,10 @@ def get_basepath():
     '''
     hostname_to_basepath_map = {
         't3-susy.ultralight.org':
-            '/raid2/veverka/jobs/outputs/regressions_no_muon_bias',
-#            '/raid2/veverka/jobs/outputs/regressions_at_low_pt',
-        #'Jan-Veverkas-MacBook-Pro.local':
-            #'/Users/veverka/Work/Data/phosphor/regressions_no_muon_bias',
+            ## Require minDeltR > 0.1 to remove near muon bias
+            '/raid2/veverka/jobs/outputs/regressions_no_muon_bias_6cat',
+        'Jan-Veverkas-MacBook-Pro.local':
+            '/Users/veverka/Work/Data/phosphor/regressions_at_low_pt',
         }
     return hostname_to_basepath_map[socket.gethostname()]
 ## End of get_basepath()
@@ -106,19 +106,40 @@ def error_getter_factory(varname):
 
 
 #______________________________________________________________________________
-def var_vs_pt_getter_factory(varname):
+def low_error_getter_factory(varname):
+    '''
+    Returns a function that takes a workspace and returns the error of the
+    variable of the given name.
+    '''
+    return lambda workspace: -workspace.var(varname).getErrorLo()
+## low_error_getter_factory(name)
+
+
+#______________________________________________________________________________
+def high_error_getter_factory(varname):
+    '''
+    Returns a function that takes a workspace and returns the error of the
+    variable of the given name.
+    '''
+    return lambda workspace: workspace.var(varname).getErrorHi()
+## high_error_getter_factory(name)
+
+
+#______________________________________________________________________________
+def yasymmerrors_var_vs_pt_getter_factory(varname):
     """
-    Returns a tupler of 4 functions that take a workspace and return
-    x, y, ex, ey where y and ey correspond to the value and error of
-    a workspace variable of the given name and x and ex are pt bins defined
-    in the global xgetter_factory function.
+    Returns a tupler of 5 functions that take a workspace and return
+    x, y, ex, eyl, eyh where y, eyl and eyh correspond to the value 
+    and asymmetric error of a workspace variable of the given name 
+    and x and ex are pt bins defined in the global xgetter_factory function.
     """
     xgetter  = xgetter_factory()
     exgetter = exgetter_factory()
     ygetter  = value_getter_factory(varname)
-    eygetter = error_getter_factory(varname)
-    return (xgetter, ygetter, exgetter, eygetter)
-## End of var_vs_pt_getter_factory(varname)
+    eylgetter = low_error_getter_factory(varname)
+    eyhgetter = high_error_getter_factory(varname)
+    return (xgetter, ygetter, exgetter, eylgetter, eyhgetter)
+## End of yasymmerrors_var_vs_pt_getter_factory(varname)
 
 
 #______________________________________________________________________________
@@ -173,12 +194,12 @@ for cat in categories:
     fitresult = 'fitresult_data'
     cfg = Config(
         ## Canvas name
-        name = 'regressions_scaletrue_%s' % (cat.name,), 
+        name = 'regressions_resdata_6cat%s' % (cat.name,), 
         ## Canvas title
         title = ', '.join(cat.labels),
         ## Axis titles
         xtitle = 'E_{T}^{#gamma} (GeV)',
-        ytitle = 'E^{#gamma} Scale (%)',
+        ytitle = 'E^{#gamma} Resolution (%)',
         ## Initialize maps for sources and getters
         ## keys 1-4 correspond to evt1of4, evt2of4, ..., evt4of4
         sources = [],
@@ -194,7 +215,7 @@ for cat in categories:
         jobname_template = 'sge_data_%s' % (name_base)
         cfg.sources.append(make_list_of_sources(jobname_template))
         cfg.titles.append(title)
-        cfg.getters.append(var_vs_pt_getter_factory('phoScaleTrue'))
+        cfg.getters.append(yasymmerrors_var_vs_pt_getter_factory('phoRes'))
     configurations.append(cfg)
 ## End of loop categories
 
@@ -216,7 +237,7 @@ def make_plots(configurations):
         ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
         plotter = FitResultPlotter(cfg.sources[0], cfg.getters[0], cfg.xtitle, 
                                    cfg.ytitle, title = cfg.titles[0],
-                                   name=cfg.name)                          
+                                   name=cfg.name, yasymmerrors=True)                          
 
         for isources, igetters, ititle in zip(cfg.sources, 
                                               cfg.getters, 
