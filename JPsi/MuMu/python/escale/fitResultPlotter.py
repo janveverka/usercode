@@ -34,6 +34,7 @@ class FitResultPlotter():
         self.styles = range(20,27)
 
         self.logy = False
+        self.yasymmerrors = False
 
         for name, value in kwargs.items():
             setattr(self, name, value)
@@ -93,16 +94,26 @@ class FitResultPlotter():
                 x.append(f(wspace))
 
             data.append(x)
-        self.x, self.y, self.ex, self.ey = zip(*data)
+        if self.yasymmerrors == True:
+            self.x, self.y, self.ex, self.eyl, self.eyh = zip(*data)
+        else:
+            self.x, self.y, self.ex, self.ey = zip(*data)
         return zip(*data)
     ## end of getData
 
     #--------------------------------------------------------------------------
     def makegraph(self):
         '''Makes a graph using the current workspace and yname.'''
-        x, ex = array('d', self.x), array('d', self.ex)
-        y, ey = array('d', self.y), array('d', self.ey)
-        self.graph = TGraphErrors(len(x), x, y, ex, ey)
+        if self.yasymmerrors == True:
+            x, exl, exh, y, eyl, eyh = (
+                array('d', self.x), array('d', self.ex ), array('d', self.ex ),
+                array('d', self.y), array('d', self.eyl), array('d', self.eyh),
+                )
+            self.graph = TGraphAsymmErrors(len(x), x, y, exl, exh, eyl, eyh)
+        else:
+            x, ex = array('d', self.x), array('d', self.ex)
+            y, ey = array('d', self.y), array('d', self.ey)
+            self.graph = TGraphErrors(len(x), x, y, ex, ey)
         if self.title:
             self.graph.SetTitle(self.title)
         self.titles.append(self.title)
@@ -116,13 +127,26 @@ class FitResultPlotter():
 
         graph = self.graph
         n = graph.GetN()
+        
+        if self.yasymmerrors == True:
+            xmin = min([graph.GetX()[i] - graph.GetEXlow()[i] 
+                        for i in range(n)])
+            xmax = max([graph.GetX()[i] + graph.GetEXhigh()[i] 
+                        for i in range(n)])
 
-        xmin = min([graph.GetX()[i] - graph.GetEX()[i] for i in range(n)])
-        xmax = max([graph.GetX()[i] + graph.GetEX()[i] for i in range(n)])
+            ymin = min([graph.GetY()[i] - graph.GetEYlow()[i] 
+                        for i in range(n)])
+            ymax = max([graph.GetY()[i] + graph.GetEYhigh()[i] 
+                        for i in range(n)])
+        else:
+            xmin = min([graph.GetX()[i] - graph.GetEX()[i] for i in range(n)])
+            xmax = max([graph.GetX()[i] + graph.GetEX()[i] for i in range(n)])
+
+            ymin = min([graph.GetY()[i] - graph.GetEY()[i] for i in range(n)])
+            ymax = max([graph.GetY()[i] + graph.GetEY()[i] for i in range(n)])
+
+
         dx = xmax - xmin
-
-        ymin = min([graph.GetY()[i] - graph.GetEY()[i] for i in range(n)])
-        ymax = max([graph.GetY()[i] + graph.GetEY()[i] for i in range(n)])
         dy = ymax - ymin
 
         graph.SetTitle('%s;%s;%s' % (self.title, self.xtitle, self.ytitle))
@@ -156,12 +180,28 @@ class FitResultPlotter():
         xlo, xhi, ylo, yhi = [], [], [], []
         for graph in self.graphs:
             n = graph.GetN()
+            
+            if self.yasymmerrors == True:
+                xlo.extend([graph.GetX()[i] - graph.GetEXlow()[i] 
+                            for i in range(n)])
+                xhi.extend([graph.GetX()[i] + graph.GetEXhigh()[i] 
+                            for i in range(n)])
 
-            xlo.extend([graph.GetX()[i] - graph.GetEX()[i] for i in range(n)])
-            xhi.extend([graph.GetX()[i] + graph.GetEX()[i] for i in range(n)])
+                ylo.extend([graph.GetY()[i] - graph.GetEYlow()[i] 
+                            for i in range(n)])
+                yhi.extend([graph.GetY()[i] + graph.GetEYhigh()[i] 
+                            for i in range(n)])
+            else:
+                xlo.extend([graph.GetX()[i] - graph.GetEX()[i] 
+                            for i in range(n)])
+                xhi.extend([graph.GetX()[i] + graph.GetEX()[i] 
+                            for i in range(n)])
 
-            ylo.extend([graph.GetY()[i] - graph.GetEY()[i] for i in range(n)])
-            yhi.extend([graph.GetY()[i] + graph.GetEY()[i] for i in range(n)])
+                ylo.extend([graph.GetY()[i] - graph.GetEY()[i] 
+                            for i in range(n)])
+                yhi.extend([graph.GetY()[i] + graph.GetEY()[i] 
+                            for i in range(n)])
+              
 
         if logy:
             ## Only keep positive y values.
@@ -172,7 +212,7 @@ class FitResultPlotter():
             for y in ytoremove:
                 yhi.remove(y)
 
-        ## Check if all list of low and high x- and y-values are not empty.
+        ## Check if all lists of low and high x- and y-values are not empty.
         if not (xlo and xhi and ylo and yhi):
             raise RuntimeError, 'Cannot estimate axis ranges!'
         
