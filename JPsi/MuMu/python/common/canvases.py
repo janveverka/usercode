@@ -59,7 +59,8 @@ def make_pdf_from_eps():
         if not c:
             continue
         c.Print(c.GetName() + '.eps')
-        command = 'ps2pdf -dEPSCrop ' + c.GetName() + '.eps'
+        command = '''ps2pdf -dEPSCrop {name}.eps
+                     rm {name}.eps'''.format(name=c.GetName())
         (exitstatus, outtext) = commands.getstatusoutput(command)
         if  exitstatus != 0:
             raise RuntimeError, '"%s" failed: "%s"!' % (command, outtext)
