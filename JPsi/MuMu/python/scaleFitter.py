@@ -923,6 +923,18 @@ subdet_r9_categories = ICut(
             ('!phoIsEB' , 'phoR9 > 0.95'),)
 )
 
+subdet_categories = ICut(
+    names = 'EB EE'.split(),
+    titles = ('Barrel',
+              'Endcaps',),
+    ## For latex labels on plots
+    labels = (('Barrel',),
+              ('Barrel',),),
+    ## For TTree selection expressions
+    cuts = (('phoIsEB',),
+            ('!phoIsEB',),)
+)
+
 ## model_names = 'gauss cbShape lognormal curijff gamma'.split()
 ## model_titles = 'Gauss CB Lognaormal Cruijff Gamma'.split()
 ## model_labels = [[i] for i in model_titles]
