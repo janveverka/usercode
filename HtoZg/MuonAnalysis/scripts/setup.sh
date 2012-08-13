@@ -23,4 +23,8 @@ cd $CMSSW_BASE/src && \
         EGamma/EGammaAnalysisTools/interface/PFIsolationEstimator.h && \
     cvs up -r 1.22 \
         EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc && \
+    ## The tagged version doesn't compile in 42x. Downgrade it to an
+    ## an older one that seems to work.
+    cvs up -r 1.2 \
+        EGamma/EGammaAnalysisTools/test/ElectronIsoAnalyzer.cc && \
     scramv1 build -j4
