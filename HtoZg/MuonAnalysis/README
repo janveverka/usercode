@@ -7,62 +7,34 @@ https://twiki.cern.ch/twiki/bin/view/CMS/CaltechHtoZg
 ---+ Production Setup Recipe
 To checkout and compile the package at FNAL to reproduce selection
 yields on the sync twiki https://twiki.cern.ch/twiki/bin/view/CMS/HtoZgtoMUMU
-you can do:
-
-ssh cmslpc-sl5.fnal.gov
-bash
-source /uscmst1/prod/sw/cms/bashrc uaf
-## To be able to use CVS at FNAL. Requires typing CERN username and password.
-kserver_init
-if [[ ! -d /tmp/$(whoami) ]]; then
-    mkdir /tmp/$(whoami)
-fi
-cd $(mktemp -d -p /tmp/$(whoami))
-export SCRAM_ARCH=slc5_amd64_gcc462
-scram project CMSSW CMSSW_5_2_6
-cd CMSSW_5_2_6/src
-eval $(scram runtime -sh)
-cvs co -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
-## Set the tag of the package to get a production release
-## to reproduce yields for 2012 muons
-# RTAG=HtoZg_sync_2012_cutbased_muons_uptoId
-# RTAG=HtoZg_sync_2012_cutbased_muons_uptoPhotonId
-# RTAG=HtoZg_sync_2012_cutbased_muons_round1
-RTAG=HtoZg_sync_2012_cutbased_muons_round2
-source tmp/setup.sh
-
+for 2011 data and MC in CMSSW_42x is not available yet.
 
 ---+ Development Setup Recipe
-To checkout and compile the package at LXPLUS so that you can continue 
+To checkout and compile the package at FNAL so that you can continue 
 develepment you can do:
 
-ssh lxplus.cern.ch
+kinit -A -f username@FNAL.GOV
+ssh cmslpc-sl5.fnal.gov
 bash
+
+source /uscmst1/prod/sw/cms/bashrc uaf
+
+## To be able to use CVS at FNAL. Requires typing CERN username and password.
+kserver_init
+
+# cd nobackup/work/cmssw
 if [[ ! -d /tmp/$(whoami) ]]; then
     mkdir /tmp/$(whoami)
 fi
 cd $(mktemp -d -p /tmp/$(whoami))
-export SCRAM_ARCH=slc5_amd64_gcc462
-scram project CMSSW CMSSW_5_2_6
-cd CMSSW_5_2_6/src
+
+export SCRAM_ARCH=slc5_amd64_gcc434
+scram project -n CMSSW_4_2_8_patch7_HtoZg CMSSW CMSSW_4_2_8_patch7
+cd CMSSW_4_2_8_patch7_HtoZg/src
 eval $(scram runtime -sh)
+
 cvs co -d tmp UserCode/JanVeverka/HtoZg/MuonAnalysis/scripts/setup.sh
-RTAG=HEAD
+RTAG=HtoZg_42x
+
+## Currently fails to compile.
 source tmp/setup.sh
-
----+ Synchronization Exercise
-To run the selection on the 2012 data and MC, do:
-
-cd $CMSSW_BASE/src/HtoZg/MuonAnalysis/test/sync
-. launch.sh
-
-This launches two jobs, one for data one for mc. They produce
-log files and root files.  The log files contain the number of
-passing events in the cut flow section.  The root files
-contain trees for muons, photons and mmg candidates with 
-the selection variables.  To produce ASCII dumps of these trees,
-you can do:
-
-python dump.sh | sh
-
-This should produce 6 text files Caltech_sync2*.txt with the dumps.
