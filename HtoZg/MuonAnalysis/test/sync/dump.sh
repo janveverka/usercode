@@ -1,5 +1,4 @@
-SOURCE=zg.root
-#SOURCE=zg_pick.root
+SOURCE=mc.root
 root -l -b << EOF
 TFile *_file0 = TFile::Open("$SOURCE")
 
