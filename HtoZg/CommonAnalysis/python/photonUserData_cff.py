@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
-photonUserFloats = []
-photonUserInts = []
+photonUserFloats = cms.VInputTag()
+photonUserInts = cms.VInputTag()
 
 ## Photon ID variables
 photonUserFloats.append(cms.InputTag('photonId:hadTowOverEm'))

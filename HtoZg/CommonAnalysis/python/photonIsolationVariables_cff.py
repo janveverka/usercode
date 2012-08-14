@@ -9,8 +9,6 @@ Jan Veverka, Caltech, 11 Aug 2012
 import FWCore.ParameterSet.Config as cms
 import Misc.TreeMaker.tools as tools
 
-from HtoZg.CommonAnalysis.photon_selection import htozg_id
-
 ## Set Loose Cut-Based Photon ID optimized for non-triggering phostons at
 ## https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonID2012
 ## Revision: r8
@@ -23,5 +21,4 @@ photonIsolationVariables = tools.get_variables_from_map([
     ('chEA'  , 'userFloat("photonIsolation:chargedHadronEA")' ),
     ('nhEA'  , 'userFloat("photonIsolation:neutralHadronEA")' ),
     ('phEA'  , 'userFloat("photonIsolation:photonEA")'        ),
-    #('passID', '? %s ? 1 : 0' % htozg_id                      ),
     ])
