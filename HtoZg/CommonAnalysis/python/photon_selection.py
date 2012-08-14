@@ -8,7 +8,33 @@ Gives expression string that defines photon selection.
 ## [1] https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonID2012
 ##     Revision: r8
 ##     Accessed: 11 Aug 2012, 04:45 CEST.
-cutbased_id_loose = '''
+
+## FIXME: Add H/E cut.
+cutbased_id_loose_2011 = '''
+    (
+        (
+            isEB &&
+            userInt("conversionTools:passElectronVeto") > 0 &&
+            sigmaIetaIeta < 0.012 &&
+            userFloat("photonIsolation:pfChargedHadronRhoCorrected") < 2.6 &&
+            userFloat("photonIsolation:pfNeutralHadronRhoCorrected") 
+                < 3.5 + 0.04 * pt &&
+            userFloat("photonIsolation:pfPhotonRhoCorrected") 
+                < 1.3 + 0.005 * pt
+        ) ||
+        (  
+            !isEB &&
+            abs(eta) < 2.4 &&
+            userInt("conversionTools:passElectronVeto") > 0 &&
+            sigmaIetaIeta < 0.034 &&
+            userFloat("photonIsolation:pfChargedHadronRhoCorrected") < 2.3 &&
+            userFloat("photonIsolation:pfNeutralHadronRhoCorrected") 
+                < 2.9 + 0.04 * pt
+        )
+    )
+    '''
+
+cutbased_id_loose_2012 = '''
     (
         (
             isEB &&
@@ -34,4 +60,4 @@ cutbased_id_loose = '''
     )
     '''
 
-htozg_id = cutbased_id_loose
+htozg_id = cutbased_id_loose_2011
