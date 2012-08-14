@@ -17,7 +17,7 @@ from HtoZg.MuonAnalysis.muon_selection import htozg_id
 ## Accessed: 6 Aug 2012, 22:41 CEST.
 muonIdVariables = tools.get_variables_from_map([
     ('isGlobal',   'isGlobalMuon'                                            ),
-    ('isPF'    ,   'isPFMuon'                                                ),
+#    ('isPF'    ,   'isPFMuon'                                                ),
     ('normChi2', '''
                  ? globalTrack().isNonnull ?
                       globalTrack().normalizedChi2 :

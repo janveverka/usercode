@@ -23,5 +23,5 @@ photonIsolationVariables = tools.get_variables_from_map([
     ('chEA'  , 'userFloat("photonIsolation:chargedHadronEA")' ),
     ('nhEA'  , 'userFloat("photonIsolation:neutralHadronEA")' ),
     ('phEA'  , 'userFloat("photonIsolation:photonEA")'        ),
-    ('passID', '? %s ? 1 : 0' % htozg_id                      ),
+    #('passID', '? %s ? 1 : 0' % htozg_id                      ),
     ])
