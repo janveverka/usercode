@@ -8,6 +8,7 @@
 # RTAG=HtoZg_sync_2012_cutbased_muons_round1
 # RTAG=HtoZg_sync_2012_cutbased_muons_round2
 # RTAG=HtoZg_42x
+# RTAG=V42-00-01 ## Compiles in 42x
 # RTAG=HEAD
 cd $CMSSW_BASE/src && \
     cvs co -r $RTAG -d HtoZg/CommonAnalysis \
@@ -28,4 +29,13 @@ cd $CMSSW_BASE/src && \
     ## an older one that seems to work.
     cvs up -r 1.2 \
         EGamma/EGammaAnalysisTools/test/ElectronIsoAnalyzer.cc && \
+    ## Custom single-level H/E calculation backported to 42x
+    ## https://twiki.cern.ch/twiki/bin/view/CMS/HoverE2012
+    addpkg RecoEgamma/EgammaElectronAlgos && \
+    cvs up -r CMSSW_5_2_2 \
+        RecoEgamma/EgammaElectronAlgos/src/ElectronHcalHelper.cc \
+        RecoEgamma/EgammaElectronAlgos/interface/ElectronHcalHelper.h && \
+    cvs co -r CMSSW_5_2_2 RecoEgamma/EgammaIsolationAlgos && \
+    ## Compile all the packages
     scramv1 build -j4
+
