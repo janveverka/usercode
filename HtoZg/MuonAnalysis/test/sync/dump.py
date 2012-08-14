@@ -49,7 +49,7 @@ def dump(source='mc.root', directory = 'mmgAfterDR'):
         }[tree]
         
     ## Use a map (source) -> (shortsource) to set the shortsource
-    shortsource = {'mc.root': 's12', 'data.root': 'r12'}[source]
+    shortsource = {'mc.root': 'f11', 'data.root': 'r11'}[source]
     output = 'Caltech_sync2_%(shortsource)s_%(directory)s.txt' % locals()
     
     snippet = '''
@@ -69,6 +69,7 @@ def dump(source='mc.root', directory = 'mmgAfterDR'):
 
     print 'echo Dumping', directory, 'for', source, '...'
     print snippet
+    print 'echo'
     #(exitstatus, outtext) = commands.getstatusoutput(snippet)
     #if  exitstatus != 0:
         #raise RuntimeError, '"%s" failed: "%s"!' % (snippet, outtext)
