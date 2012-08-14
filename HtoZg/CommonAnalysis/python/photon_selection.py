@@ -15,6 +15,7 @@ cutbased_id_loose_2011 = '''
         (
             isEB &&
             userInt("conversionTools:passElectronVeto") > 0 &&
+            userFloat("photonId:hadTowOverEm") < 0.05 &&
             sigmaIetaIeta < 0.012 &&
             userFloat("photonIsolation:pfChargedHadronRhoCorrected") < 2.6 &&
             userFloat("photonIsolation:pfNeutralHadronRhoCorrected") 
@@ -24,8 +25,9 @@ cutbased_id_loose_2011 = '''
         ) ||
         (  
             !isEB &&
-            abs(eta) < 2.4 &&
+            abs(eta) < 2.5 &&
             userInt("conversionTools:passElectronVeto") > 0 &&
+            userFloat("photonId:hadTowOverEm") < 0.05 &&
             sigmaIetaIeta < 0.034 &&
             userFloat("photonIsolation:pfChargedHadronRhoCorrected") < 2.3 &&
             userFloat("photonIsolation:pfNeutralHadronRhoCorrected") 
@@ -49,7 +51,7 @@ cutbased_id_loose_2012 = '''
         ) ||
         (  
             !isEB &&
-            abs(eta) < 2.4 &&
+            abs(eta) < 2.5 &&
             userInt("conversionTools:passElectronVeto") > 0 &&
             hadTowOverEm < 0.05 &&
             sigmaIetaIeta < 0.034 &&

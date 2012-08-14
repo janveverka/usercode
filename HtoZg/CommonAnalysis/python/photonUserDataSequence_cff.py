@@ -1,12 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
 from HtoZg.CommonAnalysis.conversionTools_cfi import conversionTools
-from HtoZg.CommonAnalysis.kt6PFJetsPho_cfi import kt6PFJetsPho
-from HtoZg.CommonAnalysis.photonIsolation_cfi import photonIsolation
+from HtoZg.CommonAnalysis.photonIdSequence_cff import *
+from HtoZg.CommonAnalysis.photonIsolationSequence_cff import *
 
 photonUserDataSequence = cms.Sequence(
     conversionTools + 
-    kt6PFJetsPho + 
-    photonIsolation
+    photonIdSequence +
+    photonIsolationSequence
     )
 

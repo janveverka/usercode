@@ -3,6 +3,8 @@
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
 <use name="EGamma/EGammaAnalysisTools"/>
+<use name="RecoEgamma/EgammaElectronAlgos"/>
+<use name="clhep"/>
 <flags EDM_PLUGIN="1"/>
 <library name="HtoZgCommonAnalysis_plugins" file="*.cc">
 </library>

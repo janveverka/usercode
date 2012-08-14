@@ -3,6 +3,9 @@ import FWCore.ParameterSet.Config as cms
 photonUserFloats = []
 photonUserInts = []
 
+## Photon ID variables
+photonUserFloats.append(cms.InputTag('photonId:hadTowOverEm'))
+
 ## Photon isolation variables
 for x in '''rho
             chargedHadronEA
