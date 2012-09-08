@@ -2037,10 +2037,12 @@ namespace cit {
     virtual Bool_t   Notify();
     virtual void     Show(Long64_t entry = -1);
   };
+} // namespace cit
+#endif
 
-  #endif
 
-  #ifdef VecBosTree_cxx
+#ifdef VecBosTree_cxx
+namespace cit {
   VecBosTree::VecBosTree(TTree *tree)
   {
   // if parameter tree is not specified (or zero), connect the file
@@ -3154,5 +3156,6 @@ namespace cit {
   }
 
 
-  #endif // #ifdef VecBosTree_cxx
 } // namespace cit
+
+#endif // #ifdef VecBosTree_cxx
