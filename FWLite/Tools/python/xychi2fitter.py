@@ -18,17 +18,39 @@ import FWLite.Tools.cmsstyle as cmsstyle
 
 import FWLite.Tools.canvases as canvases
 
+#==============================================================================
 class XYChi2Fitter():
   
     #_________________________________________________________________________
     def __init__(self):
-        self.create_toy_dataset()
+        self.generate_toy_data()
         self.define_fit_function_parabola()
     ## End of __init__(self).
+
+
+   
+    #_________________________________________________________________________
+    def read_data_from_graph_in_file(
+            self, 
+            graphname = 'regressions_restrue_EB_jan2012rereco',
+            filename = '/home/veverka/test/resTrueVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
+            ):
+        x = ROOT.RooRealVar('x', 'x', 5, 55)
+        y = ROOT.RooRealVar('y', 'y', 0, 20)
+        dxy = ROOT.RooDataSet('dxy', 'dxy', ROOT.RooArgSet(x, y),
+                              roo.StoreError(ROOT.RooArgSet(x, y)))
+        self.x, self.y, self.dxy = x, y, dxy
+        rootfile = ROOT.TFile.Open(filename)
+        graph = rootfile.Get(graphname)
+        for i in range(graph.GetN()):
+            self.x.setVal(graph.GetX()[i])
+            self.y.setVal(graph.GetY()[i])
+            self.dxy.add(ROOT.RooArgSet(self.x, self.y))
+    ## End of read_data_from_graph_in_file()  
     
     
     #_________________________________________________________________________
-    def create_toy_dataset(self):
+    def generate_toy_data(self):
         ## C r e a t e   d a t a s e t   w i t h   X   a n d   Y   v a l u e s
         ## -------------------------------------------------------------------
 
@@ -38,12 +60,13 @@ class XYChi2Fitter():
         ## of the observables. If errors on one or more observables
         ## are asymmetric, one can store the asymmetric error
         ## using the StoreAsymError() argument
+        
+        ## Fill an example dataset with X,err(X),Y,err(Y) values
         x = ROOT.RooRealVar('x', 'x', -11, 11)
         y = ROOT.RooRealVar('y', 'y', -10, 200)
         dxy = ROOT.RooDataSet('dxy', 'dxy', ROOT.RooArgSet(x, y),
                               roo.StoreError(ROOT.RooArgSet(x, y)))
-        
-        ## Fill an example dataset with X,err(X),Y,err(Y) values
+        self.x, self.y, self.dxy = x, y, dxy
         for i in range(11):
           
             ## Set X value and error
@@ -59,7 +82,6 @@ class XYChi2Fitter():
             
             dxy.add(ROOT.RooArgSet(x, y))
         ## End of loop over dxy entries
-        self.x, self.y, self.dxy = x, y, dxy
         
     ## End of create_dataset(self)
     
@@ -130,14 +152,15 @@ class XYChi2Fitter():
       
 ## End of class XYChi2Fitter      
 
-#______________________________________________________________________________
+#==============================================================================
 def main():
     '''
     Main entry point of execution.
     '''
     global fitter
     fitter = XYChi2Fitter()
-    fitter.run()    
+    fitter.read_data_from_graph_in_file()
+    fitter.dxy.Print()
 ## End of main()
 
 
