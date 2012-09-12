@@ -259,7 +259,7 @@ for cat in categories:
                            ]:        
         ## Add the sources and getters
         labels = []
-        labels.append('egm_mc')
+        labels.append('egm_data')
         ## EB/EE label
         labels.append(cat.name.split('_')[0])
         labels.append('pt{lo}to{hi}')
