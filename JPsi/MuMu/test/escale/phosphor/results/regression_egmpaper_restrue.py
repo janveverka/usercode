@@ -22,10 +22,19 @@ canvases.yperiod = 10
 categories = list(subdet_r9_categories) + list(subdet_categories)
 binedges  = list(BinEdges([10, 12, 15, 20, 25, 30, 50]))
 binedges2 = list(BinEdges([10, 12, 15, 20, 25, 30, 999]))
-bincenters    = [0.5 * (lo + hi) for lo, hi in binedges]
+# bincenters    = [0.5 * (lo + hi) for lo, hi in binedges]
 binhalfwidths = [0.5 * (hi - lo) for lo, hi in binedges]
-xgetter_factory  = lambda: lambda workspace, i = iter(bincenters)    : i.next()
-exgetter_factory = lambda: lambda workspace, i = iter(binhalfwidths) : i.next()
+## From JPsi/MuMu/test/escale/phosphor/results/et_bins.py
+bincenters = [10.989304253688067, 13.351368737004115, 17.147339299268552, 
+              22.179240833268896, 27.173917455971321, 35.803997245197557]
+binlowerrors = [0.65537679965223639, 0.94142290950319563, 1.5181461630768514,
+                1.5501082031906144, 1.5298479083763716, 4.4939315406518361]
+binhigherrors = [0.68175885440586725, 1.0874031829846533, 1.8541052767651571,
+                 1.8519733748598703, 1.8401991122139627, 13.525647096975746]
+xgetter_factory   = lambda: lambda workspace, i = iter(bincenters   ) : i.next()
+exgetter_factory  = lambda: lambda workspace, i = iter(binhalfwidths) : i.next()
+exlgetter_factory = lambda: lambda workspace, i = iter(binlowerrors ) : i.next()
+exhgetter_factory = lambda: lambda workspace, i = iter(binhigherrors) : i.next()
 
 plotters = []
 
@@ -163,6 +172,62 @@ def var_vs_pt_fitresult_getter_factory(fitresult, varname):
 
 
 #______________________________________________________________________________
+def low_error_getter_factory(varname):
+    '''
+    Returns a function that takes a workspace and returns the error of the
+    variable of the given name.
+    '''
+    return lambda workspace: -workspace.var(varname).getErrorLo()
+## low_error_getter_factory(name)
+
+
+#______________________________________________________________________________
+def high_error_getter_factory(varname):
+    '''
+    Returns a function that takes a workspace and returns the error of the
+    variable of the given name.
+    '''
+    return lambda workspace: workspace.var(varname).getErrorHi()
+## high_error_getter_factory(name)
+
+
+#______________________________________________________________________________
+def yasymmerrors_var_vs_pt_getter_factory(varname):
+    """
+    Returns a tupler of 5 functions that take a workspace and return
+    x, y, ex, eyl, eyh where y, eyl and eyh correspond to the value 
+    and asymmetric error of a workspace variable of the given name 
+    and x and ex are pt bins defined in the global xgetter_factory function.
+    """
+    xgetter  = xgetter_factory()
+    exgetter = exgetter_factory()
+    ygetter  = value_getter_factory(varname)
+    eylgetter = low_error_getter_factory(varname)
+    eyhgetter = high_error_getter_factory(varname)
+    return (xgetter, ygetter, exgetter, eylgetter, eyhgetter)
+## End of yasymmerrors_var_vs_pt_getter_factory(varname)
+
+
+#______________________________________________________________________________
+def xyasymmerrors_var_vs_pt_getter_factory(varname):
+    """
+    Returns a tupler of 6 functions that take a workspace and return
+    x, y, exl, exh, eyl, eyh where y, eyl and eyh correspond to the value 
+    and asymmetric error of a workspace variable of the given name 
+    and x and exl, and exh, are pt bins defined in the global 
+    xgetter_factory, exlgetter_factory, exhgetter_factory functions.
+    """
+    xgetter  = xgetter_factory()
+    exlgetter = exlgetter_factory()
+    exhgetter = exhgetter_factory()
+    ygetter  = value_getter_factory(varname)
+    eylgetter = low_error_getter_factory(varname)
+    eyhgetter = high_error_getter_factory(varname)
+    return (xgetter, ygetter, exlgetter, exhgetter, eylgetter, eyhgetter)
+## End of xyasymmerrors_var_vs_pt_getter_factory(varname)
+
+
+#______________________________________________________________________________
 class Config():
     """Holds fitResultPlotter configuration data."""
     def __init__(self, **kwargs):
@@ -187,16 +252,25 @@ for cat in categories:
         titles = [],
         getters = [],
         )
-    for title, version in [('No Regr.', 'yyv1'),
-                           ('Caltech', 'yyv2'),
-                           ('MIT v2', 'yyv3'),
+    for title, version in [#('No Regr.', 'yyv1'),
+                           #('Caltech', 'yyv2'),
+                           ('Jan12 rereco', 'yyv3'),
+                           ('Jul12 rereco', 'yyv4'),
                            ]:        
         ## Add the sources and getters
-        name_base = '%s_pt{lo}to{hi}_%s' % (cat.name, version)
-        jobname_template = 'sge_data_%s' % (name_base)
+        labels = []
+        labels.append('egm_data')
+        ## EB/EE label
+        labels.append(cat.name.split('_')[0])
+        labels.append('pt{lo}to{hi}')
+        labels.append(version)        
+        if '_' in cat.name:
+            ## R9 label
+            labels.append(cat.name.split('_')[1])
+        jobname_template = '_'.join(labels)
         cfg.sources.append(make_list_of_sources(jobname_template))
         cfg.titles.append(title)
-        cfg.getters.append(var_vs_pt_getter_factory('phoResTrue'))
+        cfg.getters.append(xyasymmerrors_var_vs_pt_getter_factory('phoResTrue'))
     configurations.append(cfg)
 ## End of loop categories
 
@@ -218,7 +292,9 @@ def make_plots(configurations):
         ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
         plotter = FitResultPlotter(cfg.sources[0], cfg.getters[0], cfg.xtitle, 
                                    cfg.ytitle, title = cfg.titles[0],
-                                   name=cfg.name)                          
+                                   name=cfg.name, 
+                                   xasymmerrors=True,
+                                   yasymmerrors=True)                          
 
         for isources, igetters, ititle in zip(cfg.sources, 
                                               cfg.getters, 
@@ -250,7 +326,9 @@ def save_graphs_to_file(plotters, filename):
     title_to_name_map = {
        'No Regr.': 'noregr',
        'Caltech': 'caltech',
-       'MIT v2': 'mit2'
+       'MIT v2': 'mit2',
+       'Jan12 rereco': 'jan2012rereco',
+       'Jul12 rereco': 'jul2012rereco',
        }
     rootfile = ROOT.TFile.Open(filename, 'RECREATE')
     for plotter in plotters:

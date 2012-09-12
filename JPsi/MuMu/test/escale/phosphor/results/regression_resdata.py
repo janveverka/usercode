@@ -38,7 +38,8 @@ def get_basepath():
         't3-susy.ultralight.org':
             ## Require minDeltR > 0.1 to remove near muon bias
 #           '/raid2/veverka/jobs/outputs/regressions_at_low_pt',
-             '/raid2/veverka/jobs/outputs/regressions_no_muon_bias',
+             #'/raid2/veverka/jobs/outputs/regressions_no_muon_bias',
+             '/home/veverka/jobs/outputs/regressions_no_muon_bias',
         'Jan-Veverkas-MacBook-Pro.local':
             '/Users/veverka/Work/Data/phosphor/regressions_at_low_pt',
         }
