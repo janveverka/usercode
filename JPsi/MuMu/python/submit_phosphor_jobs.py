@@ -10,13 +10,17 @@ import commands
 # project_name = 'eg_paper_jul2012rereco'
 # project_name = 'vg_baseline_rerecos'
 # project_name = 'regressions_no_muon_bias'
-project_name = 'regressions_no_muon_bias_v2'
+# project_name = 'regressions_no_muon_bias_egpaper'
+project_name = 'regressions_with_muon_bias_egpaper'
+# project_name = 'regressions_no_muon_bias_v2'
+# project_name = 'regressions_at_low_pt'
 # project_name = 'regressions_no_muon_bias_12cat'
 # project_name = 'regressions_no_muon_bias_8cat'
 # project_name = 'regressions_no_muon_bias_6cat'
 # project_name = 'regressions_with_muon_bias_6cat'
 
-output_base = '/raid2/veverka/jobs/outputs'
+# output_base = '/raid2/veverka/jobs/outputs'
+output_base = '/home/veverka/jobs/outputs'
 template_filename='JPsi/MuMu/scripts/phosphor-job.template'
 
 #______________________________________________________________________________
@@ -51,6 +55,40 @@ def get_egpaper_list():
             
     return job_names
 ## End of get_egpaper_list()
+
+
+#______________________________________________________________________________
+def get_egpaper_ptdpendence_list():
+    '''
+    Returns a list of job names for plots for the EGM-11-001 paper.
+    '''
+    job_names = []
+
+    total_sections = 4
+
+    for subdet in 'EB EE'.split():
+        for pt in '10to12 12to15 15to20 20to25 25to30 30to999'.split():
+            for version in 'yyv3 yyv4 yyv4NoJSON'.split():
+                for source in 'data mc'.split():
+                    ## inclusive r9 job name
+                    name = '_'.join(['egm', source, subdet, 'pt'+pt, version])
+                    job_names.append(name)
+                    for r9 in 'lowR9 highR9'.split():
+                        ## job name
+                        name = '_'.join(['egm', source, subdet, 'pt'+pt, 
+                                         version, r9])
+                        job_names.append(name)                
+                
+    ## Use only subsection of events for the training 
+    ## and indepenedent events for MC fit
+    for basename in job_names[:]:
+        for section in range(1, total_sections + 1):
+            part = 'evt%dof%d' % (section, total_sections)
+            name = basename + '_' + part
+            job_names.append(name)
+            
+    return job_names
+## End of get_egpaper_ptdpendence_list()
 
 
 #______________________________________________________________________________
@@ -199,9 +237,10 @@ def get_baseline_list():
 
 
 # job_names = get_egpaper_list()
+job_names = get_egpaper_ptdpendence_list()
 # job_names = get_baseline_list()
 # job_names = get_large_list()
-job_names = get_large_list_regression()
+# job_names = get_large_list_regression()
 # job_names = get_12cat_regression_list()
 # job_names = get_8cat_regression_list()
 # job_names = get_6cat_regression_list()
