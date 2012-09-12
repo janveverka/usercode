@@ -9,12 +9,13 @@ latexlabels.draw()
 
 import ROOT
 
+remove_empty_lines = True
 class Latex(ROOT.TLatex):
     def __init__(self, labels, position = (0.2, 0.9), **kwargs):
         '__init__(self, labels, position = (0.2, 0.9), **kwargs)'
         ROOT.TLatex.__init__(self)
         ## Remove empty labels
-        while '' in labels:
+        while remove_empty_lines == True and '' in labels:
             labels.remove('')
         ## Init data
         self.labels = labels
