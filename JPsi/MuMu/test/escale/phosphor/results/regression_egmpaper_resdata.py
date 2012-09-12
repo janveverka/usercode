@@ -22,10 +22,19 @@ canvases.yperiod = 10
 categories = list(subdet_r9_categories) + list(subdet_categories)
 binedges  = list(BinEdges([10, 12, 15, 20, 25, 30, 50]))
 binedges2 = list(BinEdges([10, 12, 15, 20, 25, 30, 999]))
-bincenters    = [0.5 * (lo + hi) for lo, hi in binedges]
+# bincenters    = [0.5 * (lo + hi) for lo, hi in binedges]
+## From JPsi/MuMu/test/escale/phosphor/results/et_bins.py
+bincenters = [10.989304253688067, 13.351368737004115, 17.147339299268552, 
+              22.179240833268896, 27.173917455971321, 35.803997245197557]
+binlowerrors = [0.65537679965223639, 0.94142290950319563, 1.5181461630768514,
+                1.5501082031906144, 1.5298479083763716, 4.4939315406518361]
+binhigherrors = [0.68175885440586725, 1.0874031829846533, 1.8541052767651571,
+                 1.8519733748598703, 1.8401991122139627, 13.525647096975746]
 binhalfwidths = [0.5 * (hi - lo) for lo, hi in binedges]
-xgetter_factory  = lambda: lambda workspace, i = iter(bincenters)    : i.next()
-exgetter_factory = lambda: lambda workspace, i = iter(binhalfwidths) : i.next()
+xgetter_factory   = lambda: lambda workspace, i = iter(bincenters   ) : i.next()
+exgetter_factory  = lambda: lambda workspace, i = iter(binhalfwidths) : i.next()
+exlgetter_factory = lambda: lambda workspace, i = iter(binlowerrors ) : i.next()
+exhgetter_factory = lambda: lambda workspace, i = iter(binhigherrors) : i.next()
 
 plotters = []
 
@@ -66,7 +75,7 @@ def make_list_of_sources(jobname_template):
     
     ## Common to all MC fits.
     if 'mc' in jobname_template.split('_'):
-        snapshot = 'mc_fit'
+        snapshot = 'data_fit'
     else:
         snapshot = None
 
@@ -161,6 +170,25 @@ def yasymmerrors_var_vs_pt_getter_factory(varname):
 
 
 #______________________________________________________________________________
+def xyasymmerrors_var_vs_pt_getter_factory(varname):
+    """
+    Returns a tupler of 6 functions that take a workspace and return
+    x, y, exl, exh, eyl, eyh where y, eyl and eyh correspond to the value 
+    and asymmetric error of a workspace variable of the given name 
+    and x and exl, and exh, are pt bins defined in the global 
+    xgetter_factory, exlgetter_factory, exhgetter_factory functions.
+    """
+    xgetter  = xgetter_factory()
+    exlgetter = exlgetter_factory()
+    exhgetter = exhgetter_factory()
+    ygetter  = value_getter_factory(varname)
+    eylgetter = low_error_getter_factory(varname)
+    eyhgetter = high_error_getter_factory(varname)
+    return (xgetter, ygetter, exlgetter, exhgetter, eylgetter, eyhgetter)
+## End of xyasymmerrors_var_vs_pt_getter_factory(varname)
+
+
+#______________________________________________________________________________
 def value_fitresult_getter_factory(fitresult, varname):
     '''
     Returns a function that takes a workspace and returns the final value
@@ -231,7 +259,7 @@ for cat in categories:
                            ]:        
         ## Add the sources and getters
         labels = []
-        labels.append('egm_data')
+        labels.append('egm_mc')
         ## EB/EE label
         labels.append(cat.name.split('_')[0])
         labels.append('pt{lo}to{hi}')
@@ -242,7 +270,7 @@ for cat in categories:
         jobname_template = '_'.join(labels)
         cfg.sources.append(make_list_of_sources(jobname_template))
         cfg.titles.append(title)
-        cfg.getters.append(yasymmerrors_var_vs_pt_getter_factory('phoRes'))
+        cfg.getters.append(xyasymmerrors_var_vs_pt_getter_factory('phoRes'))
     configurations.append(cfg)
 ## End of loop categories
 
@@ -264,7 +292,9 @@ def make_plots(configurations):
         ## MC, EB, 2011A+B, 1 of 4 statistically independent tests
         plotter = FitResultPlotter(cfg.sources[0], cfg.getters[0], cfg.xtitle, 
                                    cfg.ytitle, title = cfg.titles[0],
-                                   name=cfg.name, yasymmerrors=True)                          
+                                   name=cfg.name, 
+                                   xasymmerrors=True,
+                                   yasymmerrors=True)                          
 
         for isources, igetters, ititle in zip(cfg.sources, 
                                               cfg.getters, 
