@@ -8,7 +8,8 @@ _hostname = socket.gethostname()
 if (_hostname == 't3-susy.ultralight.org' or 
     ('compute-' in _hostname and '.local' in _hostname)) :
     ## Path for the t3-susy
-    _path = '/raid2/veverka/esTrees/'
+    # _path = '/raid2/veverka/esTrees/'
+    _path = '/mnt/hadoop/user/veverka/esTrees/'
 elif _hostname == 'nbcitjv':
     ## Path for Jan's Dell Inspiron 6000 laptop
     _path = '/home/veverka/Work/data/esTrees'
