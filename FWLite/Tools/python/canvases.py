@@ -1,4 +1,5 @@
 '''Facilitates the creation and use of multiple canvases.'''
+import commands
 import ROOT
 
 canvases = []
@@ -37,6 +38,7 @@ def next(name=None, title=None):
     return c1
 ## end of next()
 
+
 #______________________________________________________________________________
 def make_plots(graphics_extensions = ['png']):
     for c in canvases:
@@ -47,6 +49,28 @@ def make_plots(graphics_extensions = ['png']):
         ## end of loop over graphics_extensions
     ## end of loop over canvases
 ## end of make_plots()
+
+
+#______________________________________________________________________________
+def make_pdf_from_eps():
+    '''
+    Creates an eps output and uses GhostScript-based ps2pdf command to convert
+    it to a pdf.
+    '''
+    for c in canvases:
+        if not c:
+            continue
+        c.Print(c.GetName() + '.eps')
+        command = '''ps2pdf -dEPSCrop {name}.eps
+                     rm {name}.eps'''.format(name=c.GetName())
+        (exitstatus, outtext) = commands.getstatusoutput(command)
+        if  exitstatus != 0:
+            raise RuntimeError, '"%s" failed: "%s"!' % (command, outtext)
+        
+        ## end of loop over graphics_extensions
+    ## end of loop over canvases
+## end of make_pdf_from_eps()
+
 
 #______________________________________________________________________________
 def update():
