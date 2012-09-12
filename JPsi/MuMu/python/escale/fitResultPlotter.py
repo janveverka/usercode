@@ -35,6 +35,7 @@ class FitResultPlotter():
 
         self.logy = False
         self.yasymmerrors = False
+        self.xasymmerrors = False
 
         for name, value in kwargs.items():
             setattr(self, name, value)
@@ -94,26 +95,46 @@ class FitResultPlotter():
                 x.append(f(wspace))
 
             data.append(x)
-        if self.yasymmerrors == True:
-            self.x, self.y, self.ex, self.eyl, self.eyh = zip(*data)
+        if self.xasymmerrors == True:
+            if self.yasymmerrors == True:
+                self.x, self.y, self.exl, self.exh, self.eyl, self.eyh = zip(*data)
+            else:
+                self.x, self.y, self.exl, self.exh, self.ey = zip(*data)
         else:
-            self.x, self.y, self.ex, self.ey = zip(*data)
+            if self.yasymmerrors == True:
+                self.x, self.y, self.ex, self.eyl, self.eyh = zip(*data)
+            else:
+                self.x, self.y, self.ex, self.ey = zip(*data)
+        
         return zip(*data)
     ## end of getData
 
     #--------------------------------------------------------------------------
     def makegraph(self):
         '''Makes a graph using the current workspace and yname.'''
-        if self.yasymmerrors == True:
-            x, exl, exh, y, eyl, eyh = (
-                array('d', self.x), array('d', self.ex ), array('d', self.ex ),
-                array('d', self.y), array('d', self.eyl), array('d', self.eyh),
-                )
+        if self.xasymmerrors == True:
+            if self.yasymmerrors == True:
+                x, exl, exh, y, eyl, eyh = (
+                    array('d', self.x), array('d', self.exl), array('d', self.exh),
+                    array('d', self.y), array('d', self.eyl), array('d', self.eyh),
+                    )
+            else:
+                x, exl, exh, y, eyl, eyh = (
+                    array('d', self.x), array('d', self.exl), array('d', self.exh),
+                    array('d', self.y), array('d', self.ey ), array('d', self.ey ),
+                    )
             self.graph = TGraphAsymmErrors(len(x), x, y, exl, exh, eyl, eyh)
         else:
-            x, ex = array('d', self.x), array('d', self.ex)
-            y, ey = array('d', self.y), array('d', self.ey)
-            self.graph = TGraphErrors(len(x), x, y, ex, ey)
+            if self.yasymmerrors == True:
+                x, exl, exh, y, eyl, eyh = (
+                    array('d', self.x), array('d', self.ex ), array('d', self.ex ),
+                    array('d', self.y), array('d', self.eyl), array('d', self.eyh),
+                    )
+                self.graph = TGraphAsymmErrors(len(x), x, y, exl, exh, eyl, eyh)
+            else:
+                x, ex = array('d', self.x), array('d', self.ex)
+                y, ey = array('d', self.y), array('d', self.ey)
+                self.graph = TGraphErrors(len(x), x, y, ex, ey)
         if self.title:
             self.graph.SetTitle(self.title)
         self.titles.append(self.title)
@@ -128,7 +149,7 @@ class FitResultPlotter():
         graph = self.graph
         n = graph.GetN()
         
-        if self.yasymmerrors == True:
+        if self.xasymmerrors == True or self.yasymmerrors == True:
             xmin = min([graph.GetX()[i] - graph.GetEXlow()[i] 
                         for i in range(n)])
             xmax = max([graph.GetX()[i] + graph.GetEXhigh()[i] 
@@ -181,7 +202,7 @@ class FitResultPlotter():
         for graph in self.graphs:
             n = graph.GetN()
             
-            if self.yasymmerrors == True:
+            if self.xasymmerrors == True or self.yasymmerrors == True:
                 xlo.extend([graph.GetX()[i] - graph.GetEXlow()[i] 
                             for i in range(n)])
                 xhi.extend([graph.GetX()[i] + graph.GetEXhigh()[i] 
