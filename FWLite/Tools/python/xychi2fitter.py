@@ -15,37 +15,94 @@ import math
 import ROOT
 import FWLite.Tools.roofit as roo
 import FWLite.Tools.cmsstyle as cmsstyle
-
 import FWLite.Tools.canvases as canvases
+from FWLite.Tools.latex import Latex
+
+## Defaults
+_filename  = '/home/veverka/test/resTrueVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
+_graphname = 'regressions_restrue_EB_jan2012rereco'
+_name      = 'PhotonResolutionVsEt_MCTruth_Barrel_S0'
+_title     = 'Barrel, MC Truth, S = 0 % #sqrt{GeV} Fixed'
+_systematics = 0.
 
 #==============================================================================
 class XYChi2Fitter():
   
     #_________________________________________________________________________
-    def __init__(self):
-        self.generate_toy_data()
-        self.define_fit_function_parabola()
+    def __init__(self,
+                 filename = _filename,
+                 graphname = _graphname,
+                 name = _name,
+                 title = _title,
+                 systematics = _systematics,
+                 yrange = None):
+        
+        self.filename = filename
+        self.graphname = graphname
+        self.name = name
+        self.title = title
+        self.systematics = systematics
+        self.yrange = yrange
+        
+        #self.generate_toy_data()
+        #self.define_fit_function_parabola()
+
+        self.read_data_from_graph_in_file()
+        self.define_resolution_fit_model()
+
+        #self.S.setVal(0)
+        #self.S.setConstant(True)
+
+        #self.N.setVal(0.3)
+        #self.N.setConstant(True)
     ## End of __init__(self).
 
 
-   
     #_________________________________________________________________________
-    def read_data_from_graph_in_file(
-            self, 
-            graphname = 'regressions_restrue_EB_jan2012rereco',
-            filename = '/home/veverka/test/resTrueVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
-            ):
-        x = ROOT.RooRealVar('x', 'x', 5, 55)
+    def run(self):
+        ## P e r f o r m   c h i 2   f i t   t o   X + / - d x   a n d   Y + / - d Y   v a l u e s
+        ## ---------------------------------------------------------------------------------------
+
+        ## Fit chi^2 using X and Y errors
+        #print "## Fit chi^2 using X and Y errors"
+        self.fresult = self.f.chi2FitTo(self.dxy, roo.YVar(self.y), roo.Save(),
+                                        roo.Minos())
+        
+        self.frame = self.make_plot()                
+        self.draw_plot(self.frame)
+        self.decorate_plot()
+        canvases.update()
+    ## End of run(self)
+
+    
+    #_________________________________________________________________________
+    def read_data_from_graph_in_file(self):
+        x = ROOT.RooRealVar('x', 'Photon E_{T}', 5, 70, 'GeV')
         y = ROOT.RooRealVar('y', 'y', 0, 20)
         dxy = ROOT.RooDataSet('dxy', 'dxy', ROOT.RooArgSet(x, y),
-                              roo.StoreError(ROOT.RooArgSet(x, y)))
+                              roo.StoreAsymError(ROOT.RooArgSet(x, y)))
         self.x, self.y, self.dxy = x, y, dxy
-        rootfile = ROOT.TFile.Open(filename)
-        graph = rootfile.Get(graphname)
+        rootfile = ROOT.TFile.Open(self.filename)
+        graph = rootfile.Get(self.graphname)
+        oplus = lambda x, y: ROOT.TMath.Sqrt(x*x + y*y)
+        ## Add in quadrature 1% syst. error to the stat. errors
+        if graph.InheritsFrom('TGraphAsymmErrors'):
+            ex_low  = lambda i: -oplus(graph.GetEXlow ()[i], self.systematics)
+            ex_high = lambda i:  oplus(graph.GetEXhigh()[i], self.systematics)
+            ey_low  = lambda i: -oplus(graph.GetEYlow ()[i], self.systematics)
+            ey_high = lambda i:  oplus(graph.GetEYhigh()[i], self.systematics)
+        else:
+            ex_low  = lambda i: -oplus(graph.GetEX()[i], self.systematics)
+            ex_high = lambda i:  oplus(graph.GetEX()[i], self.systematics)
+            ey_low  = lambda i: -oplus(graph.GetEY()[i], self.systematics)
+            ey_high = lambda i:  oplus(graph.GetEY()[i], self.systematics)
         for i in range(graph.GetN()):
             self.x.setVal(graph.GetX()[i])
             self.y.setVal(graph.GetY()[i])
+            self.x.setAsymError(ex_low(i), ex_high(i))
+            self.y.setAsymError(ey_low(i), ey_high(i))
             self.dxy.add(ROOT.RooArgSet(self.x, self.y))
+        rootfile.Close()
     ## End of read_data_from_graph_in_file()  
     
     
@@ -62,7 +119,7 @@ class XYChi2Fitter():
         ## using the StoreAsymError() argument
         
         ## Fill an example dataset with X,err(X),Y,err(Y) values
-        x = ROOT.RooRealVar('x', 'x', -11, 11)
+        x = ROOT.RooRealVar('x', 'x', -11,  11)
         y = ROOT.RooRealVar('y', 'y', -10, 200)
         dxy = ROOT.RooDataSet('dxy', 'dxy', ROOT.RooArgSet(x, y),
                               roo.StoreError(ROOT.RooArgSet(x, y)))
@@ -99,24 +156,42 @@ class XYChi2Fitter():
     
 
     #_________________________________________________________________________
-    def make_plot(self):
-        frame = self.x.frame(roo.Title('#chi^{2} fit of function set of '
-                                       '(X#pmdX,Y#pmdY) values'))
+    def define_resolution_fit_model(self):
+        ## Make resolution fit model
+        self.S = ROOT.RooRealVar('S', 'Stochastic Term', 0, -100, 100, 
+                                 r'% (GeV)^{1/2}')
+        self.N = ROOT.RooRealVar('N', 'Noise Term', 0.3, -100, 100,
+                                 r'% GeV')
+        self.C = ROOT.RooRealVar('C', 'Constant Term', 1, -100, 100, '%')
+        self.f = ROOT.RooFormulaVar('f', 'Resolution fit model',
+                                    'sqrt(S*S/x + N*N/x/x + C*C)',
+                                    ROOT.RooArgList(self.x, 
+                                                    self.S, self.N, self.C))
+        
+    ## End of define_resolution_fit_model(self)
+    
 
-        ## Visualize 2- and 1-sigma errors
-        #print "## Visualize 2- and 1-sigma errors"
+    #_________________________________________________________________________
+    def make_plot(self):
+        frame = self.x.frame(roo.Title(self.title))
+
+        ## Visualize 2- and 1-sigma errors using linear error propagation.
         self.f.plotOn(frame, roo.VisualizeError(self.fresult, 2), 
                       roo.FillColor(ROOT.kGreen))
         self.f.plotOn(frame, roo.VisualizeError(self.fresult, 1), 
                       roo.FillColor(ROOT.kYellow))
-        
-        ## Plot dataset in X-Y interpretation
-        #print "## Plot dataset in X-Y interpretation"
+
+        ## Visualize 1-sigma errors using a curve sampling method. 
+        #self.f.plotOn(frame, roo.VisualizeError(self.fresult, 1, False),
+                      #roo.DrawOption("L"), roo.LineWidth(2),
+                      #roo.LineColor(ROOT.kRed))
+
+        ## Plot fitted function
+        self.f.plotOn(frame)
+
+        ## Overlay dataset in X-Y interpretation
         self.dxy.plotOnXY(frame, roo.YVar(self.y))
 
-        ## Overlay fitted function
-        #print "## Overlay fitted function"
-        self.f.plotOn(frame)
         return frame
       
     ## End of make_plot(self)
@@ -128,28 +203,60 @@ class XYChi2Fitter():
         #print "## Draw the plot on a canvas"
         canvases.wwidth = 600
         canvases.wheight = 600
-        canvases.next('rf609_xychi2fit')
-        ROOT.gPad.SetLeftMargin(0.15)
-        ROOT.gPad.SetTopMargin(0.1)
+        canvas = canvases.next(self.name)
+        canvas.SetGrid()
+        canvas.SetLeftMargin(0.15)
+        canvas.SetTopMargin(0.1)
         frame.GetYaxis().SetTitleOffset(1.0)
+        frame.GetYaxis().SetTitle('E_{#gamma} Resolution '
+                                  '#sigma_{eff}/E (%)')
+        if self.yrange:
+            frame.GetYaxis().SetRangeUser(*self.yrange)
         frame.Draw()
+        canvas.RedrawAxis('g')
         canvases.update()
     ## End of draw_plot()
 
+    #_________________________________________________________________________
+    def decorate_plot(self):
+        ## Draw the functional form
+        Latex(['#frac{#sigma_{eff}}{E} = #frac{S}{#sqrt{E_{T}}} #oplus '
+                                        '#frac{N}{E_{T}} #oplus C'],
+              position = (0.18, 0.8), textsize = 22).draw()
+              
+        ## Draw the fit result 
+        chi2 = self.fresult.minNll()
+        npars = self.fresult.floatParsFinal().getSize()
+        ndof = self.dxy.numEntries() - npars
+        prob = ROOT.TMath.Prob(chi2, ndof)
+        Latex([self.root_latex_for_realvar(self.S, 1),
+               self.root_latex_for_realvar(self.N, 1),
+               self.root_latex_for_realvar(self.C, 1),
+               '#chi^{2} / N_{dof}: %.2g / %d' % (chi2, ndof),
+               '#chi^{2} Prob.: %.2g %%' % (100 * prob)],
+               position = (0.53, 0.8), textsize = 22).draw()
+    ## End of decorate_plot()
+    
     
     #_________________________________________________________________________
-    def run(self):
-        ## P e r f o r m   c h i 2   f i t   t o   X + / - d x   a n d   Y + / - d Y   v a l u e s
-        ## ---------------------------------------------------------------------------------------
-
-        ## Fit chi^2 using X and Y errors
-        #print "## Fit chi^2 using X and Y errors"
-        self.fresult = self.f.chi2FitTo(self.dxy, roo.YVar(self.y), roo.Save())
+    def root_latex_for_realvar(self, var, precision=1):
+        '''
+        Return ROOT Latex string for this variable
+        '''
+        latex = var.GetName() + ': '
+        if var.isConstant():
+            latex += (' %.' + '%d' % precision + 'f ') % var.getVal()
+        else:
+            if var.hasAsymError():
+                latex += (' (%.' + '%d' % precision + 'f') % var.getVal()
+                latex += ('_{%.' + '%d' % precision + 'f}') % var.getErrorLo()
+                latex += ('^{+%.' + '%d' % precision + 'f}) ') % var.getErrorHi()
+            else:
+                latex += (' (%.' + '%d' % precision + 'f') % var.getVal()
+                latex += (' #pm %.' + '%d' % precision + 'f) ') % var.getError()
+        latex += var.getUnit()
+        return latex
         
-        frame = self.make_plot()                
-        self.draw_plot(frame)
-    ## End of run(self)
-      
 ## End of class XYChi2Fitter      
 
 #==============================================================================
@@ -159,8 +266,11 @@ def main():
     '''
     global fitter
     fitter = XYChi2Fitter()
-    fitter.read_data_from_graph_in_file()
-    fitter.dxy.Print()
+    #fitter.read_data_from_graph_in_file()
+    #fitter.dxy.Print()
+    fitter.run()
+    # canvases.make_plots(['png'])
+    # canvases.make_pdf_from_eps()
 ## End of main()
 
 
