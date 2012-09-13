@@ -24,6 +24,8 @@ _graphname = 'regressions_restrue_EB_jan2012rereco'
 _name      = 'PhotonResolutionVsEt_MCTruth_Barrel_S0'
 _title     = 'Barrel, MC Truth, S = 0 % #sqrt{GeV} Fixed'
 _systematics = 0.
+_yrange    = None
+_noxerrors = True
 
 #==============================================================================
 class XYChi2Fitter():
@@ -35,7 +37,8 @@ class XYChi2Fitter():
                  name = _name,
                  title = _title,
                  systematics = _systematics,
-                 yrange = None):
+                 yrange = _yrange,
+                 noxerrors = _noxerrors):
         
         self.filename = filename
         self.graphname = graphname
@@ -43,6 +46,7 @@ class XYChi2Fitter():
         self.title = title
         self.systematics = systematics
         self.yrange = yrange
+        self.noxerrors = noxerrors
         
         #self.generate_toy_data()
         #self.define_fit_function_parabola()
@@ -63,10 +67,15 @@ class XYChi2Fitter():
         ## P e r f o r m   c h i 2   f i t   t o   X + / - d x   a n d   Y + / - d Y   v a l u e s
         ## ---------------------------------------------------------------------------------------
 
-        ## Fit chi^2 using X and Y errors
-        #print "## Fit chi^2 using X and Y errors"
-        self.fresult = self.f.chi2FitTo(self.dxy, roo.YVar(self.y), roo.Save(),
-                                        roo.Minos())
+        if self.noxerrors:
+            ## Fit chi^2 using Y errors only
+            self.fresult = self.f.chi2FitTo(self.dxy_noxerrors,
+                                            roo.YVar(self.y), roo.Save(),
+                                            roo.Minos())
+        else:
+            ## Fit chi^2 using X and Y errors
+            self.fresult = self.f.chi2FitTo(self.dxy, roo.YVar(self.y), roo.Save(),
+                                            roo.Minos())
         
         self.frame = self.make_plot()                
         self.draw_plot(self.frame)
@@ -81,7 +90,11 @@ class XYChi2Fitter():
         y = ROOT.RooRealVar('y', 'y', 0, 20)
         dxy = ROOT.RooDataSet('dxy', 'dxy', ROOT.RooArgSet(x, y),
                               roo.StoreAsymError(ROOT.RooArgSet(x, y)))
+        dxy_noxerrors = ROOT.RooDataSet('dxy_noxerrors', 'dxy_noxerrors',
+                                        ROOT.RooArgSet(x, y),
+                                        roo.StoreAsymError(ROOT.RooArgSet(y)))
         self.x, self.y, self.dxy = x, y, dxy
+        self.dxy_noxerrors = dxy_noxerrors
         rootfile = ROOT.TFile.Open(self.filename)
         graph = rootfile.Get(self.graphname)
         oplus = lambda x, y: ROOT.TMath.Sqrt(x*x + y*y)
@@ -96,12 +109,23 @@ class XYChi2Fitter():
             ex_high = lambda i:  oplus(graph.GetEX()[i], self.systematics)
             ey_low  = lambda i: -oplus(graph.GetEY()[i], self.systematics)
             ey_high = lambda i:  oplus(graph.GetEY()[i], self.systematics)
+        if self.noxerrors:
+            # ex_low_orig  = ex_low
+            # ex_high_orig = ex_high
+            # ex_low  = lambda i: 0.1 * ex_low_orig(i)
+            # ex_high = lambda i: 0.1 * ex_high_orig(i)
+            # ex_low  = lambda i: 0.1
+            # ex_high = lambda i: 0.1
+            pass
         for i in range(graph.GetN()):
             self.x.setVal(graph.GetX()[i])
             self.y.setVal(graph.GetY()[i])
             self.x.setAsymError(ex_low(i), ex_high(i))
             self.y.setAsymError(ey_low(i), ey_high(i))
             self.dxy.add(ROOT.RooArgSet(self.x, self.y))
+            self.x.removeError()
+            self.x.removeAsymError()
+            self.dxy_noxerrors.add(ROOT.RooArgSet(self.x, self.y))
         rootfile.Close()
     ## End of read_data_from_graph_in_file()  
     
@@ -233,7 +257,7 @@ class XYChi2Fitter():
                self.root_latex_for_realvar(self.N, 1),
                self.root_latex_for_realvar(self.C, 1),
                '#chi^{2} / N_{dof}: %.2g / %d' % (chi2, ndof),
-               '#chi^{2} Prob.: %.2g %%' % (100 * prob)],
+               '#chi^{2} Prob.: %.3g %%' % (100 * prob)],
                position = (0.53, 0.8), textsize = 22).draw()
     ## End of decorate_plot()
     
@@ -248,9 +272,23 @@ class XYChi2Fitter():
             latex += (' %.' + '%d' % precision + 'f ') % var.getVal()
         else:
             if var.hasAsymError():
-                latex += (' (%.' + '%d' % precision + 'f') % var.getVal()
-                latex += ('_{%.' + '%d' % precision + 'f}') % var.getErrorLo()
-                latex += ('^{+%.' + '%d' % precision + 'f}) ') % var.getErrorHi()
+                val = var.getVal()
+                lo = var.getVal() + var.getErrorLo()
+                hi = var.getVal() + var.getErrorHi()
+                bounds = [ROOT.TMath.Abs(x) for x in [lo, val, hi]]
+                if lo * hi < 0.0:
+                    bounds.append(0.)
+                val = ROOT.TMath.Abs(val)
+                lo = min(bounds)
+                hi = max(bounds)
+                elo = val - lo
+                ehi = hi - val
+                ## Autoprecision
+                errors = [e for e in [elo, ehi] if e > 0.001]
+                precision = max(0, 1 - int(round(ROOT.TMath.Log10(min(errors)))))
+                latex += (' %.' + '%d' % precision + 'f') % val
+                latex += ('_{-%.' + '%d' % precision + 'f}') % elo
+                latex += ('^{+%.' + '%d' % precision + 'f} ') % ehi
             else:
                 latex += (' (%.' + '%d' % precision + 'f') % var.getVal()
                 latex += (' #pm %.' + '%d' % precision + 'f) ') % var.getError()
