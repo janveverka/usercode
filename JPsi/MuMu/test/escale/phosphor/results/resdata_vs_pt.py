@@ -5,16 +5,17 @@ import FWLite.Tools.canvases as canvases
 
 from FWLite.Tools.xychi2fitter import XYChi2Fitter as Fitter
 
-# _filename  = '/home/veverka/data/resDataVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
-_filename  = '/Users/veverka/Work/Data/phosphor/resDataVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
+_filename  = '/home/veverka/data/resDataVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
+# _filename  = '/Users/veverka/Work/Data/phosphor/resDataVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
 _stochastic_from_tb = 3.
 
-_noise_from_mc_barrel_allr9 = 44.13 # +/- 1.117
-_noise_from_mc_barrel_highr9 = 18.27 # +/- 0.7555
-_noise_from_mc_barrel_lowr9 = 76.07 # +/- 1.294
-_noise_from_mc_endcaps_allr9 = 77.14 # +/- 1.525
-_noise_from_mc_endcaps_highr9 = 26.87 # +/- 1.734
-_noise_from_mc_endcaps_lowr9 = 93.89 # +/- 1.91
+_noise_from_mc_barrel_allr9   = 44.13 # +/- 1.117
+_noise_from_mc_barrel_highr9  = 18.27 # +/- 0.7555
+_noise_from_mc_barrel_lowr9   = 76.07 # +/- 1.294
+_noise_from_mc_endcaps_allr9  = 77.14 # +/- 1.525
+_noise_from_mc_endcaps_highr9 = 27.55 # +/- 1.694
+_noise_from_mc_endcaps_lowr9  = 94.09 # +/- 1.907
+
 
 fitters = []
 

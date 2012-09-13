@@ -8,11 +8,14 @@ from FWLite.Tools.xychi2fitter import XYChi2Fitter as Fitter
 
 #==============================================================================
 ## Define global data attributes
-#_filename  = '/home/veverka/data/resTrueVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
-_filename  = '/Users/veverka/Work/Data/phosphor/resTrueVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
+_filename  = '/home/veverka/data/resTrueVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
+#_filename  = '/Users/veverka/Work/Data/phosphor/resTrueVsPt_HggV2Ression_NoMuonBias_EGMPaperCategories.root'
 _stochastic_from_tb = 3.
 _noise_from_tb      = 21.
-
+_mean_cosh_eta_barrel  = 1.37
+_mean_cosh_eta_endcaps = 3.70
+_mean_sqrt_cosh_eta_barrel  = 1.16
+_mean_sqrt_cosh_eta_endcaps = 1.91
 fitters = []
 
 ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-08)
@@ -62,7 +65,7 @@ def do_barrel_allr9_fits():
         title     = 'Barrel, MC Truth, S from TB',
         systematics = systematics,
         )
-    fitter.S.setVal(_stochastic_from_tb/1.16)
+    fitter.S.setVal(_stochastic_from_tb/_mean_sqrt_cosh_eta_barrel)
     fitter.N.setVal(ebfitter.N.getVal())
     fitter.C.setVal(ebfitter.C.getVal())
 
@@ -81,7 +84,7 @@ def do_barrel_allr9_fits():
         systematics = systematics,
         )
     fitter.S.setVal(ebfitter.S.getVal())
-    fitter.N.setVal(_noise_from_tb/1.37)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_barrel)
     fitter.C.setVal(ebfitter.C.getVal())
 
     fitter.N.setConstant()
@@ -109,7 +112,7 @@ def do_barrel_highr9_fits():
         )
 
     fitter.S.setVal(4.258)
-    fitter.N.setVal(_noise_from_tb/1.37)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_barrel)
     fitter.C.setVal(0.5098)
 
     fitter.run()
@@ -127,7 +130,7 @@ def do_barrel_highr9_fits():
         systematics = systematics,
         yrange    = (-1, 5),
         )
-    fitter.S.setVal(_stochastic_from_tb/1.16)
+    fitter.S.setVal(_stochastic_from_tb/_mean_sqrt_cosh_eta_barrel)
     fitter.N.setVal(ebfitter.N.getVal())
     fitter.C.setVal(ebfitter.C.getVal())
 
@@ -147,7 +150,7 @@ def do_barrel_highr9_fits():
         yrange    = (-1, 5),
         )
     fitter.S.setVal(ebfitter.S.getVal())
-    fitter.N.setVal(_noise_from_tb/1.37)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_barrel)
     fitter.C.setVal(ebfitter.C.getVal())
 
     fitter.N.setConstant()
@@ -175,7 +178,7 @@ def do_barrel_lowr9_fits():
         )
 
     fitter.S.setVal(4.258)
-    fitter.N.setVal(_noise_from_tb/1.37)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_barrel)
     fitter.C.setVal(0.5098)
 
     fitter.run()
@@ -193,7 +196,7 @@ def do_barrel_lowr9_fits():
         systematics = systematics,
         # yrange    = (-1, 5),
         )
-    fitter.S.setVal(_stochastic_from_tb/1.16)
+    fitter.S.setVal(_stochastic_from_tb/_mean_sqrt_cosh_eta_barrel)
     fitter.N.setVal(ebfitter.N.getVal())
     fitter.C.setVal(ebfitter.C.getVal())
 
@@ -213,7 +216,7 @@ def do_barrel_lowr9_fits():
         # yrange    = (-1, 5),
         )
     fitter.S.setVal(ebfitter.S.getVal())
-    fitter.N.setVal(_noise_from_tb/1.37)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_barrel)
     fitter.C.setVal(ebfitter.C.getVal())
 
     fitter.N.setConstant()
@@ -253,7 +256,7 @@ def do_endcap_allr9_fits():
         title     = 'Endcaps, MC Truth, S from TB',
         systematics = systematics,
         )
-    fitter.S.setVal(_stochastic_from_tb/1.91)
+    fitter.S.setVal(_stochastic_from_tb/_mean_sqrt_cosh_eta_endcaps)
     fitter.N.setVal(eefitter.N.getVal())
     fitter.C.setVal(eefitter.C.getVal())
 
@@ -272,7 +275,7 @@ def do_endcap_allr9_fits():
         systematics = systematics,
         )
     fitter.S.setVal(eefitter.S.getVal())
-    fitter.N.setVal(_noise_from_tb/3.70)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_endcaps)
     fitter.C.setVal(eefitter.C.getVal())
 
     fitter.N.setConstant()
@@ -301,7 +304,7 @@ def do_endcap_highr9_fits():
         )
 
     fitter.S.setVal(4.258)
-    fitter.N.setVal(_noise_from_tb/1.37)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_endcaps)
     fitter.C.setVal(0.5098)
 
     fitter.run()
@@ -319,7 +322,7 @@ def do_endcap_highr9_fits():
         systematics = systematics,
         # yrange    = (-1, 5),
         )
-    fitter.S.setVal(_stochastic_from_tb/1.16)
+    fitter.S.setVal(_stochastic_from_tb/_mean_sqrt_cosh_eta_endcaps)
     fitter.N.setVal(ebfitter.N.getVal())
     fitter.C.setVal(ebfitter.C.getVal())
 
@@ -339,7 +342,7 @@ def do_endcap_highr9_fits():
         # yrange    = (-1, 5),
         )
     fitter.S.setVal(ebfitter.S.getVal())
-    fitter.N.setVal(_noise_from_tb/1.37)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_endcaps)
     fitter.C.setVal(ebfitter.C.getVal())
 
     fitter.N.setConstant()
@@ -367,8 +370,8 @@ def do_endcap_lowr9_fits():
         # yrange    = (-1, 5),
         )
 
-    fitter.S.setVal(4.258)
-    fitter.N.setVal(_noise_from_tb/1.37)
+    fitter.S.setVal(_stochastic_from_tb/_mean_sqrt_cosh_eta_endcaps)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_endcaps)
     fitter.C.setVal(0.5098)
 
     fitter.run()
@@ -386,7 +389,7 @@ def do_endcap_lowr9_fits():
         systematics = systematics,
         # yrange    = (-1, 5),
         )
-    fitter.S.setVal(_stochastic_from_tb/1.16)
+    fitter.S.setVal(_stochastic_from_tb/_mean_sqrt_cosh_eta_endcaps)
     fitter.N.setVal(ebfitter.N.getVal())
     fitter.C.setVal(ebfitter.C.getVal())
 
@@ -406,7 +409,7 @@ def do_endcap_lowr9_fits():
         # yrange    = (-1, 5),
         )
     fitter.S.setVal(ebfitter.S.getVal())
-    fitter.N.setVal(_noise_from_tb/1.37)
+    fitter.N.setVal(_noise_from_tb/_mean_cosh_eta_endcaps)
     fitter.C.setVal(ebfitter.C.getVal())
 
     fitter.N.setConstant()
