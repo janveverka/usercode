@@ -10,6 +10,6 @@ export SCRAM_ARCH=slc5_amd64_gcc462
 scram project CMSSW CMSSW_5_2_6
 cd CMSSW_5_2_6/src
 eval $(scram runtime -sh)
-cvs co -d Vgamma/Analysis UserCode/JanVeverka/Vgamma/Analysis/scripts/setup.sh
+cvs co -d . UserCode/JanVeverka/Vgamma/Analysis/scripts/setup.sh
 RTAG=HEAD
 source $CMSSW_BASE/src/Vgamma/Analysis/scripts/setup.sh

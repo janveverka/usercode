@@ -15,9 +15,8 @@ using cit::VgMuonHistoFiller;
  * Ctor.
  */
 VgMuonHistoFiller::VgMuonHistoFiller(VgAnalyzerTree const& tree,
-                                     HistoCollection & histos,
-                                     const Int_t * numObjects) :
-  VgHistoFillerBase(tree, histos, numObjects)
+                                     HistoCollection & histos) :
+  VgHistoFillerBase(tree, histos)
 {  
 } // 
 
@@ -49,9 +48,10 @@ VgMuonHistoFiller::bookHistograms()
  * Fills the histograms.
  */
 void
-VgMuonHistoFiller::fillHistograms()
+VgMuonHistoFiller::fillHistograms(cit::VgEvent const& event)
 {
   histos_["muN"]->Fill(tree_.nMu);
+  collection_ = & event.muons();
   loopOverObjects();  
 } // VgMuonHistoFiller::fillHistograms(..)
 

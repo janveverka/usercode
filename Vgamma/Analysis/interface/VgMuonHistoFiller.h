@@ -17,11 +17,10 @@ namespace cit {
   class VgMuonHistoFiller : public VgHistoFillerBase {
   public:
     VgMuonHistoFiller(VgAnalyzerTree const& tree,
-                      HistoCollection & histos,
-                      const Int_t * numObjects = 0);
+                      HistoCollection & histos);
     ~VgMuonHistoFiller();
     void bookHistograms();
-    void fillHistograms();
+    void fillHistograms(VgEvent const&);
     void fillObjectWithIndex(UInt_t i);
   }; // class VgMuonHistoFiller
   

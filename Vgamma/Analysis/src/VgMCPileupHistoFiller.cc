@@ -14,10 +14,9 @@ using cit::VgMCPileupHistoFiller;
 /**
  * Ctor.
  */
-VgMCPileupHistoFiller::VgMCPileupHistoFiller(VgAnalyzerTree const& tree,
-                                             HistoCollection & histos,
-                                             const Int_t * numObjects) :
-  VgHistoFillerBase(tree, histos, numObjects)
+VgMCPileupHistoFiller::VgMCPileupHistoFiller(cit::VgAnalyzerTree const& tree,
+                                             HistoCollection & histos) :
+  VgHistoFillerBase(tree, histos)
 {  
 } // 
 
@@ -78,7 +77,7 @@ VgMCPileupHistoFiller::bookHistograms()
  * Fills the histograms.
  */
 void
-VgMCPileupHistoFiller::fillHistograms()
+VgMCPileupHistoFiller::fillHistograms(cit::VgEvent const& event)
 {
   histos_["nPU0"]->Fill(tree_.nPU[0]); 
 //   histos_["nPU1"]->Fill(t.nPU[1]);

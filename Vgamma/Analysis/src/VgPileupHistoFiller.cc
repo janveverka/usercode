@@ -15,9 +15,8 @@ using cit::VgPileupHistoFiller;
  * Ctor.
  */
 VgPileupHistoFiller::VgPileupHistoFiller(VgAnalyzerTree const& tree,
-                                         HistoCollection & histos,
-                                         const Int_t * numObjects) :
-  VgHistoFillerBase(tree, histos, numObjects)
+                                         HistoCollection & histos) :
+  VgHistoFillerBase(tree, histos)
 {  
 } // 
 
@@ -44,7 +43,7 @@ VgPileupHistoFiller::bookHistograms()
  * Fills the histograms.
  */
 void
-VgPileupHistoFiller::fillHistograms()
+VgPileupHistoFiller::fillHistograms(cit::VgEvent const& event)
 {
   histos_["rho"]->Fill(tree_.rho);
   histos_["rhoNeutral"]->Fill(tree_.rhoNeutral);

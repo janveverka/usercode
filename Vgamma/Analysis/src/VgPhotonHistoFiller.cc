@@ -15,9 +15,8 @@ using cit::VgPhotonHistoFiller;
  * Ctor.
  */
 VgPhotonHistoFiller::VgPhotonHistoFiller(VgAnalyzerTree const& tree,
-                                         HistoCollection & histos,
-                                         const Int_t * numObjects) :
-  VgHistoFillerBase(tree, histos, numObjects)
+                                         HistoCollection & histos) :
+  VgHistoFillerBase(tree, histos)
 {  
 } // 
 
@@ -117,9 +116,10 @@ VgPhotonHistoFiller::bookHistograms()
  * Fills the histograms.
  */
 void
-VgPhotonHistoFiller::fillHistograms()
+VgPhotonHistoFiller::fillHistograms(cit::VgEvent const& event)
 {
   histos_["phoN"]->Fill(tree_.nPho);
+  collection_ = &event.photons();
   loopOverObjects();  
 } // VgPhotonHistoFiller::fillHistograms(..)
 

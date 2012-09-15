@@ -15,6 +15,7 @@
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
 #include "Vgamma/Analysis/interface/VgHistoFillerBase.h"
 
+
 //_____________________________________________________________________
 namespace cit {
   
@@ -27,7 +28,7 @@ namespace cit {
                    TDirectory & output);
     ~VgHistoManager();
     void bookHistograms();
-    void fillHistograms();
+    void fillHistograms(VgEvent const&);
   private:
     VgHistoFillerCollection fillers_;
     VgHistoFillerBase::HistoCollection histos_;

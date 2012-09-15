@@ -86,7 +86,8 @@ VgAnalyzer::run()
     tree_->fChain->GetEntry(ientry);
     // if (pass(ientry) == false) continue;
     // fillHistograms();
-    histoManager_->fillHistograms();
+    VgEvent event(*tree_);
+    histoManager_->fillHistograms(event);
   } // end of loop over the events
   
   cout << "Processed " << ientry << " records." << endl;

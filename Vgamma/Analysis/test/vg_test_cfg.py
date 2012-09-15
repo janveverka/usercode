@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 
 _hostname = socket.gethostname()
 if 'lxplus' in _hostname:
-    dataset_path = '/tmp/veverka/Vgamma2011/VgKitV14/MC'
+    dataset_path = '/afs/cern.ch/user/v/veverka/work/data/Vgamma2011/test'
 elif  _hostname == 'Jan-Veverkas-MacBook-Pro.local':
     dataset_path = '/Users/veverka/Work/Data/Vgamma2011/test'
 
@@ -16,7 +16,7 @@ process.inputs = cms.PSet(
     )
 
 for filename in '''
-                mmgSkim_test.root
+                mmgSkim_test100.root
                 '''.split():
     process.inputs.fileNames.append(
         os.path.join(dataset_path, filename)

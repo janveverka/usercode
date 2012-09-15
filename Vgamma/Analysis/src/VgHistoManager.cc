@@ -21,10 +21,10 @@ VgHistoManager::VgHistoManager(VgAnalyzerTree const& tree,
   TDirectory *cwd = gDirectory;
   output.cd();  
   
-  fillers_.push_back(new VgMuonHistoFiller    (tree, histos_, &tree.nMu ));
-  fillers_.push_back(new VgPhotonHistoFiller  (tree, histos_, &tree.nPho));
-  fillers_.push_back(new VgMCPileupHistoFiller(tree, histos_            ));
-  fillers_.push_back(new VgPileupHistoFiller  (tree, histos_            ));
+  fillers_.push_back(new VgMuonHistoFiller    (tree, histos_));
+  fillers_.push_back(new VgPhotonHistoFiller  (tree, histos_));
+  fillers_.push_back(new VgMCPileupHistoFiller(tree, histos_));
+  fillers_.push_back(new VgPileupHistoFiller  (tree, histos_));
   
   bookHistograms();
   
@@ -63,12 +63,12 @@ VgHistoManager::bookHistograms()
  * Fills all histograms.
  */
 void 
-VgHistoManager::fillHistograms()
+VgHistoManager::fillHistograms(VgEvent const& event)
 {
   /// Loop over histo fillers
   for (VgHistoFillerCollection::iterator filler = fillers_.begin();
        filler != fillers_.end(); ++filler) {
-    (*filler)->fillHistograms();
+    (*filler)->fillHistograms(event);
   }    
 } // VgHistoManager::fillHistograms()
 

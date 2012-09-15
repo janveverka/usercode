@@ -15,6 +15,7 @@
 #include "TH1.h"
 
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
+#include "Vgamma/Analysis/interface/VgEvent.h"
 
 //_____________________________________________________________________
 namespace cit {
@@ -23,28 +24,30 @@ namespace cit {
     typedef std::map<std::string, TH1*> HistoCollection;
 
     VgHistoFillerBase(VgAnalyzerTree const& tree,
-                      HistoCollection & histos,
-                      const Int_t * numObjects = 0) :
+                      HistoCollection & histos) :
       tree_(tree),
       histos_(histos),
-      numObjects_(numObjects)
+      collection_(0)
     {}
     
     ~VgHistoFillerBase() {}
     virtual void bookHistograms() = 0;
-    virtual void fillHistograms() = 0;
+    virtual void fillHistograms(VgEvent const&) = 0;
   protected:
     virtual void fillObjectWithIndex(UInt_t) = 0;
 
     virtual void loopOverObjects() {
-      if (numObjects_ != 0)
-        for (Int_t index = 0; index < *numObjects_; ++index)
-          fillObjectWithIndex(index);
+      if (collection_ != 0) {
+        VgEvent::Collection::const_iterator index = collection_->begin();
+        for (; index < collection_->end(); ++index)
+          fillObjectWithIndex(*index);
+      }
     } // loopOverObjects(..)
     
     VgAnalyzerTree const & tree_;
     HistoCollection &      histos_;
     const Int_t    *       numObjects_;
+    VgEvent::Collection const * collection_;
   }; // class VgHistoFillerBase
   
 } // namespace cit

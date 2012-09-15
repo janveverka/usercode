@@ -17,11 +17,10 @@ namespace cit {
   class VgPileupHistoFiller : public VgHistoFillerBase {
   public:
     VgPileupHistoFiller(VgAnalyzerTree const& tree,
-                        HistoCollection & histos,
-                        const Int_t * numObjects = 0);
+                        HistoCollection & histos);
     ~VgPileupHistoFiller();
     void bookHistograms();
-    void fillHistograms();
+    void fillHistograms(VgEvent const&);
     void fillObjectWithIndex(UInt_t i);
   }; // class VgPileupHistoFiller
   
