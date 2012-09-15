@@ -133,6 +133,11 @@ int copyEvents(ArgParser & parser)
   
   if (parser.shortFlagPres('n')) 
     lastEntry = atoi(parser.getShortFlag('n').c_str());
+  
+  Long64_t reportEvery = -1;
+  if (parser.shortFlagPres('e')) 
+    reportEvery = atoi(parser.getShortFlag('e').c_str());
+  
   // Loop over all entries in input tree
   for (int outEntry = 0; outEntry < lastEntry; ++outEntry) {
 //   for (int outEntry = 0; outEntry < 100; ++outEntry) {
@@ -143,10 +148,10 @@ int copyEvents(ArgParser & parser)
 
     if (InTree->GetEntry(inEntry) < 0) break;
 
-    if (outEntry % 1 == 0) {
+    if (reportEvery > 0 && outEntry % reportEvery == 0) {
       std::cout << "Processing output entry " << outEntry
                 << " corresponding to input entry " << inEntry << std::endl;
-    }    
+    }
     
     // Fill _this_ entry in the output tree
     OutTree->Fill();    
@@ -174,6 +179,9 @@ int checkCommandLineArguments(ArgParser & parser) {
   parser.addShortOption('c', ArgParser::reqArg, 
                         "cut - a TFormula expression selecting events to be "
                         "stored");
+  
+  parser.addShortOption('e', ArgParser::reqArg, 
+                        "Report every n-th processed output event");
   
   parser.addShortOption('n', ArgParser::reqArg, 
                         "(maximum) number of output entries");
