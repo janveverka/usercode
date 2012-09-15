@@ -1,13 +1,22 @@
-import FWCore.ParameterSet.Config as cms
 import os
+import socket
+import FWCore.ParameterSet.Config as cms
+
+_hostname = socket.gethostname()
+if 'lxplus' in _hostname:
+    dataset_path = '/tmp/veverka/Vgamma2011/VgKitV14/MC'
+elif  _hostname == 'Jan-Veverkas-MacBook-Pro.local':
+    dataset_path = '/Users/veverka/Work/Data/Vgamma2011/test'
 
 process = cms.Process('VgammaAnalysis')
 
-process.inputs = cms.PSet(fileNames = cms.vstring())
+process.inputs = cms.PSet(
+    fileNames = cms.vstring(),
+    treeName = cms.string('EventTree'),
+    )
 
-dataset_path = '/tmp/veverka/Vgamma2011/VgKitV14/MC'
 for filename in '''
-                DYJetsToLL_TuneZ2_M50_Madgraph_Fall11.root  
+                mmgSkim_test.root
                 '''.split():
     process.inputs.fileNames.append(
         os.path.join(dataset_path, filename)
