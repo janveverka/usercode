@@ -3,11 +3,6 @@ import socket
 import getpass
 import FWCore.ParameterSet.Config as cms
 
-_hostname = socket.gethostname()
-if 'lxplus' in _hostname:
-    dataset_path = os.path.join('/tmp', getpass.getuser())
-elif  _hostname == 'Jan-Veverkas-MacBook-Pro.local':
-    dataset_path = '/Users/veverka/Work/Data/Vgamma2011/test'
 
 process = cms.Process('VgammaAnalysis')
 
@@ -16,8 +11,10 @@ process.inputs = cms.PSet(
     treeName = cms.string('EventTree'),
     )
 
+dataset_path = os.path.join(os.environ['CMSSW_BASE'],
+                            'src/Vgamma/Analysis/data')
 for filename in '''
-                WJets_mmgSkim_test.root
+                ZGammaToMuMuGamma_2Jet_MG5_TuneZ2_mmgSkim_test10.root
                 '''.split():
     process.inputs.fileNames.append(
         os.path.join(dataset_path, filename)
