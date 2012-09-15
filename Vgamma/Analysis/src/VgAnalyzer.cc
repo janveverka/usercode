@@ -131,6 +131,7 @@ VgAnalyzer::parseInputs()
 
   typedef vector<string> vstring;
   vstring filesToProcess;
+  string treeName;
 
 //   typedef vector<edm::LuminosityBlockRange> Lumis;
 //   map<string,Lumis*> filesToLumis;
@@ -169,7 +170,13 @@ VgAnalyzer::parseInputs()
                                          << "vstring or VPSet!" << endl;
   }
 
-  TChain *chain = new TChain("VgAnalyzerKit/EventTree");
+  if (inputs.existsAs<string>("treeName")) {
+    treeName = inputs.getParameter<string>("treeName");
+  } else {
+    treeName = "VgAnalyzerKit/EventTree";
+  }
+  
+  TChain *chain = new TChain(treeName.c_str());
   for (vstring::const_iterator filename = filesToProcess.begin();
        filename != filesToProcess.end(); ++filename) {
     chain->Add(filename->c_str());
