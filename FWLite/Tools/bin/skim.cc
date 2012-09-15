@@ -8,7 +8,11 @@
  * http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/
  * 
  * Use:
- * skim tree source.root destination.root
+ * skim [options] tree destination.root source.root [source2.root source3.root ...]
+ * Options:
+ *  -c <cut>  -- apply a selection in the form of a TTree::Draw expression
+ *  -n <number> -- store maximum <number> entries in the output.
+ *  -v -- verbose output; prints the usage info.
  * 
  * \author Jan Veverka, Caltech
  * \date 13 September 2012
