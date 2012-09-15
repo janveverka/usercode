@@ -1,0 +1,9 @@
+#!/bin/bash
+## Runs the unit tests of Vgamma/Analysis
+## USAGE: vg-run-unit-tests
+echo "Running Vgamma/Analysis unit tests."
+echo "VgCandidateTest ..."
+VgCandidateTest
+echo "VgLeafCandidateTest ..."
+VgLeafCandidateTest
+echo "Done."

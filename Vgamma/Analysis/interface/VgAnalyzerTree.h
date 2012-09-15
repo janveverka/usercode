@@ -15,19 +15,18 @@
 // Header file for the classes stored in the TTree if any.
 
 
-namespace cit {
-
-  // Fixed size dimensions of array or collections stored in the TTree if any.
-  const Int_t kMaxphoXtalTime = 1;
-  const Int_t kMaxpho5x5Time = 1;
-  const Int_t kMaxmuValidFraction = 1;
-  const Int_t kMaxP = 500;
-  const Int_t kMaxHltIndex = 250;
-  const Int_t kMaxPdf = 7;
-  const Int_t kMaxVtx = 150;
-  
+namespace cit {  
   class VgAnalyzerTree {
   public :
+    // Fixed size dimensions of array or collections stored in the TTree if any.
+    static const Int_t kMaxphoXtalTime = 1;
+    static const Int_t kMaxpho5x5Time = 1;
+    static const Int_t kMaxmuValidFraction = 1;
+    static const Int_t kMaxP = 500;
+    static const Int_t kMaxHltIndex = 250;
+    static const Int_t kMaxPdf = 7;
+    static const Int_t kMaxVtx = 150;
+    // Auto-generated members below.
     TTree          *fChain;   //!pointer to the analyzed TTree or TChain
     Int_t           fCurrent; //!current Tree number in a TChain
 

@@ -13,9 +13,10 @@
 #include "TLorentzVector.h"
 
 namespace cit {
+  
   class VgCandidate {
   public:
-    enum ParticleType {kMuon, kPhoton, kElectron, kCombined};
+    enum ParticleType {kElectron, kMuon, kPhoton, kCombined};
     // Ctor and dtor
     VgCandidate();
     virtual ~VgCandidate() {}
@@ -29,7 +30,7 @@ namespace cit {
     void setWeight(double weight) {weight_ = weight;}
     // Indirect setters
     void scaleWeight(double scaleFactor) {weight_ *= scaleFactor;}
-  private:
+  protected:
     TLorentzVector momentum_;
     ParticleType   type_    ;
     double         weight_  ;
