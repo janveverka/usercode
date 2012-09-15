@@ -56,8 +56,8 @@ int main(int argc, char **argv) {
   if (status > kSuccess) {
     return status;
   }
-    
-  printWelcomeMessage();
+   
+  if (parser.shortFlagPres('v')) printWelcomeMessage();
 
 //   status = copyEvents(parser.getArgument("source"), 
 //                       parser.getArgument("destination"),
@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     return status;
   }
 
-  printGoodbyeMessage();
+  if (parser.shortFlagPres('v')) printGoodbyeMessage();
   
   return kSuccess;
 }
@@ -116,8 +116,9 @@ int copyEvents(ArgParser & parser)
   Long64_t lastEntry = 0;
   if (parser.shortFlagPres('c')) {
     // Select entries
-    std::cout << "Applying cut `" << parser.getShortFlag('c') << "' ..."
-              << std::endl;
+    if (parser.shortFlagPres('v'))
+      std::cout << "Applying cut `" << parser.getShortFlag('c') << "' ..."
+                << std::endl;
     InTree->Draw(">>elist", parser.getShortFlag('c').c_str(), "entrylist");
     TEntryList* elist = (TEntryList*)gDirectory->Get("elist");
     InTree->SetEntryList(elist);
