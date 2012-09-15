@@ -1,10 +1,11 @@
 import os
 import socket
+import getpass
 import FWCore.ParameterSet.Config as cms
 
 _hostname = socket.gethostname()
 if 'lxplus' in _hostname:
-    dataset_path = '/afs/cern.ch/user/v/veverka/work/data/Vgamma2011/test'
+    dataset_path = os.path.join('/tmp', getpass.getuser())
 elif  _hostname == 'Jan-Veverkas-MacBook-Pro.local':
     dataset_path = '/Users/veverka/Work/Data/Vgamma2011/test'
 
@@ -16,7 +17,7 @@ process.inputs = cms.PSet(
     )
 
 for filename in '''
-                mmgSkim_test100.root
+                WJets_mmgSkim_test.root
                 '''.split():
     process.inputs.fileNames.append(
         os.path.join(dataset_path, filename)
@@ -27,7 +28,7 @@ process.outputs = cms.PSet(
     )
     
 process.maxEvents = cms.PSet(
-    input = cms.untracked.int64(1000),
+    input = cms.untracked.int64(-1),
     reportEvery = cms.untracked.int64(100)
     )
     
