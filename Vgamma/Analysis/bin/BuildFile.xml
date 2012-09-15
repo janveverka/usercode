@@ -1,6 +1,5 @@
 <use name="Vgamma/Analysis" />
 <environment>
-  <bin   file="analyze.cc" name="analyze-vgamma">
-  </bin>
- <bin file="VgCandidateTest.cc"/>
+  <bin file="analyze.cc" name="analyze-vgamma"/>
+  <bin file="VgCandidateTest.cc"/>
 </environment>
