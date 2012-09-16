@@ -16,7 +16,6 @@
 #include "TTree.h"
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
 #include "Vgamma/Analysis/interface/VgLeafCandidate.h"
-#include "Vgamma/Analysis/interface/VgException.h"
 
 using namespace std;
 using cit::VgAnalyzerTree;

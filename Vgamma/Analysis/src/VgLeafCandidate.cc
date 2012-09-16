@@ -5,13 +5,12 @@
  */
 #include <assert.h>
 #include <iostream>
+#include "FWCore/Utilities/interface/Exception.h"
 #include "Vgamma/Analysis/interface/VgLeafCandidate.h"
-#include "Vgamma/Analysis/interface/VgException.h"
 
 using cit::VgLeafCandidate;
 
-using cit::VgException;
-typedef cit::VgException Bad;
+typedef cms::Exception Bad;
 
 const double VgLeafCandidate::kElectronMass = 0.510998928e-3;
 const double VgLeafCandidate::kMuonMass     = 105.65836668e-3;
@@ -34,16 +33,11 @@ VgLeafCandidate::VgLeafCandidate(VgAnalyzerTree const &tree, ParticleType type,
 void
 VgLeafCandidate::init()
 {
-  using std::string;
-  string here_str("VgLeafCandidate::");
-  here_str += __FUNCTION__ + string("()"); 
-  const char * here = here_str.c_str();
-
   switch (type_) {
   //_____________
   case kElectron:
     if ((Int_t)key_ >= tree_.nEle)
-      throw Bad(here) << "key=" << key_
+      throw Bad("BadKey") << "key=" << key_
 		      << " outside of range nEle=" << tree_.nEle << "!";
     momentum_.SetPtEtaPhiM(tree_.elePt [key_],
 			   tree_.eleEta[key_],
@@ -54,7 +48,7 @@ VgLeafCandidate::init()
   //_____________
   case kMuon:
     if ((Int_t)key_ >= tree_.nMu)
-      throw Bad(here) << "key=" << key_
+      throw Bad("BadKey") << "key=" << key_
 		      << " outside of range nMu=" << tree_.nMu << "!";
     momentum_.SetPtEtaPhiM(tree_.muPt [key_],
 			   tree_.muEta[key_],
@@ -65,7 +59,7 @@ VgLeafCandidate::init()
   //_____________
   case kPhoton:
     if ((Int_t)key_ >= tree_.nPho)
-      throw Bad(here) << "key=" << key_
+      throw Bad("BadKey") << "key=" << key_
 		      << " outside of range nPho=" << tree_.nPho << "!";
     momentum_.SetPtEtaPhiM(tree_.phoEt [key_],
 			   tree_.phoEta[key_],
@@ -75,11 +69,11 @@ VgLeafCandidate::init()
       
   //_____________
   case kCombined:
-    throw Bad(here) << "Illegal ParticleType = kCombined";
+    throw Bad("BadParticleType") << "Illegal ParticleType = kCombined";
     
   //_____________
   default:
     /// This should never happen.
-    throw Bad(here) << "Unknown ParticleType: " << type_;
+    throw Bad("BadParticleType") << "Unknown ParticleType: " << type_;
   } // switch(type_)
 } // init

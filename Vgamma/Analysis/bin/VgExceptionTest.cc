@@ -4,10 +4,12 @@
  * \date 15 September 2012
  */
 
+#include <assert.h>
 #include <iostream>
-#include "Vgamma/Analysis/interface/VgException.h"
+#include "FWCore/Utilities/interface/Exception.h"
+
 using namespace std;
-typedef cit::VgException Bad;
+typedef cms::Exception Bad;
 
 //_____________________________________________________________________________
 /**
@@ -16,16 +18,18 @@ typedef cit::VgException Bad;
 int 
 main(int argc, char **argv) {
   try {
-    throw Bad(__FILE__) << "thrown test VgException in " << __FUNCTION__ 
+    throw Bad("Test") << "thrown test cms::Exception in " << __FUNCTION__ 
 			<< " on line " << __LINE__;
-  } catch (VgException& e) {
+  } catch (std::exception& e) {
     // cout << "Caught test exception: " << e.what() << endl;
+    ;
   }
 
   try {
-    throw Bad("test1");
-  } catch (VgException& e) {
-    assert(string("test1") == e.what());
+    throw Bad("Test1");
+  } catch (std::exception& e) {
+    // cout << "Caught test exception: " << e.what() << endl;
+    assert(string(e.what()).find("Test1") != string::npos);
   }
 
   return 0;

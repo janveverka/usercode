@@ -4,27 +4,48 @@
  * \date 08 September 2012
  */
 
+#include "FWCore/Utilities/interface/Exception.h"
 #include "Vgamma/Analysis/interface/VgHistoManager.h"
 #include "Vgamma/Analysis/interface/VgMuonHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgPhotonHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgMCPileupHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgPileupHistoFiller.h"
 
+using namespace std;
 using cit::VgHistoManager;
+typedef cms::Exception Bad;
+
 
 /**
  * Constructor
  */
 VgHistoManager::VgHistoManager(VgAnalyzerTree const& tree,
-                               TDirectory & output) 
+                               TDirectory & output,
+                               PSet const& cfg, bool isMC) :
+  cfg_(cfg),
+  isMC_(isMC)
 {
   TDirectory *cwd = gDirectory;
   output.cd();  
   
-  fillers_.push_back(new VgMuonHistoFiller    (tree, histos_));
-  fillers_.push_back(new VgPhotonHistoFiller  (tree, histos_));
-  fillers_.push_back(new VgMCPileupHistoFiller(tree, histos_));
-  fillers_.push_back(new VgPileupHistoFiller  (tree, histos_));
+  vector<string> fillers = cfg.getParameter<vector<string> >("do");
+  for (vector<string>::const_iterator filler = fillers.begin();
+       filler != fillers.end(); ++filler) {
+    if (*filler == string("Muons")) {
+      fillers_.push_back(new VgMuonHistoFiller(tree, histos_));
+    } else if (*filler == string("Photons")) {
+      fillers_.push_back(new VgPhotonHistoFiller(tree, histos_));
+    } else if (*filler == string("Pileup")) {
+      fillers_.push_back(new VgPileupHistoFiller(tree, histos_));
+      if (isMC == true) {
+        fillers_.push_back(new VgMCPileupHistoFiller(tree, histos_));
+      }
+    } else {
+      throw Bad("BadConfiguration") << "Don't know how to do histograms"
+                                    << " for `" << *filler << "'"
+                                    << " in `" << output.GetName() << "'";
+    }
+  }
   
   bookHistograms();
   

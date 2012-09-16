@@ -12,6 +12,7 @@
 #include <string>
 #include "TDirectory.h"
 #include "TH1.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
 #include "Vgamma/Analysis/interface/VgHistoFillerBase.h"
 
@@ -21,17 +22,19 @@ namespace cit {
   
   class VgHistoManager {
   public:
-    // typedef stVd::map<std::string, TH1*> HistoCollection;
+    typedef edm::ParameterSet PSet;
     typedef std::vector<VgHistoFillerBase*> VgHistoFillerCollection;
 
-    VgHistoManager(VgAnalyzerTree const& tree, 
-                   TDirectory & output);
+    VgHistoManager(VgAnalyzerTree const&, TDirectory&, PSet const&,
+                   bool);
     ~VgHistoManager();
     void bookHistograms();
     void fillHistograms(VgEvent const&);
   private:
     VgHistoFillerCollection fillers_;
     VgHistoFillerBase::HistoCollection histos_;
+    PSet const & cfg_;
+    bool isMC_;
   }; // class VgHistoManager
   
 } // namespace cit

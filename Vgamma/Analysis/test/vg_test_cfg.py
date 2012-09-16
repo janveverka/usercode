@@ -34,11 +34,11 @@ process.options = cms.PSet(
     )
 
 process.histograms = cms.PSet(
+    isMC = cms.bool(True),
     allEvents = cms.PSet(
-        doMuons   = cms.bool(True),
-        doPhotons = cms.bool(True),
+        do = cms.vstring('Muons', 'Photons', 'Pileup'),
         ),
     allMuons = cms.PSet(
-        doMuons   = cms.bool(True),
+        do = cms.vstring('Muons'),
         )
     )

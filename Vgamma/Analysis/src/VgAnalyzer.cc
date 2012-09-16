@@ -216,12 +216,19 @@ void
 VgAnalyzer::parseHistograms()
 {
   PSet const& histograms = cfg_->getParameter<PSet>("histograms");
-  vector<string> managers = histograms.getParameterNamesForType<PSet>();
+  
+  bool isMC(tree_->run == 1);
+  if (histograms.existsAs<bool>("isMC")) {
+    isMC = histograms.getParameter<bool>("isMC");
+  } 
+  
   /// Loop over workers
-  for (vector<string>::const_iterator worker = managers.begin();
-       worker != managers.end(); ++worker) {
+  vector<string> workers = histograms.getParameterNamesForType<PSet>();
+  for (vector<string>::const_iterator worker = workers.begin();
+       worker != workers.end(); ++worker) {
     TDirectory * subdir = output_->mkdir(worker->c_str());
-    histoManagers_.push_back(new VgHistoManager(*tree_, *subdir));
+    PSet const & cfg = histograms.getParameter<PSet>(*worker);
+    histoManagers_.push_back(new VgHistoManager(*tree_, *subdir, cfg, isMC));
   } /// Loop over workers
 } // parseConfiguration
 
