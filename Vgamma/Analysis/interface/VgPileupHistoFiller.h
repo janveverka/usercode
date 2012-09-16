@@ -21,7 +21,6 @@ namespace cit {
     ~VgPileupHistoFiller();
     void bookHistograms();
     void fillHistograms(VgEvent const&);
-    void fillObjectWithIndex(UInt_t i);
   }; // class VgPileupHistoFiller
   
 } // namespace cit

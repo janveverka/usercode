@@ -21,7 +21,7 @@ namespace cit {
     ~VgPhotonHistoFiller();
     void bookHistograms();
     void fillHistograms(VgEvent const&);
-    void fillObjectWithIndex(UInt_t i);
+    void fillCand(Cand const &);
   }; // class VgPhotonHistoFiller
   
 } // namespace cit

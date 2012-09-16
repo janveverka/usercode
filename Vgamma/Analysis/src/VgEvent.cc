@@ -8,8 +8,11 @@
  */
 
 #include "Vgamma/Analysis/interface/VgEvent.h"
+#include "Vgamma/Analysis/interface/VgLeafCandidate.h"
 
 using cit::VgEvent;
+typedef cit::VgCandidate Cand;
+typedef cit::VgLeafCandidate LeafCand;
 
 /**
  * Ctor
@@ -35,10 +38,15 @@ VgEvent::read()
 {
   photons_.clear();
   muons_  .clear();
+
   photons_.reserve(tree_.nPho);
   muons_  .reserve(tree_.nMu );
-  for (Int_t i=0; i < tree_.nPho; ++i) photons_.push_back(i);
-  for (Int_t i=0; i < tree_.nMu ; ++i) muons_  .push_back(i);
+
+  for (Int_t i=0; i < tree_.nPho; ++i) 
+    photons_.push_back(new LeafCand(tree_, Cand::kPhoton, i));
+
+  for (Int_t i=0; i < tree_.nMu ; ++i) 
+    muons_  .push_back(new LeafCand(tree_, Cand::kMuon  , i));
 }
 
 /**

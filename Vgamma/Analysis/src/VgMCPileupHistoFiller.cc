@@ -88,13 +88,3 @@ VgMCPileupHistoFiller::fillHistograms(cit::VgEvent const& event)
 //   histos_["nPU1v2"]->Fill(t.nPU[1], t.nPU[2]);
   // loopOverObjects();  
 } // VgMCPileupHistoFiller::fillHistograms(..)
-
-
-/**
- * Fills the histograms for object with index i.
- */
-void
-VgMCPileupHistoFiller::fillObjectWithIndex(UInt_t i)
-{
-} // VgMCPileupHistoFiller::fillObjectWithIndex(..)
-

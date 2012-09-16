@@ -60,9 +60,11 @@ VgMuonHistoFiller::fillHistograms(cit::VgEvent const& event)
  * Fills the histograms for object with index i.
  */
 void
-VgMuonHistoFiller::fillObjectWithIndex(UInt_t i)
+VgMuonHistoFiller::fillCand(Cand const& cand)
 {
-  histos_["muPt"]->Fill(tree_.muPt[i]);
+  LeafCand const & mu = dynamic_cast<LeafCand const &>(cand);
+  unsigned i = mu.key();
+  histos_["muPt" ]->Fill(tree_.muPt[i]);
   histos_["muEta"]->Fill(tree_.muEta[i]);
   histos_["muPhi"]->Fill(tree_.muPhi[i]);
 } // VgMuonHistoFiller::fillObjectWithIndex(..)

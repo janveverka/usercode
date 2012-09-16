@@ -128,8 +128,11 @@ VgPhotonHistoFiller::fillHistograms(cit::VgEvent const& event)
  * Fills the histograms for object with index i.
  */
 void
-VgPhotonHistoFiller::fillObjectWithIndex(UInt_t i)
+VgPhotonHistoFiller::fillCand(Cand const & cand)
 {
+  LeafCand const & lcand = dynamic_cast<LeafCand const &>(cand);
+  unsigned i = lcand.key();
+
   histos_["phoPt"]->Fill(tree_.phoEt[i]);
   histos_["phoEta"]->Fill(tree_.phoEta[i]);
   histos_["phoPhi"]->Fill(tree_.phoPhi[i]);

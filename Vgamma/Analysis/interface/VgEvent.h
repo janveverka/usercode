@@ -11,14 +11,16 @@
 #define Vgamma_Analysis_VgEvent_h
 
 #include <vector>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
+#include "Vgamma/Analysis/interface/VgCandidate.h"
 
 //_____________________________________________________________________
 namespace cit {
   
   class VgEvent {
   public:
-    typedef std::vector<UInt_t> Collection;
+    typedef boost::ptr_vector<VgCandidate> Collection;
     VgEvent(VgAnalyzerTree const&);
     ~VgEvent();
     Collection const & muons() const;
