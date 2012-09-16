@@ -9,8 +9,8 @@
  * \date 16 September 2012.
  */
 
-#ifndef Vgamma_Analysis_VgLeafCandidate_h
-#define Vgamma_Analysis_VgLeafCandidate_h
+#ifndef Vgamma_Analysis_VgException_h
+#define Vgamma_Analysis_VgException_h
 
 #include <exception>
 #include <iostream>
@@ -79,4 +79,4 @@ VgException::what() const throw()
   return message.c_str();
 } // what()
 
-#endif // #define Vgamma_Analysis_VgLeafCandidate_h
+#endif // #define Vgamma_Analysis_VgException_h

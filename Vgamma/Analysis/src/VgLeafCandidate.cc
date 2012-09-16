@@ -5,10 +5,13 @@
  */
 #include <assert.h>
 #include <iostream>
-#include <exception>
 #include "Vgamma/Analysis/interface/VgLeafCandidate.h"
+#include "Vgamma/Analysis/interface/VgException.h"
 
 using cit::VgLeafCandidate;
+
+using cit::VgException;
+typedef cit::VgException Bad;
 
 const double VgLeafCandidate::kElectronMass = 0.510998928e-3;
 const double VgLeafCandidate::kMuonMass     = 105.65836668e-3;
@@ -31,56 +34,52 @@ VgLeafCandidate::VgLeafCandidate(VgAnalyzerTree const &tree, ParticleType type,
 void
 VgLeafCandidate::init()
 {
-  switch (type_) {
+  using std::string;
+  string here_str("VgLeafCandidate::");
+  here_str += __FUNCTION__ + string("()"); 
+  const char * here = here_str.c_str();
 
-    case kElectron:
-      if ((Int_t)key_ >= tree_.nEle) {
-	std::cerr << "VgLeafCandidate::init(): key=" << key_
-		  << " outside of range nEle=" << tree_.nEle << "!"
-		  << std::endl << std::flush;
-	throw 3;
-      }
-      momentum_.SetPtEtaPhiM(tree_.elePt [key_],
-                             tree_.eleEta[key_],
-                             tree_.elePhi[key_],
-                             kElectronMass);
-      break;
+  switch (type_) {
+  //_____________
+  case kElectron:
+    if ((Int_t)key_ >= tree_.nEle)
+      throw Bad(here) << "key=" << key_
+		      << " outside of range nEle=" << tree_.nEle << "!";
+    momentum_.SetPtEtaPhiM(tree_.elePt [key_],
+			   tree_.eleEta[key_],
+			   tree_.elePhi[key_],
+			   kElectronMass);
+    break;
       
-    case kMuon:
-      if ((Int_t)key_ >= tree_.nMu) {
-	std::cerr << "VgLeafCandidate::init(): key=" << key_
-		  << " outside of range nEle=" << tree_.nMu << "!"
-		  << std::endl << std::flush;
-	throw 4;
-      }
-      momentum_.SetPtEtaPhiM(tree_.muPt [key_],
-                             tree_.muEta[key_],
-                             tree_.muPhi[key_],
-                             kMuonMass);
-      break;
+  //_____________
+  case kMuon:
+    if ((Int_t)key_ >= tree_.nMu)
+      throw Bad(here) << "key=" << key_
+		      << " outside of range nMu=" << tree_.nMu << "!";
+    momentum_.SetPtEtaPhiM(tree_.muPt [key_],
+			   tree_.muEta[key_],
+			   tree_.muPhi[key_],
+			   kMuonMass);
+    break;
       
-    case kPhoton:
-      if ((Int_t)key_ >= tree_.nPho) {
-	std::cerr << "VgLeafCandidate::init(): key=" << key_
-		  << " outside of range nEle=" << tree_.nPho << "!"
-		  << std::endl << std::flush;
-	throw 5;
-      }
-      momentum_.SetPtEtaPhiM(tree_.phoEt [key_],
-                             tree_.phoEta[key_],
-                             tree_.phoPhi[key_],
-                             kPhotonMass);
-      break;
+  //_____________
+  case kPhoton:
+    if ((Int_t)key_ >= tree_.nPho)
+      throw Bad(here) << "key=" << key_
+		      << " outside of range nPho=" << tree_.nPho << "!";
+    momentum_.SetPtEtaPhiM(tree_.phoEt [key_],
+			   tree_.phoEta[key_],
+			   tree_.phoPhi[key_],
+			   kPhotonMass);
+    break;
       
-    case kCombined:
-      std::cerr << "VgLeafCandidate::init(): Illegal ParticleType = kCombined"
-                << std::endl << std::flush;
-      throw 1;
-      
-    default:
-      /// This should never happen.
-      std::cerr << "VgLeafCandidate::init(): Unknown ParticleType: "
-                << type_ << std::endl << std::flush;
-      throw 2;
-  }
+  //_____________
+  case kCombined:
+    throw Bad(here) << "Illegal ParticleType = kCombined";
+    
+  //_____________
+  default:
+    /// This should never happen.
+    throw Bad(here) << "Unknown ParticleType: " << type_;
+  } // switch(type_)
 } // init
