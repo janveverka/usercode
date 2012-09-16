@@ -3,4 +3,5 @@
   <bin file="analyze.cc" name="analyze-vgamma"/>
   <bin file="VgCandidateTest.cc"/>
   <bin file="VgLeafCandidateTest.cc"/>
+  <bin file="VgExceptionTest.cc"/>
 </environment>

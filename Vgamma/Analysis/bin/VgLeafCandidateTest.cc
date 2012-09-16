@@ -5,6 +5,7 @@
  */
 
 #include <assert.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -29,6 +30,7 @@ typedef VgLeafCandidate Cand;
 int main(int, char**);
 TTree * getTree();
 void testCand(TreePtr, Cand::ParticleType, unsigned);
+bool areEqual(double x, double y);
 
 //_____________________________________________________________________________
 /**
@@ -44,7 +46,7 @@ main(int argc, char **argv) {
   assert(tree->LoadTree(ientry) >= 0);
   assert(tree->fChain->GetEntry(ientry) > 0);
   
-  // testCand(tree, Cand::kElectron, 0);
+  testCand(tree, Cand::kElectron, 0);
   testCand(tree, Cand::kMuon    , 0);
   testCand(tree, Cand::kMuon    , 1);
   testCand(tree, Cand::kPhoton  , 0);
@@ -85,17 +87,31 @@ testCand(TreePtr tree, Cand::ParticleType type, unsigned key) {
   Cand cand(*tree, type, key);
   
   double mass = 0.;
+  Float_t * candPt  = tree->phoEt ;
+  Float_t * candEta = tree->phoEta;
+  Float_t * candPhi = tree->phoPhi;
   switch (type) {
-    case Cand::kElectron: mass = Cand::kElectronMass; break;
-    case Cand::kMuon    : mass = Cand::kMuonMass    ; break;
-    default             : mass = 0.;
-  }
+    case Cand::kElectron: 
+      candPt  = tree->elePt;
+      candEta = tree->eleEta;
+      candPhi = tree->elePhi;
+      mass    = Cand::kElectronMass;
+      break;
+    case Cand::kMuon: 
+      candPt  = tree->muPt;
+      candEta = tree->muEta;
+      candPhi = tree->muPhi;
+      mass = Cand::kMuonMass; 
+      break;
+    default: 
+      mass = 0.;
+  } // switch (type)
   
   // Test it
-  assert(cand.momentum().Pt () == tree->phoEt [cand.key()]);
-  assert(cand.momentum().Eta() == tree->phoEta[cand.key()]);
-  assert(cand.momentum().Phi() == tree->phoPhi[cand.key()]);
-  assert(cand.momentum().M  () == mass                    );
+  assert(areEqual(cand.momentum().Pt (), candPt [key]));
+  assert(areEqual(cand.momentum().Eta(), candEta[key]));
+  assert(areEqual(cand.momentum().Phi(), candPhi[key]));
+  assert(areEqual(cand.momentum().M  (), mass        ));
   assert(cand.type() == type);
   assert(cand.weight() == 1.);
   
@@ -110,3 +126,19 @@ testCand(TreePtr tree, Cand::ParticleType type, unsigned key) {
   cand.scaleWeight(1.2);
   assert(cand.weight() == 1. * 0.9 * 1.2);
 } // void testCand(..)
+
+
+//_____________________________________________________________________________
+/**
+ * Tests if two floats are almost equal.
+ */
+bool
+areEqual(double x, double y)
+{
+  double epsilonRelative = 1e-5;
+  double epsilonAbsolute = 1e-10;
+  if (fabs(y) < epsilonAbsolute) 
+    return fabs(x - y) < epsilonAbsolute;
+  else
+    return fabs(x / y - 1.) < epsilonRelative;
+}

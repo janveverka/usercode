@@ -5,6 +5,7 @@
  */
 #include <assert.h>
 #include <iostream>
+#include <exception>
 #include "Vgamma/Analysis/interface/VgLeafCandidate.h"
 
 using cit::VgLeafCandidate;
@@ -33,7 +34,12 @@ VgLeafCandidate::init()
   switch (type_) {
 
     case kElectron:
-      assert((Int_t)key_ < tree_.nEle);
+      if ((Int_t)key_ >= tree_.nEle) {
+	std::cerr << "VgLeafCandidate::init(): key=" << key_
+		  << " outside of range nEle=" << tree_.nEle << "!"
+		  << std::endl << std::flush;
+	throw 3;
+      }
       momentum_.SetPtEtaPhiM(tree_.elePt [key_],
                              tree_.eleEta[key_],
                              tree_.elePhi[key_],
@@ -41,7 +47,12 @@ VgLeafCandidate::init()
       break;
       
     case kMuon:
-      assert((Int_t)key_ < tree_.nMu);
+      if ((Int_t)key_ >= tree_.nMu) {
+	std::cerr << "VgLeafCandidate::init(): key=" << key_
+		  << " outside of range nEle=" << tree_.nMu << "!"
+		  << std::endl << std::flush;
+	throw 4;
+      }
       momentum_.SetPtEtaPhiM(tree_.muPt [key_],
                              tree_.muEta[key_],
                              tree_.muPhi[key_],
@@ -49,7 +60,12 @@ VgLeafCandidate::init()
       break;
       
     case kPhoton:
-      assert((Int_t)key_ < tree_.nPho);
+      if ((Int_t)key_ >= tree_.nPho) {
+	std::cerr << "VgLeafCandidate::init(): key=" << key_
+		  << " outside of range nEle=" << tree_.nPho << "!"
+		  << std::endl << std::flush;
+	throw 5;
+      }
       momentum_.SetPtEtaPhiM(tree_.phoEt [key_],
                              tree_.phoEta[key_],
                              tree_.phoPhi[key_],
@@ -57,13 +73,13 @@ VgLeafCandidate::init()
       break;
       
     case kCombined:
-      std::cout << "VgLeafCandidate::init(): Illegal ParticleType = kCombined"
+      std::cerr << "VgLeafCandidate::init(): Illegal ParticleType = kCombined"
                 << std::endl << std::flush;
       throw 1;
       
     default:
       /// This should never happen.
-      std::cout << "VgLeafCandidate::init(): Unknown ParticleType: "
+      std::cerr << "VgLeafCandidate::init(): Unknown ParticleType: "
                 << type_ << std::endl << std::flush;
       throw 2;
   }
