@@ -69,6 +69,20 @@ main(int argc, char **argv) {
     assert(string(e.what()).find("outside of range nPho") != string::npos);
   }
 
+  // Check exception for combined candidate type.
+  try {
+    testCand(tree, Cand::kCombined, 0);
+  } catch (exception& e) {
+    assert(string(e.what()).find("kCombined") != string::npos);
+  }
+
+  // Check exception for unknown candidate type (doesn't compile.)
+  // try {
+  //   testCand(tree, 55u, 0);
+  // } catch (exception& e) {
+  //   assert(string(e.what()).find("Unknown ParticleType") != string::npos);
+  // }
+
   /// Loop over entries
   Long64_t maxEntry = tree->fChain->GetEntriesFast();
   for (ientry=0; ientry < maxEntry; ientry++) {
