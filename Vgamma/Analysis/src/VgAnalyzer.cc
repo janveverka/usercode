@@ -17,6 +17,7 @@
 
 using cit::VgAnalyzer;
 using cit::VgAnalyzerTree;
+using cit::VgHistoManager;
 using namespace std;
 //_____________________________________________________________________________
 /**
@@ -112,6 +113,7 @@ VgAnalyzer::parseConfiguration()
 {
   parseInputs();
   parseOutputs();
+  parseHistograms();
 
   if (cfg_->existsAs<PSet>("maxEvents")) {
     PSet const& maxEvents = cfg_->getParameter<PSet>("maxEvents");
@@ -208,6 +210,24 @@ VgAnalyzer::parseOutputs()
 
 //_____________________________________________________________________________
 /**
+ * Parses the histogram configuration and fills the histoManagers_.
+ */
+void
+VgAnalyzer::parseHistograms()
+{
+  PSet const& histograms = cfg_->getParameter<PSet>("histograms");
+  vector<string> managers = histograms.getParameterNamesForType<PSet>();
+  /// Loop over workers
+  for (vector<string>::const_iterator worker = managers.begin();
+       worker != managers.end(); ++worker) {
+    TDirectory * subdir = output_->mkdir(worker->c_str());
+    histoManagers_.push_back(new VgHistoManager(*tree_, *subdir));
+  } /// Loop over workers
+} // parseConfiguration
+
+
+//_____________________________________________________________________________
+/**
  * Sets the status of the unused branches to 0 to save time.
  */
 void
@@ -236,7 +256,7 @@ VgAnalyzer::init()
 {
   parseConfiguration();
   setBranchesStatus();
-  histoManagers_.push_back(new cit::VgHistoManager(*tree_, *output_));
+  // histoManagers_.push_back(new cit::VgHistoManager(*tree_, *output_));
 } // init
 
 

@@ -39,6 +39,7 @@ namespace cit {
     void parseConfiguration();
     void parseInputs();
     void parseOutputs();
+    void parseHistograms();
     void setBranchesStatus();
     void reportEvent(Long64_t);
     boost::shared_ptr<PSet> cfg_;
