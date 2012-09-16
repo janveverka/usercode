@@ -23,7 +23,7 @@ namespace cit {
     typedef boost::ptr_vector<VgCandidate> Collection;
     VgEvent(VgAnalyzerTree const&);
     ~VgEvent();
-    Collection const & muons() const;
+    Collection const & muons  () const;
     Collection const & photons() const;
     void read();
   private:

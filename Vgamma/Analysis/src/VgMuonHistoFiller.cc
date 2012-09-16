@@ -63,9 +63,10 @@ void
 VgMuonHistoFiller::fillCand(Cand const& cand)
 {
   LeafCand const & mu = dynamic_cast<LeafCand const &>(cand);
-  unsigned i = mu.key();
-  histos_["muPt" ]->Fill(tree_.muPt[i]);
-  histos_["muEta"]->Fill(tree_.muEta[i]);
-  histos_["muPhi"]->Fill(tree_.muPhi[i]);
+  // unsigned i = mu.key();
+  double wgt = cand.weight();
+  histos_["muPt" ]->Fill(mu.pt (), wgt);
+  histos_["muEta"]->Fill(mu.eta(), wgt);
+  histos_["muPhi"]->Fill(mu.phi(), wgt);
 } // VgMuonHistoFiller::fillObjectWithIndex(..)
 

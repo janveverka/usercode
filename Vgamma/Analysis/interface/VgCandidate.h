@@ -21,9 +21,13 @@ namespace cit {
     VgCandidate();
     virtual ~VgCandidate() {}
     // Accessors
-    TLorentzVector const & momentum() const {return momentum_;}
-    ParticleType           type()     const {return type_    ;}
-    double                 weight()   const {return weight_  ;}
+    TLorentzVector const & momentum() const {return momentum_      ;}
+    ParticleType           type    () const {return type_          ;}
+    double                 weight  () const {return weight_        ;}
+    double                 pt      () const {return momentum_.Pt ();}
+    double                 eta     () const {return momentum_.Eta();}
+    double                 phi     () const {return momentum_.Phi();}
+    double                 m       () const {return momentum_.M  ();}
     // Setters
     void setMomentum(TLorentzVector const& momentum) {momentum_ = momentum;}
     void setType(ParticleType type) {type_ = type;}
