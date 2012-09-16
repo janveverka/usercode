@@ -4,7 +4,7 @@
  * \date 15 September 2012
  */
 
-#include <iostrea>
+#include <iostream>
 #include "Vgamma/Analysis/interface/VgException.h"
 using namespace std;
 typedef cit::VgException Bad;
