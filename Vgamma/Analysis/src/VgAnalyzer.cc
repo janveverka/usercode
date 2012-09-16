@@ -31,7 +31,7 @@ VgAnalyzer::VgAnalyzer(
   maxEventsInput_(-1),
   reportEvery_(1),
   titleStyle_(""),
-  histoManager_(0)
+  histoManagers_()
 {
   init();
 } // ctor
@@ -43,9 +43,9 @@ VgAnalyzer::VgAnalyzer(
  */
 VgAnalyzer::~VgAnalyzer()
 {
-  if (histoManager_ !=0 ) {
-    delete histoManager_;
-  }
+//   if (histoManager_ !=0 ) {
+//     delete histoManager_;
+//   }
   
   if (tree_ != 0) {
     TTree *chain = tree_->fChain;
@@ -87,7 +87,13 @@ VgAnalyzer::run()
     // if (pass(ientry) == false) continue;
     // fillHistograms();
     VgEvent event(*tree_);
-    histoManager_->fillHistograms(event);
+    
+    // Loop over histoManagers_
+    for (HistoManagers::iterator worker = histoManagers_.begin();
+         worker != histoManagers_.end(); ++worker)
+      worker->fillHistograms(event);
+    // End of loop over histoManagers_
+      
   } // end of loop over the events
   
   cout << "Processed " << ientry << " records." << endl;
@@ -208,56 +214,14 @@ void
 VgAnalyzer::setBranchesStatus()
 {
   TTree *chain = tree_->fChain;
-  chain->SetBranchStatus("*", 1);  // enable all branches  
+//  chain->SetBranchStatus("*", 1);  // enable all branches  
 //   chain->SetBranchStatus("*", 0);  // disable all branches  
-//   
-//   chain->SetBranchStatus("rhoFastjet", 1);
-//   chain->SetBranchStatus("rhoJetsFastJet", 1);
-// 
-//   chain->SetBranchStatus("nPU", 1);
-//   chain->SetBranchStatus("nPV", 1);
-//   
-//   chain->SetBranchStatus("PVxPV", 1);
-//   chain->SetBranchStatus("PVyPV", 1);
-//   chain->SetBranchStatus("PVzPV", 1);
-//   
-//   chain->SetBranchStatus("beamSpotX", 1);
-//   chain->SetBranchStatus("beamSpotY", 1);
-//   chain->SetBranchStatus("beamSpotZ", 1);
-//   
-//   chain->SetBranchStatus("nPho", 1);
-//   chain->SetBranchStatus("energyPho", 1);
-//   chain->SetBranchStatus("phoEta", 1);
-//   chain->SetBranchStatus("phoPhi", 1);
-//   chain->SetBranchStatus("dr03HollowTkSumPtPho", 1);
-//   chain->SetBranchStatus("dr03EcalRecHitSumEtPho", 1);
-//   chain->SetBranchStatus("dr03HcalTowerSumEtPho", 1);
-//   chain->SetBranchStatus("hasPixelSeedPho", 1);
-//   chain->SetBranchStatus("hOverEPho", 1);
-//   chain->SetBranchStatus("superClusterIndexPho", 1);
-//   chain->SetBranchStatus("hOverEPho", 1);
-//   
-//   chain->SetBranchStatus("nSC", 1);
-//   chain->SetBranchStatus("etaSC", 1);
-//   chain->SetBranchStatus("rawEnergySC", 1);
-//   chain->SetBranchStatus("etaWidthSC", 1);
-//   chain->SetBranchStatus("e3x3SC", 1);
-//   chain->SetBranchStatus("covIEtaIEtaSC", 1);
-//   // chain->SetBranchStatus("", 1);
-//   
-//   chain->SetBranchStatus("nMuon", 1);
-//   chain->SetBranchStatus("etaMuon", 1);
-//   chain->SetBranchStatus("energyMuon", 1);
-//   chain->SetBranchStatus("phiMuon", 1);
-// 
-//   // electron veto branches
-//   chain->SetBranchStatus("nEle", 1);
-//   chain->SetBranchStatus("superClusterIndexEle", 1);
-//   chain->SetBranchStatus("superClusterIndexPho", 1);
-//   chain->SetBranchStatus("hasMatchedConversionEle", 1);
-//   chain->SetBranchStatus("gsfTrackIndexEle", 1);
-//   chain->SetBranchStatus("nGsfTrack", 1);
-//   chain->SetBranchStatus("expInnerLayersGsfTrack", 1);
+  chain->SetBranchStatus("nMu", 1);
+  chain->SetBranchStatus("mu*", 1);
+  chain->SetBranchStatus("nPho", 1);
+  chain->SetBranchStatus("pho*", 1);
+  chain->SetBranchStatus("rho*", 1);
+  chain->SetBranchStatus("nPU", 1);
   
 } // setBranchesStatus
 
@@ -272,7 +236,7 @@ VgAnalyzer::init()
 {
   parseConfiguration();
   setBranchesStatus();
-  histoManager_ = new cit::VgHistoManager(*tree_, *output_);
+  histoManagers_.push_back(new cit::VgHistoManager(*tree_, *output_));
 } // init
 
 

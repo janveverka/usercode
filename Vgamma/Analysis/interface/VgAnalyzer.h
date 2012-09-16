@@ -12,6 +12,7 @@
 
 #include <map>
 #include <string>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "TFile.h"
@@ -29,6 +30,7 @@ namespace cit {
   class VgAnalyzer {
   public:
     typedef edm::ParameterSet PSet;
+    typedef boost::ptr_vector<VgHistoManager> HistoManagers;
     VgAnalyzer(boost::shared_ptr<PSet>);
     ~VgAnalyzer();
     void run();
@@ -45,7 +47,7 @@ namespace cit {
     Long64_t maxEventsInput_;
     Long64_t reportEvery_;    
     std::string titleStyle_;
-    VgHistoManager * histoManager_;
+    HistoManagers histoManagers_;
   }; // VgAnalyzer
 
 } // namespace cit

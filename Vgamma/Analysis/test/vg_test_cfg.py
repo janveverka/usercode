@@ -33,3 +33,12 @@ process.options = cms.PSet(
     titleStyle = cms.string("mpl")
     )
 
+process.histograms = cms.PSet(
+    allEvents = cms.PSet(
+        doMuons   = cms.bool(True),
+        doPhotons = cms.bool(True),
+        ),
+    allMuons = cms.PSet(
+        doMuons   = cms.bool(True),
+        )
+    )
