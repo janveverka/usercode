@@ -7,6 +7,7 @@
  * \date 09 September 2012
  */
 
+#include <algorithm>
 #include "Vgamma/Analysis/interface/VgEvent.h"
 #include "Vgamma/Analysis/interface/VgLeafCandidate.h"
 
@@ -20,8 +21,18 @@ typedef cit::VgLeafCandidate LeafCand;
 VgEvent::VgEvent(VgAnalyzerTree const& tree) :
   tree_(tree)
 {
-  read();
+  readFromTree();
 }
+
+/**
+ * Copy ctor
+ */
+VgEvent::VgEvent(VgEvent const& other) :
+  tree_(other.tree_)
+{
+  putPhotons(other.photons_);
+  putMuons(other.muons_);
+} // Copy ctor
 
 /**
  * Dtor
@@ -34,7 +45,7 @@ VgEvent::~VgEvent()
  * all the muons and photon indices from the current event.
  */
 void
-VgEvent::read()
+VgEvent::readFromTree()
 {
   photons_.clear();
   muons_  .clear();
@@ -43,26 +54,28 @@ VgEvent::read()
   muons_  .reserve(tree_.nMu );
 
   for (Int_t i=0; i < tree_.nPho; ++i) 
-    photons_.push_back(new LeafCand(tree_, Cand::kPhoton, i));
+    photons_.push_back(LeafCand(tree_, Cand::kPhoton, i));
 
   for (Int_t i=0; i < tree_.nMu ; ++i) 
-    muons_  .push_back(new LeafCand(tree_, Cand::kMuon  , i));
+    muons_  .push_back(LeafCand(tree_, Cand::kMuon  , i));
 }
 
 /**
- * Photon getter.
+ * Photon producer.
  */
-VgEvent::Collection const &
-VgEvent::photons() const
+void
+VgEvent::putPhotons(cit::VgLeafCandidates const & photons)
 {
-  return photons_;
+  photons_.resize(photons.size());
+  std::copy(photons.begin(), photons.end(), photons_.begin());
 }
 
 /**
- * Muon getter.
+ * Muon producer.
  */
-VgEvent::Collection const &
-VgEvent::muons() const
+void
+VgEvent::putMuons(cit::VgLeafCandidates const & muons)
 {
-  return muons_;
+  muons_.resize(muons.size());
+  std::copy(muons.begin(), muons.end(), muons_.begin());
 }

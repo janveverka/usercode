@@ -15,12 +15,17 @@
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
 
 namespace cit {
+  class VgLeafCandidate;
+  typedef std::vector<VgLeafCandidate> VgLeafCandidates;
   
   class VgLeafCandidate : public VgCandidate {
   public:
     /// Ctor and dtor
-    VgLeafCandidate(VgAnalyzerTree const&, ParticleType, unsigned);
+    VgLeafCandidate(VgAnalyzerTree const &, ParticleType, unsigned);
+    VgLeafCandidate(VgLeafCandidate const &);
+    VgLeafCandidate();
     ~VgLeafCandidate() {}
+    // VgLeafCandidate & operator=(VgLeafCandidate const &);
     /// Accessors
     unsigned key() const {return key_;}
     /// Static data
@@ -31,7 +36,7 @@ namespace cit {
     /// Initialize data members
     void init();
     /// Reference to our tree holding data
-    VgAnalyzerTree const & tree_;
+    VgAnalyzerTree const * tree_;
     /// Index in the VgTree array. 
     unsigned key_;
   }; /// class VgLeafCandidate

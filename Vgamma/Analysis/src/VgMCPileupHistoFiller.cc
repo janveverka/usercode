@@ -79,7 +79,7 @@ VgMCPileupHistoFiller::bookHistograms()
 void
 VgMCPileupHistoFiller::fillHistograms(cit::VgEvent const& event)
 {
-  histos_["nPU0"]->Fill(tree_.nPU[0]); 
+  histos_["nPU0"]->Fill(tree_->nPU[0]); 
 //   histos_["nPU1"]->Fill(t.nPU[1]);
 //   histos_["nPU2"]->Fill(t.nPU[2]);
 // 

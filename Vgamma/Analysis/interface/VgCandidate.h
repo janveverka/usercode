@@ -19,6 +19,7 @@ namespace cit {
     enum ParticleType {kElectron, kMuon, kPhoton, kCombined};
     // Ctor and dtor
     VgCandidate();
+    VgCandidate(VgCandidate const &);
     virtual ~VgCandidate() {}
     // Accessors
     TLorentzVector const & momentum() const {return momentum_      ;}

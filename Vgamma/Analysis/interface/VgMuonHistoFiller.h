@@ -16,12 +16,12 @@ namespace cit {
   
   class VgMuonHistoFiller : public VgHistoFillerBase {
   public:
-    VgMuonHistoFiller(VgAnalyzerTree const& tree,
+    VgMuonHistoFiller(VgAnalyzerTree const & tree,
                       HistoCollection & histos);
     ~VgMuonHistoFiller();
     void bookHistograms();
     void fillHistograms(VgEvent const&);
-    void fillCand(Cand const&);
+    void fillCand(VgLeafCandidate const&);
   }; // class VgMuonHistoFiller
   
 } // namespace cit

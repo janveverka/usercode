@@ -37,8 +37,10 @@ process.histograms = cms.PSet(
     isMC = cms.bool(True),
     allEvents = cms.PSet(
         do = cms.vstring('Muons', 'Photons', 'Pileup'),
+	selection = cms.PSet(),
         ),
     allMuons = cms.PSet(
         do = cms.vstring('Muons'),
+	selection = cms.PSet(),
         )
     )

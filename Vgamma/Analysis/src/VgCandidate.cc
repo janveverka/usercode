@@ -8,10 +8,18 @@
 using cit::VgCandidate;
 
 //______________________________________________________________________________
-/// Default Ctor implementation
+/// Default ctor implementation
 VgCandidate::VgCandidate() : 
   momentum_(0, 0, 0, 0), 
   type_(kCombined), 
   weight_(1.) 
-{}
+{} // Default ctor
+
+//______________________________________________________________________________
+/// Copy ctor
+VgCandidate::VgCandidate(VgCandidate const & other) : 
+  momentum_(other.momentum_), 
+  type_(other.type_), 
+  weight_(other.weight_) 
+{} // Copy ctor
 

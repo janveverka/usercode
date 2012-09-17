@@ -17,8 +17,7 @@ using cit::VgMuonHistoFiller;
 VgMuonHistoFiller::VgMuonHistoFiller(VgAnalyzerTree const& tree,
                                      HistoCollection & histos) :
   VgHistoFillerBase(tree, histos)
-{  
-} // 
+{} // Default ctor.
 
 
 /**
@@ -50,9 +49,13 @@ VgMuonHistoFiller::bookHistograms()
 void
 VgMuonHistoFiller::fillHistograms(cit::VgEvent const& event)
 {
-  histos_["muN"]->Fill(tree_.nMu);
-  collection_ = & event.muons();
-  loopOverObjects();  
+  cit::VgLeafCandidates const & muons = event.muons();
+  histos_["muN"]->Fill(muons.size());
+  /// Loop over muons
+  for (cit::VgLeafCandidates::const_iterator mu = muons.begin();
+       mu != muons.end(); ++mu) {
+    fillCand(*mu);
+  } /// Loop over muons  
 } // VgMuonHistoFiller::fillHistograms(..)
 
 
@@ -60,11 +63,11 @@ VgMuonHistoFiller::fillHistograms(cit::VgEvent const& event)
  * Fills the histograms for object with index i.
  */
 void
-VgMuonHistoFiller::fillCand(Cand const& cand)
+VgMuonHistoFiller::fillCand(cit::VgLeafCandidate const & mu)
 {
-  LeafCand const & mu = dynamic_cast<LeafCand const &>(cand);
+  // LeafCand const & mu = dynamic_cast<LeafCand const &>(cand);
   // unsigned i = mu.key();
-  double wgt = cand.weight();
+  double wgt = mu.weight();
   histos_["muPt" ]->Fill(mu.pt (), wgt);
   histos_["muEta"]->Fill(mu.eta(), wgt);
   histos_["muPhi"]->Fill(mu.phi(), wgt);

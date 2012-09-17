@@ -4,4 +4,6 @@
   <bin file="VgCandidateTest.cc"/>
   <bin file="VgLeafCandidateTest.cc"/>
   <bin file="VgExceptionTest.cc"/>
+  <bin file="VgEventSelectorTest.cc"/>
+  <bin file="VgEventTest.cc"/>
 </environment>

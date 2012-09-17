@@ -13,4 +13,10 @@ VgCandidateTest
 echo "VgLeafCandidateTest ..."
 VgLeafCandidateTest
 
+echo "VgEventTest ..."
+VgEventTest
+
+echo "VgEventSelectorTest ..."
+VgEventTest
+
 echo "Done."

@@ -15,6 +15,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
 #include "Vgamma/Analysis/interface/VgHistoFillerBase.h"
+#include "Vgamma/Analysis/interface/VgEventSelector.h"
 
 
 //_____________________________________________________________________
@@ -35,6 +36,7 @@ namespace cit {
     VgHistoFillerBase::HistoCollection histos_;
     PSet const & cfg_;
     bool isMC_;
+    VgEventSelector selector_;
   }; // class VgHistoManager
   
 } // namespace cit

@@ -16,6 +16,7 @@ using cit::VgHistoManager;
 typedef cms::Exception Bad;
 
 
+//_____________________________________________________________________
 /**
  * Constructor
  */
@@ -23,7 +24,8 @@ VgHistoManager::VgHistoManager(VgAnalyzerTree const& tree,
                                TDirectory & output,
                                PSet const& cfg, bool isMC) :
   cfg_(cfg),
-  isMC_(isMC)
+  isMC_(isMC),
+  selector_(cfg.getParameter<PSet>("selection"))
 {
   TDirectory *cwd = gDirectory;
   output.cd();  
@@ -53,6 +55,7 @@ VgHistoManager::VgHistoManager(VgAnalyzerTree const& tree,
 } // VgHistoManager::VgHistoManager(..)
 
 
+//_____________________________________________________________________
 /**
  * Dtor.
  */
@@ -66,6 +69,7 @@ VgHistoManager::~VgHistoManager()
 } // VgHistoManager::~VgHistoManager()
 
 
+//_____________________________________________________________________
 /**
  * Books all histograms.
  */
@@ -80,16 +84,24 @@ VgHistoManager::bookHistograms()
 } // VgHistoManager::bookHistograms()
 
 
+//_____________________________________________________________________
 /**
- * Fills all histograms.
+ * Applies selection and fills all histograms.
  */
 void 
 VgHistoManager::fillHistograms(VgEvent const& event)
 {
-  /// Loop over histo fillers
-  for (VgHistoFillerCollection::iterator filler = fillers_.begin();
-       filler != fillers_.end(); ++filler) {
-    (*filler)->fillHistograms(event);
-  }    
+  if (selector_(event)) {
+    /// Loop over histo fillers
+    for (VgHistoFillerCollection::iterator filler = fillers_.begin();
+	 filler != fillers_.end(); ++filler) {
+      (*filler)->fillHistograms(selector_.selectedEvent());
+    } /// Loop over histo fillers
+  } /// if (selector_(event))
+  std::cout << "All photons: " << event.photons().size()
+	    << std::endl;
+  std::cout << "Selected photons: " 
+	    << selector_.selectedEvent().photons().size()
+	    << std::endl;
 } // VgHistoManager::fillHistograms()
 

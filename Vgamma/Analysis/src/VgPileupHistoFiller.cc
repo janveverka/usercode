@@ -45,6 +45,6 @@ VgPileupHistoFiller::bookHistograms()
 void
 VgPileupHistoFiller::fillHistograms(cit::VgEvent const& event)
 {
-  histos_["rho"]->Fill(tree_.rho);
-  histos_["rhoNeutral"]->Fill(tree_.rhoNeutral);
+  histos_["rho"]->Fill(tree_->rho);
+  histos_["rhoNeutral"]->Fill(tree_->rhoNeutral);
 } // VgPileupHistoFiller::fillHistograms(..)

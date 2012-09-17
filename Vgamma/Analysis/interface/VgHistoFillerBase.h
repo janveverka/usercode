@@ -24,34 +24,33 @@ namespace cit {
   class VgHistoFillerBase {
   public:
     typedef std::map<std::string, TH1*> HistoCollection;
-    typedef cit::VgCandidate Cand;
-    typedef cit::VgLeafCandidate LeafCand;
+    /* typedef cit::VgCandidate Cand; */
+    /* typedef cit::VgLeafCandidate LeafCand; */
 
-    VgHistoFillerBase(VgAnalyzerTree const& tree,
+    VgHistoFillerBase(VgAnalyzerTree const & tree,
                       HistoCollection & histos) :
-      tree_(tree),
-      histos_(histos),
-      collection_(0)
+      tree_(&tree),
+      histos_(histos) //,
+      // collection_(0)
     {}
     
     ~VgHistoFillerBase() {}
     virtual void bookHistograms() = 0;
     virtual void fillHistograms(VgEvent const&) = 0;
   protected:
-    virtual void fillCand(Cand const&) {}
-
-    virtual void loopOverObjects() {
-      if (collection_ != 0) {
-        VgEvent::Collection::const_iterator cand = collection_->begin();
-        for (; cand < collection_->end(); ++cand)
-          fillCand(*cand);
-      }
-    } // loopOverObjects(..)
+    // virtual void fillCand(Cand const&) {}
+    /* virtual void loopOverLeafCandidates(C const & collection) { */
+    /*   if (collection != 0) { */
+    /*     VgEvent::Collection::const_iterator cand = collection->begin(); */
+    /*     for (; cand < collection->end(); ++cand) */
+    /*       fillCand(*cand); */
+    /*   } */
+    /* } // loopOverObjects(..) */
     
-    VgAnalyzerTree const & tree_;
+    VgAnalyzerTree const * tree_;
     HistoCollection &      histos_;
-    const Int_t    *       numObjects_;
-    VgEvent::Collection const * collection_;
+    // const Int_t    *       numObjects_;
+    // VgEvent::Collection const * collection_;
   }; // class VgHistoFillerBase
   
 } // namespace cit

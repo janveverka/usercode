@@ -18,16 +18,51 @@ const double VgLeafCandidate::kPhotonMass   = 0.;
 
 //______________________________________________________________________________
 /// Default Ctor 
-VgLeafCandidate::VgLeafCandidate(VgAnalyzerTree const &tree, ParticleType type, 
+VgLeafCandidate::VgLeafCandidate(VgAnalyzerTree const & tree, ParticleType type, 
                                  unsigned key) : 
   VgCandidate(),
-  tree_(tree),
+  tree_(&tree),
   key_(key)
 {
   type_ = type;
   init();
-} // ctor
+} // Default ctor
 
+
+//______________________________________________________________________________
+/// Copy Ctor 
+VgLeafCandidate::VgLeafCandidate(VgLeafCandidate const & other) : 
+  VgCandidate(other),
+  tree_    (other.tree_),
+  key_     (other.key_)
+{} // Copy ctor
+
+
+//______________________________________________________________________________
+/// Ctor for std::vector::resize.
+VgLeafCandidate::VgLeafCandidate() : 
+  VgCandidate(),
+  tree_    (0),
+  key_     (0)
+{} // ctor
+
+
+//______________________________________________________________________________
+/// Overloaded assignment operator to handle the reference to the tree.
+/// See http://en.wikipedia.org/wiki/Assignment_operator_(C%2B%2B)
+// VgLeafCandidate &
+// VgLeafCandidate::operator=(VgLeafCandidate const & other)
+// {
+//   /// Pretect against invalid self-assignment.
+//   if (this != &other) {
+//     tree_ = other.tree_;
+//     key_ = other.key_;
+
+//     type_ = other.type_;
+//     momentum_ = other.momentum_;
+//   }
+//   return *this;
+// }
 
 //______________________________________________________________________________
 void
@@ -36,34 +71,34 @@ VgLeafCandidate::init()
   switch (type_) {
   //_____________
   case kElectron:
-    if ((Int_t)key_ >= tree_.nEle)
+    if ((Int_t)key_ >= tree_->nEle)
       throw Bad("BadKey") << "key=" << key_
-		      << " outside of range nEle=" << tree_.nEle << "!";
-    momentum_.SetPtEtaPhiM(tree_.elePt [key_],
-			   tree_.eleEta[key_],
-			   tree_.elePhi[key_],
+		      << " outside of range nEle=" << tree_->nEle << "!";
+    momentum_.SetPtEtaPhiM(tree_->elePt [key_],
+			   tree_->eleEta[key_],
+			   tree_->elePhi[key_],
 			   kElectronMass);
     break;
       
   //_____________
   case kMuon:
-    if ((Int_t)key_ >= tree_.nMu)
+    if ((Int_t)key_ >= tree_->nMu)
       throw Bad("BadKey") << "key=" << key_
-		      << " outside of range nMu=" << tree_.nMu << "!";
-    momentum_.SetPtEtaPhiM(tree_.muPt [key_],
-			   tree_.muEta[key_],
-			   tree_.muPhi[key_],
+		      << " outside of range nMu=" << tree_->nMu << "!";
+    momentum_.SetPtEtaPhiM(tree_->muPt [key_],
+			   tree_->muEta[key_],
+			   tree_->muPhi[key_],
 			   kMuonMass);
     break;
       
   //_____________
   case kPhoton:
-    if ((Int_t)key_ >= tree_.nPho)
+    if ((Int_t)key_ >= tree_->nPho)
       throw Bad("BadKey") << "key=" << key_
-		      << " outside of range nPho=" << tree_.nPho << "!";
-    momentum_.SetPtEtaPhiM(tree_.phoEt [key_],
-			   tree_.phoEta[key_],
-			   tree_.phoPhi[key_],
+		      << " outside of range nPho=" << tree_->nPho << "!";
+    momentum_.SetPtEtaPhiM(tree_->phoEt [key_],
+			   tree_->phoEta[key_],
+			   tree_->phoPhi[key_],
 			   kPhotonMass);
     break;
       

@@ -11,25 +11,30 @@
 #define Vgamma_Analysis_VgEvent_h
 
 #include <vector>
-#include <boost/ptr_container/ptr_vector.hpp>
+// #include <boost/ptr_container/ptr_vector.hpp>
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
-#include "Vgamma/Analysis/interface/VgCandidate.h"
+#include "Vgamma/Analysis/interface/VgLeafCandidate.h"
+// #include "Vgamma/Analysis/interface/VgCandidate.h"
 
 //_____________________________________________________________________
 namespace cit {
   
   class VgEvent {
   public:
-    typedef boost::ptr_vector<VgCandidate> Collection;
-    VgEvent(VgAnalyzerTree const&);
+    VgEvent(VgAnalyzerTree const &);
+    VgEvent(VgEvent const &);
     ~VgEvent();
-    Collection const & muons  () const;
-    Collection const & photons() const;
-    void read();
+    /// Accessors
+    VgLeafCandidates const & muons  () const {return muons_;}
+    VgLeafCandidates const & photons() const {return photons_;}
+    /// Producers
+    void readFromTree();
+    void putPhotons(VgLeafCandidates const &);
+    void putMuons  (VgLeafCandidates const &);
   private:
     VgAnalyzerTree const & tree_;
-    Collection photons_;
-    Collection muons_;
+    VgLeafCandidates muons_;
+    VgLeafCandidates photons_;
   }; // class VgEvent
   
 } // namespace cit

@@ -85,9 +85,9 @@ VgAnalyzer::run()
     if (tree_->LoadTree(ientry) < 0) break;
     if (ientry % reportEvery_ == 0) reportEvent(ientry);
     tree_->fChain->GetEntry(ientry);
-    // if (pass(ientry) == false) continue;
-    // fillHistograms();
+
     VgEvent event(*tree_);
+    event.readFromTree();
     
     // Loop over histoManagers_
     for (HistoManagers::iterator worker = histoManagers_.begin();
