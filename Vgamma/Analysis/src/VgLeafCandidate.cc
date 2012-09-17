@@ -48,23 +48,6 @@ VgLeafCandidate::VgLeafCandidate() :
 
 
 //______________________________________________________________________________
-/// Overloaded assignment operator to handle the reference to the tree.
-/// See http://en.wikipedia.org/wiki/Assignment_operator_(C%2B%2B)
-// VgLeafCandidate &
-// VgLeafCandidate::operator=(VgLeafCandidate const & other)
-// {
-//   /// Pretect against invalid self-assignment.
-//   if (this != &other) {
-//     tree_ = other.tree_;
-//     key_ = other.key_;
-
-//     type_ = other.type_;
-//     momentum_ = other.momentum_;
-//   }
-//   return *this;
-// }
-
-//______________________________________________________________________________
 void
 VgLeafCandidate::init()
 {

@@ -15,17 +15,13 @@
 #include "TH1.h"
 
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
-#include "Vgamma/Analysis/interface/VgCandidate.h"
 #include "Vgamma/Analysis/interface/VgEvent.h"
-#include "Vgamma/Analysis/interface/VgLeafCandidate.h"
 
 //_____________________________________________________________________
 namespace cit {
   class VgHistoFillerBase {
   public:
     typedef std::map<std::string, TH1*> HistoCollection;
-    /* typedef cit::VgCandidate Cand; */
-    /* typedef cit::VgLeafCandidate LeafCand; */
 
     VgHistoFillerBase(VgAnalyzerTree const & tree,
                       HistoCollection & histos) :
@@ -37,20 +33,9 @@ namespace cit {
     ~VgHistoFillerBase() {}
     virtual void bookHistograms() = 0;
     virtual void fillHistograms(VgEvent const&) = 0;
-  protected:
-    // virtual void fillCand(Cand const&) {}
-    /* virtual void loopOverLeafCandidates(C const & collection) { */
-    /*   if (collection != 0) { */
-    /*     VgEvent::Collection::const_iterator cand = collection->begin(); */
-    /*     for (; cand < collection->end(); ++cand) */
-    /*       fillCand(*cand); */
-    /*   } */
-    /* } // loopOverObjects(..) */
-    
+  protected:    
     VgAnalyzerTree const * tree_;
     HistoCollection &      histos_;
-    // const Int_t    *       numObjects_;
-    // VgEvent::Collection const * collection_;
   }; // class VgHistoFillerBase
   
 } // namespace cit

@@ -122,7 +122,6 @@ VgPhotonHistoFiller::fillHistograms(cit::VgEvent const& event)
   /// Loop over photons
   for (cit::VgLeafCandidates::const_iterator pho = photons.begin();
        pho != photons.end(); ++pho) {
-    std::cout << "Filling photon " << pho->key() << std::endl;
     fillCand(*pho);
   } /// Loop over photons  
 } // VgPhotonHistoFiller::fillHistograms(..)

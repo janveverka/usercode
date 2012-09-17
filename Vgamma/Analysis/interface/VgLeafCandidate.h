@@ -25,7 +25,6 @@ namespace cit {
     VgLeafCandidate(VgLeafCandidate const &);
     VgLeafCandidate();
     ~VgLeafCandidate() {}
-    // VgLeafCandidate & operator=(VgLeafCandidate const &);
     /// Accessors
     unsigned key() const {return key_;}
     /// Static data

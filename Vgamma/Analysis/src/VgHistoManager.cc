@@ -98,10 +98,5 @@ VgHistoManager::fillHistograms(VgEvent const& event)
       (*filler)->fillHistograms(selector_.selectedEvent());
     } /// Loop over histo fillers
   } /// if (selector_(event))
-  std::cout << "All photons: " << event.photons().size()
-	    << std::endl;
-  std::cout << "Selected photons: " 
-	    << selector_.selectedEvent().photons().size()
-	    << std::endl;
 } // VgHistoManager::fillHistograms()
 
