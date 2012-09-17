@@ -9,15 +9,21 @@
 #include "Vgamma/Analysis/interface/VgEventSelector.h"
 using cit::VgEventSelector;
 using cit::VgEvent;
-
+using namespace std;
 //_____________________________________________________________________
 /**
  * Constructor
  */
 VgEventSelector::VgEventSelector(PSet const & cfg) :
-  cfg_(cfg),
-  selectedEvent_()
-{} // Ctor
+  selectedEvent_(),
+  selectMuons_(cfg.getParameter<bool>("selectMuons")),
+  selectPhoton_(cfg.getUntrackedParameter<bool>("selectPhoton", false))
+{
+  init();
+
+  if (cfg.existsAs<vector<string> >("cutsToIgnore"))
+    setIgnoredCuts(cfg.getParameter<vector<string> >("cutsToIgnore"));
+} // Ctor
 
 
 //_____________________________________________________________________
@@ -30,17 +36,31 @@ VgEventSelector::~VgEventSelector()
 
 //_____________________________________________________________________
 /**
+ * Initialization
+ */
+void
+VgEventSelector::init()
+{
+  push_back("selectMuons", selectMuons_);
+  push_back("selectPhoton", selectPhoton_);
+
+  set("selectMuons");
+  set("selectPhoton");
+} // init()
+
+
+//_____________________________________________________________________
+/**
  * Selection interface.
  */
 bool
 VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
 {
   /// Everything passes right now.
-  ret.set(true);
+  ret.set(false);
   selectedEvent_.reset(new VgEvent(event));
-  
-  if (cfg_.getParameter<bool>("selectMuons") == true) {
-    std::cout << "Selecting muons ..." << std::endl;
+
+  if (selectMuons_ == true) {
     /// Select muons
     cit::VgLeafCandidates selectedMuons;
     cit::VgLeafCandidates const & muons = event.muons();
@@ -49,24 +69,30 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
     for (cit::VgLeafCandidates::const_iterator mu = muons.begin();
           mu != muons.end(); ++mu) {
       unsigned i = mu->key();
-      std::cout << "Checking muon " << i << std::endl;
       if (mu->pt() < 20.) continue;
       if (fabs(mu->eta()) > 2.4) continue;
       // is global muon
       if (!(unsigned(tree.muType[i]) & (1u << 1))) continue;
       if (tree.muNumberOfValidPixelHits[i] < 1) continue;
       selectedMuons.push_back(*mu);
-      std::cout << "Muon " << i << " passed" << std::endl;
     } /// loop over muons
-    if (selectedMuons.size() < 2) ret.set(false);
-    std::cout << "Found " << selectedMuons.size() << " passing muons" << std::endl;
+    if (ignoreCut("selectMuons") || selectedMuons.size() >= 2) 
+      passCut(ret, "selectMuons");
+    cout << "selected muons: " << selectedMuons.size() << endl;
     selectedEvent_->putMuons(selectedMuons);
   } else {
     // Use all muons
-    std::cout << "Ignoring muon selection ..." << std::endl;    
+    passCut(ret, "selectMuons");
+    cout << "selected muons: " << event.muons().size() << endl;
     selectedEvent_->putMuons(event.muons());
   }
       
+  if (ignoreCut("selectPhoton") || true)
+    passCut(ret, "selectPhoton");
+
+  print(cout);
+  cout << "ret: " << (bool)ret << endl;
+  
   return ret;
 } // bool operator()(..)
 

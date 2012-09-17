@@ -23,7 +23,6 @@ typedef cms::Exception Bad;
 VgHistoManager::VgHistoManager(VgAnalyzerTree const& tree,
                                TDirectory & output,
                                PSet const& cfg, bool isMC) :
-  cfg_(cfg),
   isMC_(isMC),
   selector_(cfg.getParameter<PSet>("selection"))
 {
@@ -91,7 +90,8 @@ VgHistoManager::bookHistograms()
 void 
 VgHistoManager::fillHistograms(VgEvent const& event)
 {
-  if (selector_(event)) {
+  pat::strbitset bits = selector_.getBitTemplate();
+  if (selector_(event, bits)) {
     /// Loop over histo fillers
     for (VgHistoFillerCollection::iterator filler = fillers_.begin();
 	 filler != fillers_.end(); ++filler) {

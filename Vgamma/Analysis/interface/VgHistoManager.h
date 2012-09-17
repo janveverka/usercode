@@ -34,7 +34,6 @@ namespace cit {
   private:
     VgHistoFillerCollection fillers_;
     VgHistoFillerBase::HistoCollection histos_;
-    PSet const & cfg_;
     bool isMC_;
     VgEventSelector selector_;
   }; // class VgHistoManager

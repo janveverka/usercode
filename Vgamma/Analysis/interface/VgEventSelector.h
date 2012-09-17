@@ -29,8 +29,10 @@ namespace cit {
     /// Accessor(s)
     VgEvent const & selectedEvent() const;
   private:
-    PSet const & cfg_;
+    void init();
     boost::shared_ptr<VgEvent> selectedEvent_;
+    bool selectMuons_;
+    bool selectPhoton_;
   }; // class VgEventSelector
   
 } // namespace cit
