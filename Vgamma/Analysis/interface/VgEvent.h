@@ -25,7 +25,8 @@ namespace cit {
     VgEvent(VgEvent const &);
     ~VgEvent();
     /// Accessors
-    VgLeafCandidates const & muons  () const {return muons_;}
+    VgAnalyzerTree   const & tree   () const {return tree_   ;}
+    VgLeafCandidates const & muons  () const {return muons_  ;}
     VgLeafCandidates const & photons() const {return photons_;}
     /// Producers
     void readFromTree();

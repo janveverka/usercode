@@ -3,6 +3,7 @@
  * \author Jan Veverka, Caltech
  * \date 16 September 2012
  */
+#include <math.h>
 #include <string>
 #include "FWCore/Utilities/interface/Exception.h"
 #include "Vgamma/Analysis/interface/VgEventSelector.h"
@@ -37,7 +38,36 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
   /// Everything passes right now.
   ret.set(true);
   selectedEvent_.reset(new VgEvent(event));
-  return true;
+  
+  if (cfg_.getParameter<bool>("selectMuons") == true) {
+    std::cout << "Selecting muons ..." << std::endl;
+    /// Select muons
+    cit::VgLeafCandidates selectedMuons;
+    cit::VgLeafCandidates const & muons = event.muons();
+    cit::VgAnalyzerTree const & tree = event.tree();
+    /// Loop over muons
+    for (cit::VgLeafCandidates::const_iterator mu = muons.begin();
+          mu != muons.end(); ++mu) {
+      unsigned i = mu->key();
+      std::cout << "Checking muon " << i << std::endl;
+      if (mu->pt() < 20.) continue;
+      if (fabs(mu->eta()) > 2.4) continue;
+      // is global muon
+      if (!(unsigned(tree.muType[i]) & (1u << 1))) continue;
+      if (tree.muNumberOfValidPixelHits[i] < 1) continue;
+      selectedMuons.push_back(*mu);
+      std::cout << "Muon " << i << " passed" << std::endl;
+    } /// loop over muons
+    if (selectedMuons.size() < 2) ret.set(false);
+    std::cout << "Found " << selectedMuons.size() << " passing muons" << std::endl;
+    selectedEvent_->putMuons(selectedMuons);
+  } else {
+    // Use all muons
+    std::cout << "Ignoring muon selection ..." << std::endl;    
+    selectedEvent_->putMuons(event.muons());
+  }
+      
+  return ret;
 } // bool operator()(..)
 
 //_____________________________________________________________________
