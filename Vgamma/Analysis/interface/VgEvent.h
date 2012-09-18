@@ -14,6 +14,7 @@
 // #include <boost/ptr_container/ptr_vector.hpp>
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
 #include "Vgamma/Analysis/interface/VgLeafCandidate.h"
+#include "Vgamma/Analysis/interface/VgCombinedCandidate.h"
 // #include "Vgamma/Analysis/interface/VgCandidate.h"
 
 //_____________________________________________________________________
@@ -32,10 +33,14 @@ namespace cit {
     void readFromTree();
     void putPhotons(VgLeafCandidates const &);
     void putMuons  (VgLeafCandidates const &);
+    void putDimuons(VgCombinedCandidates const &);
+    /// Combiners
+    void combineMuonsToDimuons();
   private:
     VgAnalyzerTree const & tree_;
     VgLeafCandidates muons_;
     VgLeafCandidates photons_;
+    VgCombinedCandidates dimuons_;
   }; // class VgEvent
   
 } // namespace cit
