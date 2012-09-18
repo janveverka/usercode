@@ -14,8 +14,8 @@ cvs co -d Vgamma/Analysis/scripts \
     UserCode/JanVeverka/Vgamma/Analysis/scripts/setup.sh
 RTAG=HEAD
 source $CMSSW_BASE/src/Vgamma/Analysis/scripts/setup.sh
-cp /afs/cern.ch/user/v/veverka/work/data/Vgamma2011/test/WJets_mmgSkim_test.root \
-  /tmp/$(whoami)
+# cp /afs/cern.ch/user/v/veverka/work/data/Vgamma2011/test/WJets_mmgSkim_test.root \
+#  /tmp/$(whoami)
 
 ---+ Go to Permanent Development Area
 ssh -Y lxplus5.cern.ch

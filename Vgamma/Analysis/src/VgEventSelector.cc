@@ -78,20 +78,20 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
     } /// loop over muons
     if (ignoreCut("selectMuons") || selectedMuons.size() >= 2) 
       passCut(ret, "selectMuons");
-    cout << "selected muons: " << selectedMuons.size() << endl;
+    // cout << "selected muons: " << selectedMuons.size() << endl;
     selectedEvent_->putMuons(selectedMuons);
   } else {
     // Use all muons
     passCut(ret, "selectMuons");
-    cout << "selected muons: " << event.muons().size() << endl;
+    // cout << "selected muons: " << event.muons().size() << endl;
     selectedEvent_->putMuons(event.muons());
   }
       
   if (ignoreCut("selectPhoton") || true)
     passCut(ret, "selectPhoton");
 
-  print(cout);
-  cout << "ret: " << (bool)ret << endl;
+  // print(cout);
+  // cout << "ret: " << (bool)ret << endl;
   
   return ret;
 } // bool operator()(..)

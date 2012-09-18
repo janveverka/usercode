@@ -26,6 +26,7 @@ namespace cit {
     VgLeafCandidate();
     ~VgLeafCandidate() {}
     /// Accessors
+    VgAnalyzerTree const & tree() const {return *tree_;}
     unsigned key() const {return key_;}
     /// Static data
     static const double kElectronMass;
