@@ -28,5 +28,27 @@ cd $CMSSW_BASE/src/Vgamma/Analysis/test
 
 ---+ Test the Analysis
 cd $CMSSW_BASE/src/Vgamma/Analysis/test
-analyze-vgamma vg_test_cfg.py
+vg-analyze vg_test_cfg.py
 root -l vg_test.root
+
+---+ Run Unit Tests
+vg-run-unit-tests
+
+---+ Debugging with GDB
+Compile with debugging information:
+scram b USER_CXXFLAGS="-ggdb\ -Wall" Vgamma/Analysis
+Quick gdb tutorial:
+http://www.cs.cmu.edu/~gilpin/tutorial/
+Run vg-analyze in gdb with the vg_test_cfg.py config as an argument:
+gdb --args vg-analyze vg_test_cfg.py
+(gdb) run
+Set Breakpoint:
+(gdb) break cit::VgEventSelector::operator()
+Step through lines:
+(gdb) step
+Step through lines without entering called functions:
+(gdb) next
+Quit:
+(gdb) quit
+
+
