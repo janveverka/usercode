@@ -35,12 +35,18 @@ process.options = cms.PSet(
     )
 
     
-## Default muuon selection
+## Default muon selection
 muonCuts = cms.PSet(
     isGlobalMuon = cms.bool(True),
     maxNormChi2 = cms.double(10),
     minMuonHits = cms.uint32(1),
     isTrackerMuon = cms.bool(True),
+    )
+
+## Default photon selection
+photonCuts = cms.PSet(
+    minPt = cms.double(15),
+    maxAbsEtaSC = cms.double(2.4),
     )
 
 ## Default histo manager setup
@@ -49,7 +55,9 @@ histos = cms.PSet(
     selection = cms.PSet(
         selectMuons = cms.bool(True),
         selectPhoton = cms.bool(False),
-        muonCuts = muonCuts.copy(),
+        cutsToIgnore = cms.vstring(),
+        muonCuts = copy.deepcopy(muonCuts),
+        photonCuts = copy.deepcopy(photonCuts),
         ),
     )
 
@@ -58,17 +66,22 @@ histograms = cms.PSet(
     allEvents = copy.deepcopy(histos),
     allMuons = copy.deepcopy(histos),
     selectedMuons = copy.deepcopy(histos),
+    selectedPhotons = copy.deepcopy(histos),
     )
 
-histograms.allEvents.selection.selectMuons = False
+histograms.allEvents.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
 
-histograms.allMuons.selection.selectMuons = False
+histograms.allMuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
 histograms.allMuons.do = ['Muons']
 
+histograms.selectedMuons.selection.cutsToIgnore = ['selectPhoton']
 histograms.selectedMuons.do = ['Muons']
 
+histograms.selectedPhotons.selection.cutsToIgnore = ['selectMuons']
+histograms.selectedPhotons.do = ['Photons']
+
 ## Histograms configuration
-process.histograms = histograms.copy()
+process.histograms = copy.deepcopy(histograms)
 
 if __name__ == '__main__':
     import user

@@ -56,33 +56,33 @@ VgLeafCandidate::init()
   case kElectron:
     if ((Int_t)key_ >= tree_->nEle)
       throw Bad("BadKey") << "key=" << key_
-		      << " outside of range nEle=" << tree_->nEle << "!";
+                          << " outside of range nEle=" << tree_->nEle << "!";
     momentum_.SetPtEtaPhiM(tree_->elePt [key_],
-			   tree_->eleEta[key_],
-			   tree_->elePhi[key_],
-			   kElectronMass);
+                           tree_->eleEta[key_],
+                           tree_->elePhi[key_],
+                           kElectronMass);
     break;
       
   //_____________
   case kMuon:
     if ((Int_t)key_ >= tree_->nMu)
       throw Bad("BadKey") << "key=" << key_
-		      << " outside of range nMu=" << tree_->nMu << "!";
+                          << " outside of range nMu=" << tree_->nMu << "!";
     momentum_.SetPtEtaPhiM(tree_->muPt [key_],
-			   tree_->muEta[key_],
-			   tree_->muPhi[key_],
-			   kMuonMass);
+                           tree_->muEta[key_],
+                           tree_->muPhi[key_],
+                           kMuonMass);
     break;
       
   //_____________
   case kPhoton:
     if ((Int_t)key_ >= tree_->nPho)
       throw Bad("BadKey") << "key=" << key_
-		      << " outside of range nPho=" << tree_->nPho << "!";
+                          << " outside of range nPho=" << tree_->nPho << "!";
     momentum_.SetPtEtaPhiM(tree_->phoEt [key_],
-			   tree_->phoEta[key_],
-			   tree_->phoPhi[key_],
-			   kPhotonMass);
+                           tree_->phoEta[key_],
+                           tree_->phoPhi[key_],
+                           kPhotonMass);
     break;
       
   //_____________

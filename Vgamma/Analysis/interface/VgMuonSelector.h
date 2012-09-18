@@ -37,10 +37,6 @@ namespace cit {
       // 4. muon is reconsturcted as a "tracker muon" (in-out fit)
       const int & isTrackerMuon
     );
-    double   minPt_;
-    double   maxAbsEta_;
-    bool isGlobalMuon_;
-    unsigned minPixelHits_;
   }; // class VgMuonSelector
   
 } // namespace cit

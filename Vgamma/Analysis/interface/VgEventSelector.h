@@ -15,6 +15,7 @@
 #include "PhysicsTools/SelectorUtils/interface/Selector.h"
 #include "Vgamma/Analysis/interface/VgEvent.h"
 #include "Vgamma/Analysis/interface/VgMuonSelector.h"
+#include "Vgamma/Analysis/interface/VgPhotonSelector.h"
 
 //_____________________________________________________________________
 namespace cit {
@@ -39,8 +40,11 @@ namespace cit {
       // 2. Select photons
       const bool &
     );
+    void selectMuons();
+    void selectPhotons();
     boost::shared_ptr<VgEvent> selectedEvent_;
     VgMuonSelector passesMuonCuts_;
+    VgPhotonSelector passesPhotonCuts_;
   }; // class VgEventSelector
   
 } // namespace cit

@@ -8,8 +8,8 @@
  * \date 15 September 2012.
  */
 
-#ifndef Vgamma_Analysis_VgLeafCandidate_h
-#define Vgamma_Analysis_VgLeafCandidate_h
+#ifndef Vgamma_Analysis_interface_VgLeafCandidate_h
+#define Vgamma_Analysis_interface_VgLeafCandidate_h
 
 #include "Vgamma/Analysis/interface/VgCandidate.h"
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
@@ -42,4 +42,4 @@ namespace cit {
   }; /// class VgLeafCandidate
 } /// namespace cit
 
-#endif // #define Vgamma_Analysis_VgCandidate_h
+#endif // #define Vgamma_Analysis_interface_VgLeafCandidate_h
