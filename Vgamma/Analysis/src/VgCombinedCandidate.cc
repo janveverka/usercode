@@ -59,7 +59,7 @@ void
 VgCombinedCandidate::addDaughter(VgLeafCandidate const & dau)
 {
   daughters_.push_back(dau);
-  updateMomentum();
+  update();
 }
 // void
 // VgCombinedCandidate::addDaughter(VgLeafCandidate const & dau)
@@ -67,13 +67,16 @@ VgCombinedCandidate::addDaughter(VgLeafCandidate const & dau)
 
 //______________________________________________________________________________
 void
-VgCombinedCandidate::updateMomentum()
+VgCombinedCandidate::update()
 {
   momentum_.SetPxPyPzE(0, 0, 0, 0);
+  weight_ = 1.;
   for (VgLeafCandidates::const_iterator dau = daughters_.begin();
-       dau != daughters_.end(); ++dau)
+       dau != daughters_.end(); ++dau) {
     momentum_ += dau->momentum();
-} // updateMomentum(..)
+    weight_ *= dau->weight();
+  }
+} // update(..)
 
 
 //______________________________________________________________________________
@@ -83,7 +86,7 @@ VgCombinedCandidate::addDaughter(VgCombinedCandidate const & dau)
   for (VgLeafCandidates::const_iterator gdau = dau.daughters().begin();
        gdau != dau.daughters().end(); ++gdau) 
     daughters_.push_back(*gdau);
-  updateMomentum();
+  update();
 } // addDaughter(..)
 // void
 // VgCombinedCandidate::addDaughter(VgCombinedCandidate const & dau)

@@ -31,8 +31,10 @@ namespace cit {
     void addDaughter(VgCombinedCandidate const &);
     /// Accessors
     VgLeafCandidates const & daughters() const {return daughters_;}
+    VgLeafCandidate const & daughter(unsigned i) const {return daughters_[i];}
+    unsigned numDaughters() const {return daughters_.size();}
   private:
-    void updateMomentum();
+    void update();
     VgLeafCandidates daughters_;
   }; /// class VgCombinedCandidate
 } /// namespace cit
