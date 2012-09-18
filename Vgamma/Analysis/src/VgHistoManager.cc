@@ -92,7 +92,8 @@ VgHistoManager::bookHistograms()
 void 
 VgHistoManager::fillHistograms(VgEvent const& event)
 {
-  if (selector_(event)) {
+  pat::strbitset ret = selector_.getBitTemplate();
+  if (selector_(event, ret)) {
     /// Loop over histo fillers
     for (VgHistoFillerCollection::iterator filler = fillers_.begin();
 	 filler != fillers_.end(); ++filler) {

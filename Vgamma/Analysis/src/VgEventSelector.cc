@@ -62,12 +62,11 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
   ret.set(false);
   selectedEvent_.reset(new VgEvent(event));
 
-  if (ignoreCut("selectMuons") == false) selectMuons();  
+  if (ignoreCut("selectMuons") == false) selectMuons();
   if (ignoreCut("selectPhoton") == false) selectPhotons();
   
   if (ignoreCut("selectMuons") || selectedEvent_->muons().size() >= 2)
     passCut(ret, "selectMuons");
-  // cout << "selected muons: " << selectedEvent_->muons().size() << endl;
 
   if (ignoreCut("selectPhoton") || selectedEvent_->photons().size() > 0)
     passCut(ret, "selectPhoton");
@@ -152,11 +151,19 @@ VgEventSelector::selectedEvent() const
 void
 VgEventSelector::printCutflows(ostream & out) const
 {
-  out << "Event Cut Flow:" << endl;
+  out << "Event:" << endl;
   print(out);
   
-  out << "Muons Cut Flow:" << endl;
-  passesMuonCuts_.print(out);
+  if (considerCut("selectMuons")) {
+    out << "Muons:" << endl;
+    passesMuonCuts_.print(out);
+  }
+
+  if (considerCut("selectPhoton")) {
+    out << "Photons:" << endl;
+    passesPhotonCuts_.print(out);
+  }
+
 } // end of:
 // void
 // VgEventSelector::printCutflows(ostream & out) const
