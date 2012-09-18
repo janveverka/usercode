@@ -7,8 +7,8 @@
  * \author Jan Veverka, Caltech 
  * \date 08 September 2012
  */
-#ifndef Vgamma_Analysis_VgEvent_h
-#define Vgamma_Analysis_VgEvent_h
+#ifndef Vgamma_Analysis_interface_VgEvent_h
+#define Vgamma_Analysis_interface_VgEvent_h
 
 #include <vector>
 // #include <boost/ptr_container/ptr_vector.hpp>
@@ -46,4 +46,4 @@ namespace cit {
 } // namespace cit
 
 
-#endif // #ifndef Vgamma_Analysis_VgEvent_h
+#endif // #ifndef Vgamma_Analysis_interface_VgEvent_h
