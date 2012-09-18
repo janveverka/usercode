@@ -20,7 +20,7 @@ VgEventSelector::VgEventSelector(PSet const & cfg) :
 {
   init(
     cfg.getParameter<bool>("selectMuons"),
-    cfg.getParameter<bool>("selectPhoton"),
+    cfg.getParameter<bool>("selectPhoton")
   );
 
   if (cfg.existsAs<vector<string> >("cutsToIgnore"))
