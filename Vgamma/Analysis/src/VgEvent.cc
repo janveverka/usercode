@@ -23,9 +23,7 @@ typedef cit::VgCombinedCandidate CombCand;
 VgEvent::VgEvent(VgAnalyzerTree const& tree) :
   tree_(tree)
 {
-  std::cout << "Entering VgEvent default ctor" << std::endl << std::flush;
   readFromTree();
-  std::cout << "Exiting VgEvent default ctor" << std::endl << std::flush;
 }
 
 /**
