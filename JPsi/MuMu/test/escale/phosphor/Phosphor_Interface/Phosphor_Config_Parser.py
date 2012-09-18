@@ -96,24 +96,55 @@ def parse_cfg_file(cfg_file):
             continue
         elif option=='ptlow':
             Globals.cuts.append('phoPt >= %s' % cp.getoption(option))
+            ptlow = '_PtLow_%s' % cp.getoption(option)
+            ptlow1 = cp.getoption(option)
             if debug:
                 print '===CUTS===', Globals.cuts
             continue
         elif option=='pthigh':
             Globals.cuts.append('phoPt < %s' % cp.getoption(option))
+            pthigh = '_PtHigh_%s' % cp.getoption(option)
+            pthigh1 = cp.getoption(option)
             if debug:
                 print '===CUTS===', Globals.cuts
             continue
         elif option=='r9low':
             Globals.cuts.append('phoR9 >= %s' % cp.getoption(option))
+            r9low = '_R9Low_%s' % cp.getoption(option)
             if debug:
                 print '===CUTS===', Globals.cuts
             continue
         elif option=='r9high':
             Globals.cuts.append('phoR9 < %s' % cp.getoption(option))
+            r9high = '_R9high_%s' % cp.getoption(option)
             if debug:
                 print '===CUTS===', Globals.cuts
             continue
+    	elif option=='dileptonmasscut':
+		Globals.cuts.append('mmMass > 50.0 + %s' % cp.getoption(option))
+    		dilepcut = '_dilepcut_%s' % cp.getoption(option)
+    		if debug:
+	    		print '===CUTS===', Globals.cuts
+	    	continue
             
         if debug:
             print "has option('wrongname') =", cp.hasoption('wrongname')
+    
+    print "********CUTS: ", Globals.cuts
+    Globals.name = Globals.DataType + "_" + Globals.DetectorType + "_" + Globals.model_tree_version + r9low + r9high + ptlow + pthigh #+ dilepcut
+    Globals.latex_title = Globals.DataType + ', ' + Globals.DetectorType + ', E_{T}^{#gamma} [%s,%s]'%(ptlow1 ,pthigh1)
+    #for Cut in Globals.cuts:
+	    #index = Cut.find('<')
+	    #if Cut.find('phoPt') != -1:
+		    #print "=========PAAASSSSS===="
+	    #if index == -1:
+		    #index = Cut.find('>=')
+	    #if index != -1:
+		    ##print "********CUTS: ", Cut[index+2:100]
+		    #if Cut.find('phoPt') != -1:
+			    #print "********CUTS: ", Cut[index+2:100]
+			    #Globals.name = Globals.name + "_PhoPt_" + Cut[index+2:100]
+		    #if Cut.find('phoPt') != -1:
+			    #print "********CUTS: ", Cut[index+2:100]
+			    #Globals.name = Globals.name + "_PhoR9_" + Cut[index+2:100]
+    #Globals.latex_title = Globals.name

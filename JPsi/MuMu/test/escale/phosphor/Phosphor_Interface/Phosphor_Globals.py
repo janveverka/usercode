@@ -9,6 +9,7 @@ class Globals:
     use_independent_fake_data = ''
     data_tree_version = 'yyv3'
     DataType = 'not_defined'
+    name = 'Default'
 
 version = '1.0'
 debug = False

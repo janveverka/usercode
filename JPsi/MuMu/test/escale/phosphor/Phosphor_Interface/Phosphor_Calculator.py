@@ -24,7 +24,9 @@ Jan Veverka, Caltech, 17 February 2012.
 ##   test_mc_EE_highR9_pt30to999_v13model_v15fit
 ## - Understand crashes when model is read from a file
 
-
+def debugmsg(msg):
+	print "DEBUG +++++++++++++++ Phosphor_Interface {m}".format(m=msg)
+debugmsg(1)	
 ##- Boilerplate imports --------------------------------------------------------
 import math
 import re
@@ -36,8 +38,11 @@ import JPsi.MuMu.common.roofit as roo
 import JPsi.MuMu.common.dataset as dataset
 import JPsi.MuMu.common.canvases as canvases
 
+debugmsg(2)
 from JPsi.MuMu.common.cmsstyle import cmsstyle
+debugmsg('before getChains')
 from JPsi.MuMu.common.energyScaleChains import getChains
+debugmsg('after getChains')
 from JPsi.MuMu.common.latex import Latex
 from JPsi.MuMu.common.parametrizedkeyspdf import ParametrizedKeysPdf
 from JPsi.MuMu.common.parametrizedndkeyspdf import ParametrizedNDKeysPdf
@@ -47,6 +52,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 
 from Phosphor_Globals import *
 
+debugmsg(3)
 ##-- Configuration -------------------------------------------------------------
 ## Selection
 # name = 'EB_highR9_pt15to20'
@@ -57,7 +63,7 @@ from Phosphor_Globals import *
 #name = 'test_mc_EE_highR9_pt30to999_v13_evt1of4' #Original Line from jan
 
 #name = 'test_data_EB_pt25to999_yyv3_evt1of4_R9Range0.0to0.823'
-name = 'test_CRIS_data_EB_pt25to999_yyv3_evt1of4_R9Range0.0to0.823'
+name = 'test_CRIS_data_EB_pt25to999_sixie_evt1of4_R9Range0.0to0.823'
 
 ## Fits the same MC events that were used for the model training
 # name = 'test_mc_EE_highR9_pt30to999_v13'
@@ -86,6 +92,7 @@ sw2 = ROOT.TStopwatch()
 times = []
 
 
+debugmsg(4)
 ##------------------------------------------------------------------------------
 def parse_command_line_arguments():
     '''
@@ -138,6 +145,7 @@ def parse_name_to_fake_data_cut(name):
     return fake_data_cut
 ## End of parse_name_to_fake_data_cut().
 
+debugmsg(5)
 
 ##------------------------------------------------------------------------------
 def parse_name_to_use_real_data(name):
@@ -213,7 +221,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 v11 v13 v14 v15'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 sixie v11 v13 v14 v15'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -230,6 +238,7 @@ def parse_name_to_cuts():
 ## End of parse_name_to_cuts().
 
 
+debugmsg(6)
 ##------------------------------------------------------------------------------
 def parse_name_to_title():
     'Parse the name and translate it into a title.'
@@ -318,6 +327,7 @@ def define_globals():
 ## End of define_globals()
 
 
+debugmsg(7)
 ##------------------------------------------------------------------------------
 def define_workspace():
     '''
@@ -421,6 +431,7 @@ def define_model_parameters():
 ## End of define_model_parameters().
 
 
+debugmsg(8)
 ##------------------------------------------------------------------------------
 def read_model_parameters_from_workspace(workspace):
     '''
@@ -521,7 +532,7 @@ def set_default_integrator_precision(eps_abs, eps_rel):
 
 
 ##------------------------------------------------------------------------------
-def get_data(chains = getChains('v11')):
+def get_data(chains): # = getChains('v11')):
     '''
     Get the nominal data that is used for smearing.
     '''
@@ -554,8 +565,8 @@ def get_data(chains = getChains('v11')):
     ## Have to copy aliases by hand
     
     for a in chains['z'].GetListOfAliases():
-        print '=================CUTS=========================----->', cuts
-        tree['z'].SetAlias(a.GetName(), a.GetTitle())
+	    print '=================a=========================----->', a.GetName()
+            tree['z'].SetAlias(a.GetName(), a.GetTitle())
 
     cuts0 = cuts[:]
     cuts1 = cuts[:]
@@ -625,9 +636,10 @@ def get_data(chains = getChains('v11')):
             data['fsr0'].numEntries() + data['fsr1'].numEntries() +
             data['zj0'].numEntries() + data['zj1'].numEntries()
             )
-        )
+        )							
 ## End of get_data.
 
+debugmsg(9)
 
 ##------------------------------------------------------------------------------
 def get_confint(x, cl=5):
@@ -675,7 +687,7 @@ def outro(make_plots=True, save_workspace=True):
     'Closing stuff'
     canvases.update()
     if make_plots:
-        canvases.make_plots(['png', 'eps'])
+        canvases.make_plots(['png', 'eps', 'root'])
 
     if save_workspace:
         for c in canvases.canvases:
@@ -793,6 +805,7 @@ def init():
     define_mass_derivative_function_and_mean()   
     set_ranges_for_data_observables()
     set_signal_model_normalization_integral_cache_binnings()
+    print "=====model_tree_version======  ", model_tree_version
     get_data(getChains(model_tree_version))
     build_model()
 ## End of init().
@@ -810,7 +823,15 @@ def init_cfg_file():
     global model_tree_version, data_tree_version
     data_tree_version = model_tree_version = Globals.model_tree_version
     print '====================Model Tree Version===========================', model_tree_version
+    global name, output, latex_title
+    name = Globals.name
+    latex_title = Globals.latex_title
+    outputfile = 'phosphor5_model_and_fit_' + name + '.root'
     define_workspace()
+    print  '===================Name===========================', name
+    global inputfile, outputfile
+    inputfile = 'phosphor5_model_and_fit_' + name + '.root'
+    outputfile = 'phosphor5_model_and_fit_' + name + '.root'
     define_data_observables()
     define_model_parameters()
     define_mass_derivative_function_and_mean()   
@@ -897,7 +918,7 @@ def plot_fit_to_real_data(label):
     mmgMass.setBins(80)
     plot = mmgMass.frame(roo.Range('plot'))
     if label == 'data':
-        title_start = '2011A+B'
+        title_start = '2012ABC'
     else:
         title_start = label
        
@@ -1075,7 +1096,7 @@ def process_monte_carlo():
 
     mmgMass.setBins(80)
     plot = mmgMass.frame(roo.Range('plot'))
-    plot.SetTitle('Fall11 MC, ' + latex_title)
+    plot.SetTitle('Fall12 MC, ' + latex_title)
     fitdata1.plotOn(plot)
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
@@ -1126,19 +1147,19 @@ def process_monte_carlo():
 
 
 ##------------------------------------------------------------------------------
-def main():
-    sw.Start()
-    sw2.Start()
+#def main():
+    #sw.Start()
+    #sw2.Start()
 
-    init()
-    # init_from_file(inputfile)
+    #init()
+    ## init_from_file(inputfile)
     
-    if use_real_data:
-        process_real_data()
-    else:
-        process_monte_carlo()
+    #if use_real_data:
+        #process_real_data()
+    #else:
+        #process_monte_carlo()
 
-    outro()
+    #outro()
 ## End of main().
 
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
@@ -1276,8 +1297,8 @@ def main():
 
 
 ##------------------------------------------------------------------------------
-if __name__ == '__main__':
-    parse_command_line_arguments()
-    main()
-    import user
+#if __name__ == '__main__':
+    #parse_command_line_arguments()
+    #main()
+    #import user
 

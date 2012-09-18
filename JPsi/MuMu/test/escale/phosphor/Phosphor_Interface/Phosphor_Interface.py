@@ -1,31 +1,39 @@
 #!/cms/sw/slc5_amd64_gcc434/external/python/2.6.4-cms14/bin/python
+
+def print_debug(i):
+	print "DEBUG+++++++++++++++DEBUG%d" % i
+
+print_debug(0)
 import getopt
 import sys
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-
+print_debug(1)
 #import ConfigParser, StringIO
 from Phosphor_Config_Parser import parse_cfg_file
-from Phosphor_Calculator import init, init_cfg_file, process_real_data, process_monte_carlo
+print_debug(10)
+from Phosphor_Calculator import init, init_cfg_file, process_real_data, process_monte_carlo, outro
+print_debug(2)
 from Phosphor_Globals import Globals
 #from Phosphor_Globals import debug, version, verbose, cfg_file, use_real_data
 from Phosphor_Globals import *
 sw = ROOT.TStopwatch()
 sw2 = ROOT.TStopwatch()
 
+print_debug(3)
 
+#exit(1)
 
 
 #=== MAIN =====================================================================
 
 def main():
-
+    print "DEBUG+++++++++++++++DEBUG1"
     sw.Start()
     sw2.Start()
     global  version, verbose, debug, cfg_file, use_real_data
     
     print 'ARGV      :', sys.argv[1:]
-
     try:
         options, remainder = getopt.gnu_getopt(sys.argv[1:], 'o:c:vdh', ['cfg_file=','output=','verbose','debug','version=','help',])
     except getopt.GetoptError, err:
@@ -59,13 +67,17 @@ def main():
 
     if cfg_file == 'empty':
 
+        print "USING NAME AS CONFIGURATION FILE"
+        
         if debug:
             print "USING NAME AS CONFIGURATION FILE"
         init()
         
         if use_real_data:
+	    print "=====DATA is being proccess====="
             process_real_data()
         else:
+	    print "=====DATA is being proccess====="
             process_monte_carlo()
 
     else:
@@ -77,16 +89,19 @@ def main():
             print 'Calling Parse Configuration File Function------>:'
             
         parse_cfg_file(cfg_file)
+        print "======CONFIG FILE PARSED=========", 
         init_cfg_file()
         
         if Globals.DataType == 'data':
-            process_real_data()
+	   print "=============CONFIG FILE DATA==========="
+           process_real_data()
         elif Globals.DataType == 'mc':
+            print "=============CONFIG FILE DATA==========="
             process_monte_carlo()
         else:
             raise RuntimeError, 'Wrong Data Type, Please Try DataType = data or DataType = mc'
 
-
+    outro()
 
 if __name__ == '__main__':
     main()
