@@ -98,6 +98,15 @@ VgAnalyzer::run()
   } // end of loop over the events
   
   cout << "Processed " << ientry << " records." << endl;
+  
+  // Loop over workers
+  for (HistoManagers::iterator worker = histoManagers_.begin();
+        worker != histoManagers_.end(); ++worker) {
+    cout << "== " << worker->output().GetName() << " ==" << endl;
+    worker->print(cout);
+    cout << endl;
+  } // Loop over workers
+  
   cout << "Writing " << output_->GetName() << "." << endl;
   output_->Write();
   

@@ -10,23 +10,25 @@
 using cit::VgEventSelector;
 using cit::VgEvent;
 using namespace std;
-//_____________________________________________________________________
+//_____________________________________________________________________________
 /**
  * Constructor
  */
 VgEventSelector::VgEventSelector(PSet const & cfg) :
   selectedEvent_(),
-  selectMuons_(cfg.getParameter<bool>("selectMuons")),
-  selectPhoton_(cfg.getUntrackedParameter<bool>("selectPhoton", false))
+  passesMuonCuts_(cfg.getParameter<PSet>("muonCuts"))
 {
-  init();
+  init(
+    cfg.getParameter<bool>("selectMuons"),
+    cfg.getParameter<bool>("selectPhoton"),
+  );
 
   if (cfg.existsAs<vector<string> >("cutsToIgnore"))
     setIgnoredCuts(cfg.getParameter<vector<string> >("cutsToIgnore"));
 } // Ctor
 
 
-//_____________________________________________________________________
+//_____________________________________________________________________________
 /**
  * Destructor
  */
@@ -34,22 +36,22 @@ VgEventSelector::~VgEventSelector()
 {} // Dtor
 
 
-//_____________________________________________________________________
+//_____________________________________________________________________________
 /**
  * Initialization
  */
 void
-VgEventSelector::init()
+VgEventSelector::init(const bool & selectMuons, const bool & selectPhoton)
 {
-  push_back("selectMuons", selectMuons_);
-  push_back("selectPhoton", selectPhoton_);
+  push_back("selectMuons", selectMuons);
+  push_back("selectPhoton", selectPhoton);
 
   set("selectMuons");
   set("selectPhoton");
 } // init()
 
 
-//_____________________________________________________________________
+//_____________________________________________________________________________
 /**
  * Selection interface.
  */
@@ -60,34 +62,22 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
   ret.set(false);
   selectedEvent_.reset(new VgEvent(event));
 
-  if (selectMuons_ == true) {
+  if (ignoreCut("selectMuons") == false) {
     /// Select muons
     cit::VgLeafCandidates selectedMuons;
-    cit::VgLeafCandidates const & muons = event.muons();
-    cit::VgAnalyzerTree const & tree = event.tree();
     /// Loop over muons
-    for (cit::VgLeafCandidates::const_iterator mu = muons.begin();
-          mu != muons.end(); ++mu) {
-      unsigned i = mu->key();
-      if (mu->pt() < 20.) continue;
-      if (fabs(mu->eta()) > 2.4) continue;
-      // is global muon
-      if (!(unsigned(tree.muType[i]) & (1u << 1))) continue;
-      if (tree.muNumberOfValidPixelHits[i] < 1) continue;
-      selectedMuons.push_back(*mu);
+    for (cit::VgLeafCandidates::const_iterator mu = event.muons().begin();
+          mu != event.muons().end(); ++mu) {
+      if (passesMuonCuts_(*mu)) selectedMuons.push_back(*mu);
     } /// loop over muons
-    if (ignoreCut("selectMuons") || selectedMuons.size() >= 2) 
-      passCut(ret, "selectMuons");
-    // cout << "selected muons: " << selectedMuons.size() << endl;
     selectedEvent_->putMuons(selectedMuons);
-  } else {
-    // Use all muons
-    passCut(ret, "selectMuons");
-    // cout << "selected muons: " << event.muons().size() << endl;
-    selectedEvent_->putMuons(event.muons());
   }
-      
-  if (ignoreCut("selectPhoton") || true)
+  
+  if (ignoreCut("selectMuons") || selectedEvent_->muons().size() >= 2)
+    passCut(ret, "selectMuons");
+  // cout << "selected muons: " << selectedEvent_->muons().size() << endl;
+
+  if (ignoreCut("selectPhoton") || selectedEvent_->photons().size() > 0)
     passCut(ret, "selectPhoton");
 
   // print(cout);
@@ -96,7 +86,8 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
   return ret;
 } // bool operator()(..)
 
-//_____________________________________________________________________
+
+//_____________________________________________________________________________
 /**
  * Accessor.
  */
@@ -105,9 +96,28 @@ VgEventSelector::selectedEvent() const
 {
   if (selectedEvent_.get() == 0) {
     std::string what = ("Cannot return selected event; no events "
-			"have been selected yet.");
+                        "have been selected yet.");
     throw cms::Exception("BadPreCondition") << what; 
   }
   return *selectedEvent_;
-} // selectedEvents()
+} // end of:
+// VgEvent const &
+// VgEventSelector::selectedEvent() const
+
+
+//_____________________________________________________________________________
+/**
+ * Summary output
+ */
+void
+VgEventSelector::printCutflows(ostream & out) const
+{
+  out << "Event Cut Flow:" << endl;
+  print(out);
+  
+  out << "Muons Cut Flow:" << endl;
+  passesMuonCuts_.print(out);
+} // end of:
+// void
+// VgEventSelector::printCutflows(ostream & out) const
 

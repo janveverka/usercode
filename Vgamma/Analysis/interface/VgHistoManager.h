@@ -31,11 +31,15 @@ namespace cit {
     ~VgHistoManager();
     void bookHistograms();
     void fillHistograms(VgEvent const&);
+    void print(std::ostream &)  const;
+    TDirectory const & output() const {return output_;}
   private:
     VgHistoFillerCollection fillers_;
     VgHistoFillerBase::HistoCollection histos_;
+    PSet const & cfg_;
     bool isMC_;
     VgEventSelector selector_;
+    TDirectory & output_;
   }; // class VgHistoManager
   
 } // namespace cit

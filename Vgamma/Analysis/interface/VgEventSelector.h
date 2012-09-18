@@ -9,10 +9,12 @@
 #ifndef Vgamma_Analysis_interface_VgEventSelector_h
 #define Vgamma_Analysis_interface_VgEventSelector_h
 
+#include <iostream>
 #include "boost/shared_ptr.hpp"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "PhysicsTools/SelectorUtils/interface/Selector.h"
 #include "Vgamma/Analysis/interface/VgEvent.h"
+#include "Vgamma/Analysis/interface/VgMuonSelector.h"
 
 //_____________________________________________________________________
 namespace cit {
@@ -28,11 +30,17 @@ namespace cit {
     bool operator()(VgEvent const &, pat::strbitset &);
     /// Accessor(s)
     VgEvent const & selectedEvent() const;
+    /// Summary output
+    void printCutflows(std::ostream &) const;
   private:
-    void init();
+    void init(
+      // 1. Select muons
+      const bool &, 
+      // 2. Select photons
+      const bool &
+    );
     boost::shared_ptr<VgEvent> selectedEvent_;
-    bool selectMuons_;
-    bool selectPhoton_;
+    VgMuonSelector passesMuonCuts_;
   }; // class VgEventSelector
   
 } // namespace cit

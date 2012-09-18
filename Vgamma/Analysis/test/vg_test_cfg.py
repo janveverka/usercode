@@ -1,3 +1,4 @@
+import copy
 import os
 import socket
 import getpass
@@ -33,24 +34,42 @@ process.options = cms.PSet(
     titleStyle = cms.string("mpl")
     )
 
-process.histograms = cms.PSet(
-    isMC = cms.bool(True),
-    allEvents = cms.PSet(
-        do = cms.vstring('Muons', 'Photons', 'Pileup'),
-	selection = cms.PSet(
-            selectMuons = cms.bool(False)
-            ),
-        ),
-    allMuons = cms.PSet(
-        do = cms.vstring('Muons'),
-        selection = cms.PSet(
-            selectMuons = cms.bool(False)
-            ),
-        ),
-    selectedMuons = cms.PSet(
-        do = cms.vstring('Muons'),
-        selection = cms.PSet(
-            selectMuons = cms.bool(True)
-            ),
+    
+## Default muuon selection
+muonCuts = cms.PSet(
+    isGlobalMuon = cms.bool(True),
+    maxNormChi2 = cms.double(10),
+    minMuonHits = cms.uint32(1),
+    isTrackerMuon = cms.bool(True),
+    )
+
+## Default histo manager setup
+histos = cms.PSet(
+    do = cms.vstring('Muons', 'Photons', 'Pileup'),
+    selection = cms.PSet(
+        selectMuons = cms.bool(True),
+        selectPhoton = cms.bool(False),
+        muonCuts = muonCuts.copy(),
         ),
     )
+
+histograms = cms.PSet(
+    isMC = cms.bool(True),
+    allEvents = copy.deepcopy(histos),
+    allMuons = copy.deepcopy(histos),
+    selectedMuons = copy.deepcopy(histos),
+    )
+
+histograms.allEvents.selection.selectMuons = False
+
+histograms.allMuons.selection.selectMuons = False
+histograms.allMuons.do = ['Muons']
+
+histograms.selectedMuons.do = ['Muons']
+
+## Histograms configuration
+process.histograms = histograms.copy()
+
+if __name__ == '__main__':
+    import user
+    
