@@ -30,6 +30,7 @@ namespace cit {
     VgLeafCandidates     const & muons  () const {return muons_  ;}
     VgLeafCandidates     const & photons() const {return photons_;}
     VgCombinedCandidates const & dimuons() const {return dimuons_;}
+    VgCombinedCandidates const & mmgCands() const {return mmgCands_;}
     /// Producers
     void readFromTree();
     void putPhotons(VgLeafCandidates const &);
@@ -37,11 +38,13 @@ namespace cit {
     void putDimuons(VgCombinedCandidates const &);
     /// Combiners
     void combineMuonsToDimuons();
+    void combineDimuonsAndPhotonsToMmgCands();
   private:
     VgAnalyzerTree const & tree_;
     VgLeafCandidates muons_;
     VgLeafCandidates photons_;
     VgCombinedCandidates dimuons_;
+    VgCombinedCandidates mmgCands_;
   }; // class VgEvent
   
 } // namespace cit

@@ -83,6 +83,8 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
   if (ignoreCut("selectPhoton") || selectedEvent_->photons().size() > 0)
     passCut(ret, "selectPhoton");
   else return false;
+  
+  selectedEvent_->combineDimuonsAndPhotonsToMmgCands();
 
   // print(cout);
   // cout << "ret: " << (bool)ret << endl;

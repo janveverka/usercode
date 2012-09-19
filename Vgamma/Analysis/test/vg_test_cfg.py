@@ -56,7 +56,7 @@ photonCuts = cms.PSet(
 
 ## Default histo manager setup
 histos = cms.PSet(
-    do = cms.vstring('Muons', 'Photons', 'Dimuons', 'Pileup'),
+    do = cms.vstring('Muons', 'Photons', 'Dimuons', 'mmgCands', 'Pileup'),
     selection = cms.PSet(
         selectMuons = cms.bool(True),
         selectDimuons = cms.bool(True),

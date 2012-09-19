@@ -5,11 +5,12 @@
  */
 
 #include "FWCore/Utilities/interface/Exception.h"
+#include "Vgamma/Analysis/interface/VgDimuonHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgHistoManager.h"
+#include "Vgamma/Analysis/interface/VgMCPileupHistoFiller.h"
+#include "Vgamma/Analysis/interface/VgMMGHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgMuonHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgPhotonHistoFiller.h"
-#include "Vgamma/Analysis/interface/VgDimuonHistoFiller.h"
-#include "Vgamma/Analysis/interface/VgMCPileupHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgPileupHistoFiller.h"
 
 using namespace std;
@@ -41,6 +42,8 @@ VgHistoManager::VgHistoManager(VgAnalyzerTree const& tree,
       fillers_.push_back(new VgPhotonHistoFiller(tree, histos_));
     } else if (*filler == string("Dimuons")) {
       fillers_.push_back(new VgDimuonHistoFiller(tree, histos_));
+    } else if (*filler == string("mmgCands")) {
+      fillers_.push_back(new VgMMGHistoFiller(tree, histos_));
     } else if (*filler == string("Pileup")) {
       fillers_.push_back(new VgPileupHistoFiller(tree, histos_));
       if (isMC == true) {
@@ -99,7 +102,7 @@ VgHistoManager::fillHistograms(VgEvent const& event)
   if (selector_(event, ret)) {
     /// Loop over histo fillers
     for (VgHistoFillerCollection::iterator filler = fillers_.begin();
-	 filler != fillers_.end(); ++filler) {
+         filler != fillers_.end(); ++filler) {
       (*filler)->fillHistograms(selector_.selectedEvent());
     } /// Loop over histo fillers
   } /// if (selector_(event))

@@ -17,6 +17,8 @@ typedef cit::VgCandidate Cand;
 typedef cit::VgLeafCandidate LeafCand;
 typedef cit::VgCombinedCandidate CombCand;
 
+
+//_____________________________________________________________________________
 /**
  * Ctor
  */
@@ -26,6 +28,8 @@ VgEvent::VgEvent(VgAnalyzerTree const& tree) :
   readFromTree();
 }
 
+
+//_____________________________________________________________________________
 /**
  * Copy ctor
  */
@@ -37,12 +41,16 @@ VgEvent::VgEvent(VgEvent const& other) :
   putDimuons(other.dimuons_);
 } // Copy ctor
 
+
+//_____________________________________________________________________________
 /**
  * Dtor
  */
 VgEvent::~VgEvent()
 {}
 
+
+//_____________________________________________________________________________
 /**
  * Updates the muon and photon collections to contain
  * all the muons and photon indices from the current event.
@@ -63,6 +71,8 @@ VgEvent::readFromTree()
     muons_  .push_back(LeafCand(tree_, Cand::kMuon  , i));
 }
 
+
+//_____________________________________________________________________________
 /**
  * Photon producer.
  */
@@ -73,6 +83,8 @@ VgEvent::putPhotons(cit::VgLeafCandidates const & photons)
   std::copy(photons.begin(), photons.end(), photons_.begin());
 }
 
+
+//_____________________________________________________________________________
 /**
  * Muon producer.
  */
@@ -84,6 +96,7 @@ VgEvent::putMuons(cit::VgLeafCandidates const & muons)
 }
 
 
+//_____________________________________________________________________________
 /**
  * Dimuon producer.
  */
@@ -95,7 +108,7 @@ VgEvent::putDimuons(cit::VgCombinedCandidates const & dimuons)
 }
 
 
-
+//_____________________________________________________________________________
 /**
  * Dimuon combiner.
  */
@@ -115,5 +128,26 @@ VgEvent::combineMuonsToDimuons()
     }
 }
 
+
+//_____________________________________________________________________________
+/**
+ * Mu-mu-gamma combiner.
+ */
+void
+VgEvent::combineDimuonsAndPhotonsToMmgCands()
+{  
+  mmgCands_.reserve(dimuons_.size() * photons_.size());
+  for (cit::VgCombinedCandidates::const_iterator dimu = dimuons_.begin();
+       dimu != dimuons_.end(); ++dimu)
+    for (cit::VgLeafCandidates::const_iterator pho = photons_.begin();
+         pho != photons_.end(); ++pho) {
+      VgCombinedCandidate mmg;
+      mmg.addDaughter(*dimu);
+      mmg.addDaughter(*pho);
+      mmgCands_.push_back(mmg);
+    }
+}
+// void
+// VgEvent::combineDimuonsAndPhotonsToMmgCands()
 
 
