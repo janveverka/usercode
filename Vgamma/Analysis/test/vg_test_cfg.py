@@ -54,6 +54,11 @@ photonCuts = cms.PSet(
     maxAbsEtaSC = cms.double(2.4),
     )
 
+## Default dimuon selection
+ZgCuts = cms.PSet(
+    minDeltaR = cms.double(0.7),
+    )
+
 ## Default histo manager setup
 histos = cms.PSet(
     do = cms.vstring('Muons', 'Photons', 'Dimuons', 'mmgCands', 'Pileup'),
@@ -61,10 +66,12 @@ histos = cms.PSet(
         selectMuons = cms.bool(True),
         selectDimuons = cms.bool(True),
         selectPhoton = cms.bool(True),
+        selectZg = cms.bool(True),
         cutsToIgnore = cms.vstring(),
         muonCuts = copy.deepcopy(muonCuts),
         dimuonCuts = copy.deepcopy(dimuonCuts),
         photonCuts = copy.deepcopy(photonCuts),
+        ZgCuts = copy.deepcopy(ZgCuts)
         ),
     )
 
@@ -73,30 +80,38 @@ allMuons = copy.deepcopy(histos)
 selectedMuons = copy.deepcopy(histos)
 selectedDimuons = copy.deepcopy(histos)
 selectedPhotons = copy.deepcopy(histos)
+selectedZgs = copy.deepcopy(histos)
 
 allEvents.selection.cutsToIgnore = ['selectMuons', 'selectPhoton',
-                                    'selectDimuons']
+                                    'selectDimuons', 'selectZg']
 
 allMuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton',
-                                   'selectDimuons']
+                                   'selectDimuons', 'selectZg']
 allMuons.do = ['Muons']
 
-selectedMuons.selection.cutsToIgnore = ['selectPhoton']
+selectedMuons.selection.cutsToIgnore = ['selectPhoton', 'selectZg']
 selectedMuons.do = ['Muons']
 
-selectedDimuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
+selectedDimuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton',
+                                          'selectZg']
 selectedDimuons.do = ['Dimuons']
 
-selectedPhotons.selection.cutsToIgnore = ['selectMuons', 'selectDimuons']
+selectedPhotons.selection.cutsToIgnore = ['selectMuons', 'selectDimuons',
+                                          'selectZg']
 selectedPhotons.do = ['Photons']
+
+selectedZgs.selection.cutsToIgnore =  ['selectMuons', 'selectPhoton',
+                                       'selectDimuons']
+selectedZgs.do = ['mmgCands']
 
 histograms = cms.PSet(
     isMC = cms.bool(True),
-   allEvents = copy.deepcopy(allEvents),
+    allEvents = copy.deepcopy(allEvents),
 #    allMuons = copy.deepcopy(allMuons),
     selectedMuons = copy.deepcopy(selectedMuons),
     selectedDimuons = copy.deepcopy(selectedDimuons),
     selectedPhotons = copy.deepcopy(selectedPhotons),
+    selectedZgs = copy.deepcopy(selectedZgs),
     )
 
 

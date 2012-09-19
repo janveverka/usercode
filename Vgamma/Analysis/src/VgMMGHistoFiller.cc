@@ -19,7 +19,7 @@ using cit::VgMMGHistoFiller;
  * Ctor.
  */
 VgMMGHistoFiller::VgMMGHistoFiller(VgAnalyzerTree const& tree,
-                                         HistoCollection & histos) :
+                                   HistoCollection & histos) :
   VgHistoFillerBase(tree, histos)
 {} // Default ctor.
 

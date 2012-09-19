@@ -36,6 +36,7 @@ namespace cit {
     void putPhotons(VgLeafCandidates const &);
     void putMuons  (VgLeafCandidates const &);
     void putDimuons(VgCombinedCandidates const &);
+    void putZgammas(VgCombinedCandidates const &);
     /// Combiners
     void combineMuonsToDimuons();
     void combineDimuonsAndPhotonsToMmgCands();

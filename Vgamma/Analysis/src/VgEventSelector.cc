@@ -18,12 +18,14 @@ VgEventSelector::VgEventSelector(PSet const & cfg) :
   selectedEvent_(),
   passesMuonCuts_(cfg.getParameter<PSet>("muonCuts")),
   passesDimuonCuts_(cfg.getParameter<PSet>("dimuonCuts")),
-  passesPhotonCuts_(cfg.getParameter<PSet>("photonCuts"))
+  passesPhotonCuts_(cfg.getParameter<PSet>("photonCuts")),
+  passesZgCuts_(cfg.getParameter<PSet>("ZgCuts"))
 {
   init(
     cfg.getParameter<bool>("selectMuons"),
     cfg.getParameter<bool>("selectDimuons"),
-    cfg.getParameter<bool>("selectPhoton")
+    cfg.getParameter<bool>("selectPhoton"),
+    cfg.getParameter<bool>("selectZg")
   );
 
   if (cfg.existsAs<vector<string> >("cutsToIgnore"))
@@ -46,17 +48,22 @@ VgEventSelector::~VgEventSelector()
 void
 VgEventSelector::init(const bool & selectMuons,
                       const bool & selectDimuons,
-                      const bool & selectPhoton)
+                      const bool & selectPhoton,
+		      const bool & selectZg)
 {
   push_back("Inclusive", 0);
   push_back("selectMuons", selectMuons);
   push_back("selectDimuons", selectDimuons);
   push_back("selectPhoton", selectPhoton);
+  push_back("selectZg", selectZg);
 
   set("Inclusive");
   set("selectMuons");
   set("selectDimuons");
   set("selectPhoton");
+  set("selectZg");
+  //  set("arbitratePhoton");
+
 } // init()
 
 
@@ -78,6 +85,7 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
   else return false;
 
   selectedEvent_->combineMuonsToDimuons();
+
   if (considerCut("selectDimuons")) selectDimuons();
   if (ignoreCut("selectDimuons") || selectedEvent_->dimuons().size() > 0)
     passCut(ret, "selectDimuons");
@@ -90,6 +98,10 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
   
   selectedEvent_->combineDimuonsAndPhotonsToMmgCands();
 
+  if (considerCut("selectZg")) selectZgammas(); 
+  if (ignoreCut("selectZg") || selectedEvent_->mmgCands().size() > 0)
+    passCut(ret, "selectZg");
+  else return false;
   // print(cout);
   // cout << "ret: " << (bool)ret << endl;
   
@@ -172,6 +184,31 @@ VgEventSelector::selectPhotons()
 
 //_____________________________________________________________________________
 /**
+ * Applies Zgamma cuts to Zgamma candidates in the *selectedEvent_ and stores 
+ * the passing candidates back in the *selectedEvent_.
+ * 
+ * Precondition: *selectedEvent_ has been created and Zgamma candidates
+ *               filled.
+ * Postcondition: *selectedEvent_ contains only selected Zgamma candidates.
+ */
+void
+VgEventSelector::selectZgammas() 
+{
+  /// Loop over Zgamma candidates
+  cit::VgCombinedCandidates const & sourceZgs = selectedEvent_->mmgCands();
+  cit::VgCombinedCandidates selectedZgs;
+  for (cit::VgCombinedCandidates::const_iterator zg = sourceZgs.begin();
+        zg != sourceZgs.end(); ++zg) {
+    if (passesZgCuts_(*zg)) selectedZgs.push_back(*zg);
+  } /// Loop over Zgamma candidates
+  selectedEvent_->putZgammas(selectedZgs);  
+} 
+// void
+// VgEventSelector::selectZgammas() 
+
+
+//_____________________________________________________________________________
+/**
  * Accessor.
  */
 VgEvent const &
@@ -203,14 +240,19 @@ VgEventSelector::printCutflows(ostream & out) const
     passesMuonCuts_.print(out);
   }
 
+  if (considerCut("selectDimuons")) {
+    out << "Dimuons:" << endl;
+    passesDimuonCuts_.print(out);
+  }
+
   if (considerCut("selectPhoton")) {
     out << "Photons:" << endl;
     passesPhotonCuts_.print(out);
   }
 
-  if (considerCut("selectDimuons")) {
-    out << "Dimuons:" << endl;
-    passesDimuonCuts_.print(out);
+  if (considerCut("selectZg")) {
+    out << "Zgamma candidates:" << endl;
+    passesZgCuts_.print(out);
   }
 
 } // end of:

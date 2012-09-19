@@ -110,6 +110,18 @@ VgEvent::putDimuons(cit::VgCombinedCandidates const & dimuons)
 
 //_____________________________________________________________________________
 /**
+ * Zgamma producer.
+ */
+void
+VgEvent::putZgammas(cit::VgCombinedCandidates const & Zgammas)
+{
+  mmgCands_.resize(Zgammas.size());
+  std::copy(Zgammas.begin(), Zgammas.end(), mmgCands_.begin());
+}
+
+
+//_____________________________________________________________________________
+/**
  * Dimuon combiner.
  */
 void

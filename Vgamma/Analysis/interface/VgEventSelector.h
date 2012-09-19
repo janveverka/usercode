@@ -13,10 +13,11 @@
 #include "boost/shared_ptr.hpp"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "PhysicsTools/SelectorUtils/interface/Selector.h"
+#include "Vgamma/Analysis/interface/VgDimuonSelector.h"
 #include "Vgamma/Analysis/interface/VgEvent.h"
 #include "Vgamma/Analysis/interface/VgMuonSelector.h"
 #include "Vgamma/Analysis/interface/VgPhotonSelector.h"
-#include "Vgamma/Analysis/interface/VgDimuonSelector.h"
+#include "Vgamma/Analysis/interface/ZgSelector.h"
 
 //_____________________________________________________________________
 namespace cit {
@@ -38,15 +39,18 @@ namespace cit {
     void init(
       const bool &, // 1. Select muons
       const bool &, // 2. Select dimuon
-      const bool &  // 3. Select photon
+      const bool &, // 3. Select photon
+      const bool &  // 4. Select Zgamma 
     );
     void selectMuons();
     void selectPhotons();
     void selectDimuons();
+    void selectZgammas();
     boost::shared_ptr<VgEvent> selectedEvent_;
     VgMuonSelector passesMuonCuts_;
     VgDimuonSelector passesDimuonCuts_;
     VgPhotonSelector passesPhotonCuts_;
+    ZgSelector passesZgCuts_;
   }; // class VgEventSelector
   
 } // namespace cit
