@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include "TDirectory.h"
 #include "TMath.h"
 #include "Vgamma/Analysis/interface/VgDimuonHistoFiller.h"
 
@@ -32,6 +33,11 @@ VgDimuonHistoFiller::~VgDimuonHistoFiller() {}
 void
 VgDimuonHistoFiller::bookHistograms()
 {
+
+  TDirectory * cwd = gDirectory;
+  if (cwd->GetDirectory("Dimuons")) cwd->cd("Dimuons");
+  else cwd->mkdir("Dimuons")->cd();
+
   histos_["dimuN"] = new TH1F("dimuN", ";Dimuon Multiplicity;Events / 1", 
                               51, -0.5, 50.5);
   histos_["dimuMass"] = new TH1F("dimuMass", ";Dimuon mass (GeV);Events / GeV",
@@ -54,6 +60,9 @@ VgDimuonHistoFiller::bookHistograms()
   histos_["mu2PtOverMu1Pt"] = new TH1F("mu2PtOverMu1Pt",
                               ";Subleading muon P_{T} (GeV);Events / GeV",
                                100, 0., 1.);
+
+  cwd->cd();
+
 } // VgDimuonHistoFiller::bookHistograms(..)
 
 

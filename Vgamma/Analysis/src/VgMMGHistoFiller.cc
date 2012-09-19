@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "TDirectory.h"
 #include "TMath.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "Vgamma/Analysis/interface/VgMMGHistoFiller.h"
@@ -35,18 +36,23 @@ VgMMGHistoFiller::~VgMMGHistoFiller() {}
 void
 VgMMGHistoFiller::bookHistograms()
 {
-  histos_["mmgN"] = new TH1F("mmgN", ";#mu#mu#gamma Multiplicity;Events / 1", 
+  TDirectory * cwd = gDirectory;
+  if (cwd->GetDirectory("MMGCands")) cwd->cd("MMGCands");
+  else cwd->mkdir("MMGCands")->cd();
+
+  histos_["mmgN"] = new TH1F("mmgN", ";Z#gamma Multiplicity;Events / 1", 
                              51, -0.5, 50.5);
-  histos_["mmgMass"] = new TH1F("mmgMass", ";Dimuon mass (GeV);Events / GeV",
+  histos_["mmgMass"] = new TH1F("mmgMass", ";M_{Z#gamma} (GeV);Events / GeV",
                                 150, 0., 150.);
-  histos_["mmgPt"] = new TH1F("mmgPt", ";Dimuon P_{T} (GeV);Events / GeV", 
+  histos_["mmgPt"] = new TH1F("mmgPt", ";P_{T}^{Z#gamma} (GeV);Events / GeV", 
                               100, 0., 100.);
-  histos_["mmgEta"] = new TH1F("mmgEta", ";Dimuon #eta;Events / 0.1", 
+  histos_["mmgEta"] = new TH1F("mmgEta", 
+			       ";#eta_{Z#gamma};Events / 0.1", 
                                100, -5, 5);
   histos_["mmgPhi"] = new TH1F("mmgPhi", 
-                               ";Dimuon #phi;Events / #frac{#pi}{50}", 
+                               ";#phi_{Z#gamma};Events / #frac{#pi}{50}", 
                                100, -TMath::Pi(), TMath::Pi());
-  histos_["mmgY"] = new TH1F("mmgY", ";Dimuon y;Events / 0.1", 
+  histos_["mmgY"] = new TH1F("mmgY", ";y_{Z#gamma};Events / 0.1", 
                              100, -5, 5);
   histos_["mmgMinDR"] = new TH1F("mmgMinDR",
                                  ";min #Delta R(#mu^{#pm},#gamma);Events / 0.1", 
@@ -54,6 +60,8 @@ VgMMGHistoFiller::bookHistograms()
   histos_["mmgMaxDR"] = new TH1F("mmgMaxDR",
                                  ";max #Delta R(#mu^{#pm},#gamma);Events / 0.1",
                                  100, 0., 10.);
+
+  cwd->cd();
 } // VgMMGHistoFiller::bookHistograms(..)
 
 

@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include "TDirectory.h"
 #include "TMath.h"
 #include "Vgamma/Analysis/interface/VgPileupHistoFiller.h"
 
@@ -33,9 +34,15 @@ VgPileupHistoFiller::~VgPileupHistoFiller() {}
 void
 VgPileupHistoFiller::bookHistograms()
 {
+  TDirectory * cwd = gDirectory;
+  if (cwd->GetDirectory("Pileup")) cwd->cd("Pileup");
+  else cwd->mkdir("Pileup")->cd();
+
   histos_["rho"] = new TH1F("rho", ";#rho;Events", 100, 0, 100);
   histos_["rhoNeutral"] = new TH1F("rhoNeutral", "Neutrals;#rho;Events", 
                                    100, 0, 100);
+
+  cwd->cd();
 } // VgPileupHistoFiller::bookHistograms(..)
 
 

@@ -56,7 +56,7 @@ VgDimuonSelector::init(const double & minMass)
  */
 bool 
 VgDimuonSelector::operator()(cit::VgCombinedCandidate const & dimu,
-                             pat::strbitset &  ret) 
+                             pat::strbitset & ret) 
 {
   ret.set(false);
   setIgnored(ret);
@@ -73,5 +73,5 @@ VgDimuonSelector::operator()(cit::VgCombinedCandidate const & dimu,
   return (bool) ret;
 } 
 // VgDimuonSelector::operator()(VgCombinedCandidate const & dimu,
-//                              pat::strbitset &  ret))
+//                              pat::strbitset & ret))
 

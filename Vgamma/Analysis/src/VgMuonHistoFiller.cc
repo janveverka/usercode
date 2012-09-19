@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include "TDirectory.h"
 #include "TMath.h"
 #include "Vgamma/Analysis/interface/VgMuonHistoFiller.h"
 
@@ -32,14 +33,21 @@ VgMuonHistoFiller::~VgMuonHistoFiller() {}
 void
 VgMuonHistoFiller::bookHistograms()
 {
+  TDirectory * cwd = gDirectory;
+  if (cwd->GetDirectory("Muons")) cwd->cd("Muons");
+  else cwd->mkdir("Muons")->cd();
+
   histos_["muN"] = new TH1F("muN", ";Muon Multiplicity;Events / 1", 
                             51, -0.5, 50.5);
-  histos_["muPt"] = new TH1F("muPt", ";Muon P_{T} (GeV);Events / GeV", 
+  histos_["muPt"] = new TH1F("muPt", ";P_{T}^{#mu} (GeV);Events / GeV", 
                              100, 0, 100.);
-  histos_["muEta"] = new TH1F("muEta", ";Muon #eta;Events / 0.1", 
+  histos_["muEta"] = new TH1F("muEta", ";#eta_{#mu};Events / 0.1", 
                               60, -3, 3);
-  histos_["muPhi"] = new TH1F("muPhi", ";Muon #phi;Events / #frac{#pi}{50}", 
+  histos_["muPhi"] = new TH1F("muPhi", ";#phi_{#mu};Events / #frac{#pi}{50}", 
                               100, -TMath::Pi(), TMath::Pi());
+
+  cwd->cd();
+
 } // VgMuonHistoFiller::bookHistograms(..)
 
 

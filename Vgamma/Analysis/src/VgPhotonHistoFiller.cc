@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include "TDirectory.h"
 #include "TMath.h"
 #include "Vgamma/Analysis/interface/VgPhotonHistoFiller.h"
 
@@ -32,6 +33,10 @@ VgPhotonHistoFiller::~VgPhotonHistoFiller() {}
 void
 VgPhotonHistoFiller::bookHistograms()
 {
+  TDirectory * cwd = gDirectory;
+  if (cwd->GetDirectory("Photons")) cwd->cd("Photons");
+  else cwd->mkdir("Photons")->cd();
+
   histos_["phoN"] = new TH1F("phoN", ";Photon Multiplicity;Events / 1", 
                              21, -0.5, 20.5);  
   histos_["phoPt"] = new TH1F(
@@ -107,6 +112,8 @@ VgPhotonHistoFiller::bookHistograms()
     "Endcaps;Photon #sigma_{i#phi i#phi} #times 10^{3};Events / 1",
     100, 0, 100
   );
+
+  cwd->cd();
     
 } // VgPhotonHistoFiller::bookHistograms(..)
 

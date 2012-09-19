@@ -48,10 +48,12 @@ VgEventSelector::init(const bool & selectMuons,
                       const bool & selectDimuons,
                       const bool & selectPhoton)
 {
+  push_back("Inclusive", 0);
   push_back("selectMuons", selectMuons);
   push_back("selectDimuons", selectDimuons);
   push_back("selectPhoton", selectPhoton);
 
+  set("Inclusive");
   set("selectMuons");
   set("selectDimuons");
   set("selectPhoton");
@@ -67,6 +69,8 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
 {
   ret.set(false);
   selectedEvent_.reset(new VgEvent(event));
+
+  passCut(ret, "Inclusive");
 
   if (considerCut("selectMuons")) selectMuons();
   if (ignoreCut("selectMuons") || selectedEvent_->muons().size() >= 2)

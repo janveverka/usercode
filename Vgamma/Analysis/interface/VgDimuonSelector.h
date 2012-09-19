@@ -1,7 +1,7 @@
 /**
  * \class VgDimuonSelector
  * 
- * \brief Applies the selection to the given muon.
+ * \brief Applies the selection to the given dimuon.
  * 
  * \author Jan Veverka, Caltech
  * \date 19 September 2012.

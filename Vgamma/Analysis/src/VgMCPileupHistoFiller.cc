@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include "TDirectory.h"
 #include "TMath.h"
 #include "Vgamma/Analysis/interface/VgMCPileupHistoFiller.h"
 
@@ -33,6 +34,10 @@ VgMCPileupHistoFiller::~VgMCPileupHistoFiller() {}
 void
 VgMCPileupHistoFiller::bookHistograms()
 {
+  TDirectory * cwd = gDirectory;
+  if (cwd->GetDirectory("Pileup")) cwd->cd("Pileup");
+  else cwd->mkdir("Pileup")->cd();
+
   histos_["nPU0"] = new TH1F(
     "nPU0", "Early OOT Pileup;True number of interactions;Events / 1", 
     101, -0.5, 100.5
@@ -70,6 +75,9 @@ VgMCPileupHistoFiller::bookHistograms()
 //     "nPV", "Reconstructed Primary Vertices;Number of Vertices;Events / 1", 
 //     101, -0.5, 100.5
 //   );
+
+  cwd->cd();
+
 } // VgMCPileupHistoFiller::bookHistograms(..)
 
 
