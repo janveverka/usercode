@@ -61,24 +61,30 @@ histos = cms.PSet(
         ),
     )
 
+allEvents = copy.deepcopy(histos)
+allMuons = copy.deepcopy(histos)
+selectedMuons = copy.deepcopy(histos)
+selectedPhotons = copy.deepcopy(histos)
+
+allEvents.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
+
+allMuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
+allMuons.do = ['Muons']
+
+selectedMuons.selection.cutsToIgnore = ['selectPhoton']
+selectedMuons.do = ['Muons']
+
+selectedPhotons.selection.cutsToIgnore = ['selectMuons']
+selectedPhotons.do = ['Photons']
+
 histograms = cms.PSet(
     isMC = cms.bool(True),
-    allEvents = copy.deepcopy(histos),
-    allMuons = copy.deepcopy(histos),
-    selectedMuons = copy.deepcopy(histos),
-    selectedPhotons = copy.deepcopy(histos),
+#    allEvents = copy.deepcopy(allEvents),
+#    allMuons = copy.deepcopy(allMuons),
+    selectedMuons = copy.deepcopy(selectedMuons),
+    selectedPhotons = copy.deepcopy(selectedPhotons),
     )
 
-histograms.allEvents.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
-
-histograms.allMuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
-histograms.allMuons.do = ['Muons']
-
-histograms.selectedMuons.selection.cutsToIgnore = ['selectPhoton']
-histograms.selectedMuons.do = ['Muons']
-
-histograms.selectedPhotons.selection.cutsToIgnore = ['selectMuons']
-histograms.selectedPhotons.do = ['Photons']
 
 ## Histograms configuration
 process.histograms = copy.deepcopy(histograms)

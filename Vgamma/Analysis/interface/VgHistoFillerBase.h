@@ -7,8 +7,8 @@
  * 
  * Jan Veverka, Caltech, 08 September 2012.
  */
-#ifndef Vgamma_Analysis_VgHistoFillerBase_h
-#define Vgamma_Analysis_VgHistoFillerBase_h
+#ifndef Vgamma_Analysis_interface_VgHistoFillerBase_h
+#define Vgamma_Analysis_interface_VgHistoFillerBase_h
 
 #include <map>
 #include <string>
@@ -40,4 +40,4 @@ namespace cit {
   
 } // namespace cit
 
-#endif // #ifndef Vgamma_Analysis_VgHistoFillerBase_h
+#endif // #ifndef Vgamma_Analysis_interface_VgHistoFillerBase_h

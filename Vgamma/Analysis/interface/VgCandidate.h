@@ -29,6 +29,7 @@ namespace cit {
     double                 eta     () const {return momentum_.Eta();}
     double                 phi     () const {return momentum_.Phi();}
     double                 m       () const {return momentum_.M  ();}
+    double                 y       () const {return momentum_.Rapidity();}
     // Setters
     void setMomentum(TLorentzVector const& momentum) {momentum_ = momentum;}
     void setType(ParticleType type) {type_ = type;}
