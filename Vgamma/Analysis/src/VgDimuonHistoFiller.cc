@@ -35,9 +35,9 @@ VgDimuonHistoFiller::bookHistograms()
   histos_["dimuN"] = new TH1F("dimuN", ";Dimuon Multiplicity;Events / 1", 
                               51, -0.5, 50.5);
   histos_["dimuMass"] = new TH1F("dimuMass", ";Dimuon mass (GeV);Events / GeV",
-                                 101, -39.5, 140.5);
+                                 150, 0., 150.);
   histos_["dimuPt"] = new TH1F("dimuPt", ";Dimuon P_{T} (GeV);Events / GeV", 
-                               101, -0.5, 100.5);
+                               100, 0., 100.);
   histos_["dimuEta"] = new TH1F("dimuEta", ";Dimuon #eta;Events / 0.1", 
                                 60, -3, 3);
   histos_["dimuPhi"] = new TH1F("dimuPhi", 
@@ -47,13 +47,13 @@ VgDimuonHistoFiller::bookHistograms()
                                 60, -3, 3);
   histos_["mu1Pt"] = new TH1F("mu1Pt",
                               ";Leading muon P_{T} (GeV);Events / GeV", 
-                               101, -0.5, 100.5);
+                               100, 0., 100.);
   histos_["mu2Pt"] = new TH1F("mu2Pt",
                               ";Subleading muon P_{T} (GeV);Events / GeV",
-                               101, -0.5, 100.5);
+                               100, 0., 100.);
   histos_["mu2PtOverMu1Pt"] = new TH1F("mu2PtOverMu1Pt",
                               ";Subleading muon P_{T} (GeV);Events / GeV",
-                               101, -0.5, 100.5);
+                               100, 0., 1.);
 } // VgDimuonHistoFiller::bookHistograms(..)
 
 

@@ -17,10 +17,12 @@ using namespace std;
 VgEventSelector::VgEventSelector(PSet const & cfg) :
   selectedEvent_(),
   passesMuonCuts_(cfg.getParameter<PSet>("muonCuts")),
+  passesDimuonCuts_(cfg.getParameter<PSet>("dimuonCuts")),
   passesPhotonCuts_(cfg.getParameter<PSet>("photonCuts"))
 {
   init(
     cfg.getParameter<bool>("selectMuons"),
+    cfg.getParameter<bool>("selectDimuons"),
     cfg.getParameter<bool>("selectPhoton")
   );
 
@@ -42,12 +44,16 @@ VgEventSelector::~VgEventSelector()
  * Initialization
  */
 void
-VgEventSelector::init(const bool & selectMuons, const bool & selectPhoton)
+VgEventSelector::init(const bool & selectMuons,
+                      const bool & selectDimuons,
+                      const bool & selectPhoton)
 {
   push_back("selectMuons", selectMuons);
+  push_back("selectDimuons", selectDimuons);
   push_back("selectPhoton", selectPhoton);
 
   set("selectMuons");
+  set("selectDimuons");
   set("selectPhoton");
 } // init()
 
@@ -62,14 +68,21 @@ VgEventSelector::operator()(VgEvent const& event, pat::strbitset & ret)
   ret.set(false);
   selectedEvent_.reset(new VgEvent(event));
 
-  if (ignoreCut("selectMuons") == false) selectMuons();
-  if (ignoreCut("selectPhoton") == false) selectPhotons();
-  
+  if (considerCut("selectMuons")) selectMuons();
   if (ignoreCut("selectMuons") || selectedEvent_->muons().size() >= 2)
     passCut(ret, "selectMuons");
+  else return false;
 
+  selectedEvent_->combineMuonsToDimuons();
+  if (considerCut("selectDimuons")) selectDimuons();
+  if (ignoreCut("selectDimuons") || selectedEvent_->dimuons().size() > 0)
+    passCut(ret, "selectDimuons");
+  else return false;
+ 
+  if (considerCut("selectPhoton")) selectPhotons(); 
   if (ignoreCut("selectPhoton") || selectedEvent_->photons().size() > 0)
     passCut(ret, "selectPhoton");
+  else return false;
 
   // print(cout);
   // cout << "ret: " << (bool)ret << endl;
@@ -100,6 +113,31 @@ VgEventSelector::selectMuons()
 } 
 // void
 // VgEventSelector::selectMuons() 
+
+
+//_____________________________________________________________________________
+/**
+ * Applies dimuon cuts to dimuons in the *selectedEvent_ and stores the passing
+ * dimuons back in the *selectedEvent_.
+ * 
+ * Precondition: *selectedEvent_ has been created and muons have been combined
+ *                to dimuons.
+ * Postcondition: *selectedEvent_ contains only selected dimuons.
+ */
+void
+VgEventSelector::selectDimuons() 
+{
+  /// Loop over dimuons
+  cit::VgCombinedCandidates const & sourceDimuons = selectedEvent_->dimuons();
+  cit::VgCombinedCandidates selectedDimuons;
+  for (cit::VgCombinedCandidates::const_iterator dimu = sourceDimuons.begin();
+       dimu != sourceDimuons.end(); ++dimu) {
+    if (passesDimuonCuts_(*dimu)) selectedDimuons.push_back(*dimu);
+  } /// Loop over dimuons
+  selectedEvent_->putDimuons(selectedDimuons);  
+} 
+// void
+// VgEventSelector::selectDimuons() 
 
 
 //_____________________________________________________________________________
@@ -162,6 +200,11 @@ VgEventSelector::printCutflows(ostream & out) const
   if (considerCut("selectPhoton")) {
     out << "Photons:" << endl;
     passesPhotonCuts_.print(out);
+  }
+
+  if (considerCut("selectDimuons")) {
+    out << "Dimuons:" << endl;
+    passesDimuonCuts_.print(out);
   }
 
 } // end of:

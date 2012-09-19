@@ -43,6 +43,11 @@ muonCuts = cms.PSet(
     isTrackerMuon = cms.bool(True),
     )
 
+## Default dimuon selection
+dimuonCuts = cms.PSet(
+    minMass = cms.double(50),
+    )
+
 ## Default photon selection
 photonCuts = cms.PSet(
     minPt = cms.double(15),
@@ -51,12 +56,14 @@ photonCuts = cms.PSet(
 
 ## Default histo manager setup
 histos = cms.PSet(
-    do = cms.vstring('Muons', 'Photons', 'Pileup'),
+    do = cms.vstring('Muons', 'Photons', 'Dimuons', 'Pileup'),
     selection = cms.PSet(
         selectMuons = cms.bool(True),
-        selectPhoton = cms.bool(False),
+        selectDimuons = cms.bool(True),
+        selectPhoton = cms.bool(True),
         cutsToIgnore = cms.vstring(),
         muonCuts = copy.deepcopy(muonCuts),
+        dimuonCuts = copy.deepcopy(dimuonCuts),
         photonCuts = copy.deepcopy(photonCuts),
         ),
     )
@@ -64,24 +71,31 @@ histos = cms.PSet(
 allEvents = copy.deepcopy(histos)
 allMuons = copy.deepcopy(histos)
 selectedMuons = copy.deepcopy(histos)
+selectedDimuons = copy.deepcopy(histos)
 selectedPhotons = copy.deepcopy(histos)
 
-allEvents.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
+allEvents.selection.cutsToIgnore = ['selectMuons', 'selectPhoton',
+                                    'selectDimuons']
 
-allMuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
+allMuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton',
+                                   'selectDimuons']
 allMuons.do = ['Muons']
 
 selectedMuons.selection.cutsToIgnore = ['selectPhoton']
 selectedMuons.do = ['Muons']
 
-selectedPhotons.selection.cutsToIgnore = ['selectMuons']
+selectedDimuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton']
+selectedDimuons.do = ['Dimuons']
+
+selectedPhotons.selection.cutsToIgnore = ['selectMuons', 'selectDimuons']
 selectedPhotons.do = ['Photons']
 
 histograms = cms.PSet(
     isMC = cms.bool(True),
-#    allEvents = copy.deepcopy(allEvents),
+   allEvents = copy.deepcopy(allEvents),
 #    allMuons = copy.deepcopy(allMuons),
     selectedMuons = copy.deepcopy(selectedMuons),
+    selectedDimuons = copy.deepcopy(selectedDimuons),
     selectedPhotons = copy.deepcopy(selectedPhotons),
     )
 

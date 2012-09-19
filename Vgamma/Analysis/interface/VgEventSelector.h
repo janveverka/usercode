@@ -16,6 +16,7 @@
 #include "Vgamma/Analysis/interface/VgEvent.h"
 #include "Vgamma/Analysis/interface/VgMuonSelector.h"
 #include "Vgamma/Analysis/interface/VgPhotonSelector.h"
+#include "Vgamma/Analysis/interface/VgDimuonSelector.h"
 
 //_____________________________________________________________________
 namespace cit {
@@ -35,15 +36,16 @@ namespace cit {
     void printCutflows(std::ostream &) const;
   private:
     void init(
-      // 1. Select muons
-      const bool &, 
-      // 2. Select photons
-      const bool &
+      const bool &, // 1. Select muons
+      const bool &, // 2. Select dimuon
+      const bool &  // 3. Select photon
     );
     void selectMuons();
     void selectPhotons();
+    void selectDimuons();
     boost::shared_ptr<VgEvent> selectedEvent_;
     VgMuonSelector passesMuonCuts_;
+    VgDimuonSelector passesDimuonCuts_;
     VgPhotonSelector passesPhotonCuts_;
   }; // class VgEventSelector
   
