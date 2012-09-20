@@ -48,6 +48,19 @@ VgLeafCandidate::VgLeafCandidate() :
 
 
 //______________________________________________________________________________
+/// Checks if this candidate is equal to the other.
+bool
+VgLeafCandidate::operator==(VgLeafCandidate const & other)
+{
+  return (VgCandidate::operator==(other) &&
+          tree_ == &other.tree() &&
+          key_ == other.key());
+}
+// bool
+// VgLeafCandidate::operator==(VgCandidate const & other)
+
+
+//______________________________________________________________________________
 void
 VgLeafCandidate::init()
 {

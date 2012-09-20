@@ -142,21 +142,25 @@ testCand(TreePtr tree, Cand::ParticleType type, unsigned key) {
   Float_t * candPt  = tree->phoEt ;
   Float_t * candEta = tree->phoEta;
   Float_t * candPhi = tree->phoPhi;
+  int candCharge = 0;
   switch (type) {
   case Cand::kElectron: 
     candPt  = tree->elePt;
     candEta = tree->eleEta;
     candPhi = tree->elePhi;
+    candCharge = tree->eleCharge[key];
     mass    = Cand::kElectronMass;
     break;
   case Cand::kMuon: 
     candPt  = tree->muPt;
     candEta = tree->muEta;
     candPhi = tree->muPhi;
+    candCharge = tree->muCharge[key];
     mass = Cand::kMuonMass; 
     break;
   default: 
     mass = 0.;
+    candCharge = 0;
   } // switch (type)
   
   // cout << "cand.momentum().M(), mass: " << cand.momentum().M() << ", " 
@@ -167,8 +171,12 @@ testCand(TreePtr tree, Cand::ParticleType type, unsigned key) {
   assert(areEqual(cand.momentum().Eta(), candEta[key]));
   assert(areEqual(cand.momentum().Phi(), candPhi[key]));
   assert(areEqual(cand.momentum().M  (), mass        ));
+  assert(cand.charge() == candCharge);
   assert(cand.type() == type);
   assert(cand.weight() == 1.);
+  
+  Cand candCopy(cand);
+  assert(candCopy == cand);
   
   TLorentzVector v1(1, 2, 3, mass);
   cand.setMomentum(v1);
@@ -180,6 +188,9 @@ testCand(TreePtr tree, Cand::ParticleType type, unsigned key) {
   cand.scaleWeight(0.9);
   cand.scaleWeight(1.2);
   assert(cand.weight() == 1. * 0.9 * 1.2);
+  
+  cand.setCharge(2);
+  assert(cand.charge() == 2);
 } // void testCand(..)
 
 

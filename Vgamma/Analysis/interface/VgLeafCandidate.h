@@ -28,6 +28,8 @@ namespace cit {
     /// Accessors
     VgAnalyzerTree const & tree() const {return *tree_;}
     unsigned key() const {return key_;}
+    /// Overloaded equality operator
+    bool operator==(VgLeafCandidate const & other);
     /// Static data
     static const double kElectronMass;
     static const double kMuonMass;
