@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
   assert(cand.momentum() == TLorentzVector(0, 0, 0, 0));
   assert(cand.type() == Cand::kCombined);
   assert(cand.weight() == 1.);
+  assert(cand.charge() == 0);
 
   TLorentzVector v1(1, 2, 3, 4);
   cand.setMomentum(v1);
@@ -30,6 +31,12 @@ int main(int argc, char **argv) {
   cand.scaleWeight(0.9);
   cand.scaleWeight(1.2);
   assert(cand.weight() == 1. * 0.9 * 1.2);
+  
+  cand.setCharge(1);
+  assert(cand.charge() == 1);
+  
+  Cand otherCand(cand);
+  assert(cand == otherCand);
 
   return 0;
 } // int main(..)

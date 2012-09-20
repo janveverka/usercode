@@ -23,6 +23,7 @@ namespace cit {
     virtual ~VgCandidate() {}
     // Accessors
     TLorentzVector const & momentum() const {return momentum_      ;}
+    TLorentzVector const & p       () const {return momentum_      ;}
     ParticleType           type    () const {return type_          ;}
     double                 weight  () const {return weight_        ;}
     double                 pt      () const {return momentum_.Pt ();}
@@ -30,16 +31,22 @@ namespace cit {
     double                 phi     () const {return momentum_.Phi();}
     double                 m       () const {return momentum_.M  ();}
     double                 y       () const {return momentum_.Rapidity();}
+    double                 charge  () const {return charge_             ;}
+    double                 q       () const {return charge_             ;}
+    
     // Setters
     void setMomentum(TLorentzVector const& momentum) {momentum_ = momentum;}
     void setType(ParticleType type) {type_ = type;}
     void setWeight(double weight) {weight_ = weight;}
+    void setCharge(int charge) {charge_ = charge;}
     // Indirect setters
     void scaleWeight(double scaleFactor) {weight_ *= scaleFactor;}
+    bool operator==(VgCandidate const & other);
   protected:
     TLorentzVector momentum_;
     ParticleType   type_    ;
     double         weight_  ;
+    int            charge_  ;
   }; // class VgCandidate
 } // namespace cit
 
