@@ -61,6 +61,7 @@ VgLeafCandidate::init()
                            tree_->eleEta[key_],
                            tree_->elePhi[key_],
                            kElectronMass);
+    charge_ = tree_->eleCharge[key_];
     break;
       
   //_____________
@@ -72,6 +73,7 @@ VgLeafCandidate::init()
                            tree_->muEta[key_],
                            tree_->muPhi[key_],
                            kMuonMass);
+    charge_ = tree_->muCharge[key_];
     break;
       
   //_____________
@@ -83,6 +85,7 @@ VgLeafCandidate::init()
                            tree_->phoEta[key_],
                            tree_->phoPhi[key_],
                            kPhotonMass);
+    charge_ = 0;
     break;
       
   //_____________

@@ -71,10 +71,12 @@ VgCombinedCandidate::update()
 {
   momentum_.SetPxPyPzE(0, 0, 0, 0);
   weight_ = 1.;
+  charge_ = 0;
   for (VgLeafCandidates::const_iterator dau = daughters_.begin();
        dau != daughters_.end(); ++dau) {
     momentum_ += dau->momentum();
-    weight_ *= dau->weight();
+    weight_   *= dau->weight();
+    charge_   += dau->charge();
   }
 } // update(..)
 
