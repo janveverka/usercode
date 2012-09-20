@@ -43,8 +43,9 @@ from FWLite.Tools.parameterizedkeyspdf import ParameterizedKeysPdf
 
 
 ## CONFIGURATION BEGIN ========================================================
-path = '/raid2/veverka/yyTrees/escale'
+# path = '/raid2/veverka/yyTrees/escale'
 # path = '/Users/veverka/Work/Data/zeeDataYong'
+path = '/mnt/hadoop/user/veverka/zeeDataYong'
 filename = ('zeeWsShapev1Smear.DoubleElectronRun2011AB16Jan2012v1AOD.'
             'etcut25.corr451.eleid1.datapu0.mcpu0.m70to110.scale2.'
             'smear0.root')
@@ -147,7 +148,7 @@ def main():
     data = getdata()
     data.SetName('zeeDataYong')
     ## Reduce data for debugging
-    data = data.reduce(roo.EventRange(0, 5000))
+    data = data.reduce(roo.EventRange(0, 1000))
     x = data.get()[variable]
     initialize_fit_parameters(data, x)
     old_precision = set_default_integrator_precision(1e-8, 1e-8)
