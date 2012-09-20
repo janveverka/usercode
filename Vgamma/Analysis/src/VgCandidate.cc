@@ -31,7 +31,7 @@ VgCandidate::VgCandidate(VgCandidate const & other) :
 //______________________________________________________________________________
 /// Checks if this candidate is equal to the other.
 bool
-VgCandidate::operator==(VgCandidate const & other)
+VgCandidate::operator==(VgCandidate const & other) const
 {
   return (momentum_ == other.momentum() &&
           type_ == other.type() &&

@@ -41,7 +41,7 @@ namespace cit {
     void setCharge(int charge) {charge_ = charge;}
     // Indirect setters
     void scaleWeight(double scaleFactor) {weight_ *= scaleFactor;}
-    bool operator==(VgCandidate const & other);
+    bool operator==(VgCandidate const & other) const;
   protected:
     TLorentzVector momentum_;
     ParticleType   type_    ;

@@ -50,7 +50,7 @@ VgLeafCandidate::VgLeafCandidate() :
 //______________________________________________________________________________
 /// Checks if this candidate is equal to the other.
 bool
-VgLeafCandidate::operator==(VgLeafCandidate const & other)
+VgLeafCandidate::operator==(VgLeafCandidate const & other) const
 {
   return (VgCandidate::operator==(other) &&
           tree_ == &other.tree() &&
