@@ -15,7 +15,7 @@ process.inputs = cms.PSet(
 dataset_path = os.path.join(os.environ['CMSSW_BASE'],
                             'src/Vgamma/Analysis/data')
 for filename in '''
-                ZGammaToMuMuGamma_2Jet_MG5_TuneZ2_mmgSkim_test10.root
+                ZGammaToMuMuGamma_2Jet_MG5_TuneZ2_mmgSkim_test1000.root
                 '''.split():
     process.inputs.fileNames.append(
         os.path.join(dataset_path, filename)
