@@ -13,7 +13,7 @@
 #include "boost/shared_ptr.hpp"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "PhysicsTools/SelectorUtils/interface/Selector.h"
-#include "Vgamma/Analysis/interface/VgDimuonSelector.h"
+#include "Vgamma/Analysis/interface/VgDileptonSelector.h"
 #include "Vgamma/Analysis/interface/VgEvent.h"
 #include "Vgamma/Analysis/interface/VgMuonSelector.h"
 #include "Vgamma/Analysis/interface/VgPhotonSelector.h"
@@ -48,7 +48,7 @@ namespace cit {
     void selectZgammas();
     boost::shared_ptr<VgEvent> selectedEvent_;
     VgMuonSelector passesMuonCuts_;
-    VgDimuonSelector passesDimuonCuts_;
+    VgDileptonSelector passesDimuonCuts_;
     VgPhotonSelector passesPhotonCuts_;
     ZgSelector passesZgCuts_;
   }; // class VgEventSelector

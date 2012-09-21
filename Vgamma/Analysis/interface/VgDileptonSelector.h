@@ -27,7 +27,7 @@ namespace cit {
     using Selector<VgCombinedCandidate>::operator();
     bool operator()(VgCombinedCandidate const &, pat::strbitset &);
   private:
-    void init(const double & minMass);
+    void init(const int & charge, const double & minMass);
   }; // class VgDileptonSelector
   
 } // namespace cit

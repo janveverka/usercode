@@ -45,6 +45,7 @@ muonCuts = cms.PSet(
 
 ## Default dimuon selection
 dimuonCuts = cms.PSet(
+    charge = cms.int32(0),
     minMass = cms.double(50),
     )
 
@@ -81,6 +82,7 @@ selectedMuons = copy.deepcopy(histos)
 selectedDimuons = copy.deepcopy(histos)
 selectedPhotons = copy.deepcopy(histos)
 selectedZgs = copy.deepcopy(histos)
+FullSelection = copy.deepcopy(histos)
 
 allEvents.selection.cutsToIgnore = ['selectMuons', 'selectPhoton',
                                     'selectDimuons', 'selectZg']
@@ -112,6 +114,7 @@ histograms = cms.PSet(
     selectedDimuons = copy.deepcopy(selectedDimuons),
     selectedPhotons = copy.deepcopy(selectedPhotons),
     selectedZgs = copy.deepcopy(selectedZgs),
+    FullSelection = copy.deepcopy(FullSelection),
     )
 
 

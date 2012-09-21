@@ -18,7 +18,8 @@ using namespace std;
  */
 VgDileptonSelector::VgDileptonSelector(PSet const & cfg)
 {
-  init(cfg.getParameter<double>("minMass"));
+  init(cfg.getParameter<int>("charge"),
+       cfg.getParameter<double>("minMass"));
 
   if (cfg.exists("cutsToIgnore"))
     setIgnoredCuts(cfg.getParameter<vector<string> >("cutsToIgnore"));
@@ -40,12 +41,14 @@ VgDileptonSelector::~VgDileptonSelector()
  * Initialization
  */
 void
-VgDileptonSelector::init(const double & minMass)
+VgDileptonSelector::init(const int & charge, const double & minMass)
 {
   push_back("Inclusive", 0);
+  push_back("charge", charge);
   push_back("minMass", minMass);
 
   set("Inclusive");
+  set("charge");
   set("minMass");
 } // init()
 
@@ -64,9 +67,13 @@ VgDileptonSelector::operator()(cit::VgCombinedCandidate const & ll,
   // 0. all leptons
   passCut(ret, "Inclusive");
 
-  // 1. dilepton mass is greater than a given minimum
-  if (ll.m() >= cut("minMass", double()) ||
-      ignoreCut("minMass") )
+  // 1. require charge equal to the given charge
+  if (ll.charge() == cut("charge", int()) || ignoreCut("charge"))
+    passCut(ret, "charge");
+  else return false;
+
+  // 2. dilepton mass is greater than a given minimum
+  if (ll.m() >= cut("minMass", double()) || ignoreCut("minMass"))
     passCut(ret, "minMass");
   else return false;
 
