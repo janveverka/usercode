@@ -18,17 +18,17 @@ using namespace std;
  */
 VgMuonSelector::VgMuonSelector(PSet const & cfg)
 {
-  init(     cfg.getParameter<double>("minPt"         ),  //  1
-            cfg.getParameter<double>("maxAbsEta"     ),  //  2
-       (int)cfg.getParameter<bool  >("isGlobalMuon"  ),  //  3
-            cfg.getParameter<double>("maxNormChi2"   ),  //  4
-            cfg.getParameter<int   >("minChamberHits"),  //  5
-            cfg.getParameter<int   >("minStations"   ),  //  6
-            cfg.getParameter<double>("maxAbsDxy"     ),  //  7
-            cfg.getParameter<double>("maxAbsDz"      ),  //  8
-            cfg.getParameter<int   >("minPixelHits"  ),  //  9
-            cfg.getParameter<int   >("minTkHits"     ),  // 10
-            cfg.getParameter<double>("maxCombRelIso" )); // 11
+  init(     cfg.getParameter<double  >("minPt"         ),  //  1
+            cfg.getParameter<double  >("maxAbsEta"     ),  //  2
+       (int)cfg.getParameter<bool    >("isGlobalMuon"  ),  //  3
+            cfg.getParameter<double  >("maxNormChi2"   ),  //  4
+       (int)cfg.getParameter<unsigned>("minChamberHits"),  //  5
+       (int)cfg.getParameter<unsigned>("minStations"   ),  //  6
+            cfg.getParameter<double  >("maxAbsDxy"     ),  //  7
+            cfg.getParameter<double  >("maxAbsDz"      ),  //  8
+       (int)cfg.getParameter<unsigned>("minPixelHits"  ),  //  9
+       (int)cfg.getParameter<unsigned>("minTkHits"     ),  // 10
+            cfg.getParameter<double  >("maxCombRelIso" )); // 11
 
   if (cfg.exists("cutsToIgnore"))
     setIgnoredCuts(cfg.getParameter<vector<string> >("cutsToIgnore"));

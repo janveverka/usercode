@@ -49,7 +49,8 @@ namespace cit {
     boost::shared_ptr<VgEvent> selectedEvent_;
     VgMuonSelector passesMuonCuts_;
     VgDileptonSelector passesDimuonCuts_;
-    VgPhotonSelector passesPhotonCuts_;
+    VgPhotonSelector passesPhotonBarrelCuts_;
+    VgPhotonSelector passesPhotonEndcapCuts_;
     ZgSelector passesZgCuts_;
   }; // class VgEventSelector
   

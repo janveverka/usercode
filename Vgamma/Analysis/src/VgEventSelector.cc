@@ -18,7 +18,8 @@ VgEventSelector::VgEventSelector(PSet const & cfg) :
   selectedEvent_(),
   passesMuonCuts_(cfg.getParameter<PSet>("muonCuts")),
   passesDimuonCuts_(cfg.getParameter<PSet>("dimuonCuts")),
-  passesPhotonCuts_(cfg.getParameter<PSet>("photonCuts")),
+  passesPhotonBarrelCuts_(cfg.getParameter<PSet>("photonBarrelCuts")),
+  passesPhotonEndcapCuts_(cfg.getParameter<PSet>("photonEndcapCuts")),
   passesZgCuts_(cfg.getParameter<PSet>("ZgCuts"))
 {
   init(
@@ -174,9 +175,11 @@ VgEventSelector::selectPhotons()
   cit::VgLeafCandidates selectedPhotons;
   for (cit::VgLeafCandidates::const_iterator pho = sourcePhotons.begin();
         pho != sourcePhotons.end(); ++pho) {
-    if (passesPhotonCuts_(*pho)) selectedPhotons.push_back(*pho);
+    bool passesBarrel = passesPhotonBarrelCuts_(*pho);
+    bool passesEndcaps = passesPhotonEndcapCuts_(*pho);
+    if (passesBarrel || passesEndcaps) selectedPhotons.push_back(*pho);
   } /// Loop over photons
-  selectedEvent_->putPhotons(selectedPhotons);  
+  selectedEvent_->putPhotons(selectedPhotons);
 } 
 // void
 // VgEventSelector::selectPhotons() 
@@ -246,8 +249,10 @@ VgEventSelector::printCutflows(ostream & out) const
   }
 
   if (considerCut("selectPhoton")) {
-    out << "Photons:" << endl;
-    passesPhotonCuts_.print(out);
+    out << "Barrel Photons:" << endl;
+    passesPhotonBarrelCuts_.print(out);
+    out << "Endcap Photons:" << endl;
+    passesPhotonEndcapCuts_.print(out);
   }
 
   if (considerCut("selectZg")) {
