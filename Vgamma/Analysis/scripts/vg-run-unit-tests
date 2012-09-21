@@ -13,6 +13,9 @@ VgCandidateTest
 echo "VgLeafCandidateTest ..."
 VgLeafCandidateTest
 
+echo "VgCombinedCandidateTest ..."
+VgCombinedCandidateTest
+
 echo "VgEventTest ..."
 VgEventTest
 

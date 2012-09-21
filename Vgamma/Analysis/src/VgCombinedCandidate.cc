@@ -89,8 +89,21 @@ VgCombinedCandidate::addDaughter(VgCombinedCandidate const & dau)
        gdau != dau.daughters().end(); ++gdau) 
     daughters_.push_back(*gdau);
   update();
-} // addDaughter(..)
+}
 // void
 // VgCombinedCandidate::addDaughter(VgCombinedCandidate const & dau)
 
 
+//______________________________________________________________________________
+bool
+VgCombinedCandidate::operator==(VgCombinedCandidate const & other) const
+{
+  if (numDaughters() != other.numDaughters()) return false;
+
+  for (unsigned i = 0; i < numDaughters(); ++i)
+    if (!(daughter(i) == other.daughter(i))) return false;
+
+  return VgCandidate::operator==(other); 
+}
+// bool
+// VgCombinedCandidate::operator==(VgCombinedCandidate const & other)

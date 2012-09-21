@@ -2,6 +2,7 @@
 <environment>
   <bin file="analyze.cc" name="vg-analyze"/>
   <bin file="VgCandidateTest.cc"/>
+  <bin file="VgCombinedCandidateTest.cc"/>
   <bin file="VgLeafCandidateTest.cc"/>
   <bin file="VgExceptionTest.cc"/>
   <bin file="VgEventSelectorTest.cc"/>

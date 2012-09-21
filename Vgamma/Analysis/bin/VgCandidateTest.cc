@@ -5,8 +5,12 @@
  */
 
 #include <assert.h>
+#include <math.h>
 #include "TLorentzVector.h"
 #include "Vgamma/Analysis/interface/VgCandidate.h"
+
+bool areEqual(double x, double y);
+int main(int, char **);
 
 //_____________________________________________________________________________
 /**
@@ -38,5 +42,27 @@ int main(int argc, char **argv) {
   Cand otherCand(cand);
   assert(cand == otherCand);
 
+  otherCand.setPt(cand.pt() + 10.);
+  assert(otherCand != cand);
+  assert(otherCand.eta() == cand.eta());
+  assert(otherCand.phi() == cand.phi());
+  assert(areEqual(otherCand.m  (), cand.m  ()));
+
   return 0;
 } // int main(..)
+
+
+//_____________________________________________________________________________
+/**
+ * Tests if two floats are almost equal.
+ */
+bool
+areEqual(double x, double y)
+{
+  double epsilonRelative = 1e-5;
+  double epsilonAbsolute = 1e-5;
+  if (fabs(y) < epsilonAbsolute) 
+    return fabs(x - y) < epsilonAbsolute;
+  else
+    return fabs(x / y - 1.) < epsilonRelative;
+}

@@ -36,12 +36,14 @@ namespace cit {
     
     // Setters
     void setMomentum(TLorentzVector const& momentum) {momentum_ = momentum;}
+    void setPt(double pt) {momentum_.SetPtEtaPhiM(pt, eta(), phi(), m());}
     void setType(ParticleType type) {type_ = type;}
     void setWeight(double weight) {weight_ = weight;}
     void setCharge(int charge) {charge_ = charge;}
     // Indirect setters
     void scaleWeight(double scaleFactor) {weight_ *= scaleFactor;}
     bool operator==(VgCandidate const & other) const;
+    bool operator!=(VgCandidate const & other) const {return !operator==(other);}
   protected:
     TLorentzVector momentum_;
     ParticleType   type_    ;

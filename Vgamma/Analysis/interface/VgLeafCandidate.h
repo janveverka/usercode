@@ -30,6 +30,9 @@ namespace cit {
     unsigned key() const {return key_;}
     /// Overloaded the equality operator
     bool operator==(VgLeafCandidate const & other) const;
+    bool operator!=(VgLeafCandidate const & other) const {
+      return ! operator==(other);
+    }
     /// Static data
     static const double kElectronMass;
     static const double kMuonMass;

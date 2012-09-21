@@ -32,7 +32,7 @@ typedef cit::VgCombinedCandidate CombCand;
  */
 int main(int, char**);
 TTree * getTree();
-void testCand(TreePtr, LeafCand::ParticleType, unsigned);
+void testCand(CombCand const &);
 bool areEqual(double x, double y);
 
 //_____________________________________________________________________________
@@ -59,19 +59,33 @@ main(int argc, char **argv) {
     CombCand leptojet;
     // Add electrons.
     for (unsigned i=0; i < (unsigned) tree->nEle; ++i) {
-      LeafCand ele(tree, Cand::kElectron, i);
+      LeafCand ele(*tree, Cand::kElectron, i);
       leptojet.addDaughter(ele);
-      LeafCand const & lastDaughter = leptojet.daughter(letojet.numDaughters() - 1);
+      LeafCand const & lastDaughter = leptojet.daughter(leptojet.numDaughters() - 1);
       assert(lastDaughter == ele);
     }
+    assert((int) leptojet.numDaughters() == tree->nEle);
 
     // Add muons
     for (unsigned i=0; i < (unsigned) tree->nMu; ++i) {
-      testCand(tree, Cand::kMuon    , i);
+      LeafCand mu(*tree, Cand::kMuon, i);
+      leptojet.addDaughter(mu);
+      LeafCand const & lastDaughter = leptojet.daughter(leptojet.numDaughters() - 1);
+      assert(lastDaughter == mu);      
+    }
+    assert((int) leptojet.numDaughters() == tree->nEle + tree->nMu);
 
-    // Test photons
-    for (unsigned i=0; i < (unsigned) tree->nPho; ++i)
-      testCand(tree, Cand::kPhoton  , 0);
+    // Add photons
+    for (unsigned i=0; i < (unsigned) tree->nPho; ++i) {
+      LeafCand pho(*tree, Cand::kPhoton, i);
+      leptojet.addDaughter(pho);
+      LeafCand const & lastDaughter = leptojet.daughter(leptojet.numDaughters() - 1);
+      assert(lastDaughter == pho);      
+    }
+    assert((int) leptojet.numDaughters() == tree->nEle + tree->nMu + tree->nPho);
+
+    testCand(leptojet);
+
   } // loop over entries
 
   return 0;
@@ -105,53 +119,50 @@ getTree() {
  * Test a candidate.
  */
 void
-testCand(TreePtr tree, Cand::ParticleType type, unsigned key) {
-  // cout << "type, key: " << type << ", " << key << endl;
-  // Define the candidate
-  Cand cand(*tree, type, key);
+testCand(CombCand const & cand) {
   
-  double mass = 0.;
-  Float_t * candPt  = tree->phoEt ;
-  Float_t * candEta = tree->phoEta;
-  Float_t * candPhi = tree->phoPhi;
-  switch (type) {
-  case Cand::kElectron: 
-    candPt  = tree->elePt;
-    candEta = tree->eleEta;
-    candPhi = tree->elePhi;
-    mass    = Cand::kElectronMass;
-    break;
-  case Cand::kMuon: 
-    candPt  = tree->muPt;
-    candEta = tree->muEta;
-    candPhi = tree->muPhi;
-    mass = Cand::kMuonMass; 
-    break;
-  default: 
-    mass = 0.;
-  } // switch (type)
+  CombCand otherCand(cand);
+  assert(otherCand == cand);
+
+  TLorentzVector momentum;
+  int charge = 0;
+  double weight = 1.;
   
-  // cout << "cand.momentum().M(), mass: " << cand.momentum().M() << ", " 
-  //      << mass << endl;
-
-  // Test it
-  assert(areEqual(cand.momentum().Pt (), candPt [key]));
-  assert(areEqual(cand.momentum().Eta(), candEta[key]));
-  assert(areEqual(cand.momentum().Phi(), candPhi[key]));
-  assert(areEqual(cand.momentum().M  (), mass        ));
-  assert(cand.type() == type);
-  assert(cand.weight() == 1.);
+  // loop over daughters
+  for (unsigned i = 0; i < cand.numDaughters(); ++i) {
+    LeafCand const & dau = cand.daughter(i);
+    assert(dau == otherCand.daughter(i));
+    momentum += dau.momentum();
+    charge += dau.charge();
+    weight *= dau.weight();
+  } // loop over daughters
   
-  TLorentzVector v1(1, 2, 3, mass);
-  cand.setMomentum(v1);
-  assert(cand.momentum() == v1);
+  assert(cand.momentum() == momentum);
+  assert(areEqual(cand.momentum().Pt (), momentum.Pt ()));
+  assert(charge == cand.charge());
+  assert(weight == cand.weight());
 
-  cand.setType(Cand::kPhoton);
-  assert(cand.type() == Cand::kPhoton);
+  if (cand.numDaughters() > 0) {
+    otherCand.addDaughter(cand.daughter(0));
+    assert(otherCand != cand);
+  }
+  
+  // assert(areEqual(cand.momentum().Eta(), candEta[key]));
+  // assert(areEqual(cand.momentum().Phi(), candPhi[key]));
+  // assert(areEqual(cand.momentum().M  (), mass        ));
+  // assert(cand.type() == type);
+  // assert(cand.weight() == 1.);
+  
+  // TLorentzVector v1(1, 2, 3, mass);
+  // cand.setMomentum(v1);
+  // assert(cand.momentum() == v1);
 
-  cand.scaleWeight(0.9);
-  cand.scaleWeight(1.2);
-  assert(cand.weight() == 1. * 0.9 * 1.2);
+  // cand.setType(Cand::kPhoton);
+  // assert(cand.type() == Cand::kPhoton);
+
+  // cand.scaleWeight(0.9);
+  // cand.scaleWeight(1.2);
+  // assert(cand.weight() == 1. * 0.9 * 1.2);
 } // void testCand(..)
 
 

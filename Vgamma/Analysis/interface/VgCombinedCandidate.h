@@ -34,7 +34,10 @@ namespace cit {
     VgLeafCandidate const & daughter(unsigned i) const {return daughters_[i];}
     unsigned numDaughters() const {return daughters_.size();}
     /// Overloaded the equality operator
-    // bool operator==(VgLeafCandidate const & other) const;
+    bool operator==(VgCombinedCandidate const & other) const;
+    bool operator!=(VgCombinedCandidate const & other) const {
+      return !operator==(other);
+    }
   private:
     void update();
     VgLeafCandidates daughters_;
