@@ -15,9 +15,7 @@ using cit::VgDimuonHistoFiller;
 /**
  * Ctor.
  */
-VgDimuonHistoFiller::VgDimuonHistoFiller(VgAnalyzerTree const& tree,
-                                         HistoCollection & histos) :
-  VgHistoFillerBase(tree, histos)
+VgDimuonHistoFiller::VgDimuonHistoFiller() : VgHistoFillerBase()
 {} // Default ctor.
 
 

@@ -15,9 +15,7 @@ using cit::VgMuonHistoFiller;
 /**
  * Ctor.
  */
-VgMuonHistoFiller::VgMuonHistoFiller(VgAnalyzerTree const& tree,
-                                     HistoCollection & histos) :
-  VgHistoFillerBase(tree, histos)
+VgMuonHistoFiller::VgMuonHistoFiller() : VgHistoFillerBase()
 {} // Default ctor.
 
 

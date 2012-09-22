@@ -37,17 +37,17 @@ VgHistoManager::VgHistoManager(VgAnalyzerTree const& tree,
   for (vector<string>::const_iterator filler = fillers.begin();
        filler != fillers.end(); ++filler) {
     if (*filler == string("Muons")) {
-      fillers_.push_back(new VgMuonHistoFiller(tree, histos_));
+      fillers_.push_back(new VgMuonHistoFiller());
     } else if (*filler == string("Photons")) {
-      fillers_.push_back(new VgPhotonHistoFiller(tree, histos_));
+      fillers_.push_back(new VgPhotonHistoFiller());
     } else if (*filler == string("Dimuons")) {
-      fillers_.push_back(new VgDimuonHistoFiller(tree, histos_));
+      fillers_.push_back(new VgDimuonHistoFiller());
     } else if (*filler == string("mmgCands")) {
-      fillers_.push_back(new VgMMGHistoFiller(tree, histos_));
+      fillers_.push_back(new VgMMGHistoFiller());
     } else if (*filler == string("Pileup")) {
-      fillers_.push_back(new VgPileupHistoFiller(tree, histos_));
+      fillers_.push_back(new VgPileupHistoFiller());
       if (isMC == true) {
-        fillers_.push_back(new VgMCPileupHistoFiller(tree, histos_));
+        fillers_.push_back(new VgMCPileupHistoFiller());
       }
     } else {
       throw Bad("BadConfiguration") << "Don't know how to do histograms"

@@ -17,8 +17,7 @@ namespace cit {
   
   class VgMMGHistoFiller : public VgHistoFillerBase {
   public:
-    VgMMGHistoFiller(VgAnalyzerTree const & tree,
-                        HistoCollection & histos);
+    VgMMGHistoFiller();
     ~VgMMGHistoFiller();
     void bookHistograms();
     void fillHistograms(VgEvent const&);

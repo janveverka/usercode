@@ -27,18 +27,6 @@ namespace cit {
     /// Selection interface
     using Selector<VgLeafCandidate>::operator();
     bool operator()(VgLeafCandidate const &, pat::strbitset &);
-    /// Other methods
-    double effectiveArea(double scAbsEta, IsolationType type) const;
-    /// Static data
-    static const double kBarrelIsoEffectiveAreaTracker ;
-    static const double kBarrelIsoEffectiveAreaEcal    ;
-    static const double kBarrelIsoEffectiveAreaHcal    ;
-    static const double kEndcapsIsoEffectiveAreaTracker;
-    static const double kEndcapsIsoEffectiveAreaEcal   ;
-    static const double kEndcapsIsoEffectiveAreaHcal   ;
-    static const double kIsoPtSlopeTracker             ;
-    static const double kIsoPtSlopeEcal                ;
-    static const double kIsoPtSlopeHcal                ;
   private:
     void init(
       const double &, // 1. minimum photon pt
@@ -48,7 +36,7 @@ namespace cit {
       const int    &, // 5. has pixel match
       const double &, // 6. maximum tracker isolation
       const double &, // 7. maximum ECAL isolation
-      const double & // 8. maximum HCAL isolation
+      const double &  // 8. maximum HCAL isolation
     );
   }; // class VgPhotonSelector
   

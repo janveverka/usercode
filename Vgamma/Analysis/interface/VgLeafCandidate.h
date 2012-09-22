@@ -26,8 +26,9 @@ namespace cit {
     VgLeafCandidate();
     ~VgLeafCandidate() {}
     /// Accessors
-    VgAnalyzerTree const & tree() const {return *tree_;}
-    unsigned key() const {return key_;}
+    inline VgAnalyzerTree const & tree() const {return *tree_;}
+    inline unsigned key() const {return key_;}
+    inline double rho() const {return tree_->rho;}
     /// Overloaded the equality operator
     bool operator==(VgLeafCandidate const & other) const;
     bool operator!=(VgLeafCandidate const & other) const {
@@ -37,6 +38,8 @@ namespace cit {
     static const double kElectronMass;
     static const double kMuonMass;
     static const double kPhotonMass;
+    /// Common isolation interface
+    double combRelIso();
   private:
     /// Initialize data members
     void init();

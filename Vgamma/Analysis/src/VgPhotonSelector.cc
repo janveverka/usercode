@@ -7,24 +7,11 @@
 #include <string>
 #include "FWCore/Utilities/interface/Exception.h"
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
+#include "Vgamma/Analysis/interface/VgPhoton.h"
 #include "Vgamma/Analysis/interface/VgPhotonSelector.h"
 
 using cit::VgPhotonSelector;
 using namespace std;
-
-//_____________________________________________________________________
-/**
- * Static data
- */
-const double VgPhotonSelector::kBarrelIsoEffectiveAreaTracker  = 0.0167;
-const double VgPhotonSelector::kBarrelIsoEffectiveAreaEcal     = 0.183 ;
-const double VgPhotonSelector::kBarrelIsoEffectiveAreaHcal     = 0.062 ;
-const double VgPhotonSelector::kEndcapsIsoEffectiveAreaTracker = 0.032 ;
-const double VgPhotonSelector::kEndcapsIsoEffectiveAreaEcal    = 0.090 ;
-const double VgPhotonSelector::kEndcapsIsoEffectiveAreaHcal    = 0.180 ;
-const double VgPhotonSelector::kIsoPtSlopeTracker = 0.001 ;
-const double VgPhotonSelector::kIsoPtSlopeEcal    = 0.006 ;
-const double VgPhotonSelector::kIsoPtSlopeHcal    = 0.0025;
 
 //_____________________________________________________________________
 /**
@@ -107,17 +94,15 @@ VgPhotonSelector::init(const double & minPt        , // 1
  * Selection interface.
  */
 bool 
-VgPhotonSelector::operator()(cit::VgLeafCandidate const & pho,
+VgPhotonSelector::operator()(cit::VgLeafCandidate const & cand,
                              pat::strbitset &  ret) 
 {
   ret.set(false);
   setIgnored(ret);
 
+  cit::VgPhoton pho(cand);
   cit::VgAnalyzerTree const & tree = pho.tree();
   unsigned i = pho.key();
-  double rho = tree.rho;
-  double scAbsEta = fabs(tree.phoSCEta[i]);
-  double iso = 0.;
   
   // 0. all photons
   passCut(ret, "Inclusive");
@@ -129,13 +114,13 @@ VgPhotonSelector::operator()(cit::VgLeafCandidate const & pho,
   else return false;
 
   // 2. maximum supercluster absolute pseudorapidity |eta|
-  if (scAbsEta > cut("minAbsEtaSC", double()) ||
+  if (pho.scAbsEta() > cut("minAbsEtaSC", double()) ||
       ignoreCut("minAbsEtaSC") )
     passCut(ret, "minAbsEtaSC");
   else return false;
 
   // 3. maximum supercluster absolute pseudorapidity |eta|
-  if (scAbsEta < cut("maxAbsEtaSC", double()) ||
+  if (pho.scAbsEta() < cut("maxAbsEtaSC", double()) ||
       ignoreCut("maxAbsEtaSC") )
     passCut(ret, "maxAbsEtaSC");
   else return false;
@@ -153,25 +138,19 @@ VgPhotonSelector::operator()(cit::VgLeafCandidate const & pho,
   else return false;
 
   // 6. maximum tracker isolation
-  iso = tree.phoTrkIsoHollowDR04[i] - kIsoPtSlopeTracker * pho.pt();
-  iso -= rho * effectiveArea(scAbsEta, kIsoTracker);
-  if (iso < cut("maxTrackIso", double()) ||
+  if (pho.trackIso() < cut("maxTrackIso", double()) ||
       ignoreCut("maxTrackIso")) 
     passCut(ret, "maxTrackIso");
   else return false;
 
   // 7. maximum ECAL isolation
-  iso = tree.phoEcalIsoDR04[i] - kIsoPtSlopeEcal * pho.pt();
-  iso -= rho * effectiveArea(scAbsEta, kIsoEcal);
-  if (cut("maxEcalIso", double()) ||
+  if (pho.ecalIso() < cut("maxEcalIso", double()) ||
       ignoreCut("maxEcalIso")) 
     passCut(ret, "maxEcalIso");
   else return false;
 
   // 8. maximum HCAL isolation
-  iso = tree.phoHcalIsoDR04[i] - kIsoPtSlopeHcal * pho.pt();
-  iso -= rho * effectiveArea(scAbsEta, kIsoHcal);
-  if (cut("maxHcalIso", double()) ||
+  if (pho.hcalIso() < cut("maxHcalIso", double()) ||
       ignoreCut("maxHcalIso")) 
     passCut(ret, "maxHcalIso");
   else return false;
@@ -180,38 +159,3 @@ VgPhotonSelector::operator()(cit::VgLeafCandidate const & pho,
 } 
 // VgPhotonSelector::operator()(VgLeafCandidate const & pho,
 //                            pat::strbitset &  ret))
-
-
-//_____________________________________________________________________
-/**
- * Returns the effective area for this kind of isolation
- */
-double
-VgPhotonSelector::effectiveArea(double scAbsEta, IsolationType type) const
-{
-  switch (type) {
-  case kIsoTracker:
-    if (scAbsEta < 1.5) return kBarrelIsoEffectiveAreaTracker;
-    else return kEndcapsIsoEffectiveAreaTracker;
-  case kIsoEcal:
-    if (scAbsEta < 1.5) return kBarrelIsoEffectiveAreaEcal;
-    else return kEndcapsIsoEffectiveAreaEcal;
-  case kIsoHcal:
-    if (scAbsEta < 1.5) return kBarrelIsoEffectiveAreaHcal;
-    else return kEndcapsIsoEffectiveAreaHcal;
-  default:
-    /// This should never happen
-    ostringstream msg;
-    msg << "VgPhotonSelector::effectiveArea(..): Unknown isolation type: "
-        << type;
-    throw cms::Exception("BadPhotonIsolationType") << msg.str();
-    break;
-  } // switch(type)
-  /// This should never happen either
-  ostringstream msg;
-  msg << "VgPhotonSelector::effectiveArea(..): Logic error";
-  throw cms::Exception("LogicError") << msg.str();
-  return 0.;
-}
-// double
-// VgPhotonSelector::effectiveArea(double scEta, IsolationType type) const

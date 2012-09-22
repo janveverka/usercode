@@ -8,6 +8,7 @@
 #include "FWCore/Utilities/interface/Exception.h"
 #include "Vgamma/Analysis/interface/VgLeafCandidate.h"
 
+
 using cit::VgLeafCandidate;
 
 typedef cms::Exception Bad;
