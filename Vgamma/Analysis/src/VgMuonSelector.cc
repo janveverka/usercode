@@ -7,6 +7,7 @@
 #include <string>
 #include "FWCore/Utilities/interface/Exception.h"
 #include "Vgamma/Analysis/interface/VgAnalyzerTree.h"
+#include "Vgamma/Analysis/interface/VgMuon.h"
 #include "Vgamma/Analysis/interface/VgMuonSelector.h"
 
 using cit::VgMuonSelector;
@@ -95,12 +96,13 @@ VgMuonSelector::init(const double & minPt         , //  1
  * Selection interface.
  */
 bool 
-VgMuonSelector::operator()(cit::VgLeafCandidate const & mu,
+VgMuonSelector::operator()(cit::VgLeafCandidate const & cand,
                            pat::strbitset &  ret) 
 {
   ret.set(false);
   setIgnored(ret);
-
+  
+  cit::VgMuon mu(cand);
   cit::VgAnalyzerTree const & tree = mu.tree();
   unsigned i = mu.key();
   
@@ -120,9 +122,7 @@ VgMuonSelector::operator()(cit::VgLeafCandidate const & mu,
   else return false;
 
   // 3. muon is reconstructed as a "global muon" (out-in fit)
-  unsigned globalMuon = 1<<1;
-  int isGlobalMuon( (unsigned(tree.muType[i]) & globalMuon) ?  1 : 0 );
-  if (cut("isGlobalMuon", int()) == isGlobalMuon ||
+  if (mu.isGlobalMuon() == (bool) cut("isGlobalMuon", int()) ||
       ignoreCut("isGlobalMuon") )
     passCut(ret, "isGlobalMuon");
   else return false;
@@ -177,10 +177,7 @@ VgMuonSelector::operator()(cit::VgLeafCandidate const & mu,
   //     within a cone of DR < 0.3 around  the muon direction
   //     (vetoing a cone of 0.015 around that direction for the tracker
   //     isloation) divided by muon pt.
-  double combIso = tree.muIsoEcal[i] + tree.muIsoHcal[i] + tree.muIsoTrk[i];
-  double combIsoPUcorr = combIso - tree.rho * TMath::Pi() * 0.3 * 0.3;
-  double combRelIso = combIsoPUcorr / mu.pt();
-  if (combRelIso < cut("maxCombRelIso" , double()) || 
+  if (mu.combRelIso() < cut("maxCombRelIso" , double()) || 
       ignoreCut("maxCombRelIso" )) 
     passCut(ret, "maxCombRelIso" );
   else return false;
