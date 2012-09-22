@@ -41,7 +41,7 @@ namespace cit {
     void parseOutputs();
     void parseHistograms();
     void setBranchesStatus();
-    void reportEvent(Long64_t);
+    void reportEvent(Long64_t thisEntry, Long64_t entriesToProcess = -1);
     boost::shared_ptr<PSet> cfg_;
     VgAnalyzerTree *tree_;
     TFile *output_;

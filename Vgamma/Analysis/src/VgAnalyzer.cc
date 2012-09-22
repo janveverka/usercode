@@ -74,12 +74,14 @@ VgAnalyzer::run()
   if (tree_->fChain == 0) return;
 
   // Get the number of events to loop over.
-  Long64_t maxEntry = tree_->fChain->GetEntriesFast();
+  Long64_t totalEntries = tree_->fChain->GetEntriesFast();
+  Long64_t maxEntry = totalEntries;
   if (0 <= maxEventsInput_ && maxEventsInput_ < maxEntry) {
     maxEntry = maxEventsInput_;
   }
 
   // Loop over the events.
+  cout << "Start processing " << maxEntry << " records..." << endl;
   Long64_t ientry=0;
   for (; ientry < maxEntry; ientry++) {
     if (tree_->LoadTree(ientry) < 0) break;
@@ -97,7 +99,9 @@ VgAnalyzer::run()
       
   } // end of loop over the events
   
-  cout << "Processed " << ientry << " records." << endl;
+  cout.precision(2);
+  cout << "Processed " << ientry << " of " << totalEntries
+       << " (" << (float) ientry / totalEntries << "%) records." << endl;
   
   // Loop over workers
   for (HistoManagers::iterator worker = histoManagers_.begin();
@@ -281,8 +285,15 @@ VgAnalyzer::init()
  * Report event being processed inside the event loop.
  */
 void
-VgAnalyzer::reportEvent(Long64_t ientry)
+VgAnalyzer::reportEvent(Long64_t thisEntry, Long64_t entriesToProcess)
 {
-  cout << "Processing record " << ientry + 1 << endl;
+  if (entriesToProcess >= 0) {
+    cout.precision(2);
+    cout << "Processing record " << thisEntry + 1
+         << " of " << entriesToProcess
+         << " (" << (float) thisEntry / entriesToProcess << "%)" << endl;
+  } else {
+    cout << "Processing record " << thisEntry + 1 << endl;
+  }
 } // reportEvent
 
