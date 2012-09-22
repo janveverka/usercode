@@ -83,5 +83,5 @@ namespace cit {
 
 } // namespace cit
 
-#endif // #define Vgamma_Analysis_interface_VgLeafCandidate_h
+#endif // #define Vgamma_Analysis_interface_VgPhoton_h
 
