@@ -137,7 +137,7 @@ selectedZgs.do = ['mmgCands']
 
 histograms = cms.PSet(
     isMC = cms.bool(True),
-#    allEvents = copy.deepcopy(allEvents),
+    AllEvents = copy.deepcopy(allEvents),
 #    allMuons = copy.deepcopy(allMuons),
     #selectedMuons = copy.deepcopy(selectedMuons),
     #selectedDimuons = copy.deepcopy(selectedDimuons),

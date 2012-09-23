@@ -45,7 +45,7 @@ VgPhotonHistoFiller::bookHistograms()
     "phoEta", ";Photon #eta;Events / 0.1", 60, -3, 3
   );
   histos_["phoSCEta"] = new TH1F(
-    "phoEta", ";Photon Super Cluster #eta;Events / 0.1", 60, -3, 3
+    "phoSCEta", ";Photon Super Cluster #eta;Events / 0.1", 60, -3, 3
   );
   histos_["phoPhi"] = new TH1F(
     "phoPhi", ";Photon #phi;Events / #frac{#pi}{50}", 
