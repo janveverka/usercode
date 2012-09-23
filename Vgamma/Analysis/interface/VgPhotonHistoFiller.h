@@ -18,9 +18,9 @@ namespace cit {
   public:
     VgPhotonHistoFiller();
     ~VgPhotonHistoFiller();
-    void bookHistograms();
-    void fillHistograms(VgEvent const&);
-    void fillCand(VgLeafCandidate const &);
+    virtual void bookHistograms();
+    virtual void fillHistograms(VgEvent const&);
+    virtual void fillCand(VgLeafCandidate const &);
   }; // class VgPhotonHistoFiller
   
 } // namespace cit

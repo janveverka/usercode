@@ -11,6 +11,8 @@
 #include "Vgamma/Analysis/interface/VgMMGHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgMuonHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgPhotonHistoFiller.h"
+#include "Vgamma/Analysis/interface/VgBarrelPhotonHistoFiller.h"
+#include "Vgamma/Analysis/interface/VgEndcapPhotonHistoFiller.h"
 #include "Vgamma/Analysis/interface/VgPileupHistoFiller.h"
 
 using namespace std;
@@ -40,6 +42,10 @@ VgHistoManager::VgHistoManager(VgAnalyzerTree const& tree,
       fillers_.push_back(new VgMuonHistoFiller());
     } else if (*filler == string("Photons")) {
       fillers_.push_back(new VgPhotonHistoFiller());
+    } else if (*filler == string("BarrelPhotons")) {
+      fillers_.push_back(new VgBarrelPhotonHistoFiller());
+    } else if (*filler == string("EndcapPhotons")) {
+      fillers_.push_back(new VgEndcapPhotonHistoFiller());
     } else if (*filler == string("Dimuons")) {
       fillers_.push_back(new VgDimuonHistoFiller());
     } else if (*filler == string("mmgCands")) {

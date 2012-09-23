@@ -44,6 +44,9 @@ VgPhotonHistoFiller::bookHistograms()
   histos_["phoEta"] = new TH1F(
     "phoEta", ";Photon #eta;Events / 0.1", 60, -3, 3
   );
+  histos_["phoSCEta"] = new TH1F(
+    "phoEta", ";Photon Super Cluster #eta;Events / 0.1", 60, -3, 3
+  );
   histos_["phoPhi"] = new TH1F(
     "phoPhi", ";Photon #phi;Events / #frac{#pi}{50}", 
     100, -TMath::Pi(), TMath::Pi()
@@ -124,6 +127,7 @@ VgPhotonHistoFiller::fillCand(cit::VgLeafCandidate const & cand)
 
   histos_["phoPt" ]->Fill(pho.pt (), wgt);
   histos_["phoEta"]->Fill(pho.eta(), wgt);
+  histos_["phoSCEta"]->Fill(pho.scEta(), wgt);
   histos_["phoPhi"]->Fill(pho.phi(), wgt);
   histos_["phoTrkIso"]->Fill(pho.trackIso(), wgt);
   histos_["phoEcalIso"]->Fill(pho.ecalIso(), wgt);

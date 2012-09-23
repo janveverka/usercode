@@ -88,9 +88,9 @@ ZgCuts = cms.PSet(
     minDeltaR = cms.double(0.7),
     )
 
-## Default histo manager setup
+## Default analysis setup
 histos = cms.PSet(
-    do = cms.vstring('Muons', 'Photons', 'Dimuons', 'mmgCands', 'Pileup'),
+    do = cms.vstring('Muons', 'Photons', 'BarrelPhotons', 'EndcapPhotons', 'Dimuons', 'mmgCands', 'Pileup'),
     selection = cms.PSet(
         selectMuons = cms.bool(True),
         selectDimuons = cms.bool(True),
@@ -137,12 +137,12 @@ selectedZgs.do = ['mmgCands']
 
 histograms = cms.PSet(
     isMC = cms.bool(True),
-    allEvents = copy.deepcopy(allEvents),
+#    allEvents = copy.deepcopy(allEvents),
 #    allMuons = copy.deepcopy(allMuons),
-    selectedMuons = copy.deepcopy(selectedMuons),
-    selectedDimuons = copy.deepcopy(selectedDimuons),
-    selectedPhotons = copy.deepcopy(selectedPhotons),
-    selectedZgs = copy.deepcopy(selectedZgs),
+    #selectedMuons = copy.deepcopy(selectedMuons),
+    #selectedDimuons = copy.deepcopy(selectedDimuons),
+    #selectedPhotons = copy.deepcopy(selectedPhotons),
+    #selectedZgs = copy.deepcopy(selectedZgs),
     FullSelection = copy.deepcopy(FullSelection),
     )
 

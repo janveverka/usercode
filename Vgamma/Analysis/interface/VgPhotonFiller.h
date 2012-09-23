@@ -10,6 +10,7 @@
 #define Vgamma_Analysis_VgPhotonHistoFiller_h
 
 #include "Vgamma/Analysis/interface/VgHistoFillerBase.h"
+#include "Vgamma/Analysis/interface/VgPhotonSelector.h"
 
 //_____________________________________________________________________
 namespace cit {
@@ -20,9 +21,9 @@ namespace cit {
                         HistoCollection & histos,
                         const Int_t * nMu);
     ~VgPhotonHistoFiller();
-    void bookHistograms();
-    void fillHistograms();
-    void fillObjectWithIndex(UInt_t i);
+    virtual void bookHistograms();
+    virtual void fillHistograms();
+    virtual void fillObjectWithIndex(UInt_t i);
   }; // class VgPhotonHistoFiller
   
 } // namespace cit
