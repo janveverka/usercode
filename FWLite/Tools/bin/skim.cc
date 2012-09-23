@@ -95,8 +95,8 @@ int copyEvents(ArgParser & parser)
   if (parser.shortFlagPres('v')) 
     verbosity = 1;
   
-  if (verbosity > 0)
-      parser.printOptions("skim");
+//   if (verbosity > 0)
+//       parser.printOptions("skim");
   
   // Open the input file and get input tree
 //   TFile* InFile = new TFile(InFileName, "read");
@@ -140,11 +140,13 @@ int copyEvents(ArgParser & parser)
     reportEvery = atoi(parser.getShortFlag('e').c_str());
   
   // Loop over all entries in input tree
-  for (int outEntry = 0; outEntry < lastEntry; ++outEntry) {
+  Long64_t outEntry = 0;
+  Long64_t inEntry = 0;
+  for (; outEntry < lastEntry; ++outEntry) {
 //   for (int outEntry = 0; outEntry < 100; ++outEntry) {
     // if (outEntry % 1000 == 0) {
     
-    Long64_t inEntry = InTree->GetEntryNumber(outEntry);
+    inEntry = InTree->GetEntryNumber(outEntry);
     if (inEntry < 0) break;
 
     if (InTree->GetEntry(inEntry) < 0) break;
@@ -159,6 +161,10 @@ int copyEvents(ArgParser & parser)
     
   }
   
+  std::cout << "Processed " << outEntry << " output entries"
+            << " corresponding to " << inEntry << " input entries."
+            << std::endl;
+            
   OutTree->SetWeight(weight);
   // Write and close output file
   OutFile->Write();
