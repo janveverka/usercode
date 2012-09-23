@@ -1,0 +1,11 @@
+#! /usr/bin/env sh
+## rootcp
+## ------
+## Wrapper around the roocp.py script.
+##
+## Usage: rootcp [path1/]source.root/[path2/]hist [path3/]destination.root[/path4]
+## 
+## Jan Veverka, Caltech, 23 September 2012
+## Call the rootcp.py and pass it all obtained arguments
+
+env python $CMSSW_BASE/src/FWLite/Tools/python/rootcp.py $@
