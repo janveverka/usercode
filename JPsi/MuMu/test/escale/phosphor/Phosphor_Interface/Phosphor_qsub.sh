@@ -1,18 +1,20 @@
 #!/bin/sh
 
-INITIALTOPDIR=`pwd`
+QSUBDIR=/home/cmorgoth/phosphor/CMSSW_4_2_8_patch7/src/JPsi/MuMu/test/escale/phosphor/Phosphor_Interface/QsubScripts
 
-for idir in RPVgluinodir_M_*; do
-    cd $idir; pwd; SGEFILE=`ls -1 | grep '\.sge'`; echo $SGEFILE    
-    if [ -a NuclearInteractionOutputFile.txt ] 
+for qfiles in $QSUBDIR/*.sge; do
+    pwd; SGEFILE=qfiles; echo $SGEFILE    
+    if [ -a $QSUBDIR/$SGEFILE ] 
 	then 
-	echo "nothing"
-    else
-	echo "qsub"
+	echo "QSUB"
 	#qsub -j y -o `pwd` -q all.q $SGEFILE;
-	qsub -j y -o `pwd` -q all.q@compute-0-1.local,all.q@compute-0-3.local,all.q@compute-1-6.local,all.q@compute-1-7.local,all.q@compute-1-8.local,all.q@compute-1-9.local,all.q@compute-0-14.local,all.q@compute-0-2.local,all.q@compute-0-4.local,all.q@compute-0-6.local   $SGEFILE;
+	qsub -j y -o `pwd` -q all.q@compute-1-6.local,all.q@compute-0-1.local,all.q@compute-0-3.local,all.q@compute-1-7.local,all.q@compute-1-8.local,all.q@compute-1-9.local,all.q@compute-0-14.local,all.q@compute-0-2.local,all.q@compute-0-4.local,all.q@compute-0-6.local $SGEFILE;
+
+    else
+
+	echo "FILE $$QSUBDIR/$SGEFILE DOES NOT EXIT, DOING NOTHING"
     fi
-    cd $INITIALTOPDIR;
+    #cd $INITIALTOPDIR;
 done
 
 
