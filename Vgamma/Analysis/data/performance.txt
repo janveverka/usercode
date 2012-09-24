@@ -1,0 +1,61 @@
+---+ Performance 100k data evens read from Raid
+
+All branches active
+CPU time: 20.8s, real time: 28.9s.
+
+Only some branches status = 1:
+CPU time: 17.3s, real time: 23.0s.
+CPU time: 17.4s, real time: 21.8s.
+CPU time: 17.3s, real time: 21.4s.
+CPU time: 17.3s, real time: 21.2s.
+
+Only some branches status = 1, turn on tree caching 1e7:
+CPU time: 17.1s, real time: 23.2s.
+CPU time: 17.2s, real time: 21.2s.
+CPU time: 17.2s, real time: 20.8s.
+
+Only some branches status = 1, turn on tree caching 1e8:
+CPU time: 17.1s, real time: 21.5s.
+CPU time: 17.3s, real time: 21.1s.
+CPU time: 17.2s, real time: 21.6s.
+
+Only some branches status = 1, turn on caching 1e8 for some branches:
+CPU time: 17.3s, real time: 21.2s.
+CPU time: 17.2s, real time: 21.7s.
+CPU time: 17.2s, real time: 21.2s.
+
+Only some branches status = 1, turn on caching 1e9 for some branches :
+CPU time: 17.6s, real time: 25.7s.
+CPU time: 17.5s, real time: 18.2s.
+CPU time: 17.5s, real time: 18.4s.
+Observe warnings:
+Warning in <TTreeCache::FillBuffer>: There is more data in this cluster (starting at entry 0 to 201902, current=200277) than usual ... with 131 99.242% of the branches we already have 424167238 bytes (instead of 1000000000)
+
+Only some branches status = 1, turn on caching 5e8 for some branches :
+CPU time: 17.4s, real time: 17.5s.
+CPU time: 17.5s, real time: 17.5s.
+CPU time: 17.3s, real time: 17.4s.
+
+Only some branches status = 1, turn on caching 5e8 for some branches, activete
+only used muon branches:
+CPU time: 17.0s, real time: 17.2s.
+CPU time: 17.0s, real time: 17.1s
+CPU time: 17.0s, real time: 17.1s
+
+Only minimum number of active cached branches wich cache size 5e8:
+CPU time: 11.1s, real time: 11.2s
+CPU time: 11.1s, real time: 11.2s.
+CPU time: 11.0s, real time: 11.2s.
+
+---+ Performance 100k data evens read from Hadoop
+Only some branches status = 1, turn on caching 1e9 for some branches :
+CPU time: 17.5s, real time: 26.4s.
+CPU time: 17.6s, real time: 25.3s.
+CPU time: 17.8s, real time: 26.2s.
+
+Only minimum number of active cached branches wich cache size 5e8:
+CPU time: 11.2s, real time: 15.5s.
+CPU time: 11.1s, real time: 13.4s.
+CPU time: 11.2s, real time: 13.4s.
+
+
