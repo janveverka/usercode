@@ -4,12 +4,17 @@ import socket
 import getpass
 import FWCore.ParameterSet.Config as cms
 
+from Vgamma.Analysis.histos_cff import fullSelection
+from Vgamma.Analysis.histos_cff import noSelection
+from Vgamma.Analysis.activeBranches_cff import activeBranchesMC
 
 process = cms.Process('VgammaAnalysis')
 
 process.inputs = cms.PSet(
     fileNames = cms.vstring(),
     treeName = cms.string('EventTree'),
+    version = cms.string('V14MC'),
+    activeBranches = copy.deepcopy(activeBranchesMC),
     )
 
 dataset_path = os.path.join(os.environ['CMSSW_BASE'],
@@ -32,89 +37,14 @@ process.maxEvents = cms.PSet(
     reportEvery = cms.untracked.int64(100)
     )
     
-process.options = cms.PSet(
-    titleStyle = cms.string("mpl")
-    )
+allEvents = copy.deepcopy(noSelection)
+allMuons = copy.deepcopy(fullSelection)
+selectedMuons = copy.deepcopy(fullSelection)
+selectedDimuons = copy.deepcopy(fullSelection)
+selectedPhotons = copy.deepcopy(fullSelection)
+selectedZgs = copy.deepcopy(fullSelection)
+FullSelection = copy.deepcopy(fullSelection)
 
-    
-## Default muon selection
-muonCuts = cms.PSet(
-    minPt = cms.double(20),
-    maxAbsEta = cms.double(2.4),
-    isGlobalMuon = cms.bool(True),
-    maxNormChi2 = cms.double(10),
-    minChamberHits = cms.uint32(1),
-    minStations = cms.uint32(2),
-    maxAbsDxy = cms.double(0.02),
-    maxAbsDz = cms.double(0.1),
-    minPixelHits = cms.uint32(1),
-    minTkHits = cms.uint32(11),
-    maxCombRelIso = cms.double(0.1),
-    )
-
-## Default dimuon selection
-dimuonCuts = cms.PSet(
-    charge = cms.int32(0),
-    minMass = cms.double(50),
-    )
-
-## Default photon selection in the barrel
-photonBarrelCuts = cms.PSet(
-    minPt = cms.double(15),
-    minAbsEtaSC = cms.double(0),
-    maxAbsEtaSC = cms.double(1.4442),
-    maxSihih = cms.double(0.11),
-    hasPixelMatch = cms.bool(False),
-    maxTrackIso = cms.double(2.0),
-    maxEcalIso = cms.double(4.2),
-    maxHcalIso = cms.double(2.2),
-    cutsToIgnore = cms.vstring("minAbsEtaSC"),
-    )
-
-## Default photon selection in the endcaps
-photonEndcapCuts = cms.PSet(
-    minPt = cms.double(15),
-    minAbsEtaSC = cms.double(1.556),
-    maxAbsEtaSC = cms.double(2.5),
-    maxSihih = cms.double(0.30),
-    hasPixelMatch = cms.bool(False),
-    maxTrackIso = cms.double(2.0),
-    maxEcalIso = cms.double(4.2),
-    maxHcalIso = cms.double(2.2),
-    )
-
-## Default dimuon selection
-ZgCuts = cms.PSet(
-    minDeltaR = cms.double(0.7),
-    )
-
-## Default analysis setup
-histos = cms.PSet(
-    do = cms.vstring('Muons', 'Photons', 'BarrelPhotons', 'EndcapPhotons', 'Dimuons', 'mmgCands', 'Pileup'),
-    selection = cms.PSet(
-        selectMuons = cms.bool(True),
-        selectDimuons = cms.bool(True),
-        selectPhoton = cms.bool(True),
-        selectZg = cms.bool(True),
-        cutsToIgnore = cms.vstring(),
-        muonCuts = copy.deepcopy(muonCuts),
-        dimuonCuts = copy.deepcopy(dimuonCuts),
-        photonBarrelCuts = copy.deepcopy(photonBarrelCuts),
-        photonEndcapCuts = copy.deepcopy(photonEndcapCuts),
-        ZgCuts = copy.deepcopy(ZgCuts)
-        ),
-    )
-
-allEvents = copy.deepcopy(histos)
-allMuons = copy.deepcopy(histos)
-selectedMuons = copy.deepcopy(histos)
-selectedDimuons = copy.deepcopy(histos)
-selectedPhotons = copy.deepcopy(histos)
-selectedZgs = copy.deepcopy(histos)
-FullSelection = copy.deepcopy(histos)
-
-allEvents.selection.cutsToIgnore = ['selectMuons', 'selectPhoton',
-                                    'selectDimuons', 'selectZg']
 
 allMuons.selection.cutsToIgnore = ['selectMuons', 'selectPhoton',
                                    'selectDimuons', 'selectZg']

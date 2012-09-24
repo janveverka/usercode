@@ -1,4 +1,5 @@
 <use name="Vgamma/Analysis" />
+<use name="root" />
 <environment>
   <bin file="analyze.cc" name="vg-analyze"/>
   <bin file="VgCandidateTest.cc"/>

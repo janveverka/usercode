@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <boost/shared_ptr.hpp>
+#include "TStopwatch.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ProcessDesc.h"
 #include "FWCore/PythonParameterSet/interface/PythonProcessDesc.h"
@@ -69,11 +70,14 @@ void printGoodbyeMessage() {
 /**
  * Main entry point of execution
  */
-int main(int argc, char **argv) {
+int main(int argc, char **argv) { 
   int status = checkCommandLineArguments(argc, argv);
   if (status > 0) {
     return status;
   }
+  
+  TStopwatch stopwatch;
+  stopwatch.Start();
   
   printWelcomeMessage();
   
@@ -88,6 +92,12 @@ int main(int argc, char **argv) {
   
   // Run the analyzer:
   analyzer.run();
+  
+  std::cout.precision(1);
+  std::cout << "CPU time: "  << analyzer.humanReadableTime(stopwatch.CpuTime())
+            << ", real time: " 
+            << analyzer.humanReadableTime(stopwatch.RealTime()) << "." 
+            << std::endl;
   
   // That's it!
   printGoodbyeMessage();

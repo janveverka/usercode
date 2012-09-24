@@ -32,7 +32,8 @@ VgAnalyzer::VgAnalyzer(
   maxEventsInput_(-1),
   reportEvery_(1),
   titleStyle_(""),
-  histoManagers_()
+  histoManagers_(),
+  stopwatch_()
 {
   init();
 } // ctor
@@ -74,7 +75,8 @@ VgAnalyzer::run()
   if (tree_->fChain == 0) return;
 
   // Get the number of events to loop over.
-  Long64_t totalEntries = tree_->fChain->GetEntriesFast();
+  // Long64_t totalEntries = tree_->fChain->GetEntriesFast();
+  Long64_t totalEntries = tree_->fChain->GetEntries();
   Long64_t maxEntry = totalEntries;
   if (0 <= maxEventsInput_ && maxEventsInput_ < maxEntry) {
     maxEntry = maxEventsInput_;
@@ -82,10 +84,11 @@ VgAnalyzer::run()
 
   // Loop over the events.
   cout << "Start processing " << maxEntry << " records..." << endl;
+  stopwatch_.Start();
   Long64_t ientry=0;
   for (; ientry < maxEntry; ientry++) {
     if (tree_->LoadTree(ientry) < 0) break;
-    if (ientry % reportEvery_ == 0) reportEvent(ientry);
+    if (ientry % reportEvery_ == 0) reportEvent(ientry, maxEntry);
     tree_->fChain->GetEntry(ientry);
 
     VgEvent event(*tree_);
@@ -99,9 +102,9 @@ VgAnalyzer::run()
       
   } // end of loop over the events
   
-  cout.precision(2);
+  cout.precision(3);
   cout << "Processed " << ientry << " of " << totalEntries
-       << " (" << (float) ientry / totalEntries << "%) records." << endl;
+       << " (" << (float) 100 * ientry / totalEntries << "%) records." << endl;
   
   // Loop over workers
   for (HistoManagers::iterator worker = histoManagers_.begin();
@@ -198,13 +201,53 @@ VgAnalyzer::parseInputs()
     treeName = "VgAnalyzerKit/EventTree";
   }
   
+  string versionString = "V14MC";
+  if (inputs.existsAs<string>("version")) {
+    versionString = inputs.getParameter<string>("version");
+  }
+  
+  // cout << "VgAnalyzer::parseInputs(): version: " << versionString << endl;
+  
+  VgAnalyzerTree::Version version = VgAnalyzerTree::kV14MC;
+  if        (versionString == string("V14MC"  )) {
+           version = VgAnalyzerTree::kV14MC   ;
+  } else if (versionString == string("V14Data")) {
+           version = VgAnalyzerTree::kV14Data ;
+  } else if (versionString == string("V15MC"  )) {
+           version = VgAnalyzerTree::kV15MC   ;
+  } else {
+    throw cms::Exception("BanConfiguration") << "VgAnalyzer::parseInputs(): "
+                                             << "Version must be one of: "
+                                             << "V14MC, V14Data, V15MC";
+  }
+
+  if (inputs.existsAs<vector<string> >("activeBranches")) {
+    activeBranches_ = inputs.getParameter<vector<string> >("activeBranches");
+  } else {
+    activeBranches_.push_back("nMu");
+    activeBranches_.push_back("mu*");
+    activeBranches_.push_back("nPho");
+    activeBranches_.push_back("pho*");
+    activeBranches_.push_back("rho*");
+    if (version == VgAnalyzerTree::kV14MC ||
+        version == VgAnalyzerTree::kV15MC) {
+      activeBranches_.push_back("nPU");
+    }
+  }
+  
+//   cout << "Active branches:" << endl;
+//   for (vector<string>::const_iterator branch = activeBranches_.begin();
+//        branch != activeBranches_.end(); ++branch) {
+//     cout << *branch << endl;
+//   }
+    
   TChain *chain = new TChain(treeName.c_str());
   for (vstring::const_iterator filename = filesToProcess.begin();
        filename != filesToProcess.end(); ++filename) {
     chain->Add(filename->c_str());
   }
   
-  tree_ = new VgAnalyzerTree(chain);  
+  tree_ = new VgAnalyzerTree(chain, version);  
 } // parseInputs
 
 
@@ -255,13 +298,13 @@ VgAnalyzer::setBranchesStatus()
 {
   TTree *chain = tree_->fChain;
 //  chain->SetBranchStatus("*", 1);  // enable all branches  
-//   chain->SetBranchStatus("*", 0);  // disable all branches  
-  chain->SetBranchStatus("nMu", 1);
-  chain->SetBranchStatus("mu*", 1);
-  chain->SetBranchStatus("nPho", 1);
-  chain->SetBranchStatus("pho*", 1);
-  chain->SetBranchStatus("rho*", 1);
-  chain->SetBranchStatus("nPU", 1);
+  chain->SetBranchStatus("*", 0);  // disable all branches  
+//   chain->SetBranchStatus("nEle", 1);
+//   chain->SetBranchStatus("ele*", 1);
+  for (vector<string>::const_iterator branch = activeBranches_.begin();
+       branch != activeBranches_.end(); ++branch) {
+    chain->SetBranchStatus(branch->c_str(), 1);
+  }
   
 } // setBranchesStatus
 
@@ -276,8 +319,39 @@ VgAnalyzer::init()
 {
   parseConfiguration();
   setBranchesStatus();
+  turnOnTreeCaching(5e8); // 5e8 = 500,000,000 = 500 MB
   // histoManagers_.push_back(new cit::VgHistoManager(*tree_, *output_));
 } // init
+
+
+//_____________________________________________________________________________
+/**
+ * Turns on caching of the tree branches.
+ */
+void
+VgAnalyzer::turnOnTreeCaching(long cacheSize)
+{
+  TTree *chain = tree_->fChain;
+  chain->SetCacheSize(cacheSize);
+  for (vector<string>::const_iterator branch = activeBranches_.begin();
+       branch != activeBranches_.end(); ++branch) {
+    chain->AddBranchToCache(branch->c_str());
+  }
+  
+  // chain->AddBranchToCache("*"); 
+//   chain->AddBranchToCache("nMu");
+//   chain->AddBranchToCache("mu*");
+//   chain->AddBranchToCache("nPho");
+//   chain->AddBranchToCache("pho*");
+//   chain->AddBranchToCache("rho*");
+//   if (tree_->version() == VgAnalyzerTree::kV14MC ||
+//       tree_->version() == VgAnalyzerTree::kV15MC) {
+//     chain->AddBranchToCache("nPU");
+//   }
+} 
+// void
+// VgAnalyzer::turnOnTreeCaching(long cacheSize)
+
 
 
 //_____________________________________________________________________________
@@ -287,13 +361,48 @@ VgAnalyzer::init()
 void
 VgAnalyzer::reportEvent(Long64_t thisEntry, Long64_t entriesToProcess)
 {
-  if (entriesToProcess >= 0) {
+  
+    stopwatch_.Stop();
+    double realTime = stopwatch_.RealTime();
+    stopwatch_.Start(false);
+
+    if (entriesToProcess >= 0) {
+    double progress = (double) thisEntry / entriesToProcess;
+    double eta = 99999999;
+      
+    if (progress > 0.) 
+      eta = (1. - progress) / progress * realTime;
+
+    string etastring = "?";
+    if (eta < 9999999) etastring = humanReadableTime(eta);
+    
     cout.precision(2);
     cout << "Processing record " << thisEntry + 1
-         << " of " << entriesToProcess
-         << " (" << (float) thisEntry / entriesToProcess << "%)" << endl;
+         << " of " << entriesToProcess << ", "
+         << 100 * progress << "%"
+//          << ", Elapsed: " << stopwatch_.RealTime() << "s = "
+//          << humanReadableTime(realTime) << ", "
+//          << "ETA: " << etastring 
+         << endl;
   } else {
     cout << "Processing record " << thisEntry + 1 << endl;
   }
 } // reportEvent
 
+
+//_____________________________________________________________________________
+/**
+ * Returns a string representing timeInSeconds in human readable format.
+ */
+string
+VgAnalyzer::humanReadableTime(double timeInSeconds) const
+{
+  char buffer[64];
+  sprintf(buffer, "%01.0f:%02.0f:%02.1f", 
+          floor(timeInSeconds / 3600.), 
+          floor(fmod(timeInSeconds, 3600.) / 60.),
+          fmod(timeInSeconds, 60.));
+  return string(buffer);
+}
+// string
+// VgAnalyzer::humanReadableTime(double timeInSeconds) const

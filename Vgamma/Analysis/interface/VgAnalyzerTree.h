@@ -817,7 +817,8 @@ namespace cit {
     TBranch        *b_WmunuACopPfMET;   //!
     TBranch        *b_WmunuMuIndex;   //!
 
-    VgAnalyzerTree(TTree *tree=0);
+    enum Version {kV14MC, kV14Data, kV15MC};
+    VgAnalyzerTree(TTree *tree=0, Version version = kV14MC);
     virtual ~VgAnalyzerTree();
     virtual Int_t    Cut(Long64_t entry);
     virtual Int_t    GetEntry(Long64_t entry);
@@ -826,6 +827,9 @@ namespace cit {
     virtual void     Loop();
     virtual Bool_t   Notify();
     virtual void     Show(Long64_t entry = -1);
+    virtual Version  version() const {return version_;}
+  private:
+    Version version_;
   };
 
 } // namespace cit
@@ -833,7 +837,9 @@ namespace cit {
 
 #ifdef VgAnalyzerTree_cxx
 namespace cit {
-  VgAnalyzerTree::VgAnalyzerTree(TTree *tree) : fChain(0) 
+  VgAnalyzerTree::VgAnalyzerTree(TTree *tree, Version version) : 
+    fChain(0),
+    version_(version)
   {
   // if parameter tree is not specified (or zero), connect the file
   // used to generate this class and read the Tree.
@@ -890,6 +896,84 @@ namespace cit {
     fCurrent = -1;
     fChain->SetMakeClass(1);
 
+    switch (version_) {
+    case kV14MC: case kV15MC:    
+      fChain->SetBranchAddress("pdf", pdf, &b_pdf);
+      fChain->SetBranchAddress("pthat", &pthat, &b_pthat);
+      fChain->SetBranchAddress("processID", &processID, &b_processID);
+      fChain->SetBranchAddress("nBX", &nBX, &b_nBX);
+      fChain->SetBranchAddress("nPU", nPU, &b_nPU);
+      fChain->SetBranchAddress("BXPU", BXPU, &b_BXPU);
+      fChain->SetBranchAddress("nMC", &nMC, &b_nMC);
+      fChain->SetBranchAddress("mcPID", mcPID, &b_mcPID);
+      fChain->SetBranchAddress("mcVtx", mcVtx, &b_mcVtx);
+      fChain->SetBranchAddress("mcPt", mcPt, &b_mcPt);
+      fChain->SetBranchAddress("mcMass", mcMass, &b_mcMass);
+      fChain->SetBranchAddress("mcEta", mcEta, &b_mcEta);
+      fChain->SetBranchAddress("mcPhi", mcPhi, &b_mcPhi);
+      fChain->SetBranchAddress("mcGMomPID", mcGMomPID, &b_mcGMomPID);
+      fChain->SetBranchAddress("mcMomPID", mcMomPID, &b_mcMomPID);
+      fChain->SetBranchAddress("mcMomPt", mcMomPt, &b_mcMomPt);
+      fChain->SetBranchAddress("mcMomMass", mcMomMass, &b_mcMomMass);
+      fChain->SetBranchAddress("mcMomEta", mcMomEta, &b_mcMomEta);
+      fChain->SetBranchAddress("mcMomPhi", mcMomPhi, &b_mcMomPhi);
+      fChain->SetBranchAddress("mcIndex", mcIndex, &b_mcIndex);
+      fChain->SetBranchAddress("mcDecayType", mcDecayType, &b_mcDecayType);
+      fChain->SetBranchAddress("mcIsoDR03", mcIsoDR03, &b_mcIsoDR03);
+      fChain->SetBranchAddress("mcCalIsoDR03", mcCalIsoDR03, &b_mcCalIsoDR03);
+      fChain->SetBranchAddress("mcTrkIsoDR03", mcTrkIsoDR03, &b_mcTrkIsoDR03);
+      fChain->SetBranchAddress("mcIsoDR04", mcIsoDR04, &b_mcIsoDR04);
+      fChain->SetBranchAddress("mcCalIsoDR04", mcCalIsoDR04, &b_mcCalIsoDR04);
+      fChain->SetBranchAddress("mcTrkIsoDR04", mcTrkIsoDR04, &b_mcTrkIsoDR04);
+      fChain->SetBranchAddress("genMET", &genMET, &b_genMET);
+      fChain->SetBranchAddress("genMETx", &genMETx, &b_genMETx);
+      fChain->SetBranchAddress("genMETy", &genMETy, &b_genMETy);
+      fChain->SetBranchAddress("genMETPhi", &genMETPhi, &b_genMETPhi);
+
+      fChain->SetBranchAddress("SmearedpfMET", &SmearedpfMET, &b_SmearedpfMET);
+      fChain->SetBranchAddress("SmearedpfMETx", &SmearedpfMETx, &b_SmearedpfMETx);
+      fChain->SetBranchAddress("SmearedpfMETy", &SmearedpfMETy, &b_SmearedpfMETy);
+      fChain->SetBranchAddress("SmearedpfMETPhi", &SmearedpfMETPhi, &b_SmearedpfMETPhi);
+      fChain->SetBranchAddress("SmearedpfMETsumEt", &SmearedpfMETsumEt, &b_SmearedpfMETsumEt);
+      fChain->SetBranchAddress("SmearedpfMETmEtSig", &SmearedpfMETmEtSig, &b_SmearedpfMETmEtSig);
+      fChain->SetBranchAddress("SmearedpfMETSig", &SmearedpfMETSig, &b_SmearedpfMETSig);
+      fChain->SetBranchAddress("SmearedTypeIpfMET", &SmearedTypeIpfMET, &b_SmearedTypeIpfMET);
+      fChain->SetBranchAddress("SmearedTypeIpfMETx", &SmearedTypeIpfMETx, &b_SmearedTypeIpfMETx);
+      fChain->SetBranchAddress("SmearedTypeIpfMETy", &SmearedTypeIpfMETy, &b_SmearedTypeIpfMETy);
+      fChain->SetBranchAddress("SmearedTypeIpfMETPhi", &SmearedTypeIpfMETPhi, &b_SmearedTypeIpfMETPhi);
+      fChain->SetBranchAddress("SmearedTypeIpfMETsumEt", &SmearedTypeIpfMETsumEt, &b_SmearedTypeIpfMETsumEt);
+      fChain->SetBranchAddress("SmearedTypeIpfMETmEtSig", &SmearedTypeIpfMETmEtSig, &b_SmearedTypeIpfMETmEtSig);
+      fChain->SetBranchAddress("SmearedTypeIpfMETSig", &SmearedTypeIpfMETSig, &b_SmearedTypeIpfMETSig);
+
+      fChain->SetBranchAddress("eleGenIndex", eleGenIndex, &b_eleGenIndex);
+      fChain->SetBranchAddress("eleGenGMomPID", eleGenGMomPID, &b_eleGenGMomPID);
+      fChain->SetBranchAddress("eleGenMomPID", eleGenMomPID, &b_eleGenMomPID);
+      fChain->SetBranchAddress("eleGenMomPt", eleGenMomPt, &b_eleGenMomPt);
+      
+      fChain->SetBranchAddress("phoGenIndex", phoGenIndex, &b_phoGenIndex);
+      fChain->SetBranchAddress("phoGenGMomPID", phoGenGMomPID, &b_phoGenGMomPID);
+      fChain->SetBranchAddress("phoGenMomPID", phoGenMomPID, &b_phoGenMomPID);
+      fChain->SetBranchAddress("phoGenMomPt", phoGenMomPt, &b_phoGenMomPt);
+      
+      fChain->SetBranchAddress("muGenIndex", muGenIndex, &b_muGenIndex);
+      fChain->SetBranchAddress("muGenGMomPID", muGenGMomPID, &b_muGenGMomPID);
+      fChain->SetBranchAddress("muGenMomPID", muGenMomPID, &b_muGenMomPID);
+      fChain->SetBranchAddress("muGenMomPt", muGenMomPt, &b_muGenMomPt);
+      
+      fChain->SetBranchAddress("jetGenJetIndex", jetGenJetIndex, &b_jetGenJetIndex);
+      fChain->SetBranchAddress("jetGenJetEn", jetGenJetEn, &b_jetGenJetEn);
+      fChain->SetBranchAddress("jetGenJetPt", jetGenJetPt, &b_jetGenJetPt);
+      fChain->SetBranchAddress("jetGenJetEta", jetGenJetEta, &b_jetGenJetEta);
+      fChain->SetBranchAddress("jetGenJetPhi", jetGenJetPhi, &b_jetGenJetPhi);
+      fChain->SetBranchAddress("jetGenJetMass", jetGenJetMass, &b_jetGenJetMass);
+      fChain->SetBranchAddress("jetGenPartonID", jetGenPartonID, &b_jetGenPartonID);
+      fChain->SetBranchAddress("jetGenPartonMomID", jetGenPartonMomID, &b_jetGenPartonMomID);
+
+      break;
+    default:
+      ; // do nothing
+    } // switch (version_)
+    
     fChain->SetBranchAddress("run", &run, &b_run);
     fChain->SetBranchAddress("event", &event, &b_event);
     fChain->SetBranchAddress("orbit", &orbit, &b_orbit);
@@ -916,37 +1000,10 @@ namespace cit {
     fChain->SetBranchAddress("rho", &rho, &b_rho);
     fChain->SetBranchAddress("sigma", &sigma, &b_sigma);
     fChain->SetBranchAddress("rhoNeutral", &rhoNeutral, &b_rhoNeutral);
-    fChain->SetBranchAddress("pdf", pdf, &b_pdf);
-    fChain->SetBranchAddress("pthat", &pthat, &b_pthat);
-    fChain->SetBranchAddress("processID", &processID, &b_processID);
-    fChain->SetBranchAddress("nBX", &nBX, &b_nBX);
-    fChain->SetBranchAddress("nPU", nPU, &b_nPU);
-    fChain->SetBranchAddress("BXPU", BXPU, &b_BXPU);
-    fChain->SetBranchAddress("nMC", &nMC, &b_nMC);
-    fChain->SetBranchAddress("mcPID", mcPID, &b_mcPID);
-    fChain->SetBranchAddress("mcVtx", mcVtx, &b_mcVtx);
-    fChain->SetBranchAddress("mcPt", mcPt, &b_mcPt);
-    fChain->SetBranchAddress("mcMass", mcMass, &b_mcMass);
-    fChain->SetBranchAddress("mcEta", mcEta, &b_mcEta);
-    fChain->SetBranchAddress("mcPhi", mcPhi, &b_mcPhi);
-    fChain->SetBranchAddress("mcGMomPID", mcGMomPID, &b_mcGMomPID);
-    fChain->SetBranchAddress("mcMomPID", mcMomPID, &b_mcMomPID);
-    fChain->SetBranchAddress("mcMomPt", mcMomPt, &b_mcMomPt);
-    fChain->SetBranchAddress("mcMomMass", mcMomMass, &b_mcMomMass);
-    fChain->SetBranchAddress("mcMomEta", mcMomEta, &b_mcMomEta);
-    fChain->SetBranchAddress("mcMomPhi", mcMomPhi, &b_mcMomPhi);
-    fChain->SetBranchAddress("mcIndex", mcIndex, &b_mcIndex);
-    fChain->SetBranchAddress("mcDecayType", mcDecayType, &b_mcDecayType);
-    fChain->SetBranchAddress("mcIsoDR03", mcIsoDR03, &b_mcIsoDR03);
-    fChain->SetBranchAddress("mcCalIsoDR03", mcCalIsoDR03, &b_mcCalIsoDR03);
-    fChain->SetBranchAddress("mcTrkIsoDR03", mcTrkIsoDR03, &b_mcTrkIsoDR03);
-    fChain->SetBranchAddress("mcIsoDR04", mcIsoDR04, &b_mcIsoDR04);
-    fChain->SetBranchAddress("mcCalIsoDR04", mcCalIsoDR04, &b_mcCalIsoDR04);
-    fChain->SetBranchAddress("mcTrkIsoDR04", mcTrkIsoDR04, &b_mcTrkIsoDR04);
-    fChain->SetBranchAddress("genMET", &genMET, &b_genMET);
-    fChain->SetBranchAddress("genMETx", &genMETx, &b_genMETx);
-    fChain->SetBranchAddress("genMETy", &genMETy, &b_genMETy);
-    fChain->SetBranchAddress("genMETPhi", &genMETPhi, &b_genMETPhi);
+    
+    /// Moved pdf, PU mc* and genMET* branches in the switch above
+
+    
     fChain->SetBranchAddress("MET", &MET, &b_MET);
     fChain->SetBranchAddress("METx", &METx, &b_METx);
     fChain->SetBranchAddress("METy", &METy, &b_METy);
@@ -983,20 +1040,9 @@ namespace cit {
     fChain->SetBranchAddress("TypeIpIIpfMETsumEt", &TypeIpIIpfMETsumEt, &b_TypeIpIIpfMETsumEt);
     fChain->SetBranchAddress("TypeIpIIpfMETmEtSig", &TypeIpIIpfMETmEtSig, &b_TypeIpIIpfMETmEtSig);
     fChain->SetBranchAddress("TypeIpIIpfMETSig", &TypeIpIIpfMETSig, &b_TypeIpIIpfMETSig);
-    fChain->SetBranchAddress("SmearedpfMET", &SmearedpfMET, &b_SmearedpfMET);
-    fChain->SetBranchAddress("SmearedpfMETx", &SmearedpfMETx, &b_SmearedpfMETx);
-    fChain->SetBranchAddress("SmearedpfMETy", &SmearedpfMETy, &b_SmearedpfMETy);
-    fChain->SetBranchAddress("SmearedpfMETPhi", &SmearedpfMETPhi, &b_SmearedpfMETPhi);
-    fChain->SetBranchAddress("SmearedpfMETsumEt", &SmearedpfMETsumEt, &b_SmearedpfMETsumEt);
-    fChain->SetBranchAddress("SmearedpfMETmEtSig", &SmearedpfMETmEtSig, &b_SmearedpfMETmEtSig);
-    fChain->SetBranchAddress("SmearedpfMETSig", &SmearedpfMETSig, &b_SmearedpfMETSig);
-    fChain->SetBranchAddress("SmearedTypeIpfMET", &SmearedTypeIpfMET, &b_SmearedTypeIpfMET);
-    fChain->SetBranchAddress("SmearedTypeIpfMETx", &SmearedTypeIpfMETx, &b_SmearedTypeIpfMETx);
-    fChain->SetBranchAddress("SmearedTypeIpfMETy", &SmearedTypeIpfMETy, &b_SmearedTypeIpfMETy);
-    fChain->SetBranchAddress("SmearedTypeIpfMETPhi", &SmearedTypeIpfMETPhi, &b_SmearedTypeIpfMETPhi);
-    fChain->SetBranchAddress("SmearedTypeIpfMETsumEt", &SmearedTypeIpfMETsumEt, &b_SmearedTypeIpfMETsumEt);
-    fChain->SetBranchAddress("SmearedTypeIpfMETmEtSig", &SmearedTypeIpfMETmEtSig, &b_SmearedTypeIpfMETmEtSig);
-    fChain->SetBranchAddress("SmearedTypeIpfMETSig", &SmearedTypeIpfMETSig, &b_SmearedTypeIpfMETSig);
+    
+    /// Moved SmearedpfMET* branches in the switch above
+    
     fChain->SetBranchAddress("npfCharged", &npfCharged, &b_npfCharged);
     fChain->SetBranchAddress("pfChargedSumPt", &pfChargedSumPt, &b_pfChargedSumPt);
     fChain->SetBranchAddress("npfChargedHadron", &npfChargedHadron, &b_npfChargedHadron);
@@ -1047,10 +1093,9 @@ namespace cit {
     fChain->SetBranchAddress("eleSeedEnergy", eleSeedEnergy, &b_eleSeedEnergy);
     fChain->SetBranchAddress("eleRecoFlag", eleRecoFlag, &b_eleRecoFlag);
     fChain->SetBranchAddress("eleSeverity", eleSeverity, &b_eleSeverity);
-    fChain->SetBranchAddress("eleGenIndex", eleGenIndex, &b_eleGenIndex);
-    fChain->SetBranchAddress("eleGenGMomPID", eleGenGMomPID, &b_eleGenGMomPID);
-    fChain->SetBranchAddress("eleGenMomPID", eleGenMomPID, &b_eleGenMomPID);
-    fChain->SetBranchAddress("eleGenMomPt", eleGenMomPt, &b_eleGenMomPt);
+
+    /// Moved eleGen* branches to the version switch above
+
     fChain->SetBranchAddress("eleIsoTrkDR03", eleIsoTrkDR03, &b_eleIsoTrkDR03);
     fChain->SetBranchAddress("eleIsoEcalDR03", eleIsoEcalDR03, &b_eleIsoEcalDR03);
     fChain->SetBranchAddress("eleIsoHcalDR03", eleIsoHcalDR03, &b_eleIsoHcalDR03);
@@ -1115,10 +1160,9 @@ namespace cit {
     fChain->SetBranchAddress("phoRecoFlag", phoRecoFlag, &b_phoRecoFlag);
     fChain->SetBranchAddress("phoSeverity", phoSeverity, &b_phoSeverity);
     fChain->SetBranchAddress("phoPos", phoPos, &b_phoPos);
-    fChain->SetBranchAddress("phoGenIndex", phoGenIndex, &b_phoGenIndex);
-    fChain->SetBranchAddress("phoGenGMomPID", phoGenGMomPID, &b_phoGenGMomPID);
-    fChain->SetBranchAddress("phoGenMomPID", phoGenMomPID, &b_phoGenMomPID);
-    fChain->SetBranchAddress("phoGenMomPt", phoGenMomPt, &b_phoGenMomPt);
+
+    /// Moved phoGen* branches to the version switch above
+    
     fChain->SetBranchAddress("phoSCE", phoSCE, &b_phoSCE);
     fChain->SetBranchAddress("phoESE", phoESE, &b_phoESE);
     fChain->SetBranchAddress("phoSCEt", phoSCEt, &b_phoSCEt);
@@ -1179,10 +1223,9 @@ namespace cit {
     fChain->SetBranchAddress("muCharge", muCharge, &b_muCharge);
     fChain->SetBranchAddress("muPt", muPt, &b_muPt);
     fChain->SetBranchAddress("muPz", muPz, &b_muPz);
-    fChain->SetBranchAddress("muGenIndex", muGenIndex, &b_muGenIndex);
-    fChain->SetBranchAddress("muGenGMomPID", muGenGMomPID, &b_muGenGMomPID);
-    fChain->SetBranchAddress("muGenMomPID", muGenMomPID, &b_muGenMomPID);
-    fChain->SetBranchAddress("muGenMomPt", muGenMomPt, &b_muGenMomPt);
+
+    /// Moved muGen* branches in the switch above
+    
     fChain->SetBranchAddress("muIsoTrk", muIsoTrk, &b_muIsoTrk);
     fChain->SetBranchAddress("muIsoCalo", muIsoCalo, &b_muIsoCalo);
     fChain->SetBranchAddress("muIsoEcal", muIsoEcal, &b_muIsoEcal);
@@ -1237,14 +1280,9 @@ namespace cit {
     fChain->SetBranchAddress("jetChargedMuEnergyFraction", jetChargedMuEnergyFraction, &b_jetChargedMuEnergyFraction);
     fChain->SetBranchAddress("jetJVAlpha", jetJVAlpha, &b_jetJVAlpha);
     fChain->SetBranchAddress("jetJVBeta", jetJVBeta, &b_jetJVBeta);
-    fChain->SetBranchAddress("jetGenJetIndex", jetGenJetIndex, &b_jetGenJetIndex);
-    fChain->SetBranchAddress("jetGenJetEn", jetGenJetEn, &b_jetGenJetEn);
-    fChain->SetBranchAddress("jetGenJetPt", jetGenJetPt, &b_jetGenJetPt);
-    fChain->SetBranchAddress("jetGenJetEta", jetGenJetEta, &b_jetGenJetEta);
-    fChain->SetBranchAddress("jetGenJetPhi", jetGenJetPhi, &b_jetGenJetPhi);
-    fChain->SetBranchAddress("jetGenJetMass", jetGenJetMass, &b_jetGenJetMass);
-    fChain->SetBranchAddress("jetGenPartonID", jetGenPartonID, &b_jetGenPartonID);
-    fChain->SetBranchAddress("jetGenPartonMomID", jetGenPartonMomID, &b_jetGenPartonMomID);
+
+    /// Moved jetGen* branches in the switch above.
+    
     fChain->SetBranchAddress("nZee", &nZee, &b_nZee);
     fChain->SetBranchAddress("ZeeMass", ZeeMass, &b_ZeeMass);
     fChain->SetBranchAddress("ZeePt", ZeePt, &b_ZeePt);

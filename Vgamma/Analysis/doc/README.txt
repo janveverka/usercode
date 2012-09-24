@@ -36,6 +36,7 @@ vg-run-unit-tests
 
 ---+ Debugging with GDB
 Compile with debugging information:
+scram b clean
 scram b USER_CXXFLAGS="-ggdb\ -Wall" Vgamma/Analysis
 Quick gdb tutorial:
 http://www.cs.cmu.edu/~gilpin/tutorial/
