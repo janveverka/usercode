@@ -35,7 +35,7 @@ def main():
     
     print 'ARGV      :', sys.argv[1:]
     try:
-        options, remainder = getopt.gnu_getopt(sys.argv[1:], 'o:c:vdih', ['cfg_file=','output=','verbose','debug','DataType=','Det=','treeversion=','R9Low=','R9High=','PtLow=','PtHigh=','help',])
+        options, remainder = getopt.gnu_getopt(sys.argv[1:], 'o:c:vdih', ['cfg_file=','output=','verbose','debug','DataType=','DetectorType=','treeversion=','R9Low=','R9High=','PtLow=','PtHigh=','help',])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
