@@ -68,7 +68,7 @@ def main():
 	elif opt == '--Data':
 	    Globals.DataType = arg
 	    continue
-	elif opt == '--Det':
+	elif opt == '--DetectorType':
 	    Globals.DetectorType = arg
             if Globals.DetectorType=='EE':
                 Globals.cuts.append('!phoIsEB')
