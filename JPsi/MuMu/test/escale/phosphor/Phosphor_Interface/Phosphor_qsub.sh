@@ -3,8 +3,8 @@
 QSUBDIR=/home/cmorgoth/phosphor/CMSSW_4_2_8_patch7/src/JPsi/MuMu/test/escale/phosphor/Phosphor_Interface/QsubScripts
 
 for qfiles in $QSUBDIR/*.sge; do
-    pwd; SGEFILE=qfiles; echo $SGEFILE    
-    if [ -a $QSUBDIR/$SGEFILE ] 
+    pwd; echo $qfiles; SGEFILE=$qfiles; echo $SGEFILE    
+    if [ -a $SGEFILE ] 
 	then 
 	echo "QSUB"
 	#qsub -j y -o `pwd` -q all.q $SGEFILE;
@@ -12,7 +12,7 @@ for qfiles in $QSUBDIR/*.sge; do
 
     else
 
-	echo "FILE $$QSUBDIR/$SGEFILE DOES NOT EXIT, DOING NOTHING"
+	echo "FILE $SGEFILE DOES NOT EXIT, DOING NOTHING"
     fi
     #cd $INITIALTOPDIR;
 done
