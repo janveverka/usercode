@@ -5,11 +5,13 @@ import JPsi.MuMu.common.clusterCorrections as clusterCorrs
 from JPsi.MuMu.common.basicRoot import *
 
 _hostname = socket.gethostname()
-if (_hostname == 't3-susy.ultralight.org' or 
-    ('compute-' in _hostname and '.local' in _hostname)) :
+if (_hostname == 't3-susy.ultralight.org'
+    or ('compute-' in _hostname and '.local' in _hostname)) :
     ## Path for the t3-susy
-    # _path = '/raid2/veverka/esTrees/'
-    _path = '/mnt/hadoop/user/veverka/esTrees/'
+    ##_path = '/raid2/veverka/esTrees/'#original place changed after raid2 problem
+    ##_path = '/mnt/hadoop/user/veverka/esTrees/'
+    _path = '/home/cmorgoth/ZmumuGammaData/'
+    ##_path = '/raid2/veverka/esTrees/'
 elif _hostname == 'nbcitjv':
     ## Path for Jan's Dell Inspiron 6000 laptop
     _path = '/home/veverka/Work/data/esTrees'
@@ -21,6 +23,7 @@ elif (_hostname == 'eee.home' or
 else:
     raise RuntimeError, "Unknown hostname `%s'" % _hostname
 
+##_list is a pyhton dictionary map    
 _files = {}
 _files['v1'] = {
     'data' : '''
@@ -253,6 +256,14 @@ _files['v15'] = {
             'batch2_of2.root')],       
 }
 
+##New Sixie trees first try to make it work
+_files['sixie'] = {
+	'data': [ ( 'ZmumuGammaNtuple_Run2012C.root' ), 
+		( 'ZmumuGammaNtuple_Run2012AB.root' ) ],
+	'z'   : [ ( 'ZmumuGammaNtuple_DYM50_53X.root' ) ],
+	}
+
+
 _treeNames = {
     'v1' : 'tree/es',
     'v2' : 'pmvTree/pmv',
@@ -270,10 +281,11 @@ _treeNames = {
     'v15' : 'tree/pmv',
     'yyv1' : 'Analysis',
     'yyv2' : 'Analysis',    
-    'yyv3' : 'Analysis',    
+    'yyv3' : 'Analysis',
     'yyv3_e5x5' : 'Analysis',    
     'yyv4' : 'Analysis',    
-    'yyv4NoJSON' : 'Analysis',    
+    'yyv4NoJSON' : 'Analysis',
+    'sixie' : 'ZmumuGammaEvent',
 }
 
 
@@ -285,6 +297,36 @@ def getChains(version='v4'):
             print "Loading ", name, ":", f
             chains[name].Add( os.path.join(_path, f) )
 
+    print "=====version: ", version
+
+    if version == 'sixie':
+	es_to_sixie_name_map ='''mmMass DileptonMass
+        mmgMass Mass
+        phoEta PhotonEta
+        phoPhi PhotonPhi
+        phoGenE GenPhoE
+        phoIsEB	PhotonIsEB
+        phoR9 PhotonR9
+        phoPt PhotonPt
+        mu1Pt Mu1Pt
+        mu2Pt Mu2Pt
+        mu1Eta Mu1Eta
+        mu2Eta Mu2Eta
+        mu1Phi Mu1Phi
+        mu2Phi Mu2Phi
+        pileup.weight Weight
+        minDeltaR MinDeltaR
+        isFSR IsFSR'''.split('\n')
+	
+        for ch in chains.values():
+            print "ch sixie: ", ch 
+            for name_pair in es_to_sixie_name_map:
+                if len(name_pair.strip()) < 3:
+                    raise RuntimeError, 'Illegal name pair %s' % name_paires_name
+                es_name, sixie_name = name_pair.split()
+                print "====es_name: ", es_name, "sixie_name:  ", sixie_name
+                ch.SetAlias(es_name, sixie_name)
+					
     if version in 'yyv1 yyv2 yyv3 yyv3_e5x5 yyv4 yyv4NoJSON'.split():
         ## On each line corresponding to a list item, 
         ## 1st is esTree name, 2nd is YY tree name in Yong's trees.
@@ -303,6 +345,7 @@ def getChains(version='v4'):
                                pileup.weight   evtweight
                                minDeltaR       mdrg[0]<mdrg[1]?mdrg[0]:mdrg[1]
                                isFSR           gametrue>0'''.split('\n')
+    
         if version == 'yyv1':
             ## Use the default CMSSW cluster corrections
             es_to_yy_name_map.extend(
@@ -336,10 +379,12 @@ def getChains(version='v4'):
         ## Set aliases for Yong's trees so that one can use the same names
         ## as in esTrees
         for ch in chains.values():
+	    #print "ch: ", ch 
             for name_pair in es_to_yy_name_map:
                 if len(name_pair.strip()) < 3:
                     raise RuntimeError, 'Illegal name pair %s' % name_pair
                 es_name, yy_name = name_pair.split()
+                #print "====es_name: ", es_name, "yy_name  "
                 ch.SetAlias(es_name, yy_name)
     
     ## Set aliases
