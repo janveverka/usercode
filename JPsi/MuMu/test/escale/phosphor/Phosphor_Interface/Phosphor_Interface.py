@@ -65,7 +65,7 @@ def main():
         elif opt == '--treeversion':
             Globals.model_tree_version = Globals.data_tree_version = arg
 	    continue
-	elif opt == '--Data':
+	elif opt == '--DataType':
 	    Globals.DataType = arg
 	    continue
 	elif opt == '--DetectorType':
