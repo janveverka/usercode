@@ -60,11 +60,11 @@ source = {
         dataset = 'MVAPresel',
         ),
     }
-variable = 'sigE_o_E_lead'
+variable = 'sigE_o_E_sublead'
 output_filename = 'result.root'
-plot_range = (0.004, 0.014)
-fit_range = (0.005, 0.012)
-kde_training_max_events = 50000
+plot_range = (0.006, 0.012)
+fit_range = (0.006, 0.011)
+kde_training_max_events = 100000
 
 ## CONFIGURATION END ==========================================================
 
@@ -196,7 +196,7 @@ def get_corrected_data(data_raw, correction):
     data_corr.Print()
     x_corr_var = data_corr.addColumn(correction)
     debugmsg(2)
-    data_corr = data_corr.Reduce(ROOT.RooArgSet(x_corr_var))
+    data_corr = data_corr.reduce(ROOT.RooArgSet(x_corr_var))
     data_corr.Print()
     x_corr_var = data_corr.get()[correction.GetName()]
     x_corr_var.Print()
@@ -207,7 +207,7 @@ def get_corrected_data(data_raw, correction):
         )
     debugmsg(3)
     x_corr_var = data_corr.addColumn(rename_func)
-    data_corr = data_corr.Reduce(ROOT.RooArgSet(x_corr_var))
+    data_corr = data_corr.reduce(ROOT.RooArgSet(x_corr_var))
     return data_corr
 ## End of get_corrected_data
 
@@ -239,6 +239,11 @@ def get_correction(x_raw, params_raw, params_target):
     '''
     global a_corr
     a_corr = x_raw.Clone('a_corr')
+    amin = a_corr.getMin()
+    amax = a_corr.getMax()
+    aabsmax = max(abs(amin), abs(amax))
+    a_corr.setRange(-aabsmax, aabsmax)
+    
     global b_corr
     b_corr = ROOT.RooRealVar('b_corr', 'b_corr', 1., 0.001, 1000.)
     
@@ -307,11 +312,12 @@ def main():
             name = data['raw'].GetName() + '_boot',
             title = data['raw'].GetTitle() + ' Bootstrap Replica',
             size = kde_training_max_events,
+            seed = 12345,
             )
         data_kde_training = data['raw_reduced']    
     
     model = ParameterizedKeysPdf('model', 'model', x, mode, effsigma, 
-                                 data_kde_training, rho=0.8, forcerange=True)
+                                 data_kde_training, rho=0.3, forcerange=True)
                 
     
     fitresult = {}
@@ -319,9 +325,11 @@ def main():
         dataset.SetName(name + 'Data')
         ## Reduce data for debugging
         # dataset = dataset.reduce(roo.EventRange(0, 10000))
-        fitresult[name] = model.fitTo(dataset, roo.SumW2Error(True), 
+        mode.setVal(model.shapemodevar.getVal())
+        effsigma.setVal(model.shapewidthvar.getVal())
+        fitresult[name] = model.fitTo(dataset, roo.SumW2Error(True),
                                       roo.NumCPU(8), roo.Strategy(2),
-                                      roo.Save())
+                                      roo.Save(), roo.Range("fit"))
         make_plot(x, dataset, model)
                             
         print '\n==  Fitted parameters =='
@@ -344,7 +352,6 @@ if __name__ == '__main__':
     for name in 'raw_reduced raw target'.split():
         print '===', name, '==='
         fitresult[name].floatParsInit().Print('v')
-
     print '\n== Final Parameters =='
     for name in 'raw_reduced raw target'.split():
         print '===', name, '==='
