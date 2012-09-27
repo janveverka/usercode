@@ -7,6 +7,8 @@ This would copy the histogram named "hist" from source.root to destination.root.
 import os
 import re
 import sys
+## Run root in batch mode
+sys.argv.append('-b')
 import ROOT
 
 # source = /home/cms/veverka/Vgamma2011/VgKitV14/MC/ZZ_TuneZ2_Fall11.root/VgAnalyzerKit/hEvents
@@ -16,7 +18,7 @@ def main():
     '''
     Main entry point for execution.
     '''
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print 'Illegal arguments: ', sys.argv
         print_usage()
     
