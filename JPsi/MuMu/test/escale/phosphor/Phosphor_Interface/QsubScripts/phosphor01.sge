@@ -2,6 +2,8 @@
 #$ -S /bin/sh
 #$ -cwd
 
+echo "BLABLABLA "
+
 WORKDIR=/home/cmorgoth/phosphor/CMSSW_4_2_8_patch7/src/JPsi/MuMu/test/escale/phosphor/Phosphor_Interface	    		
 			
 # find out host name
@@ -17,6 +19,10 @@ cd $WORKDIR
 
 cmsenv
 
+###################################
+#############Set up################
+################################## 
+
 Det="EB"
 TreeVer="sixie"
 Data="data"
@@ -29,17 +35,15 @@ PtHigh=15
 # mkdir -p /wntmp/jduarte/model1/
 # run CMSSW job
 
-NEWDIR=`date | gawk '{ print $1 $2 $3"_" $6 }'`
+cd $2
+echo $2
+pwd
 
-if [ -d $NEWDIR ]; then
-	echo "DIR $NEWDIR exists."
-else
-	mkdir $NEWDIR
-	echo "Creating DIR: $NEWDIR."
-fi
+###################################	
+#####EXECUTING THE SCRIPT##########
+###################################
 
-cd $NEWDIR
-./../Phosphor_Interface.py -i --DataType $Data --DetectorType $Det --treeversion $TreeVer \
+./../../Phosphor_Interface.py -i --DataType $Data --DetectorType $Det --treeversion $TreeVer \
 --R9Low $R9Low --R9High $R9High --PtLow $PtLow --PtHigh $PtHigh >\
  log_$Data"_"$Det"_"$TreeVer"_R9Low"$R9Low"_R9High"$R9High"_PtLow"$PtLow"_PtHigh"$PtHigh.txt
 # time cmsRun VECBOSPYTHONFILE
