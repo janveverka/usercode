@@ -17,17 +17,21 @@ def main():
     Main entry point of execution.  Writes a snippet of c++
     code to STDOUT.
     '''
-    elines = get_enum_lines()
+    #elines = get_enum_lines()
 
-    lines = get_snippet_lines('scale')
-    lines.extend(get_snippet_lines('resolution'))
+    #lines = get_snippet_lines('scale')
+    #lines.extend(get_snippet_lines('resolution'))
 
-    indent(elines, '    ')
-    indent(lines, '  ')    
+    #indent(elines, '    ')
+    #indent(lines, '  ')    
 
-    print '\n'.join(elines)
-    print
-    print '\n'.join(lines)
+    #print '\n'.join(elines)
+    #print
+    #print '\n'.join(lines)
+
+    get_category_names(get_categories())
+
+        
 ## End of main().
 
  
@@ -109,49 +113,32 @@ def get_category_names(categories):
     Returns a list of the categories of enum names.
     '''
     names = []
+    name_to_number = {
+        'MonteCarlo' : '0',
+        'RealData' : '1',
+        '2011' : '0',
+        '2012' : '1',
+        'Barrel' : '0',
+        'Endcaps' : '1',
+        'PtLow_10_PtHigh_12' : '0',
+        'PtLow_12_PtHigh_15' : '1',
+        'PtLow_15_PtHigh_20' : '2',
+        'PtLow_20_PtHigh_999' : '3',
+        'scale' : '0',
+        'resolution' : '1',
+        }
+    print "Scales"
+    print "PERIOD(2011, 2012)=(0,1) DATA(mc,data)=(0,1) Detector(EB,EE)=(0,1) Pt(0,1,2,3) Correction(scale,resolution)=(0,1) Number"
     for data, period, subdet, pt in categories:
         names.append('k' + ''.join([data, period, subdet, 'Et', pt]))
+        
+        print name_to_number[data], " ", name_to_number[period], " ",name_to_number[subdet],\
+              " ", name_to_number[pt], " ", name_to_number['scale'], " ", get_value('scale' , data, period, subdet, pt)
+        print name_to_number[data], " ", name_to_number[period], " ",  name_to_number[subdet],\
+              " ", name_to_number[pt], " ", name_to_number['resolution'], " ", get_value('resolution' , data, period, subdet, pt)
+        
     return names
 ## End of get_category_names(categories)
-
-
-def get_enum_lines():
-    '''
-    Returns a list of strings corresponding to lines of a c++ code snippet
-    defining the enum Category.
-    '''
-    ## Get the list of category names
-    lines = get_category_names(get_categories())
-    lines.sort()
-    lines.append('kUnspecified')
-    lines.append('kNumCategories')
-    ## Make sure the first category has value equal to "0":
-    lines[0] = lines[0] + ' = 0'
-    ## Pad lines with whitespace from the right.
-    width = max([len(l) for l in lines])
-    for i in range(len(lines)):
-        lines[i] = '{0:<{width}}'.format(lines[i], width=width)
-    ## Add the prefix to the first line, pad other lines with spaces:
-    prefix = 'enum Category {'
-    indent(lines, ' ' * len(prefix))
-    lines[0] = lines[0].replace(' ' * len(prefix), prefix)
-    ## Add trailing commas
-    for i in range(len(lines) - 1):
-        lines[i] = lines[i] + ','
-    ## Add the final closing brace:
-    lines[-1] = lines[-1] + '};'
-    return lines
-## End of get_enum_lines().
-
-##------------------------------------------------------------------------------
-def indent(lines, prefix):
-    '''
-    Indents lines with the given prefix.
-    '''
-    for i, l in enumerate(lines):
-        lines[i] = prefix + l
-## End of indent.
-
 
 ##------------------------------------------------------------------------------
 def get_value(varname, data, period, subdet, pt):
@@ -246,7 +233,7 @@ def get_workspace(data, period, subdet, pt):
         }
     version = period_version_map[period]
     
-    #filename = os.path.join(basepath, jobname, basefilename)
+    filename = os.path.join(basepath, jobname, basefilename)
     filename = os.path.join(basepath, version, jobname)
     #print "filename= ", filename
     #print "jobname= ",  jobname.replace(" ", "").rstrip(jobname[-5:])
