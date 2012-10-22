@@ -213,6 +213,13 @@ _files['yyv4NoJSON'] = {
               'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
     }
     
+## Yong's trees with the Hgg photon regression v2, looser selection
+## and Rochester corrections applied.
+_files['yyv5'] = {
+    'data': ['Data_yyv3_muon_corr_2011.root'],
+    'z'   : ['MC_yyv3_muon_corr_2011.root']
+    }
+    
 _files['v13'] = {
     'z' : [('esTree_V13_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
             'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
@@ -284,7 +291,8 @@ _treeNames = {
     'yyv3' : 'Analysis',
     'yyv3_e5x5' : 'Analysis',    
     'yyv4' : 'Analysis',    
-    'yyv4NoJSON' : 'Analysis',
+    'yyv4NoJSON' : 'Analysis',    
+    'yyv5' : 'Analysis',    
     'sixie' : 'ZmumuGammaEvent',
 }
 
@@ -297,7 +305,7 @@ def getChains(version='v4'):
             print "Loading ", name, ":", f
             chains[name].Add( os.path.join(_path, f) )
 
-    print "=====version: ", version
+    # print "=====version: ", version
 
     if version == 'sixie':
 	es_to_sixie_name_map ='''mmMass DileptonMass
@@ -327,7 +335,7 @@ def getChains(version='v4'):
                 print "====es_name: ", es_name, "sixie_name:  ", sixie_name
                 ch.SetAlias(es_name, sixie_name)
 					
-    if version in 'yyv1 yyv2 yyv3 yyv3_e5x5 yyv4 yyv4NoJSON'.split():
+    if version in 'yyv1 yyv2 yyv3 yyv3_e5x5 yyv4 yyv4NoJSON yyv5'.split():
         ## On each line corresponding to a list item, 
         ## 1st is esTree name, 2nd is YY tree name in Yong's trees.
         es_to_yy_name_map = '''mmMass          mm 
@@ -352,7 +360,7 @@ def getChains(version='v4'):
                 '''mmgMass         mmg
                   phoPt           gamenergy/cosh(gameta)'''.split('\n')
                   )
-        elif version in 'yyv2 yyv3 yyv4 yyv4NoJSON'.split():
+        elif version in 'yyv2 yyv3 yyv4 yyv4NoJSON yyv5'.split():
             ## Use the regression cluster corrections
             es_to_yy_name_map.extend(
                 '''mmgMass         mmgcorr
