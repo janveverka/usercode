@@ -28,7 +28,8 @@ def main():
     #print '\n'.join(elines)
     #print
     #print '\n'.join(lines)
-
+    
+    
     get_category_names(get_categories())
 
         
@@ -100,7 +101,8 @@ def get_categories():
     for subdet in 'Barrel Endcaps'.split():
         for pt in 'PtLow_10_PtHigh_12 PtLow_12_PtHigh_15 PtLow_15_PtHigh_20 PtLow_20_PtHigh_999'.split():
             for data in 'MonteCarlo RealData'.split():
-                for period in '2011 2012'.split():
+                for period in '2011'.split():
+                #for period in '2011 2012'.split():
                     categories.append((data, period, subdet, pt))
     #print "CATEGORIES" ,categories               
     return categories
@@ -130,12 +132,9 @@ def get_category_names(categories):
     print "Scales"
     print "PERIOD(2011, 2012)=(0,1) DATA(mc,data)=(0,1) Detector(EB,EE)=(0,1) Pt(0,1,2,3) Correction(scale,resolution)=(0,1) Number"
     for data, period, subdet, pt in categories:
-        names.append('k' + ''.join([data, period, subdet, 'Et', pt]))
-        
-        print name_to_number[data], " ", name_to_number[period], " ",name_to_number[subdet],\
-              " ", name_to_number[pt], " ", name_to_number['scale'], " ", get_value('scale' , data, period, subdet, pt)
-        print name_to_number[data], " ", name_to_number[period], " ",  name_to_number[subdet],\
-              " ", name_to_number[pt], " ", name_to_number['resolution'], " ", get_value('resolution' , data, period, subdet, pt)
+        print name_to_number[period],name_to_number[data],name_to_number[subdet], name_to_number[pt], name_to_number['scale'], "%0.2f"%get_value('scale' , data, period, subdet, pt)
+    for data, period, subdet, pt in categories:   
+        print name_to_number[period], name_to_number[data], name_to_number[subdet], name_to_number[pt], name_to_number['resolution'], "%0.2f"%get_value('resolution' , data, period, subdet, pt)
         
     return names
 ## End of get_category_names(categories)
@@ -192,8 +191,8 @@ def get_jobname(data, period, subdet, pt):
         }
 
     period_version_map = {
-        '2011' : 'yyv3',
-        '2012' : 'sixie',
+        '2011' : 'yyv3corr',#name on file
+        '2012' : 'sixie',#name on file
         }
     
     subdet_label_map = {
@@ -223,13 +222,15 @@ def get_workspace(data, period, subdet, pt):
     Returns the workspace for the given data, subdet and pt.
     '''
     jobname = get_jobname(data, period, subdet, pt)
+    #print "jobname: ", jobname
     basepath = get_basepath()
+    #print "basepath: ", basepath
     basefilename = ('phosphor5_model_and_fit_'
                     'test_mc_EE_highR9_pt30to999_v13_evt1of4.root')
     
     period_version_map = {
-        '2011' : 'yyv3',
-        '2012' : 'sixie',
+        '2011' : 'yyv3corr',#modifiy folder inside day it was created
+        '2012' : 'sixiecorr',#modifiy folder inside day it was created
         }
     version = period_version_map[period]
     
@@ -252,7 +253,7 @@ def get_basepath():
     '''
     hostname_to_basepath_map = {
         't3-susy.ultralight.org':
-            '/home/cmorgoth/phosphor/CMSSW_4_2_8_patch7/src/JPsi/MuMu/test/escale/phosphor/Phosphor_Interface/WedSep26_2012/',
+            '/home/cmorgoth/phosphor/CMSSW_4_2_8_patch7/src/JPsi/MuMu/test/escale/phosphor/Phosphor_Interface/MonOct8_2012/',
         'Jan-Veverkas-MacBook-Pro.local':
             '/Users/veverka/Work/Data/phosphor/sge_correction',
         }

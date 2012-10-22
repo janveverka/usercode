@@ -125,6 +125,8 @@ def main():
 	Globals.cuts.append('mmMass + mmgMass < 180')
         Globals.cuts.append('minDeltaR < 1.5')
 	Globals.cuts.append('mmgMass > 52')
+	Globals.cuts.append('mu1Pt > 15')
+	Globals.cuts.append('mu2Pt > 10')
         
         if debug:
             print 'COMMAND Line CONFIGURATION ------>:'
@@ -161,6 +163,9 @@ def main():
 
         Globals.cuts.append('mmMass + mmgMass < 180')
         Globals.cuts.append('minDeltaR < 1.5')
+	Globals.cuts.append('mmgMass > 52')
+	Globals.cuts.append('mu1Pt > 15')
+	Globals.cuts.append('mu2Pt > 10')
         
         if debug:
             print 'Calling Parse Configuration File Function------>:'
