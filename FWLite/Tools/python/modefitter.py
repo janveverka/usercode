@@ -5,11 +5,12 @@ Jan Veverka, Caltech, 17 October 2012.
 '''
 
 import ROOT
-import JPsi.MuMu.common.roofit as roo
-from FWLite.Tools.parameterizedkeyspdf import ParameterizedKeysPdf
-
+import FWLite.Tools.roofit as roo
 import FWLite.Tools.cmsstyle as cmsstyle
 import FWLite.Tools.canvases as canvases
+
+from FWLite.Tools.parameterizedkeyspdf import ParameterizedKeysPdf
+from FWLite.Tools.resampler import resampler
 
 ##------------------------------------------------------------------------------
 class KeysResponseFitter:
