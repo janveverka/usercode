@@ -59,7 +59,8 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
-name = 'egm_data_EE_pt25to999_highR9_v13'
+# name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
+name = 'egm_fc_expbkg_data_EE_highR9_pt25to999_yyv5'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -67,8 +68,11 @@ outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 strain = 'nominal'
 rtrain = 'nominal'
 
+# sfit = 'nominal'
+# rfit = 'nominal'
+
 sfit = 'nominal'
-rfit = 'nominal'
+rfit = 1.0
 
 fit_data_fraction = 0.25
 reduce_data = False
@@ -135,6 +139,39 @@ def parse_name_to_fake_data_cut(name):
 
 
 ##------------------------------------------------------------------------------
+def parse_name_to_target_smearing_of_mc_fit(name):
+    '''
+    Parses the name and decides whether to smear the MC used in the fit and
+    extracts the target scale and resolution values.
+    Stores their values in the global variables sfit and rfit.
+    If the name is split into tokens separated by the underscore "_" and
+    one of the tokens is "sfitX.X" or "rfitY.Y" then it means that 
+    the MC fit sample should be smeared to scale sfit = X.X and
+    resolution rfit = Y.Y.
+    '''
+    global sfit, rfit
+    for tok in name.split('_'):
+        if 'sfit' in tok:
+            sfit = float(tok.replace('sfit', ''))
+        if 'rfit' in tok:
+            rfit = float(tok.replace('rfit', ''))
+## End of parse_name_to_target_smearing_of_mc_fit(name)
+
+
+##------------------------------------------------------------------------------
+def parse_name_whether_use_exp_bkg(name):
+    '''
+    Parses the name and decides whether to add an exponential bkg model
+    (use_exp_bkg = True).
+    '''
+    global use_exp_bkg
+    use_exp_bkg = False
+    if 'expbkg' in name.split('_'):
+        use_exp_bkg = True
+## End of parse_name_whether_use_exp_bkg(name)
+
+
+##------------------------------------------------------------------------------
 def parse_name_to_use_real_data(name):
     '''
     Parses the name and decides whether to use real data or MC for the fit.
@@ -158,7 +195,10 @@ def parse_name_to_cuts():
     global cuts
     ## For EGM-11-001 to help with regression
     # cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5', 'minDeltaR > 0.1']
-    cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5']
+    cuts = ['mmMass + mmgMass < 180', 
+            'minDeltaR < 1.5', 
+            'mu1Pt > 15', 
+            'mu2Pt > 10']
     # cuts = ['mmMass + mmgMass < 180']
     if 'EB' in name:
         cuts.append('phoIsEB')
@@ -191,7 +231,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON v11 v13 v14 v15'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 v11 v13 v14 v15'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -219,10 +259,17 @@ def parse_name_to_title():
 
     parse_name_to_cuts()
     
+    if data_tree_version in 'yyv1 yyv2 yyv3'.split():
+        tokens.append('16 Jan Re-reco')
+        latex_labels.append('16 Jan Re-reco')
+    elif data_tree_version in 'yyv4 yyv4NoJSON'.split():
+        tokens.append('14 Jul Re-reco')
+        latex_labels.append('14 Jul Re-reco')
+    
     if model_tree_version in 'v11'.split():
         tokens.append('2011A+B PU S4 MC Model')
         latex_labels.append('2011A+B PU S4 MC Model')
-    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON'.split():
+    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5'.split():
         tokens.append('2011A+B PU S6 MC Model')
         latex_labels.append('2011A+B PU S6 MC Model')
     elif model_tree_version == 'v14':
@@ -231,12 +278,10 @@ def parse_name_to_title():
     elif model_tree_version == 'v15':
         tokens.append('2011B PU')
         latex_labels.append('2011B PU S6 MC Model')
-    elif model_tree_version in 'yyv1 yyv2 yyv3'.split():
-        tokens.append('16 Jan Re-reco')
-        latex_labels.append('16 Jan Re-reco')
-    elif model_tree_version in 'yyv4 yyv4NoJSON'.split():
-        tokens.append('14 Jul Re-reco')
-        latex_labels.append('14 Jul Re-reco')
+        
+    if model_tree_version in 'yyv5'.split():
+        tokens.append('mu corrections')
+        latex_labels.append('#mu corr.')
     
     if 'EB' in name:
         tokens.append('Barrel')
@@ -281,10 +326,21 @@ def parse_name_to_title():
     elif model_tree_version == 'yyv2':        
         tokens.append('Caltech Regression')
         latex_labels.append('Caltech Regression')
-    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON'.split():        
-        tokens.append('Hgg v2 Regression')
-        latex_labels.append('Hgg v2 Regression')
+    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5'.split():        
+        tokens.append('Hgg v2 Regr.')
+        latex_labels.append('Hgg v2 Regr.')
+    
+    if 'sfit' in name:
+        tokens.append('starget: %g %%' % sfit)
+        latex_labels.append('#mu_{target} = %g %%' % sfit)
+    if 'rfit' in name:
+        tokens.append('rtarget: %g %%' % rfit)
+        latex_labels.append('#mu_{target} = %g %%' % rfit)
 
+    if 'expbkg' in name.split('_'):
+        tokens.append('exp. bkg.')
+        latex_labels.append('exp. bkg.')
+    
     title = ', '.join(tokens)
     latex_title = ', '.join(latex_labels)
 ## End of parse_name_to_title().
@@ -297,7 +353,9 @@ def define_globals():
     '''
     global plots
     plots = []
-    parse_name_to_cuts()    
+    parse_name_to_cuts()
+    parse_name_to_target_smearing_of_mc_fit(name)
+    parse_name_whether_use_exp_bkg(name)
     parse_name_to_title()
 ## End of define_globals()
 
@@ -371,7 +429,7 @@ def set_ranges_for_data_observables():
     '''
     Sets the ranges used for fitting and plotting.
     '''
-    mmgMass.setRange('plot', 70, 110)
+    mmgMass.setRange('plot', 60, 120)
     mmgMass.setRange('fit', 60, 120)
 ## End of set_ranges_for_data_observables().
 
@@ -517,9 +575,9 @@ def get_data(chains = getChains('v11')):
         'mmMass' : 'mmMass' ,
         'phoERes'    : '100 * phoERes',
         'mmgMassPhoGenE': ('threeBodyMass(mu1Pt, mu1Eta, mu1Phi, 0.106, '
-                            '              mu2Pt, mu2Eta, mu2Phi, 0.106, '
-                            '              phoGenE * phoPt / phoE, '
-                            '                     phoEta, phoPhi, 0)'),
+                           '              mu2Pt, mu2Eta, mu2Phi, 0.106, '
+                           '              phoGenE * phoPt / phoE, '
+                           '                     phoEta, phoPhi, 0)'),
         'weight' : 'pileup.weight',
         }
     
@@ -730,22 +788,28 @@ def build_model():
     zj_pdf = ROOT.RooKeysPdf('zj0_pdf', 'zj0_pdf', mmgMass,
                             data['zj0'], ROOT.RooKeysPdf.NoMirror, 3)
     w.Import(zj_pdf)
-
+    
     ## Build the PDF for other backgrounds.
+    global exp_pdf
+    exp_pdf = w.factory('Exponential::exp_pdf(mmgMass, exp_c[-0.1,-10,0])')
+    
     global bkg_pdf
-    bkg_pdf = w.factory('Exponential::bkg_pdf(mmgMass, bkg_c[-1,-10,10])')
+    bkg_pdf = w.factory('SUM::bkg_pdf(exp_f[0, 0, 1] * exp_pdf, zj0_pdf)')
 
     ## Build the composite model PDF
     global pm
     pm = w.factory(
         ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
         ##                    {name}_zj_N    [10,0,1e6]   * {name}_zj_pdf,
-        ##                    {name}_bkg_N   [10,0,1e6]   * {name}_bkg_pdf)
+        ##                    {name}_bkg_N   [10,0,1e6]   * {name}_exp_pdf)
         ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
         ##                    {name}_zj_N[50,0,1e6] * {name}_zj_pdf)
         ## '''.format(name=name)
-        'SUM::pm(signal_f[0.97,0,1] * signal_model0, zj0_pdf)'
+        'SUM::pm(signal_f[0.9, 0, 1] * signal_model0, bkg_pdf)'
         )
+    if not use_exp_bkg:
+        w.var('exp_f').setConstant()
+        w.var('exp_c').setConstant()
     
     check_timer('2.4 build full S+B model')
 ## End build_full_model()
@@ -756,10 +820,10 @@ def read_model_from_workspace(workspace):
     '''
     Reads the full signa + background model from a given workspace.
     '''
-    global signal_model, zj_pdf, bkg_pdf, pm
+    global signal_model, zj_pdf, exp_pdf, pm
     signal_model = workspace.pdf('signal_model0')
     zj_pdf = workspace.pdf('zj0_pdf')
-    bkg_pdf = workspace.pdf('bkg_pdf')
+    exp_pdf = workspace.pdf('exp_pdf')
     pm = workspace.pdf('pm')
 ## End of read_model_from_workspace().
 
@@ -869,7 +933,9 @@ def plot_fit_to_real_data(label):
     data[label].plotOn(plot)
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-              roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
+              roo.Components('bkg*'), roo.LineStyle(ROOT.kDashed))
+    #pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+              #roo.Components('bkg*'), roo.LineStyle(ROOT.kDotted))
     canvases.next(name + '_' + label).SetGrid()
     plot.Draw()
 ## End of plot_fit_to_real_data().

@@ -244,7 +244,7 @@ def make_scale_plots(configurations):
     scale versus pt for all sets of measurements specified.
     These measurements are either from the true or the PHOSPHOR fit.
     '''
-    for cfg in configurations[:]:
+    for cfg in configurations[:2]:
         ## Only check EE 2011AB
         #if (not 'EE_lowR9' in cfg.name) or (not 'AB' in cfg.name):
             #continue
@@ -326,91 +326,13 @@ def make_resolution_plots(configurations):
 
 
 #==============================================================================
-def histogram_residuals():
-    '''
-    Makes and plots histograms of residuals for the given plotters.
-    Relies on the fact that the plotters are in particular order:
-    1. scale plotters
-      1.1. crossvalidation 1
-        1.1.1. Pt 10-12 GeV
-        1.1.2. Pt 12-15 GeV
-        ...
-        1.1.6. Pt > 30 GeV
-      1.2. crossvalidation 2
-      ...
-      1.4. crossvalidation 4
-    2. resolution plotters
-      2.1. crossvalidation 1
-        2.1.1. Pt 10-12 GeV
-        2.1.2. Pt 12-15 GeV
-        ...
-        2.1.6. Pt > 30 GeV
-      2.2. crossvalidation 2
-      ...
-      2.4. crossvalidation 4
-    '''
-    for plot in plotters:
-        if 'scale' in plot.name:
-            xtitle = 'Fitted - True Scale (%)'
-            title = 'Scale Residuals'
-        else:
-            xtitle = 'Fitted - True Resolution (%)'
-            title = 'Resolution Residuals'
-
-        plot.residual_histogram = hist = ROOT.TH1F("h_" + plot.name,
-                                                  plot.title + ", " + title,
-                                                  21, -5.25, 5.25)
-        hist.GetXaxis().SetTitle(xtitle)
-        hist.GetYaxis().SetTitle("Fits")
-
-        for gtrue, gfit in zip(plot.graphs[:4], plot.graphs[4:]):
-            for i in range(gtrue.GetN()):
-                residual = gfit.GetY()[i] - gtrue.GetY()[i]
-                hist.Fill(residual)
-        canvases.next(plot.residual_histogram.GetName())
-        # hist.GetXaxis().SetRangeUser(hist.GetMean() - 3 * hist.GetRMS(),
-        #                              hist.GetMean() + 3 * hist.GetRMS())
-        hist.Draw()
-        hist.Fit("gaus")
-    ## End of loop over plotters
-    canvases.update()
-
-    h_scale_residuals = ROOT.TH1F("h_scale_residuals",
-                                  "Scale Residuals",
-                                  21, -5.25, 5.25)
-
-    h_scale_residuals_eb = ROOT.TH1F("h_scale_residuals_eb",
-                                    "Barrel, Scale Residuals",
-                                    21, -5.25, 5.25)
-
-    h_scale_residuals_ee = ROOT.TH1F("h_scale_residuals_ee",
-                                    "Endcaps, Scale Residuals",
-                                    21, -5.25, 5.25)
-
-    for i in range(4):
-        h_scale_residuals.Add(plotters[i*3 + 2].residual_histogram)
-    for i in range(2):
-        h_scale_residuals.Add(plotters[i*3 + 2].residual_histogram)
-    for i in range(2):
-        h_scale_residuals.Add(plotters[i*3 + 8].residual_histogram)
-
-    for hist in [h_scale_residuals,
-                h_scale_residuals_eb,
-                h_scale_residuals_ee]:
-        canvases.next(hist.GetName())
-        hist.Fit("gaus")
-        hist.Draw()
-## End of histogram_residuals(..)
-
-
-#==============================================================================
 def main():
     '''
     Main entry point of execution.
     '''
     make_scale_plots(scale_configurations)
-    make_resolution_plots(resolution_configurations)
-    histogram_residuals()
+    # make_resolution_plots(resolution_configurations)
+    # histogram_residuals()
 ## End of main(..)
 
 

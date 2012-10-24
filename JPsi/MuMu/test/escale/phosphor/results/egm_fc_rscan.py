@@ -134,7 +134,7 @@ def rfit_high_error_getter_factory(varname):
     variable of the given name.
     '''
     return lambda workspace: oplus(workspace.var(varname).getErrorHi(),
-                                   0.0 * workspace.var(varname).getVal())
+                                   0.2 * workspace.var(varname).getVal())
 ## high_error_getter_factory(name)
 
 
@@ -145,7 +145,7 @@ def rfit_low_error_getter_factory(varname):
     variable of the given name.
     '''
     return lambda workspace: oplus(workspace.var(varname).getErrorLo(),
-                                   0.0 * workspace.var(varname).getVal())
+                                   0.2 * workspace.var(varname).getVal())
 ## rfit_low_error_getter_factory(name)
 
 
