@@ -10,8 +10,12 @@ if (_hostname == 't3-susy.ultralight.org'
     ## Path for the t3-susy
     ##_path = '/raid2/veverka/esTrees/'#original place changed after raid2 problem
     ##_path = '/mnt/hadoop/user/veverka/esTrees/'
-    _path = '/home/cmorgoth/ZmumuGammaData/'
-    ##_path = '/raid2/veverka/esTrees/'
+    ##_path = '/home/cmorgoth/ZmumuGammaData/sixie_2012_hgg_regresion_v3/'
+    ##_path = '/home/cmorgoth/scratch/CMSSW_5_2_5/src/UserCode/CPena/src/PhosphorCorrFunctor/MuonCorrectedTrees/'##MuonCorrectedTrees 2011 and 2012
+    _path = '/home/cmorgoth/scratch/CMSSW_5_2_5/src/UserCode/CPena/src/PhosphorCorrFunctor/GaussSmearingTrees'##Test for Gaussian Smearing
+    #_path = '/home/cmorgoth/scratch/CMSSW_5_2_5/src/UserCode/CPena/src/PhosphorCorrFunctor/FabSmearing'##Test for Fabrice Smearing
+    ##_path = '/home/cmorgoth/ZmumuGammaData/SIXIE_LAST_VERSION/'
+    
 elif _hostname == 'nbcitjv':
     ## Path for Jan's Dell Inspiron 6000 laptop
     _path = '/home/veverka/Work/data/esTrees'
@@ -27,9 +31,9 @@ else:
 _files = {}
 _files['v1'] = {
     'data' : '''
-            esTree_ZMu-May10ReReco-42X-v3_V1.root
-            esTree_PromptReco-v4_FNAL_42X-v3_V1.root
-            '''.split(),
+    esTree_ZMu-May10ReReco-42X-v3_V1.root
+    esTree_PromptReco-v4_FNAL_42X-v3_V1.root
+    '''.split(),
     'z' : ['esTree_DYToMuMu_pythia6_AOD-42X-v4_V1.root'],
 }
 
@@ -154,11 +158,37 @@ _files['yyv2'] = {
 
 ## Yong's trees with the Hgg photon regression v2
 _files['yyv3'] = {
+#    'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AOD.'
+#              'muid2.phtid1.phtcorr96.datapu0.mcpu0.r1to129.root')],#Original from Jan
+
+#    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
+#              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
+#              'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],#Original from Jan    
+#    'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AODv02b.muid2.phtid2.phtcorr96.datapu0.mcpu0.r1to129.scale0.root')],
+#    'z': [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythiaFall11-PU_S6_START42_V14B-v1AODSIMv02b.muid2.phtid2.phtcorr96.datapu6.mcpu1.r1to38.scale0.root')],
+#    'z': [('MC_yyv3_muon_corr_2011.root')],##Muon Corrected Trees
+#    'data': [('Data_yyv3_muon_corr_2011.root')],##Muon Corrected Trees
+    
+    'data': [('MC_yyv3_muon_corr_2011_1.5PercentGaussSmearing.root')],##Muon Corrected Trees + Gaussian Smearing
+    'z': [('MC_yyv3_muon_corr_2011.root')],##Muon Corrected Trees
+    }
+
+##Fabrice Smearing threes
+_files['yyv6'] = {
+    'data': [('Data_yyv3_muon_corr_2011.root')],##Muon Corrected Trees 
+    'z': [('MC_muon_corr_2011_FabSmearTest.root')],##Muon Corrected Trees + Fab Smearing
+    }
+
+## Yong's trees with the Hgg photon regression v2
+## Montecarlo Scale is corrected to zero, resolution is corrected to match data(resolution)
+## For now data is uncorrected/. todo correct data!
+_files['yyv3corr'] = {
     'data': [('testSelectionfsr.v3.DoubleMuRun2011AB16Jan2012v1AOD.'
               'muid2.phtid1.phtcorr96.datapu0.mcpu0.r1to129.root')],
-    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
-              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
-              'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
+    'z': [('small.root')],
+#    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
+#              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
+#              'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
     }
     
 ## Yong's trees with e5x5 for the photon energy
@@ -265,9 +295,18 @@ _files['v15'] = {
 
 ##New Sixie trees first try to make it work
 _files['sixie'] = {
-	'data': [ ( 'ZmumuGammaNtuple_Run2012C.root' ), 
-		( 'ZmumuGammaNtuple_Run2012AB.root' ) ],
-	'z'   : [ ( 'ZmumuGammaNtuple_DYM50_53X.root' ) ],
+        #'data': [ ( 'ZmumuGammaNtuple_Run2012AB_Jun29Rereco.root' ) ],#Original Line
+        #'z'   : [ ( 'ZmumuGammaNtuple_DYM50_52X.root' ) ],#Original Line
+        #THIS LINE IS USED AS CLOSURE TEST(Must Comment other MC->z)
+        
+    'z': [('MC_sixie_muon_corr_2012.root')],#Muon Corrected MC
+    'data': [('Data_sixie_muon_corr_2012.root')],#Muon Corrected data   
+        
+	}
+
+_files['sixie2'] = {
+	'data': [ ( 'ZmumuGammaNtuple_Run2012AB_Jun29Rereco.root' ) ],
+	'z'   : [ ( 'testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythiaFall11-PU_S6_START42_V14B-v1AODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root' ) ],
 	}
 
 
@@ -289,25 +328,36 @@ _treeNames = {
     'yyv1' : 'Analysis',
     'yyv2' : 'Analysis',    
     'yyv3' : 'Analysis',
+    'yyv3corr' : 'Analysis',
     'yyv3_e5x5' : 'Analysis',    
-    'yyv4' : 'Analysis',    
+    'yyv4' : 'Analysis',
+    'yyv5' : 'Analysis',
+    'yyv6' : 'Analysis',
     'yyv4NoJSON' : 'Analysis',    
-    'yyv5' : 'Analysis',    
     'sixie' : 'ZmumuGammaEvent',
+    'sixie2': 'ZmumuGammaEvent'
 }
 
 
 def getChains(version='v4'):
     chains = {}
     for name, flist in _files[version].items():
-        chains[name] = TChain( _treeNames[version] )
+        if version != 'sixie2':
+            chains[name] = TChain( _treeNames[version] )
+        else : 
+            if name == 'data':
+                chains[name] = TChain( _treeNames['sixie'] )
+            elif name == 'z':
+                chains[name] = TChain( _treeNames['yyv3'] )
+            
         for f in flist:
             print "Loading ", name, ":", f
             chains[name].Add( os.path.join(_path, f) )
 
     # print "=====version: ", version
 
-    if version == 'sixie':
+    if version == 'sixie' or version == 'sixie2':
+        print "version == 'sixie' or version == 'sixie2'"
 	es_to_sixie_name_map ='''mmMass DileptonMass
         mmgMass Mass
         phoEta PhotonEta
@@ -325,8 +375,14 @@ def getChains(version='v4'):
         pileup.weight Weight
         minDeltaR MinDeltaR
         isFSR IsFSR'''.split('\n')
+
+    
 	
-        for ch in chains.values():
+        for name, ch in chains.items():
+            print name, ch
+            if (version, name) == ('sixie2', 'z'):
+                print " (version, name) == ('sixie2', 'z')"
+                continue
             print "ch sixie: ", ch 
             for name_pair in es_to_sixie_name_map:
                 if len(name_pair.strip()) < 3:
@@ -334,8 +390,9 @@ def getChains(version='v4'):
                 es_name, sixie_name = name_pair.split()
                 print "====es_name: ", es_name, "sixie_name:  ", sixie_name
                 ch.SetAlias(es_name, sixie_name)
-					
-    if version in 'yyv1 yyv2 yyv3 yyv3_e5x5 yyv4 yyv4NoJSON yyv5'.split():
+                
+    if version in 'yyv1 yyv2 yyv3 yyv3corr yyv3_e5x5 yyv4 yyv5 yyv6 yyv4NoJSON sixie2'.split():
+
         ## On each line corresponding to a list item, 
         ## 1st is esTree name, 2nd is YY tree name in Yong's trees.
         es_to_yy_name_map = '''mmMass          mm 
@@ -360,7 +417,9 @@ def getChains(version='v4'):
                 '''mmgMass         mmg
                   phoPt           gamenergy/cosh(gameta)'''.split('\n')
                   )
-        elif version in 'yyv2 yyv3 yyv4 yyv4NoJSON yyv5'.split():
+
+        elif version in 'yyv2 yyv3 yyv3corr yyv4 yyv5 yyv6 yyv4NoJSON sixie2'.split():
+
             ## Use the regression cluster corrections
             es_to_yy_name_map.extend(
                 '''mmgMass         mmgcorr
@@ -386,7 +445,10 @@ def getChains(version='v4'):
                 ])
         ## Set aliases for Yong's trees so that one can use the same names
         ## as in esTrees
-        for ch in chains.values():
+        for name, ch in chains.items():
+            if (version, name) == ('sixie2', 'data'):
+                continue
+            
 	    #print "ch: ", ch 
             for name_pair in es_to_yy_name_map:
                 if len(name_pair.strip()) < 3:
