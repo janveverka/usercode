@@ -60,7 +60,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'egm_fc_expbkg_data_EE_highR9_pt25to999_yyv5'
+name = 'egm_fc_expbkg_data_EE_lowR9_pt25to999_yyv5'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -68,11 +68,11 @@ outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 strain = 'nominal'
 rtrain = 'nominal'
 
-# sfit = 'nominal'
-# rfit = 'nominal'
-
 sfit = 'nominal'
-rfit = 1.0
+rfit = 'nominal'
+
+#sfit = 'nominal'
+#rfit = 1.0
 
 fit_data_fraction = 0.25
 reduce_data = False
@@ -429,7 +429,7 @@ def set_ranges_for_data_observables():
     '''
     Sets the ranges used for fitting and plotting.
     '''
-    mmgMass.setRange('plot', 60, 120)
+    mmgMass.setRange('plot', 70, 110)
     mmgMass.setRange('fit', 60, 120)
 ## End of set_ranges_for_data_observables().
 
@@ -791,24 +791,20 @@ def build_model():
     
     ## Build the PDF for other backgrounds.
     global exp_pdf
-    exp_pdf = w.factory('Exponential::exp_pdf(mmgMass, exp_c[-0.1,-10,0])')
+    exp_pdf = w.factory('Exponential::exp_pdf(mmgMass, exp_c[-0.05,-10,0])')
     
-    global bkg_pdf
-    bkg_pdf = w.factory('SUM::bkg_pdf(exp_f[0, 0, 1] * exp_pdf, zj0_pdf)')
+    # global bkg_pdf
+    # bkg_pdf = w.factory('SUM::bkg_pdf(exp_f[0.2, 0, 1] * exp_pdf, zj0_pdf)')
 
     ## Build the composite model PDF
     global pm
     pm = w.factory(
-        ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
-        ##                    {name}_zj_N    [10,0,1e6]   * {name}_zj_pdf,
-        ##                    {name}_bkg_N   [10,0,1e6]   * {name}_exp_pdf)
-        ## '''SUM::{name}_pm5({name}_signal_N[1000,0,1e6] * {name}_signal_model,
-        ##                    {name}_zj_N[50,0,1e6] * {name}_zj_pdf)
-        ## '''.format(name=name)
-        'SUM::pm(signal_f[0.9, 0, 1] * signal_model0, bkg_pdf)'
+        'SUM::pm(signal_N[1e3,0,1e10] * signal_model0, exp_N[2e2,0,1e10] * exp_pdf, zj_N[2e2,0,1e10] *zj0_pdf)'
         )
+        
     if not use_exp_bkg:
-        w.var('exp_f').setConstant()
+        w.var('exp_N').setVal(0)
+        w.var('exp_N').setConstant()
         w.var('exp_c').setConstant()
     
     check_timer('2.4 build full S+B model')
@@ -932,8 +928,12 @@ def plot_fit_to_real_data(label):
     plot.SetTitle('%s, %s' % (title_start, latex_title))
     data[label].plotOn(plot)
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-              roo.Components('bkg*'), roo.LineStyle(ROOT.kDashed))
+    if use_exp_bkg:
+        pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+                  roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
+    else:
+        pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+                  roo.Components('*zj*'), roo.LineStyle(ROOT.kDotted))
     #pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
               #roo.Components('bkg*'), roo.LineStyle(ROOT.kDotted))
     canvases.next(name + '_' + label).SetGrid()
@@ -947,6 +947,9 @@ def draw_latex_for_fit_to_real_data():
     Draw latex results to the plot of the fit to real data.
     '''
     global fsr_purity
+    ntot = 0
+    for x in 'signal_N zj_N'.split():
+        ntot += w.var(x).getVal()
     Latex([
         'E^{#gamma} Scale (%)',
         '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
@@ -967,8 +970,8 @@ def draw_latex_for_fit_to_real_data():
             'Signal Purity (%)',
             '  MC Truth: %.2f' % fsr_purity,
             '  Data Fit: %.2f #pm %.2f' % (
-                100 * w.var('signal_f').getVal(),
-                100 * w.var('signal_f').getError()
+                100 * w.var('signal_N').getVal() / ntot,
+                100 * w.var('signal_N').getError() / ntot
                 )
         ],
         position=(0.2, 0.8)
