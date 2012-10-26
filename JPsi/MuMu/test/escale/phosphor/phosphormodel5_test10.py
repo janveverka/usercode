@@ -66,10 +66,10 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'egm_expbkg_fc_data_EE_highR9_pt30to999_yyv5'
+name = 'egm_expbkg_fc_data_EB_pt25to999_yyv5'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
-outputfile = 'phosphor5_model_and_fit_' + name + '.root'
+outputfile = 'phosphor5_model_and_fit_' + name + '2.root'
 
 strain = 'nominal'
 rtrain = 'nominal'
@@ -381,8 +381,8 @@ def read_workspace_from_file(filename):
     '''
     Read the default workspace w from a file of the given filename.
     '''
-    global w
-    w = ROOT.TFile.Open(filename).Get(name + '_workspace')
+    global wsrc
+    wsrc = ROOT.TFile.Open(filename).Get(name + '_workspace')
 ## End of read_workspace_from_file()
 
 
@@ -447,47 +447,36 @@ def define_model_parameters():
     as python globals.
     '''
     ## Define model parameters.
-    global phoScale, phoRes, phoScaleTrue, phoResTrue
+    global phoScale, phoRes
     phoScale     = w.factory('phoScale[0,-50,50]')
     phoRes       = w.factory('phoRes[3,0.1,20.1]')
-    phoScaleTrue = w.factory('phoScaleTrue[0,-50,50]')
-    phoResTrue   = w.factory('phoResTrue[1.5,0.01,50]')
-
-    ## Prep for storing fit results in the workspace.
-    global phoScaleTarget, phoResTarget, params
-    phoScaleTarget = w.factory('phoScaleTarget[0,-50,50]')
-    phoResTarget   = w.factory('phoResTarget[5,0.01,50]')
-    params         = ROOT.RooArgSet(phoScaleTarget, phoResTarget)
-    w.defineSet('params', params)
-
     ## Set units.
-    for x, u in zip([phoScale, phoRes, phoScaleTrue, phoResTrue,
-                     phoScaleTarget, phoResTarget],
-                    '% % % % % %'.split()):
+    for x, u in zip([phoScale, phoRes], '% %'.split()):
         x.setUnit(u)
-
 ## End of define_model_parameters().
 
 
+##------------------------------------------------------------------------------
+def define_mc_true_parameters():
+    ## Prep for storing fit results in the workspace.
+    global phoScaleTrue, phoResTrue
+    phoScaleTrue = w.factory('phoScaleTrue[0,-50,50]')
+    phoResTrue   = w.factory('phoResTrue[1.5,0.01,50]')
+    ## Set units.
+    for x, u in zip([phoScaleTrue, phoResTrue], '% %'.split()):
+        x.setUnit(u)
+## End of define_mc_true_parameters()
+
+        
 ##------------------------------------------------------------------------------
 def read_model_parameters_from_workspace(workspace):
     '''
     Reads model parameters form the given workspace and defines them as 
     python globals.
     '''
-    global phoScale, phoRes, phoScaleTrue, phoResTrue
+    global phoScale, phoRes
     phoScale     = workspace.var('phoScale')
     phoRes       = workspace.var('phoRes')
-    phoScaleTrue = workspace.var('phoScaleTrue')
-    phoResTrue   = workspace.var('phoResTrue')
-    
-    
-    ## Prep for storing fit results in the workspace.
-    global phoScaleTarget, phoResTarget, params
-    phoScaleTarget = workspace.var('phoScaleTarget')
-    phoResTarget   = workspace.var('phoResTarget')
-    params         = workspace.set('params')
-  
 ## End of read_model_parameters_from_workspace
 
 
@@ -569,7 +558,7 @@ def set_default_integrator_precision(eps_abs, eps_rel):
 
 
 ##------------------------------------------------------------------------------
-def get_data(chains = getChains('v11')):
+def get_data(chains): # = getChains('v11')):
     '''
     Get the nominal data that is used for smearing.
     '''
@@ -637,31 +626,7 @@ def get_data(chains = getChains('v11')):
         data['fsr0'] = data['fsr0'].reduce(
             roo.EventRange(0, int(reduced_entries))
             )
-
-    data['zj0'].SetName('zj0_mc')
-    w.Import(data['zj0'])
-
-    ##-- Calculate MC Truth Purity ---------------------------------------------
-    if use_independent_fake_data:
-        num_fsr_events = data['fsr1'].sumEntries()
-        num_zj_events = data['zj1'].sumEntries()
-    else:
-        num_fsr_events = data['fsr0'].sumEntries()
-        num_zj_events = data['zj0'].sumEntries()
-    global fsr_purity
-    fsr_purity = 100 * num_fsr_events / (num_fsr_events + num_zj_events)
     
-    ##-- Get Smeared Data ------------------------------------------------------
-    old_precision = set_default_integrator_precision(2e-9, 2e-9)
-    global calibrator0, calibrator1, fit_calibrator
-    calibrator0 = MonteCarloCalibrator(data['fsr0'], printlevel=1, rho=1.5)
-    if use_independent_fake_data:
-        calibrator1 = MonteCarloCalibrator(data['fsr1'], printlevel=1, rho=1.5)
-        fit_calibrator = calibrator1
-    else:
-        fit_calibrator = calibrator0
-    set_default_integrator_precision(*old_precision)
-
     ##-- Check the time -------------------------------------------------------
     check_timer(
         '1. init and get_data (%d entries)' % (
@@ -673,7 +638,44 @@ def get_data(chains = getChains('v11')):
 
 
 ##------------------------------------------------------------------------------
+def define_calibrators():
+    '''
+    Defines calibrators.
+    '''
+    old_precision = set_default_integrator_precision(2e-9, 2e-9)
+    global calibrator0, calibrator1, fit_calibrator
+    calibrator0 = MonteCarloCalibrator(data['fsr0'], printlevel=1, rho=1.5)
+    if use_independent_fake_data:
+        calibrator1 = MonteCarloCalibrator(data['fsr1'], printlevel=1, rho=1.5)
+        fit_calibrator = calibrator1
+    else:
+        fit_calibrator = calibrator0
+    set_default_integrator_precision(*old_precision)
+## End of define_calibrators()
+
+
+##------------------------------------------------------------------------------
+def calculate_mc_true_purity():
+    '''
+    Defines a global variable fsr_purity and sets it to the MC truth purity.
+    '''
+    if use_independent_fake_data:
+        num_fsr_events = data['fsr1'].sumEntries()
+        num_zj_events = data['zj1'].sumEntries()
+    else:
+        num_fsr_events = data['fsr0'].sumEntries()
+        num_zj_events = data['zj0'].sumEntries()
+    global fsr_purity
+    fsr_purity = 100 * num_fsr_events / (num_fsr_events + num_zj_events)
+## End of calculate_mc_true_purity()
+
+
+##------------------------------------------------------------------------------
 def get_confint(x, cl=5):
+    '''
+    Returns the confidence interval of given confidence level cl for the
+    given variable x.
+    '''
     if x.hasAsymError():
         if x.getErrorHi() <= 0.:
             ehi = x.getError()
@@ -718,8 +720,13 @@ def outro(make_plots=True, save_workspace=True):
     'Closing stuff'
     canvases.update()
     if make_plots:
-        canvases.make_plots(['png', 'eps'])
+        canvases.make_plots(['png', 'root'])
+        canvases.make_pdf_from_eps()
 
+    for label, dataset in data.items():
+        dataset.SetName('data_' + label)
+        w.Import(dataset)
+    
     if save_workspace:
         for c in canvases.canvases:
             if c:
@@ -826,10 +833,11 @@ def read_model_from_workspace(workspace):
     Reads the full signa + background model from a given workspace.
     '''
     global signal_model, zj_pdf, exp_pdf, pm
-    signal_model = workspace.pdf('signal_model0')
-    zj_pdf = workspace.pdf('zj0_pdf')
-    exp_pdf = workspace.pdf('exp_pdf')
-    pm = workspace.pdf('pm')
+    w.Import(workspace.pdf('pm'))
+    pm = w.pdf('signal_model0')
+    signal_model = w.pdf('signal_model0')
+    zj_pdf = w.pdf('zj0_pdf')
+    exp_pdf = w.pdf('exp_pdf')
 ## End of read_model_from_workspace().
 
 
@@ -842,12 +850,33 @@ def init():
     define_workspace()
     define_data_observables()
     define_model_parameters()
+    define_mc_true_parameters()
     define_mass_derivative_function_and_mean()   
     set_ranges_for_data_observables()
     set_signal_model_normalization_integral_cache_binnings()
     get_data(getChains(model_tree_version))
+    calculate_mc_true_purity()
+    define_calibrators()
     build_model()
 ## End of init().
+
+
+##------------------------------------------------------------------------------
+def read_data_from_workspace(workspace):
+    '''
+    Reads the various datasets from the given workspace and imports them in 
+    the current workspace.
+    '''
+    global data
+    data = {}
+    for name in 'fsr0 fsr1 zj0 zj1'.split():        
+        data[name] = workspace.data('data_' + name)
+
+    if 'data' in name.split('_'):
+        for name in 'data 2011A 2011B'.split():
+            if workspace.data('data_' + name):
+                data[name] = workspace.data('data_' + name)
+## End of read_data_from_workspace(workspace).
 
 
 ##------------------------------------------------------------------------------
@@ -857,15 +886,18 @@ def init_from_file(filename):
     of the given filename.
     '''
     define_globals()
+    define_workspace()
+    define_data_observables()
     read_workspace_from_file(filename)
-    read_data_observables_from_workspace(w)
+    read_data_from_workspace(wsrc)
+    calculate_mc_true_purity()
+    define_calibrators()
+    read_model_from_workspace(wsrc)
     read_model_parameters_from_workspace(w)
+    define_mc_true_parameters()
     read_mass_derivative_function_and_mean_from_workspace(w)
     set_ranges_for_data_observables()
     set_signal_model_normalization_integral_cache_binnings()
-    get_data(getChains(model_tree_version))
-    read_model_from_workspace(w)
-    # build_model()
 ## End of init_from_file().
 
 
@@ -917,6 +949,7 @@ def fit_real_data(label):
                           roo.Save(), roo.Extended(True)
         )
     w.Import(fit_result, 'fitresult_' + label)
+    return fit_result
 ## End of fit_real_data()
 
 
@@ -1012,15 +1045,63 @@ def process_real_data_single_dataset(label):
     "data" (full 2011A+B), "2011A" or "2011B".
     '''
     get_real_data(label)
-    fit_real_data(label)
+
+    set_fit_components('SEB')
+    fit_result = fit_real_data(label)
     plot_fit_to_real_data(label)
     draw_latex_for_fit_to_real_data()
-    make_fit_validation_plots_for_data(label)
+    validate_fit(data[label], fit_result)
+    
+    #set_fit_components('SE')
+    #fit_result = fit_real_data(label)
+    #plot_fit_to_real_data(label)
+    #draw_latex_for_fit_to_real_data()
+    #validate_fit(data[label], fit_result)
+    
+    #set_fit_components('SB')
+    #fit_result = fit_real_data(label)
+    #plot_fit_to_real_data(label)
+    #draw_latex_for_fit_to_real_data()
+    #validate_fit(data[label], fit_result)
+       
     ## Store the the mc truth values in the workspace
     set_mc_truth(fit_calibrator.s, fit_calibrator.r)
-    w.saveSnapshot('_'.join(['mc_truth', label]), 
+    w.saveSnapshot('_'.join(['mc_truth', label]),
                    ROOT.RooArgSet(phoScaleTrue, phoResTrue))    
 ## End of get_fit_and_plot_real_data_single_dataset().
+
+
+#-------------------------------------------------------------------------------
+def set_fit_components(components):
+    '''
+    Sets components that should be fitted given a string.  Each
+    letter in the string corresponds to a commponent:
+    S : signal
+    B : Z+jets background
+    E : exponential background
+    '''
+    ## yieds
+    global name
+    global w
+    num = {'S': 'signal_N', 'B': 'zj_N', 'E': 'exp_N'}
+    params = {'S': 'phoScale phoRes'.split(), 'B': [], 'E': ['exp_c']}    
+    for c in 'S B E'.split():
+        if c in components:
+            w.var(num[c]).setConstant(False)
+            for p in params[c]:
+                w.var(p).setConstant(False)
+        else:
+            w.var(num[c]).setVal(0)
+            w.var(num[c]).setConstant(True)
+            for p in params[c]:
+                w.var(p).setConstant(True)
+    ## Change the name
+    tokens = name.split('_')
+    if 'fit' in tokens[-1]:
+        del tokens[-1]
+    tokens.append('fit' + components)
+    name = '_'.join(tokens)
+## End of set_fit_components(components)
 
 
 #-------------------------------------------------------------------------------
@@ -1208,71 +1289,121 @@ def draw_latex_for_fit_to_monte_carlo():
 
 
 #-------------------------------------------------------------------------------
-def make_fit_validation_plots_for_data(label):
+def validate_fit(dataset, fit_result):
     '''
     Plot the data/fit in small and large range, residuals, pulls, pull
     distribution, chi2 prob and parameters for a dataset specified by the label:
     "data" (full 2011A+B), "2011A" or "2011B".
-    '''
-    ddbins = get_auto_binning(data[label])
+    '''    
+    plot = plot_mass_peak_varbins(dataset)
+    plot_residuals(plot, fit_result)
+    plot_mass_peak(label)
+    plot_mass_tails(label)
+## End of validate_fit().
+
+
+#-------------------------------------------------------------------------------
+def plot_mass_peak_varbins(dataset):
+    global plots    
+    mmgMass.setBins(40)
+    plot_range = (60, 120)
+    mmgMass.setRange('linplot2', *plot_range)
+    plot = mmgMass.frame(roo.Range('linplot2'))
+    plots.append(plot)
+    plot.SetTitle('Mass Peak with Variable Binning')
+    reduced_data = dataset.reduce(
+        '%f < mmgMass & mmgMass < %f' % plot_range
+        )
+    ddbins = get_auto_binning(reduced_data)
     bins = ddbins.binning(ROOT.RooBinning())
     bins.SetName('chi2')
     uniformBins = ddbins.uniformBinning(ROOT.RooUniformBinning())
     uniformBins.SetName('normalization')
-    
-    plot_fit_to_real_data_peak_zoom2(label, bins, uniformBins, ddbins)
-    plot_fit_to_real_data_peak_zoom(label)
-    plot_fit_to_real_data_tails_zoomout(label)
-## End of make_fit_validation_plots_for_data().
-
-
-#-------------------------------------------------------------------------------
-def plot_fit_to_real_data_peak_zoom2(label, bins, uniformBins, ddbins):
-    # mmgMass.setRange('plot', 70, 110)
-    global plots    
-    mmgMass.setBins(60)
-    mmgMass.setRange('linplot', 60, 120)
-    plot = mmgMass.frame(roo.Range('linplot'))       
-    plot.SetTitle('Peak Zoom-In')
     ## This is hack to make RooFit use a nice normaliztion.
     ## First plot the data with uniform binning but don't display it.
-    data[label].plotOn(plot, roo.Binning(uniformBins), roo.Invisible())
-    data[label].plotOn(plot, roo.Binning(bins))    
-    hist = plot.getHist('h_' + data[label].GetName())
+    reduced_data.plotOn(plot, roo.Binning(uniformBins), roo.Invisible())
+    reduced_data.plotOn(plot, roo.Binning(bins))    
+    hist = plot.getHist('h_' + reduced_data.GetName())
     ddbins.applyTo(hist)
-    pm.plotOn(plot, roo.Range('linplot'), roo.NormRange('linplot'))
-    numevents = data[label].tree().Draw('mmgMass', 
-                                        '80 < mmgMass & mmgMass < 100', 
-                                        'goff')
+    norm = reduced_data.sumEntries()
+    # norm = 666.
+    print 'plot_mass_peak_varbins norm:', norm
     if use_exp_bkg:
-        pm.plotOn(plot, roo.Range('linplot'), 
-                  #roo.Normalization(numevents, ROOT.RooAbsReal.NumEvent),
-                  roo.NormRange('linplot'),
+        pm.plotOn(plot, roo.Range('linplot2'), 
+                  roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),
+                  # roo.NormRange('linplot2'),
                   roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
-        pm.plotOn(plot, roo.Range('linplot'),
-                  #roo.Normalization(numevents, ROOT.RooAbsReal.NumEvent),        
-                  roo.NormRange('linplot'),
+        pm.plotOn(plot, roo.Range('linplot2'),
+                  roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),        
+                  # roo.NormRange('linplot2'),
                   roo.Components('*exp*'), roo.LineStyle(ROOT.kDotted))
     else:
-        pm.plotOn(plot, roo.Range('linplot'),
-                  roo.Normalization(numevents, ROOT.RooAbsReal.NumEvent),        
+        pm.plotOn(plot, roo.Range('linplot2'),
+                  roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),        
                   roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-    canvases.next(name + '_' + label + '_zoom2').SetGrid()
-    plot.Draw()    
-    plots.append(plot)    
-    calc = RooChi2Calculator(plot)
-    hist = calc.residHist()
-    plot = mmgMass.frame(roo.Range('linplot')) 
-    plot.SetTitle('#chi^{2} Residuals')
-    plot.addPlotable(hist, 'P')    
-    canvases.next(name + '_' + label + '_residuals2').SetGrid()
+    pm.plotOn(plot, roo.Range('linplot2'), 
+              roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),
+              roo.NormRange('fit')
+              )
+    myname = name + '_' + dataset.GetName() + '_peak_varbins'
+    canvases.next(myname).SetGrid()
+    plot.SetName(myname)
     plot.Draw()
-    plots.append(plot)
-## End of plot_fit_to_real_data_peak_zoom2().
+    return plot
+## End of plot_mass_peak2(label, bins, uniformBins, ddbins, fit_result).
 
 
 #-------------------------------------------------------------------------------
-def plot_fit_to_real_data_peak_zoom(label):
+def plot_residuals(source, fit_result, normalize=False):
+    global plots
+    plot = mmgMass.frame(roo.Range(*get_plot_range(source)))
+    plots.append(plot)
+    chi2calculator = RooChi2Calculator(source)
+    if normalize:
+        hist = chi2calculator.pullHist()
+        plot.SetTitle('#chi^{2} Pulls')
+        canvases.next(source.GetName() + '_pulls').SetGrid()
+    else:
+        hist = chi2calculator.residHist()
+        plot.SetTitle('#chi^{2} Residuals')
+        canvases.next(source.GetName() + '_residuals').SetGrid()
+    plot.addPlotable(hist, 'P')    
+    plot.Draw()
+    npars = fit_result.floatParsFinal().getSize()
+    ndof = chi2calculator.numDOF(npars)
+    chi2 = chi2calculator.chiSquare(npars) * ndof
+    Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
+           'p-value: %.2g %%' % (100 * ROOT.TMath.Prob(chi2, ndof))],
+          position=(0.2, 0.8)
+          ).draw()    
+## End of plot_residuals(plot, fit_result)
+
+#-------------------------------------------------------------------------------
+def get_plot_range(plot):
+    '''
+    Returns the x-axis range of the given RooPlot.
+    '''
+    xaxis = plot.GetXaxis()
+    xmin = xaxis.GetBinLowEdge(1)
+    xmax = xaxis.GetBinUpEdge(xaxis.GetNbins())
+    return (xmin, xmax)
+## End of get_plot_range(plot)
+
+
+#-------------------------------------------------------------------------------
+def get_hist_range(hist):
+    '''
+    Returns the x-axis range of the given RooHist.
+    '''
+    xaxis = plot.GetXaxis()
+    xmin = xaxis.GetBinLowEdge(1)
+    xmax = xaxis.GetBinUpEdge(xaxis.GetNbins())
+    return (xmin, xmax)
+## End of get_plot_range(plot)
+
+
+#-------------------------------------------------------------------------------
+def plot_mass_peak(label):
     # mmgMass.setRange('plot', 70, 110)
     mmgMass.setBins(80)
     mmgMass.setRange('linplot', 80, 100)
@@ -1303,11 +1434,11 @@ def plot_fit_to_real_data_peak_zoom(label):
     rplot.addPlotable(rhist, 'P')
     rplot.Draw()
     plots.append(rplot)
-## End of plot_fit_to_real_data_peak_zoom().
+## End of plot_mass_peak().
 
 
 #-------------------------------------------------------------------------------
-def plot_fit_to_real_data_tails_zoomout(label):
+def plot_mass_tails(label):
     # mmgMass.setRange('plot', 70, 110)
     mmgMass.setBins(60)
     mmgMass.setRange('logplot', 60, 120)
@@ -1343,7 +1474,7 @@ def plot_fit_to_real_data_tails_zoomout(label):
     rplot.addPlotable(rhist, 'P')
     rplot.Draw()
     plots.append(rplot)
-## End of plot_fit_to_real_data_tails_zoomout().
+## End of plot_mass_tails().
 
 
 #--------------------------------------------------------------------------
@@ -1382,7 +1513,7 @@ def main():
     else:
         process_monte_carlo()
 
-    outro()
+    # outro()
 ## End of main().
 
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)

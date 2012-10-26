@@ -34,6 +34,13 @@ namespace cit {
 
       Double_t chiSquare(const char* pdfname, const char* histname,
                          int nFitParam = 0) const;
+      
+      int numDOF(int nFitParam = 0) const {
+        return numDOF(0, 0, nFitParam);
+      }
+      
+      int numDOF(const char* pdfname, const char* histname, 
+                 int nFitParam = 0) const;
 
     private:
       RooPlot const* plot_;
