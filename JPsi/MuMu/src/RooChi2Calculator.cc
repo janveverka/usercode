@@ -103,24 +103,24 @@ const
     if (xl < xstart || xstop < xh) continue ;
 
     Double_t norm = (xh - xl) / plot_->getFitRangeBinW();
+    Double_t norml = (x - xl) / plot_->getFitRangeBinW();
+    Double_t normh = (xh - x) / plot_->getFitRangeBinW();
     point *= norm;
 
     // Start a hack to work around a bug in RooCurve::interpolate
     // that sometimes gives a wrong result.
-    Double_t avg = curve->average(xl, xh);
-    Double_t avg2 = 0.5 * (curve->average(xl, x) + curve->average(x, xh));
-    Double_t yexpected;
-    if (avg + avg2 > 0 &&
-	(avg2 - avg) / (avg2 + avg) > 0.1) {
-      yexpected = curve->interpolate(x);
-    } else {
-      yexpected = avg;
+    // Correcting the expected number of events in this bin for the non-uniform
+    // bin width by multiplying with the norm.
+    Double_t yexp  = curve->average(xl, xh) * norm;
+    Double_t yexp2 = curve->average(xl, x ) * norml + 
+                     curve->average(x , xh) * normh;
+    if (yexp + yexp2 > 0 &&
+	TMath::Abs((yexp - yexp2) / (yexp + yexp2)) > 0.1) {
+      yexp = curve->interpolate(x) * norm;
     }
     // End of hack around the bug in RooCurve::interpolate
 
-    // Correct the expected number of events in this bin for the non-uniform
-    // bin width.
-    yexpected *= norm;
+    Double_t yexpected = yexp;
 
     Double_t yy = point - yexpected;
     // Normalize to the number of events per bin taking into account
@@ -205,33 +205,46 @@ RooChi2Calculator::chiSquare(const char* pdfname, const char* histname,
     if (xl < xstart || xstop < xh) continue ;
 
     nbin++ ;
+ 
+    // JV: Adjust observed and expected number of events for bin width to represent
+    // number of events.
+    Double_t norm  = (xh - xl) / plot_->getFitRangeBinW();
+    Double_t norml = (x - xl) / plot_->getFitRangeBinW();
+    Double_t normh = (xh - x) / plot_->getFitRangeBinW();
+    y *= norm;
 
     // Integrate function over this bin.
+
     // Start a hack to work around a bug in RooCurve::interpolate
     // that sometimes gives a wrong result.
-    Double_t avg = curve->average(xl, xh);
-    Double_t avg2 = 0.5 * (curve->average(xl, x) + curve->average(x, xh));
-    if (avg + avg2 > 0 &&
-	(avg2 - avg) / (avg2 + avg) > 0.1) {
-      avg = curve->interpolate(x);
+    // Correcting the expected number of events in this bin for the non-uniform
+    // bin width by multiplying with the norm.
+    Double_t yexp  = curve->average(xl, xh) * norm;
+    Double_t yexp2 = curve->average(xl, x ) * norml + 
+                     curve->average(x , xh) * normh;
+    if (yexp + yexp2 > 0 &&
+        TMath::Abs((yexp - yexp2) / (yexp + yexp2)) > 0.1) {
+      yexp = curve->interpolate(x) * norm;
+      coutW(InputArguments) << "cit::RooChi2Calculator(plotname=" 
+                            << plot_->GetName()
+                            << ")::chiSquare(..) Interpolating bin "
+                            << i << " for " << xl << "-" << xh << endl ;
     }
     // End of hack around the bug in RooCurve::interpolate
 
-    // JV: Adjust observed and expected number of events for bin width to represent
-    // number of events.
-    Double_t norm = (xh - xl) / plot_->getFitRangeBinW();
-    y *= norm;
-    avg *= norm;
+    Double_t avg = yexp;
 
     if (avg < 5.) {
       coutW(InputArguments) << "cit::RooChi2Calculator(plotname=" << plot_->GetName()
-			    << ")::chiSquare(..) expectation in bin "
-			    << i << " is " << avg << " < 5!" << endl ;
+                            << ")::chiSquare(..) expectation in bin "
+                            << i << " is " << avg << " < 5!" << endl ;
     }
 
     // JV: Use the expected number of events for the y uncertainty,
     // See (33.34) of http://pdg.lbl.gov/2011/reviews/rpp2011-rev-statistics.pdf
 
+    cout << "chi2 calculator i, obs, exp: " << i << ", " << y << ", " << avg << endl;
+    
     // Add pull^2 to chisq
     if (avg != 0) {      
       Double_t resid = y - avg;
@@ -242,3 +255,65 @@ RooChi2Calculator::chiSquare(const char* pdfname, const char* histname,
   // Return chisq/nDOF 
   return chisq / (nbin - nFitParam) ;
 }
+
+
+
+///----------------------------------------------------------------------------
+/// Returns the number of degrees of freedom.
+int
+RooChi2Calculator::numDOF(const char* pdfname, const char* histname, 
+                          int nFitParam) const
+{
+  // Calculate the NDOF of this curve with respect to the histogram
+  // 'hist' accounting nFitParam floating parameters in case the curve
+
+  // Find curve object
+  RooCurve* curve = (RooCurve*) plot_->findObject(pdfname,
+                                                  RooCurve::Class());
+  if (!curve) {
+    coutE(InputArguments) << "cit::RooChi2Calculator(plotname=" 
+                          << plot_->GetName()
+                          << ")::numDOF(..) cannot find curve" << endl ;
+    return 0 ;
+  }
+
+  // Find histogram object
+  RooHist* hist = (RooHist*) plot_->findObject(histname,
+                                               RooHist::Class()) ;
+  if (!hist) {
+    coutE(InputArguments) << "cit::RooChi2Calculator(plotname=" 
+                          << plot_->GetName()
+                          << ")::numDOF(..) cannot find histogram" << endl ;
+    return 0 ;
+  }
+  
+  Int_t i,np = hist->GetN() ;
+  Double_t x,y,/*eyl,eyh,*/ xl,xh ;
+
+  // Find starting and ending bin of histogram based on range of RooCurve
+  Double_t xstart,xstop ;
+
+#if ROOT_VERSION_CODE >= ROOT_VERSION(4,0,1)
+  curve->GetPoint(0,xstart,y) ;
+  curve->GetPoint(curve->GetN()-1,xstop,y) ;
+#else
+  const_cast<RooCurve*>(curve)->GetPoint(0,xstart,y) ;
+  const_cast<RooCurve*>(curve)->GetPoint(curve->GetN() - 1,xstop,y) ;
+#endif
+
+  Int_t nbin(0) ;
+
+  for (i=0 ; i<np ; i++) {
+    // Retrieve histogram contents
+    hist->GetPoint(i,x,y) ;
+    xl = x - hist->GetEXlow()[i] ;
+    xh = x + hist->GetEXhigh()[i] ;
+    // Check if the whole bin is in range of curve
+    if (xl < xstart || xstop < xh) continue ;
+    nbin++ ;
+  }
+  // Return nDOF 
+  return nbin - nFitParam;
+}  // RooChi2Calculator::numDOF(const char* pdfname, const char* histname, 
+//                              int nFitParam)
+
