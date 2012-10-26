@@ -16,6 +16,7 @@
 #include "TAxis.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
+#include "TRandom.h"
 
 #include "JPsi/MuMu/interface/tools.h"
 
@@ -135,24 +136,77 @@ Double_t phoSmearE(Double_t scale, Double_t resolution,
 /// given the scale and resolution and reference
 /// scale and resolution and the reco and gen energies.
 Double_t phoSmearF(Double_t scale, Double_t resolution,
-		   Double_t refScale, Double_t refResolution,
-		   Double_t phoE, Double_t phoGenE)
+                   Double_t refScale, Double_t refResolution,
+                   Double_t phoE, Double_t phoGenE)
 {
   return phoSmearE(scale, resolution, refScale, refResolution, phoE, phoGenE) / 
          phoE;
 }
 
 ///-----------------------------------------------------------------------------
+/// Smeared photon energy as defined by Fabrice Couderc
+// From: Fabrice Couderc <fabrice.couderc@cea.fr>
+// Date: Wed, Sep 26, 2012 at 9:38 AM
+// Subject: Re: MC smearing for EGM-11-001
+// To: Adi Bornheim <bornheim@hep.caltech.edu>
+// Cc: Cristian peña <cristian.morgoth@gmail.com>, Jan Veverka <veverka@hep.caltech.edu>
+Double_t phoSmearFabrice(Double_t phoE, Double_t scEta, Double_t r9)
+{
+  Double_t smear = gRandom->Gaus(1, smearingFabrice(scEta, r9));
+  return smear * phoE;
+}
+
+
+///-----------------------------------------------------------------------------
+/// Width of a Gaussian used in photon energy as defined by Fabrice Couderc
+// From: Fabrice Couderc <fabrice.couderc@cea.fr>
+// Date: Wed, Sep 26, 2012 at 9:38 AM
+// Subject: Re: MC smearing for EGM-11-001
+// To: Adi Bornheim <bornheim@hep.caltech.edu>
+// Cc: Cristian peña <cristian.morgoth@gmail.com>, Jan Veverka <veverka@hep.caltech.edu>
+Double_t smearingFabrice(Double_t scEta, Double_t r9)
+{
+  float r9_bad_eb[]  = { 8.91085e-03, 6.60522e-03, -2.86797e-02, 4.73330e-02, -1.95607e-02 };
+  float r9_gold_eb[] = { 7.62684e-03, 1.13788e-02, -4.14171e-02, 5.57636e-02, -1.93949e-02 };
+  
+  float r9_gold_ee[] = { -4.64302e-01, 9.20859e-01, -5.54852e-01, 1.07274e-01, 0 };
+  float r9_bad_ee[]  = { -1.47432e-01, 2.22487e-01, -1.26847e-02,-6.83499e-02, 1.99454e-02 };
+
+
+  float *par = 0;
+  if( fabs(scEta) <  1.5 && r9 >  0.94 ) par = r9_gold_eb;
+  if( fabs(scEta) <  1.5 && r9 <= 0.94 ) par = r9_bad_eb;
+  if( fabs(scEta) >= 1.5 && r9 >  0.94 ) par = r9_gold_ee;
+  if( fabs(scEta) >= 1.5 && r9 <= 0.94 ) par = r9_bad_ee;
+
+  float res = 0;
+  for( int ip = 4 ; ip >= 0; ip-- ) res = par[ip] + fabs(scEta)*res; 
+
+  return res;
+}
+  
+
+
+///-----------------------------------------------------------------------------
 /// mmg mass smeared for 
 /// given photon energy scale and resolution and reference
 /// scale and resolution and the reco and gen energies.
 Double_t mmgMassPhoSmearE(Double_t scale, Double_t resolution,
-			  Double_t refScale, Double_t refResolution,
-			  Double_t phoE, Double_t phoGenE,
-			  Double_t mmgMass, Double_t mmMass)
+                          Double_t refScale, Double_t refResolution,
+                          Double_t phoE, Double_t phoGenE,
+                          Double_t mmgMass, Double_t mmMass)
 {
   Double_t sfactor = phoSmearF(scale, resolution, refScale, refResolution, phoE,
-			       phoGenE);
+                               phoGenE);
+  return scaledMmgMass3(sfactor, mmgMass, mmMass);
+}
+
+///-----------------------------------------------------------------------------
+/// mmg mass smeared for photon energy smearing defined by Fabrice Couderc 
+Double_t mmgMassPhoFabriceSmearE(Double_t mmgMass, Double_t mmMass,
+                                 Double_t scEta, Double_t r9)
+{
+  Double_t sfactor = smearingFabrice(scEta, r9);
   return scaledMmgMass3(sfactor, mmgMass, mmMass);
 }
 

@@ -75,7 +75,10 @@
                                           Double_t, Double_t, Double_t,\
                                           Double_t, Double_t, Double_t,\
                                           Double_t);
+#pragma link C++ function smearingFabrice(Double_t, Double_t);                                        
 #pragma link C++ function scaledMmgMass3(Double_t, Double_t, Double_t);
+#pragma link C++ function mmgMassPhoFabriceSmearE(Double_t, Double_t,\
+                                                  Double_t, Double_t);
 #pragma link C++ function scaledDimuonPhotonMass(Double_t, Double_t, Double_t,\
                                                  Double_t, Double_t, Double_t,\
                                                  Double_t, Double_t);

@@ -35,12 +35,16 @@ Double_t phoSmearE(Double_t scale, Double_t resolution,
 		   Double_t refScale, Double_t refResolution,
 		   Double_t phoE, Double_t phoGenE);
 Double_t phoSmearF(Double_t scale, Double_t resolution,
-		   Double_t refScale, Double_t refResolution,
-		   Double_t phoE, Double_t phoGenE);
+                   Double_t refScale, Double_t refResolution,
+                   Double_t phoE, Double_t phoGenE);
+Double_t phoFabriceSmearE(Double_t phoE, Double_t scEta, Double_t r9);
+Double_t smearingFabrice(Double_t scEta, Double_t r9);
 Double_t mmgMassPhoSmearE(Double_t scale, Double_t resolution,
-			  Double_t refScale, Double_t refResolution,
-			  Double_t phoE, Double_t phoGenE,
-			  Double_t mmgMass, Double_t mmMass);
+                          Double_t refScale, Double_t refResolution,
+                          Double_t phoE, Double_t phoGenE,
+                          Double_t mmgMass, Double_t mmMass);
+Double_t mmgMassPhoFabriceSmearE(Double_t mmgMass, Double_t mmMass,
+                                 Double_t scEta, Double_t r9);
 Double_t scaledDimuonPhotonMass(Double_t scale2,
 				Double_t pt1, Double_t eta1, Double_t phi1, Double_t m1,
 				Double_t pt2, Double_t eta2, Double_t phi2);
