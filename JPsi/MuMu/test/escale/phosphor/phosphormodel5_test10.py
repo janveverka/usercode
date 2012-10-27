@@ -66,7 +66,7 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'egm_seb_renorm_data_EE_highR9_pt25to999_yyv5'
+name = 'mass_landscape_test_data_EE_lowR9_pt25to999_yyv5'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -473,6 +473,9 @@ def define_bookkeeping_parameters():
     pvalue = w.factory('pvalue[0,0,1]')
     chi2.removeMax()
     ndof.removeMax()
+    chi2.setError(0)
+    ndof.setError(0)
+    pvalue.setError(0)
     gof = ROOT.RooArgSet(chi2, ndof, pvalue)
     w.defineSet('gof', gof)
 ## End of define_bookkeeping_parameters()
@@ -735,7 +738,7 @@ def outro(make_plots=True, save_workspace=True):
 
     for label, dataset in data.items():
         dataset.SetName('data_' + label)
-        w.Import(dataset)
+        #w.Import(dataset)
     
     if save_workspace:
         for c in canvases.canvases:
@@ -815,6 +818,7 @@ def build_model():
     ## Build the PDF for other backgrounds.
     global exp_pdf
     exp_pdf = w.factory('Exponential::exp_pdf(mmgMass, exp_c[-0.05,-0.1,0])')
+    w.var('exp_c').setUnit('GeV^{-1}')
     
     # global bkg_pdf
     # bkg_pdf = w.factory('SUM::bkg_pdf(exp_f[0.2, 0, 1] * exp_pdf, zj0_pdf)')
@@ -844,7 +848,7 @@ def read_model_from_workspace(workspace):
     '''
     global signal_model, zj_pdf, exp_pdf, pm
     w.Import(workspace.pdf('pm'))
-    pm = w.pdf('signal_model0')
+    pm = w.pdf('pm')
     signal_model = w.pdf('signal_model0')
     zj_pdf = w.pdf('zj0_pdf')
     exp_pdf = w.pdf('exp_pdf')
@@ -1056,7 +1060,24 @@ def process_real_data_single_dataset(label):
     '''
     get_real_data(label)
 
+    ## store the the mc truth values in the workspace
+    set_mc_truth(fit_calibrator.s, fit_calibrator.r)
+    w.saveSnapshot('_'.join(['mc_truth', label]),
+                   ROOT.RooArgSet(phoScaleTrue, phoResTrue))    
+
     set_fit_components('S')
+    fit_result = fit_real_data(label)
+    plot_fit_to_real_data(label)
+    draw_latex_for_fit_to_real_data()
+    validate_mass_fit(data[label], fit_result)
+       
+    set_fit_components('B')
+    fit_result = fit_real_data(label)
+    plot_fit_to_real_data(label)
+    draw_latex_for_fit_to_real_data()
+    validate_mass_fit(data[label], fit_result)
+       
+    set_fit_components('E')
     fit_result = fit_real_data(label)
     plot_fit_to_real_data(label)
     draw_latex_for_fit_to_real_data()
@@ -1078,12 +1099,7 @@ def process_real_data_single_dataset(label):
     # fit_result = fit_real_data(label)
     # plot_fit_to_real_data(label)
     # draw_latex_for_fit_to_real_data()
-    # validate_mass_fit(data[label], fit_result)
-    
-    ## store the the mc truth values in the workspace
-    set_mc_truth(fit_calibrator.s, fit_calibrator.r)
-    w.saveSnapshot('_'.join(['mc_truth', label]),
-                   ROOT.RooArgSet(phoScaleTrue, phoResTrue))    
+    # validate_mass_fit(data[label], fit_result)    
 ## End of get_fit_and_plot_real_data_single_dataset().
 
 
@@ -1109,8 +1125,15 @@ def set_fit_components(components):
         else:
             w.var(num[c]).setVal(0)
             w.var(num[c]).setConstant(True)
+            w.var(num[c]).setError(0)
             for p in params[c]:
                 w.var(p).setConstant(True)
+                w.var(p).setError(0)
+    ## Always float the signal fraction
+    w.var('signal_N').setConstant(False)
+    ## Set the scale and resolution defaults to MC truth
+    phoScale.setVal(phoScaleTrue.getVal())
+    phoRes.setVal(phoResTrue.getVal())
     ## Change the name
     tokens = name.split('_')
     if 'fit' in tokens[-1]:
@@ -1314,9 +1337,10 @@ def validate_mass_fit(dataset, fit_result):
     # plot_mass_tails(dataset, fit_result)
     tails_plot = plot_mass_varbins(dataset, (60, 120), True)
     save_gof(tails_plot, fit_result)
-    draw_gof_latex()
+    # draw_gof_latex()
     pulls_plot = plot_residuals(tails_plot, fit_result, True)
-    draw_gof_latex()
+    # draw_gof_latex()
+    pulldist_plot = plot_pull_distribution(pulls_plot)
     # plot_mass_peak(dataset, fit_result)
     peak_plot = plot_mass_varbins(dataset, (80, 100))
     resid_plot = plot_residuals(peak_plot, fit_result)
@@ -1324,15 +1348,52 @@ def validate_mass_fit(dataset, fit_result):
     canvas = canvases.next(name + '_mass_landscape')
     canvas.SetWindowSize(1200, 600)
     canvas.Divide(3,2)
-    myplots = [tails_plot, peak_plot, peak_plot, pulls_plot, resid_plot]
+    myplots = [tails_plot, peak_plot, pulldist_plot, pulls_plot, resid_plot]
+    mytitles = ['Full Fit Range', 'Peak Detail', 'Distribution of #chi^{2} Pulls', 
+                '#chi^{2} Pulls', '#chi^{2} Residuals', '']
     pads = [canvas.cd(i) for i in range(1, 7)]        
     pads[0].SetLogy()
     ## Draw frames
-    for i, plot in enumerate(myplots):
+    for i, (plot, title) in enumerate(zip(myplots, mytitles)):
         pad = canvas.cd(i+1)
         pad.SetGrid()
-        plot.Draw() 
+        plot.SetTitle(title)
+        plot.Draw()
+    canvas.cd(6)
+    draw_gof_latex(position=(0.1, 1.0), rowheight=0.08)
+    Latex(['s_{true}: ' + latexpm(phoScaleTrue),
+           's_{fit} : ' + latexpm(phoScale),],
+           position=(0.1, 0.8), rowheight=0.08).draw()
+    Latex(['r_{true}: ' + latexpm(phoResTrue),
+           'r_{fit} : ' + latexpm(phoRes),],
+           position=(0.55, 0.8), rowheight=0.08).draw()
+    Latex(['N_{S}: ' + latexpm(w.var('signal_N')),
+           'N_{Z+j}: ' + latexpm(w.var('zj_N')),
+           'N_{exp}: ' + latexpm(w.var('exp_N')),
+           '#lambda_{exp}: ' + latexpm(w.var('exp_c')),],
+           position = (0.1, 0.6), rowheight=0.08).draw()
 ## End of validate_mass_fit().
+
+
+#-------------------------------------------------------------------------------
+def latexpm(var):
+    '''
+    Returns a string that is a ROOT-style latex code for the variable
+    value +/- error unit.
+    '''
+    if var.isConstant():
+        ret = '%g' % var.getVal()
+    else:
+        if var.getError() < 1e-6:
+            ret = '%g #pm %g' % (var.getVal(), var.getError())
+        else:
+            precission = max(0, 1 + int(0.5 - ROOT.TMath.Log10(var.getError())))
+            ret = '%.*f #pm %.*f' % (precission, var.getVal(), 
+                                     precission, var.getError())
+    if var.getUnit():
+        ret += ' ' + var.getUnit()
+    return ret
+## End of latexpm(var)
 
 
 #-------------------------------------------------------------------------------
@@ -1384,13 +1445,13 @@ def plot_mass_varbins(dataset, plot_range, logy=False):
               roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),
               roo.NormRange('fit'))
     myname = name + '_' + dataset.GetName() + '_peak_varbins'
-    canvas = canvases.next(myname)
-    canvas.SetGrid()
     plot.SetName(myname)
-    plot.Draw()
+    #canvas = canvases.next(myname)
+    #canvas.SetGrid()
+    #plot.Draw()
     if (logy):
         plot.SetMaximum(math.pow(plot.GetMaximum(), 1.2))
-        canvas.SetLogy()
+        #canvas.SetLogy()
     return plot
 ## End of plot_mass_varbins(dataset).
 
@@ -1405,15 +1466,15 @@ def plot_residuals(source, fit_result, normalize=False):
         hist = chi2calculator.pullHist('h_data', 'pm_Norm[mmgMass]', True)
         plot.SetTitle('#chi^{2} Pulls')
         ytitle = '(Data - Fit) / #sqrt{Fit}'
-        canvases.next(source.GetName() + '_pulls').SetGrid()
+        # canvases.next(source.GetName() + '_pulls').SetGrid()
     else:
         hist = chi2calculator.residHist('h_data', 'pm_Norm[mmgMass]', True, True)
         plot.SetTitle('#chi^{2} Residuals')
         ytitle = 'Data - Fit'
-        canvases.next(source.GetName() + '_residuals').SetGrid()
+        # canvases.next(source.GetName() + '_residuals').SetGrid()
     plot.GetYaxis().SetTitle(ytitle)
     plot.addPlotable(hist, 'P')    
-    plot.Draw()
+    # plot.Draw()
     return plot
 ## End of plot_residuals(plot, fit_result)
 
@@ -1444,8 +1505,9 @@ def save_gof(plot, fit_result):
     w.Import(fit_result, 'fitresult_' + tok)    
 ## End of calculate_gof(plot)
 
+
 #-------------------------------------------------------------------------------
-def draw_gof_latex(position=(0.2, 0.8)):
+def draw_gof_latex(position=(0.2, 0.8), rowheight=0.055):
     '''
     Draws latex labes with GOF information: chi2 / ndof, and p-value.
     Precondition: a canvas exists.
@@ -1455,7 +1517,7 @@ def draw_gof_latex(position=(0.2, 0.8)):
     pval = w.var('pvalue').getVal()
     Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
            'p-value: %.2g %%' % (100 * pval),],
-          position=position
+          position, rowheight=rowheight,
           ).draw()
 ## End of draw_gof_latex()
     
@@ -1482,6 +1544,35 @@ def get_hist_range(hist):
     xmax = xaxis.GetBinUpEdge(xaxis.GetNbins())
     return (xmin, xmax)
 ## End of get_plot_range(plot)
+
+
+#
+def plot_pull_distribution(pull_plot):
+    '''
+    Returns a RooPlot with the distribution of pulls overlayed with
+    a unit Gaussian.
+    '''
+    ## Plot the pull spectrum
+    normal_pdf = w.pdf('normal_pdf')
+    if not normal_pdf:
+        normal_pdf = w.factory(
+            'Gaussian::normal_pdf(pull[-6,6],zero[0],unit[1])'
+            )
+    pull = w.var('pull')
+    pull.SetTitle('#chi^{2} Pulls (Data - Fit) / #sqrt{Fit}')
+    pull.setBins(10)
+    plot = pull.frame()
+    plot.SetYTitle('Bins of %s' % mmgMass.GetTitle())
+    data = ROOT.RooDataSet(name + '_pulls', 'Pulls', ROOT.RooArgSet(pull))
+    hpull = pull_plot.getHist()
+    for i in range(hpull.GetN()):
+        pull.setVal(hpull.GetY()[i])
+        data.add(ROOT.RooArgSet(pull))
+    w.Import(data)
+    data.plotOn(plot)
+    normal_pdf.plotOn(plot)
+    return plot
+## End plot_pull_distribution(pull_plot)
 
 
 #-------------------------------------------------------------------------------
