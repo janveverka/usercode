@@ -459,15 +459,23 @@ def define_model_parameters():
 
 
 ##------------------------------------------------------------------------------
-def define_mc_true_parameters():
+def define_bookkeeping_parameters():
     ## Prep for storing fit results in the workspace.
     global phoScaleTrue, phoResTrue
     phoScaleTrue = w.factory('phoScaleTrue[0,-50,50]')
-    phoResTrue   = w.factory('phoResTrue[1.5,0.01,50]')
+    phoResTrue   = w.factory('phoResTrue[1.5,0.01,50]')    
     ## Set units.
     for x, u in zip([phoScaleTrue, phoResTrue], '% %'.split()):
         x.setUnit(u)
-## End of define_mc_true_parameters()
+    ## These are Goodness-of-Fit (GOF) parameters. They are not global.
+    chi2 = w.factory('chi2[0,0,1e3]')
+    ndof = w.factory('ndof[0,0,1e3]')
+    pvalue = w.factory('pvalue[0,0,1]')
+    chi2.removeMax()
+    ndof.removeMax()
+    gof = ROOT.RooArgSet(chi2, ndof, pvalue)
+    w.defineSet('gof', gof)
+## End of define_bookkeeping_parameters()
 
         
 ##------------------------------------------------------------------------------
@@ -852,7 +860,7 @@ def init():
     define_workspace()
     define_data_observables()
     define_model_parameters()
-    define_mc_true_parameters()
+    define_bookkeeping_parameters()
     define_mass_derivative_function_and_mean()   
     set_ranges_for_data_observables()
     set_signal_model_normalization_integral_cache_binnings()
@@ -896,7 +904,7 @@ def init_from_file(filename):
     define_calibrators()
     read_model_from_workspace(wsrc)
     read_model_parameters_from_workspace(w)
-    define_mc_true_parameters()
+    define_bookkeeping_parameters()
     read_mass_derivative_function_and_mean_from_workspace(w)
     set_ranges_for_data_observables()
     set_signal_model_normalization_integral_cache_binnings()
@@ -1302,13 +1310,28 @@ def validate_mass_fit(dataset, fit_result):
     Plot the data/fit in small and large range, residuals, pulls, pull
     distribution, chi2 prob and parameters for a dataset specified by the label:
     "data" (full 2011A+B), "2011A" or "2011B".
-    '''    
-    # plot_mass_peak(dataset, fit_result)
-    plot = plot_mass_varbins(dataset, (80, 100))
-    plot_residuals(plot, fit_result)
+    '''
     # plot_mass_tails(dataset, fit_result)
-    plot = plot_mass_varbins(dataset, (60, 120), True)
-    plot_residuals(plot, fit_result, True)
+    tails_plot = plot_mass_varbins(dataset, (60, 120), True)
+    save_gof(tails_plot, fit_result)
+    draw_gof_latex()
+    pulls_plot = plot_residuals(tails_plot, fit_result, True)
+    draw_gof_latex()
+    # plot_mass_peak(dataset, fit_result)
+    peak_plot = plot_mass_varbins(dataset, (80, 100))
+    resid_plot = plot_residuals(peak_plot, fit_result)
+    ## Make a landscape canvas
+    canvas = canvases.next(name + '_mass_landscape')
+    canvas.SetWindowSize(1200, 600)
+    canvas.Divide(3,2)
+    myplots = [tails_plot, peak_plot, peak_plot, pulls_plot, resid_plot]
+    pads = [canvas.cd(i) for i in range(1, 7)]        
+    pads[0].SetLogy()
+    ## Draw frames
+    for i, plot in enumerate(myplots):
+        pad = canvas.cd(i+1)
+        pad.SetGrid()
+        plot.Draw() 
 ## End of validate_mass_fit().
 
 
@@ -1391,24 +1414,51 @@ def plot_residuals(source, fit_result, normalize=False):
     plot.GetYaxis().SetTitle(ytitle)
     plot.addPlotable(hist, 'P')    
     plot.Draw()
-    if not normalize:
-        return
+    return plot
+## End of plot_residuals(plot, fit_result)
+
+
+#-------------------------------------------------------------------------------
+def save_gof(plot, fit_result):
+    '''
+    Calculates GOF parameters and stores them in the workspace.
+    '''
     ## Subtract one parameter for the normalization that is fixed
     ## for the chi2 calculation.
     npars = fit_result.floatParsFinal().getSize() - 1
+    chi2calculator = RooChi2Calculator(plot)
     ndof = chi2calculator.numDOF(npars)
     ## Second parameter is to renormalize: guarantees that the total
     ## observed and expected events is the same.  This is to
     ## avoid some spurious disagreements in the normalization presumably due
     ## to the finickiness of RooFit and numarical rounding.
     chi2 = chi2calculator.chiSquare(npars, True) * ndof
-    Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
-           'p-value: %.2g %%' % (100 * ROOT.TMath.Prob(chi2, ndof)),],
-          position=(0.2, 0.8)
-          ).draw()
-    return plot
-## End of plot_residuals(plot, fit_result)
+    pvalue = ROOT.TMath.Prob(chi2, ndof)
+    w.var('chi2').setVal(chi2)
+    w.var('ndof').setVal(ndof)
+    w.var('pvalue').setVal(pvalue)
+    for tok in name.split('_'):
+        if 'fit' in tok:
+            break
+    w.saveSnapshot(tok, w.set('gof'))
+    w.Import(fit_result, 'fitresult_' + tok)    
+## End of calculate_gof(plot)
 
+#-------------------------------------------------------------------------------
+def draw_gof_latex(position=(0.2, 0.8)):
+    '''
+    Draws latex labes with GOF information: chi2 / ndof, and p-value.
+    Precondition: a canvas exists.
+    '''
+    ndof = w.var('ndof').getVal()
+    chi2 = w.var('chi2').getVal()
+    pval = w.var('pvalue').getVal()
+    Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
+           'p-value: %.2g %%' % (100 * pval),],
+          position=position
+          ).draw()
+## End of draw_gof_latex()
+    
 
 #-------------------------------------------------------------------------------
 def get_plot_range(plot):
