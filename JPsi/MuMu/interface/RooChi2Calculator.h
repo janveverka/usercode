@@ -22,18 +22,19 @@ namespace cit {
       virtual ~RooChi2Calculator();
 
       RooHist* residHist(const char* histname = 0, const char* curvename = 0,
-                         bool normalize = false) const;
+                         bool normalize = false, bool renormalize = false) const;
 
       RooHist* pullHist(const char* histname = 0,
-                        const char* pdfname = 0) const
-        { return residHist(histname, pdfname, true); }
+                        const char* pdfname = 0, bool renormalize = false) const { 
+	return residHist(histname, pdfname, true, renormalize); 
+      }
 
-      Double_t chiSquare(int nFitParam = 0) const { 
-	return chiSquare(0, 0, nFitParam); 
+      Double_t chiSquare(int nFitParam = 0, bool renormalize = false) const { 
+	return chiSquare(0, 0, nFitParam, renormalize); 
       }      
 
       Double_t chiSquare(const char* pdfname, const char* histname,
-                         int nFitParam = 0) const;
+                         int nFitParam = 0, bool renormalize = false) const;
       
       int numDOF(int nFitParam = 0) const {
         return numDOF(0, 0, nFitParam);
