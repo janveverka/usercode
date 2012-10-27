@@ -66,10 +66,10 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'egm_expbkg_fc_data_EB_pt25to999_yyv5'
+name = 'egm_seb_renorm_data_EE_highR9_pt25to999_yyv5'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
-outputfile = 'phosphor5_model_and_fit_' + name + '2.root'
+outputfile = 'phosphor5_model_and_fit_' + name + '.root'
 
 strain = 'nominal'
 rtrain = 'nominal'
@@ -437,6 +437,8 @@ def set_ranges_for_data_observables():
     '''
     mmgMass.setRange('plot', 70, 110)
     mmgMass.setRange('fit', 60, 120)
+    mmgMass.setRange('tails', 60, 120)
+    mmgMass.setRange('peak', 80, 100)
 ## End of set_ranges_for_data_observables().
 
 
@@ -1046,25 +1048,31 @@ def process_real_data_single_dataset(label):
     '''
     get_real_data(label)
 
-    set_fit_components('SEB')
+    set_fit_components('S')
     fit_result = fit_real_data(label)
     plot_fit_to_real_data(label)
     draw_latex_for_fit_to_real_data()
-    validate_fit(data[label], fit_result)
-    
-    #set_fit_components('SE')
-    #fit_result = fit_real_data(label)
-    #plot_fit_to_real_data(label)
-    #draw_latex_for_fit_to_real_data()
-    #validate_fit(data[label], fit_result)
-    
-    #set_fit_components('SB')
-    #fit_result = fit_real_data(label)
-    #plot_fit_to_real_data(label)
-    #draw_latex_for_fit_to_real_data()
-    #validate_fit(data[label], fit_result)
+    validate_mass_fit(data[label], fit_result)
        
-    ## Store the the mc truth values in the workspace
+    # set_fit_components('SE')
+    # fit_result = fit_real_data(label)
+    # plot_fit_to_real_data(label)
+    # draw_latex_for_fit_to_real_data()
+    # validate_mass_fit(data[label], fit_result)
+    
+    # set_fit_components('SB')
+    # fit_result = fit_real_data(label)
+    # plot_fit_to_real_data(label)
+    # draw_latex_for_fit_to_real_data()
+    # validate_mass_fit(data[label], fit_result)
+       
+    # set_fit_components('SEB')
+    # fit_result = fit_real_data(label)
+    # plot_fit_to_real_data(label)
+    # draw_latex_for_fit_to_real_data()
+    # validate_mass_fit(data[label], fit_result)
+    
+    ## store the the mc truth values in the workspace
     set_mc_truth(fit_calibrator.s, fit_calibrator.r)
     w.saveSnapshot('_'.join(['mc_truth', label]),
                    ROOT.RooArgSet(phoScaleTrue, phoResTrue))    
@@ -1289,26 +1297,43 @@ def draw_latex_for_fit_to_monte_carlo():
 
 
 #-------------------------------------------------------------------------------
-def validate_fit(dataset, fit_result):
+def validate_mass_fit(dataset, fit_result):
     '''
     Plot the data/fit in small and large range, residuals, pulls, pull
     distribution, chi2 prob and parameters for a dataset specified by the label:
     "data" (full 2011A+B), "2011A" or "2011B".
     '''    
-    plot = plot_mass_peak_varbins(dataset)
+    # plot_mass_peak(dataset, fit_result)
+    plot = plot_mass_varbins(dataset, (80, 100))
     plot_residuals(plot, fit_result)
-    plot_mass_peak(label)
-    plot_mass_tails(label)
-## End of validate_fit().
+    # plot_mass_tails(dataset, fit_result)
+    plot = plot_mass_varbins(dataset, (60, 120), True)
+    plot_residuals(plot, fit_result, True)
+## End of validate_mass_fit().
 
 
 #-------------------------------------------------------------------------------
-def plot_mass_peak_varbins(dataset):
+def validate_response_fit(dataset, fit_result):
+    '''
+    Plot the data/fit in small and large range, residuals, pulls, pull
+    distribution, chi2 prob and parameters for a dataset specified by the label:
+    "data" (full 2011A+B), "2011A" or "2011B".
+    '''    
+    # plot_mass_peak(dataset, fit_result)
+    plot = plot_mass_varbins(dataset, (85, 100))
+    plot_residuals(plot, fit_result)
+    # plot_mass_tails(dataset, fit_result)
+    plot = plot_mass_varbins(dataset, (60, 120), True)
+    plot_residuals(plot, fit_result, True)
+## End of validate_response_fit().
+
+
+#-------------------------------------------------------------------------------
+def plot_mass_varbins(dataset, plot_range, logy=False):
     global plots    
-    mmgMass.setBins(40)
-    plot_range = (60, 120)
-    mmgMass.setRange('linplot2', *plot_range)
-    plot = mmgMass.frame(roo.Range('linplot2'))
+    #mmgMass.setBins(40)
+    mmgMass.setRange('varbins', *plot_range)
+    plot = mmgMass.frame(roo.Range('varbins'))
     plots.append(plot)
     plot.SetTitle('Mass Peak with Variable Binning')
     reduced_data = dataset.reduce(
@@ -1326,31 +1351,25 @@ def plot_mass_peak_varbins(dataset):
     hist = plot.getHist('h_' + reduced_data.GetName())
     ddbins.applyTo(hist)
     norm = reduced_data.sumEntries()
-    # norm = 666.
-    print 'plot_mass_peak_varbins norm:', norm
-    if use_exp_bkg:
-        pm.plotOn(plot, roo.Range('linplot2'), 
-                  roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),
-                  # roo.NormRange('linplot2'),
-                  roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
-        pm.plotOn(plot, roo.Range('linplot2'),
-                  roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),        
-                  # roo.NormRange('linplot2'),
-                  roo.Components('*exp*'), roo.LineStyle(ROOT.kDotted))
-    else:
-        pm.plotOn(plot, roo.Range('linplot2'),
-                  roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),        
-                  roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-    pm.plotOn(plot, roo.Range('linplot2'), 
+    pm.plotOn(plot, roo.Range('varbins'), 
               roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),
-              roo.NormRange('fit')
-              )
+              roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
+    pm.plotOn(plot, roo.Range('varbins'),
+              roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),        
+              roo.Components('*exp*'), roo.LineStyle(ROOT.kDotted))
+    pm.plotOn(plot, roo.Range('varbins'), 
+              roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),
+              roo.NormRange('fit'))
     myname = name + '_' + dataset.GetName() + '_peak_varbins'
-    canvases.next(myname).SetGrid()
+    canvas = canvases.next(myname)
+    canvas.SetGrid()
     plot.SetName(myname)
     plot.Draw()
+    if (logy):
+        plot.SetMaximum(math.pow(plot.GetMaximum(), 1.2))
+        canvas.SetLogy()
     return plot
-## End of plot_mass_peak2(label, bins, uniformBins, ddbins, fit_result).
+## End of plot_mass_varbins(dataset).
 
 
 #-------------------------------------------------------------------------------
@@ -1360,23 +1379,36 @@ def plot_residuals(source, fit_result, normalize=False):
     plots.append(plot)
     chi2calculator = RooChi2Calculator(source)
     if normalize:
-        hist = chi2calculator.pullHist()
+        hist = chi2calculator.pullHist('h_data', 'pm_Norm[mmgMass]', True)
         plot.SetTitle('#chi^{2} Pulls')
+        ytitle = '(Data - Fit) / #sqrt{Fit}'
         canvases.next(source.GetName() + '_pulls').SetGrid()
     else:
-        hist = chi2calculator.residHist()
+        hist = chi2calculator.residHist('h_data', 'pm_Norm[mmgMass]', True, True)
         plot.SetTitle('#chi^{2} Residuals')
+        ytitle = 'Data - Fit'
         canvases.next(source.GetName() + '_residuals').SetGrid()
+    plot.GetYaxis().SetTitle(ytitle)
     plot.addPlotable(hist, 'P')    
     plot.Draw()
-    npars = fit_result.floatParsFinal().getSize()
+    if not normalize:
+        return
+    ## Subtract one parameter for the normalization that is fixed
+    ## for the chi2 calculation.
+    npars = fit_result.floatParsFinal().getSize() - 1
     ndof = chi2calculator.numDOF(npars)
-    chi2 = chi2calculator.chiSquare(npars) * ndof
+    ## Second parameter is to renormalize: guarantees that the total
+    ## observed and expected events is the same.  This is to
+    ## avoid some spurious disagreements in the normalization presumably due
+    ## to the finickiness of RooFit and numarical rounding.
+    chi2 = chi2calculator.chiSquare(npars, True) * ndof
     Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
-           'p-value: %.2g %%' % (100 * ROOT.TMath.Prob(chi2, ndof))],
+           'p-value: %.2g %%' % (100 * ROOT.TMath.Prob(chi2, ndof)),],
           position=(0.2, 0.8)
-          ).draw()    
+          ).draw()
+    return plot
 ## End of plot_residuals(plot, fit_result)
+
 
 #-------------------------------------------------------------------------------
 def get_plot_range(plot):
@@ -1403,77 +1435,99 @@ def get_hist_range(hist):
 
 
 #-------------------------------------------------------------------------------
-def plot_mass_peak(label):
-    # mmgMass.setRange('plot', 70, 110)
-    mmgMass.setBins(80)
-    mmgMass.setRange('linplot', 80, 100)
-    plot = mmgMass.frame(roo.Range('linplot'))
-    plot.SetTitle('Peak Zoom-In')
-    data[label].plotOn(plot)
-    pm.plotOn(plot, roo.Range('linplot'), roo.NormRange('linplot'))
-    if use_exp_bkg:
-        pm.plotOn(plot, roo.Range('linplot'), roo.NormRange('linplot'),
-                  roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
-        pm.plotOn(plot, roo.Range('linplot'), roo.NormRange('linplot'),
-                  roo.Components('*exp*'), roo.LineStyle(ROOT.kDotted))
-    else:
-        pm.plotOn(plot, roo.Range('linplot'), roo.NormRange('linplot'),
-                  roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-    #pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-              #roo.Components('bkg*'), roo.LineStyle(ROOT.kDotted))
-    canvas = canvases.next(name + '_' + label + '_zoomin')
+def plot_mass_peak(dataset, fit_result):
+    global plots
+    label = dataset.GetName()
+    mmgMass.setBins(60)
+    plot = mmgMass.frame(roo.Range('peak'))
+    plots.append(plot)
+    plot.SetTitle('Mass Peak')
+    dataset.plotOn(plot)
+    pm.plotOn(plot, roo.Range('peak'), roo.NormRange('peak'))
+    pm.plotOn(plot, roo.Range('peak'), roo.NormRange('peak'),
+              roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
+    pm.plotOn(plot, roo.Range('peak'), roo.NormRange('peak'),
+              roo.Components('*exp*'), roo.LineStyle(ROOT.kDotted))
+    canvas = canvases.next(name + '_' + label + '_peak')
     canvas.SetGrid()
     plot.Draw()
-    global plots
-    plots.append(plot)
-    canvas = canvases.next(name + '_' + label + '_residuals')
-    rhist = plot.residHist('h_data', 'pm_Norm[mmgMass]_Range[linplot]_NormRange[linplot]')
-    rplot = mmgMass.frame(roo.Range('linplot'))
-    rplot.SetTitle('Fit Residuals')
-    rplot.GetYaxis().SetTitle('Observed - Expected')
+    npars = fit_result.floatParsFinal().getSize()
+    ndof = plot.getHist('h_data').GetN() - npars
+    chi2 = plot.chiSquare('pm_Norm[mmgMass]_Range[peak]_NormRange[peak]',
+                          'h_data', npars) * ndof
+    Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
+           'p-value: %.2g %%' % (100 * ROOT.TMath.Prob(chi2, ndof)),
+           ],
+          position=(0.2, 0.8)
+          ).draw()
+    ## Residuals
+    canvas = canvases.next(name + '_' + label + '_peak_residuals').SetGrid()
+    rhist = plot.residHist('h_data',
+                           'pm_Norm[mmgMass]_Range[peak]_NormRange[peak]')
+    rplot = mmgMass.frame(roo.Range('peak'))
+    rplot.SetTitle('Mass Peak Fit Residuals')
+    ytitle = plot.GetYaxis().GetTitle().replace('Events', 'Data - Fit')
+    rplot.GetYaxis().SetTitle(ytitle)
     rplot.addPlotable(rhist, 'P')
     rplot.Draw()
+    Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
+           'p-value: %.2g %%' % (100 * ROOT.TMath.Prob(chi2, ndof)),
+           ],
+          position=(0.2, 0.8)
+          ).draw()    
     plots.append(rplot)
 ## End of plot_mass_peak().
 
 
 #-------------------------------------------------------------------------------
-def plot_mass_tails(label):
-    # mmgMass.setRange('plot', 70, 110)
+def plot_mass_tails(dataset, fit_result):
+    global plots
+    label = dataset.GetName()
     mmgMass.setBins(60)
-    mmgMass.setRange('logplot', 60, 120)
-    plot = mmgMass.frame(roo.Range('logplot'))
-    plot.SetTitle('Tails Zoom-Out')
-    data[label].plotOn(plot)
-    pm.plotOn(plot, roo.Range('logplot'), roo.NormRange('logplot'))
-    if use_exp_bkg:
-        pm.plotOn(plot, roo.Range('logplot'), roo.NormRange('logplot'),
-                  roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
-        pm.plotOn(plot, roo.Range('logplot'), roo.NormRange('logplot'),
-                  roo.Components('*exp*'), roo.LineStyle(ROOT.kDotted))
-    else:
-        pm.plotOn(plot, roo.Range('logplot'), roo.NormRange('logplot'),
-                  roo.Components('*zj*'), roo.LineStyle(ROOT.kDashed))
-    #pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-              #roo.Components('bkg*'), roo.LineStyle(ROOT.kDotted))
-    canvas = canvases.next(name + '_' + label + '_zoomout')
+    plot = mmgMass.frame(roo.Range('tails'))
+    plots.append(plot)
+    plot.SetTitle('Mass Tails')
+    dataset.plotOn(plot)
+    pm.plotOn(plot, roo.Range('tails'), roo.NormRange('tails'))
+    pm.plotOn(plot, roo.Range('tails'), roo.NormRange('tails'),
+              roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
+    pm.plotOn(plot, roo.Range('tails'), roo.NormRange('tails'),
+              roo.Components('*exp*'), roo.LineStyle(ROOT.kDotted))
+    canvas = canvases.next(name + '_' + label + '_tails')
     canvas.SetGrid()
     canvas.SetLogy()
     plot.Draw()
-    global plots
-    plots.append(plot)
+    plot.SetMaximum(math.pow(plot.GetMaximum(), 1.2))
+    npars = fit_result.floatParsFinal().getSize()
+    ndof = plot.getHist('h_data').GetN() - npars
+    chi2 = plot.chiSquare('pm_Norm[mmgMass]_Range[peak]_NormRange[peak]',
+                          'h_data', npars) * ndof
+    print 'plot_mass_tails: npars, ndof, chi2:', npars, ndof, chi2
+    Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
+           'p-value: %.2g %%' % (100 * ROOT.TMath.Prob(chi2, ndof)),
+           ],
+          position=(0.2, 0.8)
+          ).draw()    
     ## Pulls
-    canvas = canvases.next(name + '_' + label + '_pulls')
+    canvas = canvases.next(name + '_' + label + '_tails_pulls')
     rhist = plot.residHist(
         'h_data', 
-        'pm_Norm[mmgMass]_Range[logplot]_NormRange[logplot]',
+        'pm_Norm[mmgMass]_Range[tails]_NormRange[tails]',
         True)
-    rplot = mmgMass.frame()
-    rplot.SetTitle('Fit Pulls')
-    rplot.GetYaxis().SetTitle('(Observed - Expected) / Error')
+    rplot = mmgMass.frame(roo.Range('tails'))
+    rplot.SetTitle('Mass Tails Fit Pulls')
+    ytitle = plot.GetYaxis().GetTitle().replace(
+        'Events', '(Data - Fit) / Error'
+        )
+    rplot.GetYaxis().SetTitle(ytitle)
     rplot.addPlotable(rhist, 'P')
     rplot.Draw()
     plots.append(rplot)
+    Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
+           'p-value: %.2g %%' % (100 * ROOT.TMath.Prob(chi2, ndof)),
+           ],
+          position=(0.2, 0.8)
+          ).draw()    
 ## End of plot_mass_tails().
 
 
@@ -1494,7 +1548,7 @@ def get_auto_binning(data):
     entries = data.tree().Draw('mmgMass', '', 'goff')
 
     ## Create the DataDrivenBinning object with bincontent in 35-200
-    bins = DataDrivenBinning(entries, data.tree().GetV1(), 35, 200)
+    bins = DataDrivenBinning(entries, data.tree().GetV1(), 20, 500)
 
     return bins
 ## end of get_auto_binning(data)
@@ -1655,4 +1709,3 @@ if __name__ == '__main__':
     parse_command_line_arguments()
     main()
     import user
-
