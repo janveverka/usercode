@@ -738,7 +738,7 @@ def outro(make_plots=True, save_workspace=True):
 
     for label, dataset in data.items():
         dataset.SetName('data_' + label)
-        #w.Import(dataset)
+        w.Import(dataset)
     
     if save_workspace:
         for c in canvases.canvases:
@@ -825,9 +825,9 @@ def build_model():
 
     ## Build the composite model PDF
     global pm
-    pm = w.factory(
-        'SUM::pm(signal_N[1e3,0,1e4] * signal_model0, exp_N[2e2,0,1e3] * exp_pdf, zj_N[2e2,0,1e3] *zj0_pdf)'
-        )
+    pm = w.factory('''SUM::pm(signal_N[1e3,0,1e4] * signal_model0,
+                              exp_N   [2e2,0,1e3] * exp_pdf,
+                              zj_N    [2e2,0,1e3] * zj0_pdf)''')
 
     for yieldvar in 'signal_N exp_N zj_N'.split():
         w.var(yieldvar).removeMax()
@@ -1065,23 +1065,15 @@ def process_real_data_single_dataset(label):
     w.saveSnapshot('_'.join(['mc_truth', label]),
                    ROOT.RooArgSet(phoScaleTrue, phoResTrue))    
 
-    set_fit_components('S')
-    fit_result = fit_real_data(label)
-    plot_fit_to_real_data(label)
-    draw_latex_for_fit_to_real_data()
-    validate_mass_fit(data[label], fit_result)
-       
-    set_fit_components('B')
-    fit_result = fit_real_data(label)
-    plot_fit_to_real_data(label)
-    draw_latex_for_fit_to_real_data()
-    validate_mass_fit(data[label], fit_result)
-       
-    set_fit_components('E')
-    fit_result = fit_real_data(label)
-    plot_fit_to_real_data(label)
-    draw_latex_for_fit_to_real_data()
-    validate_mass_fit(data[label], fit_result)
+    # for components in ['SEB']:
+    for components in 'S SE SB SEB E B EB'.split() + ['']:
+        process_real_data_for_label_and_components(label, components)
+
+    # set_fit_components('S')
+    # fit_result = fit_real_data(label)
+    # plot_fit_to_real_data(label)
+    # draw_latex_for_fit_to_real_data()
+    # validate_mass_fit(data[label], fit_result)
        
     # set_fit_components('SE')
     # fit_result = fit_real_data(label)
@@ -1100,7 +1092,41 @@ def process_real_data_single_dataset(label):
     # plot_fit_to_real_data(label)
     # draw_latex_for_fit_to_real_data()
     # validate_mass_fit(data[label], fit_result)    
-## End of get_fit_and_plot_real_data_single_dataset().
+
+    # set_fit_components('')
+    # fit_result = fit_real_data(label)
+    # plot_fit_to_real_data(label)
+    # draw_latex_for_fit_to_real_data()
+    # validate_mass_fit(data[label], fit_result)
+       
+    # set_fit_components('E')
+    # fit_result = fit_real_data(label)
+    # plot_fit_to_real_data(label)
+    # draw_latex_for_fit_to_real_data()
+    # validate_mass_fit(data[label], fit_result)
+       
+    # set_fit_components('B')
+    # fit_result = fit_real_data(label)
+    # plot_fit_to_real_data(label)
+    # draw_latex_for_fit_to_real_data()
+    # validate_mass_fit(data[label], fit_result)
+       
+    # set_fit_components('EB')
+    # fit_result = fit_real_data(label)
+    # plot_fit_to_real_data(label)
+    # draw_latex_for_fit_to_real_data()
+    # validate_mass_fit(data[label], fit_result)
+## End of process_real_data_single_dataset().
+
+
+#-------------------------------------------------------------------------------
+def process_real_data_for_label_and_components(label, components):
+    set_fit_components(components)
+    fit_result = fit_real_data(label)
+    plot_fit_to_real_data(label)
+    draw_latex_for_fit_to_real_data()
+    validate_mass_fit(data[label], fit_result)
+## End of process_real_data_for_label_and_components(label, components)
 
 
 #-------------------------------------------------------------------------------
@@ -1120,6 +1146,7 @@ def set_fit_components(components):
     for c in 'S B E'.split():
         if c in components:
             w.var(num[c]).setConstant(False)
+            w.var(num[c]).setVal(200)
             for p in params[c]:
                 w.var(p).setConstant(False)
         else:
@@ -1131,6 +1158,7 @@ def set_fit_components(components):
                 w.var(p).setError(0)
     ## Always float the signal fraction
     w.var('signal_N').setConstant(False)
+    w.var('signal_N').setVal(1000)
     ## Set the scale and resolution defaults to MC truth
     phoScale.setVal(phoScaleTrue.getVal())
     phoRes.setVal(phoResTrue.getVal())
@@ -1342,14 +1370,17 @@ def validate_mass_fit(dataset, fit_result):
     # draw_gof_latex()
     pulldist_plot = plot_pull_distribution(pulls_plot)
     # plot_mass_peak(dataset, fit_result)
-    peak_plot = plot_mass_varbins(dataset, (80, 100))
+    peak_plot = plot_mass_varbins(dataset, (60, 120))
     resid_plot = plot_residuals(peak_plot, fit_result)
+    for p in [peak_plot, resid_plot]:
+        p.GetXaxis().SetRangeUser(80, 100)
     ## Make a landscape canvas
     canvas = canvases.next(name + '_mass_landscape')
     canvas.SetWindowSize(1200, 600)
     canvas.Divide(3,2)
     myplots = [tails_plot, peak_plot, pulldist_plot, pulls_plot, resid_plot]
-    mytitles = ['Full Fit Range', 'Peak Detail', 'Distribution of #chi^{2} Pulls', 
+    mytitles = ['Full Fit Range', 'Peak Detail',
+                'Distribution of #chi^{2} Pulls Overlayed with Unit Gaussian', 
                 '#chi^{2} Pulls', '#chi^{2} Residuals', '']
     pads = [canvas.cd(i) for i in range(1, 7)]        
     pads[0].SetLogy()
@@ -1360,18 +1391,18 @@ def validate_mass_fit(dataset, fit_result):
         plot.SetTitle(title)
         plot.Draw()
     canvas.cd(6)
-    draw_gof_latex(position=(0.1, 1.0), rowheight=0.08)
+    draw_gof_latex(position=(0.1, 0.9), rowheight=0.08)
     Latex(['s_{true}: ' + latexpm(phoScaleTrue),
            's_{fit} : ' + latexpm(phoScale),],
-           position=(0.1, 0.8), rowheight=0.08).draw()
+           position=(0.1, 0.7), rowheight=0.08).draw()
     Latex(['r_{true}: ' + latexpm(phoResTrue),
            'r_{fit} : ' + latexpm(phoRes),],
-           position=(0.55, 0.8), rowheight=0.08).draw()
+           position=(0.55, 0.7), rowheight=0.08).draw()
     Latex(['N_{S}: ' + latexpm(w.var('signal_N')),
            'N_{Z+j}: ' + latexpm(w.var('zj_N')),
            'N_{exp}: ' + latexpm(w.var('exp_N')),
            '#lambda_{exp}: ' + latexpm(w.var('exp_c')),],
-           position = (0.1, 0.6), rowheight=0.08).draw()
+           position = (0.1, 0.5), rowheight=0.08).draw()
 ## End of validate_mass_fit().
 
 
@@ -1435,15 +1466,14 @@ def plot_mass_varbins(dataset, plot_range, logy=False):
     hist = plot.getHist('h_' + reduced_data.GetName())
     ddbins.applyTo(hist)
     norm = reduced_data.sumEntries()
-    pm.plotOn(plot, roo.Range('varbins'), 
+    pm.plotOn(plot, roo.Range('varbins'), roo.NormRange('varbins'),
               roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),
               roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
-    pm.plotOn(plot, roo.Range('varbins'),
+    pm.plotOn(plot, roo.Range('varbins'), roo.NormRange('varbins'),
               roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),        
               roo.Components('*exp*'), roo.LineStyle(ROOT.kDotted))
-    pm.plotOn(plot, roo.Range('varbins'), 
-              roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),
-              roo.NormRange('fit'))
+    pm.plotOn(plot, roo.Range('varbins'), roo.NormRange('varbins'),
+              roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),)
     myname = name + '_' + dataset.GetName() + '_peak_varbins'
     plot.SetName(myname)
     #canvas = canvases.next(myname)
