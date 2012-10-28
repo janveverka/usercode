@@ -241,7 +241,7 @@ def decorate(canvas):
     '''
     canvas.cd()
     labels = []
-    labels.append(Latex(['CMS Preliminary 2011,  #sqrt{s} = 7 TeV'], 
+    labels.append(Latex(['CMS 2011,  #sqrt{s} = 7 TeV'], 
                         position=(0.17, 0.93),
                         textsize=22))
                         
@@ -264,7 +264,7 @@ def main():
     make_scale_plots()
     canvases
     canvases.make_pdf_from_eps()
-    canvases.make_plots('eps C png'.split())
+    canvases.make_plots('eps C root'.split())
 ## End of main()
 
 

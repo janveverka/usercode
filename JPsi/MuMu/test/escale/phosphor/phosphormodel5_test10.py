@@ -66,7 +66,7 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'mass_landscape_test_data_EE_lowR9_pt25to999_yyv5'
+name = 'mass_landscape_test_data_EB_lowR9_pt25to999_yyv5'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -962,7 +962,7 @@ def fit_real_data(label):
                           roo.InitialHesse(True), roo.Minos(),
                           roo.Save(), roo.Extended(True)
         )
-    w.Import(fit_result, 'fitresult_' + label)
+    # w.Import(fit_result, 'fitresult_' + label)
     return fit_result
 ## End of fit_real_data()
 
@@ -1123,6 +1123,7 @@ def process_real_data_single_dataset(label):
 def process_real_data_for_label_and_components(label, components):
     set_fit_components(components)
     fit_result = fit_real_data(label)
+    w.Import(fit_result, '_'.join('fitresult', label, components))    
     plot_fit_to_real_data(label)
     draw_latex_for_fit_to_real_data()
     validate_mass_fit(data[label], fit_result)
@@ -1532,7 +1533,6 @@ def save_gof(plot, fit_result):
         if 'fit' in tok:
             break
     w.saveSnapshot(tok, w.set('gof'))
-    w.Import(fit_result, 'fitresult_' + tok)    
 ## End of calculate_gof(plot)
 
 
