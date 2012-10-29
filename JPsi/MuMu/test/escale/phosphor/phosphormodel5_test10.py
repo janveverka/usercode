@@ -403,7 +403,7 @@ def define_data_observables():
     title_unit_map = {
         'mmgMass': 'm_{#mu#mu#gamma} GeV'.split(),
         'mmMass' : 'm_{#mu#mu} GeV'.split(),
-        'phoERes': ('E_{reco}^{#gamma}/E_{gen}^{#gamma} - 1', ''),
+        'phoERes': ('E_{reco}^{#gamma}/E_{gen}^{#gamma} - 1', '%'),
         'mmgMassPhoGenE': ('gen. level m_{#mu#mu#gamma}', 'GeV'),
         }
 
@@ -738,7 +738,7 @@ def outro(make_plots=True, save_workspace=True):
 
     for label, dataset in data.items():
         dataset.SetName('data_' + label)
-        # w.Import(dataset)
+        w.Import(dataset)
     
     if save_workspace:
         for c in canvases.canvases:
@@ -772,8 +772,8 @@ def build_signal_model():
     # phortargets = [0.1, 0.5, 1, 3, 5, 7, 10, 15, 25]
 
     # phortargets = [0.5, 6, 7, 7.5, 8, 8.5, 8.75, 9, 9.5, 10, 10.5, 11, 11.5, 11.75, 12, 12.5, 13, 14]
-    # phortargets = [0.5, fit_calibrator.r0.getVal(), 10, 20]
-    # phortargets.append(fit_calibrator.r0.getVal())
+    # phortargets = [0.5, calibrator0.r0.getVal(), 10, 20]
+    # phortargets.append(calibrator0.r0.getVal())
     phortargets.sort()
 
     ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(0.1e-08)
@@ -954,8 +954,8 @@ def fit_real_data(label):
     "2011A" or "2011B".
     '''
     ## Set initial values to MC truth
-    phoScale.setVal(fit_calibrator.s.getVal())
-    phoRes.setVal(fit_calibrator.r.getVal())
+    phoScale.setVal(calibrator0.s.getVal())
+    phoRes.setVal(calibrator0.r.getVal())
     ## Do the fit
     fit_result = pm.fitTo(data[label], roo.Range('fit'),  roo.NumCPU(8),
                           roo.Timer(), # roo.Verbose()
@@ -1023,16 +1023,16 @@ def draw_latex_for_fit_to_real_data():
     
     Latex([
         'E^{#gamma} Scale (%)',
-        '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
-                                       fit_calibrator.s.getError()),
+        '  MC Truth: %.2f #pm %.2f' % (calibrator0.s.getVal(),
+                                       calibrator0.s.getError()),
         '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
             phoScale.getVal(), phoScale.getError(), phoScale.getErrorHi(),
             phoScale.getErrorLo()
             ),
         '',
         'E^{#gamma} Resolution (%)',
-        '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.r.getVal(),
-                                       fit_calibrator.r.getError()),
+        '  MC Truth: %.2f #pm %.2f' % (calibrator0.r.getVal(),
+                                       calibrator0.r.getError()),
         '  Data Fit: %.2f #pm %.2f ^{+%.2f}_{%.2f}' % (
             phoRes.getVal(), phoRes.getError(), phoRes.getErrorHi(),
             phoRes.getErrorLo()
@@ -1059,12 +1059,10 @@ def process_real_data_single_dataset(label):
     "data" (full 2011A+B), "2011A" or "2011B".
     '''
     get_real_data(label)
-    ## store the the mc truth values in the workspace
-    set_mc_truth(fit_calibrator.s, fit_calibrator.r)
     w.saveSnapshot('_'.join(['mc_truth', label]),
                    ROOT.RooArgSet(phoScaleTrue, phoResTrue))    
-    # for components in ['SEB']:
-    for components in 'S SE SB SEB E B EB'.split() + ['']:
+    for components in ['SEB', 'EB']:
+    # for components in [''] + 'E B EB S SE SB SEB'.split():
         process_real_data_for_label_and_components(label, components)
 ## End of process_real_data_single_dataset().
 
@@ -1077,6 +1075,7 @@ def process_real_data_for_label_and_components(label, components):
     plot_fit_to_real_data(label)
     draw_latex_for_fit_to_real_data()
     validate_mass_fit(data[label], fit_result)
+    w.saveSnapshot('_'.join(['gof', label, components]), w.set('gof'))    
 ## End of process_real_data_for_label_and_components(label, components)
 
 
@@ -1128,6 +1127,12 @@ def process_real_data():
     Get, fit and plot real data for all 3 dataset specified:
     "data" (full 2011A+B), "2011A" or "2011B".
     '''
+    ## store the the mc truth values in the workspace
+    fitresult = fit_mc_truth(data['fsr1'])
+    w.Import(fitresult, 'fitresult_mctruth')
+    set_mc_truth(calibrator0.s, calibrator0.r)
+    validate_response_fit(data['fsr1'], fitresult)
+
     #process_real_data_single_dataset('2011A')
     #check_timer('13.1 get, fit and plot 2011A real data')
 
@@ -1138,6 +1143,22 @@ def process_real_data():
     check_timer('13.3 get, fit and plot 2011A+B real data')
 ## End of process_real_data().
     
+
+#-------------------------------------------------------------------------------
+def fit_mc_truth(idata):
+    '''
+    Fits the MC truth for the model sample and returns the fit result.
+    '''
+    old_precision = set_default_integrator_precision(2e-9, 2e-9)
+    calibrator0.s.setRange(-15, 15)
+    calibrator0.r.setRange(0,25)
+    fitresult = calibrator0.phoEResPdf.fitTo(
+        idata, roo.Range(-50, 50), roo.Strategy(2), roo.Save()
+        )
+    set_default_integrator_precision(*old_precision)
+    return fitresult
+## End of fit_mc_truth().
+
 
 #-------------------------------------------------------------------------------
 def set_mc_truth(phos, phor):
@@ -1249,16 +1270,13 @@ def process_monte_carlo():
     canvases.next(name + '_fit').SetGrid()
     plot.Draw()
     ## Estimate the MC truth phos and phor:
-    old_precision = set_default_integrator_precision(2e-9, 2e-9)
-    calibrator0.s.setRange(-15, 15)
-    calibrator0.r.setRange(0,25)
-    calibrator0.phoEResPdf.fitTo(fitdata1, roo.Range(-50, 50), roo.Strategy(2))
-    set_default_integrator_precision(*old_precision)
+    fitresult_mctrue = fit_mc_truth(data['fsr1'])
     set_mc_truth(calibrator0.s, calibrator0.r)
 
     ## Store the result in the workspace:
     w.saveSnapshot('mc_fit', ROOT.RooArgSet(phoScale, phoRes,
                                             phoScaleTrue, phoResTrue))
+    w.Import(fitresult_mctrue, 'fitresult_mctrue')
                                             
     draw_latex_for_fit_to_monte_carlo()
     
@@ -1317,12 +1335,12 @@ def validate_mass_fit(dataset, fit_result):
     tails_plot = plot_mass_varbins(dataset, (60, 120), True)
     save_gof(tails_plot, fit_result)
     # draw_gof_latex()
-    pulls_plot = plot_residuals(tails_plot, fit_result, True)
+    pulls_plot = plot_mass_residuals(tails_plot, fit_result, True)
     # draw_gof_latex()
     pulldist_plot = plot_pull_distribution(pulls_plot)
     # plot_mass_peak(dataset, fit_result)
     peak_plot = plot_mass_varbins(dataset, (60, 120))
-    resid_plot = plot_residuals(peak_plot, fit_result)
+    resid_plot = plot_mass_residuals(peak_plot, fit_result)
     for p in [peak_plot, resid_plot]:
         p.GetXaxis().SetRangeUser(80, 100)
     ## Make a landscape canvas
@@ -1342,18 +1360,19 @@ def validate_mass_fit(dataset, fit_result):
         plot.SetTitle(title)
         plot.Draw()
     canvas.cd(6)
-    draw_gof_latex(position=(0.1, 0.9), rowheight=0.08)
+    Latex(['Mass Fit (PHOSPHOR)'], position=(0.1, 0.9)).draw()
+    draw_gof_latex(position=(0.1, 0.8), rowheight=0.08)
     Latex(['s_{true}: ' + latexpm(phoScaleTrue),
            's_{fit} : ' + latexpm(phoScale),],
-           position=(0.1, 0.7), rowheight=0.08).draw()
+           position=(0.1, 0.6), rowheight=0.08).draw()
     Latex(['r_{true}: ' + latexpm(phoResTrue),
            'r_{fit} : ' + latexpm(phoRes),],
-           position=(0.55, 0.7), rowheight=0.08).draw()
+           position=(0.55, 0.6), rowheight=0.08).draw()
     Latex(['N_{S}: ' + latexpm(w.var('signal_N')),
            'N_{Z+j}: ' + latexpm(w.var('zj_N')),
            'N_{exp}: ' + latexpm(w.var('exp_N')),
            '#lambda_{exp}: ' + latexpm(w.var('exp_c')),],
-           position = (0.1, 0.5), rowheight=0.08).draw()
+           position = (0.1, 0.4), rowheight=0.08).draw()
 ## End of validate_mass_fit().
 
 
@@ -1379,18 +1398,46 @@ def latexpm(var):
 
 
 #-------------------------------------------------------------------------------
-def validate_response_fit(dataset, fit_result):
+def validate_response_fit(idata, fit_result):
     '''
     Plot the data/fit in small and large range, residuals, pulls, pull
     distribution, chi2 prob and parameters for a dataset specified by the label:
     "data" (full 2011A+B), "2011A" or "2011B".
-    '''    
-    # plot_mass_peak(dataset, fit_result)
-    plot = plot_mass_varbins(dataset, (85, 100))
-    plot_residuals(plot, fit_result)
-    # plot_mass_tails(dataset, fit_result)
-    plot = plot_mass_varbins(dataset, (60, 120), True)
-    plot_residuals(plot, fit_result, True)
+    '''
+    sval = fit_result.floatParsFinal().find('s').getVal()
+    rval = fit_result.floatParsFinal().find('r').getVal()
+    zoom_range =  (sval - 2 * rval, sval + 2 * rval)
+    full_range = (-50, 50)
+    tails_plot = plot_response_varbins(idata, full_range, True)
+    save_gof(tails_plot, fit_result, mctruth=True)
+    pulls_plot = plot_response_residuals(tails_plot, fit_result, True)
+    pulldist_plot = plot_pull_distribution(pulls_plot)
+    peak_plot = plot_response_varbins(idata, full_range)
+    resid_plot = plot_response_residuals(peak_plot, fit_result)
+    for p in [peak_plot, resid_plot]:
+        p.GetXaxis().SetRangeUser(*zoom_range)
+    canvas = canvases.next(name + '_mass_landscape')
+    canvas.SetWindowSize(1200, 600)
+    canvas.Divide(3,2)
+    myplots = [tails_plot, peak_plot, pulldist_plot, pulls_plot, resid_plot]
+    mytitles = ['Full Fit Range', 'Peak Detail',
+                'Distribution of #chi^{2} Pulls Overlayed with Unit Gaussian', 
+                '#chi^{2} Pulls', '#chi^{2} Residuals', '']
+    pads = [canvas.cd(i) for i in range(1, 7)]        
+    pads[0].SetLogy()
+    ## Draw frames
+    for i, (plot, title) in enumerate(zip(myplots, mytitles)):
+        pad = canvas.cd(i+1)
+        pad.SetGrid()
+        plot.SetTitle(title)
+        plot.Draw()
+    canvas.cd(6)
+    Latex(['Response Fit (MC Truth)'], position=(0.1, 0.9)).draw()
+    draw_gof_latex(position=(0.1, 0.8), rowheight=0.08)
+    Latex(['s_{true}: ' + latexpm(phoScaleTrue),],
+           position=(0.1, 0.6), rowheight=0.08).draw()
+    Latex(['r_{true}: ' + latexpm(phoResTrue),],
+           position=(0.55, 0.6), rowheight=0.08).draw()    
 ## End of validate_response_fit().
 
 
@@ -1439,7 +1486,42 @@ def plot_mass_varbins(dataset, plot_range, logy=False):
 
 
 #-------------------------------------------------------------------------------
-def plot_residuals(source, fit_result, normalize=False):
+def plot_response_varbins(idata, plot_range, logy=False):
+    global plots    
+    phoERes.setRange('varbins', *plot_range)
+    plot = phoERes.frame(roo.Range('varbins'))
+    plots.append(plot)
+    plot.SetTitle('Response Peak with Variable Binning')
+    idata = idata.reduce(
+        '%f < phoERes & phoERes < %f' % plot_range
+        )
+    idata = idata.reduce(ROOT.RooArgSet(phoERes))
+    ddbins = get_auto_binning(idata)
+    bins = ddbins.binning(ROOT.RooBinning())
+    bins.SetName('chi2')
+    uniformBins = ddbins.uniformBinning(ROOT.RooUniformBinning())
+    uniformBins.SetName('normalization')
+    ## This is hack to make RooFit use a nice normaliztion.
+    ## First plot the data with uniform binning but don't display it.
+    idata.plotOn(plot, roo.Binning(uniformBins), roo.Invisible())
+    idata.plotOn(plot, roo.Binning(bins))    
+    hist = plot.getHist('h_' + idata.GetName())
+    ddbins.applyTo(hist)
+    norm = idata.sumEntries()
+    model = calibrator0.phoEResPdf
+    model.plotOn(plot, roo.Range('varbins'), roo.NormRange('varbins'),
+                 roo.Normalization(norm, ROOT.RooAbsReal.NumEvent),)
+    myname = name + '_' + idata.GetName() + '_response_varbins'
+    plot.SetName(myname)
+    if (logy):
+        plot.SetMaximum(math.pow(plot.GetMaximum(), 1.2))
+        plot.SetMinimum(1e-1)
+    return plot
+## End of plot_response_varbins(idata).
+
+
+#-------------------------------------------------------------------------------
+def plot_mass_residuals(source, fit_result, normalize=False):
     global plots
     plot = mmgMass.frame(roo.Range(*get_plot_range(source)))
     plots.append(plot)
@@ -1458,11 +1540,37 @@ def plot_residuals(source, fit_result, normalize=False):
     plot.addPlotable(hist, 'P')    
     # plot.Draw()
     return plot
-## End of plot_residuals(plot, fit_result)
+## End of plot_mass_residuals(plot, fit_result)
 
 
 #-------------------------------------------------------------------------------
-def save_gof(plot, fit_result):
+def plot_response_residuals(source, fit_result, normalize=False):
+    global plots
+    plot = phoERes.frame(roo.Range(*get_plot_range(source)))
+    plots.append(plot)
+    chi2calculator = RooChi2Calculator(source)
+    for histname in 'h_data h_data_fsr1'.split():
+        if source.getHist(histname):
+            break
+    if normalize:
+        hist = chi2calculator.pullHist(histname, 'phoEResPdf_Norm[phoERes]', True)
+        plot.SetTitle('#chi^{2} Pulls')
+        ytitle = '(Data - Fit) / #sqrt{Fit}'
+        # canvases.next(source.GetName() + '_pulls').SetGrid()
+    else:
+        hist = chi2calculator.residHist(histname, 'phoEResPdf_Norm[phoERes]', False, True)
+        plot.SetTitle('#chi^{2} Residuals')
+        ytitle = 'Data - Fit'
+        # canvases.next(source.GetName() + '_residuals').SetGrid()
+    plot.GetYaxis().SetTitle(ytitle)
+    plot.addPlotable(hist, 'P')    
+    # plot.Draw()
+    return plot
+## End of plot_mass_residuals(plot, fit_result)
+
+
+#-------------------------------------------------------------------------------
+def save_gof(plot, fit_result, mctruth=False):
     '''
     Calculates GOF parameters and stores them in the workspace.
     '''
@@ -1480,11 +1588,14 @@ def save_gof(plot, fit_result):
     w.var('chi2').setVal(chi2)
     w.var('ndof').setVal(ndof)
     w.var('pvalue').setVal(pvalue)
-    for tok in name.split('_'):
-        if 'fit' in tok:
-            break
+    if mctruth:
+        tok = 'mctruth'
+    else:
+        for tok in name.split('_'):
+            if 'fit' in tok:
+                break
     w.saveSnapshot(tok, w.set('gof'))
-## End of calculate_gof(plot)
+## End of save_gof(plot)
 
 
 #-------------------------------------------------------------------------------
@@ -1658,7 +1769,7 @@ def plot_mass_tails(dataset, fit_result):
 
 
 #--------------------------------------------------------------------------
-def get_auto_binning(data):
+def get_auto_binning(idata):
     '''
     Get binning that is uniform around that peak area and non-uniform
     in the tails.  It guaranties that the number of entries per bin is
@@ -1669,13 +1780,11 @@ def get_auto_binning(data):
       * the bin width is a pretty number, e.g. 1, 0.5, 0.2, etc.
       * calculate the median for each bin. (->better looking plot)
     '''
-
     ## Get the data as an array of doubles pointed by a tree
-    entries = data.tree().Draw('mmgMass', '', 'goff')
-
+    name = idata.get().first().GetName()
+    entries = idata.tree().Draw(name, '', 'goff')
     ## Create the DataDrivenBinning object with bincontent in 35-200
-    bins = DataDrivenBinning(entries, data.tree().GetV1(), 20, 500)
-
+    bins = DataDrivenBinning(entries, idata.tree().GetV1(), 20, 500)
     return bins
 ## end of get_auto_binning(data)
 
@@ -1685,15 +1794,15 @@ def main():
     sw.Start()
     sw2.Start()
 
-    init()
-    # init_from_file(inputfile)
+    # init()
+    init_from_file(inputfile)
     
     if use_real_data:
         process_real_data()
     else:
         process_monte_carlo()
 
-    outro()
+    # outro()
 ## End of main().
 
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
