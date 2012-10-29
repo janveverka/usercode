@@ -1060,10 +1060,12 @@ def process_real_data_single_dataset(label):
     '''
     get_real_data(label)
     w.saveSnapshot('_'.join(['mc_truth', label]),
-                   ROOT.RooArgSet(phoScaleTrue, phoResTrue))    
-    for components in ['SEB', 'EB']:
-    # for components in [''] + 'E B EB S SE SB SEB'.split():
+                   ROOT.RooArgSet(phoScaleTrue, phoResTrue))
+    #components_combinations = 'E B EB S SE SB SEB'.split()
+    components_combinations = 'S SB SE SEB'.split()    
+    for components in components_combinations:
         process_real_data_for_label_and_components(label, components)
+    plot_combo_summaries(label, components_combinations)
 ## End of process_real_data_single_dataset().
 
 
@@ -1077,6 +1079,75 @@ def process_real_data_for_label_and_components(label, components):
     validate_mass_fit(data[label], fit_result)
     w.saveSnapshot('_'.join(['gof', label, components]), w.set('gof'))    
 ## End of process_real_data_for_label_and_components(label, components)
+
+
+#-------------------------------------------------------------------------------
+def plot_combo_summaries(label, combos):
+    ## p-value
+    hist = plot_gofvar_vs_combo('pvalue', label, combos)
+    hist.GetYaxis().SetTitle('Fit #chi^{2} p-value')
+    canvases.next('pvalue_vs_combo')
+    hist.DrawCopy('p')
+    w.Import(hist)
+    ## chi2
+    hist = plot_gofvar_vs_combo('chi2', label, combos)
+    hist.GetYaxis().SetTitle('Fit #chi^{2}')
+    canvases.next('chi2_vs_combo')
+    hist.DrawCopy('p')
+    w.Import(hist)
+    ## Resolution
+    hist = plot_floatvar_vs_combo('phoRes', label, combos)
+    hist.SetMinimum(0)
+    hist.GetYaxis().SetTitle('E^{#gamma} Resolution (%)')
+    canvases.next('phoRes_vs_combo')
+    hist.DrawCopy('e1x0')
+    w.Import(hist)
+    ## Scale
+    hist = plot_floatvar_vs_combo('phoScale', label, combos)
+    hist.GetYaxis().SetTitle('E^{#gamma} Scale (%)')
+    canvases.next('phoScale_vs_combo')
+    hist.DrawCopy('e1x0')
+    w.Import(hist)
+## End of plot_combo_summaries(label, combos)
+
+
+#-------------------------------------------------------------------------------
+def plot_floatvar_vs_combo(varname, label, combos):
+    hname = 'h_%s_vs_combo' % varname
+    npoints = len(combos)
+    hist = ROOT.TH1F(hname, '', npoints, -0.5, npoints - 0.5)
+    hist.SetStats(0)
+    hist.GetXaxis().SetTitle('Fit Model Components')
+    for ibin, components in enumerate(combos):
+        hist.GetXaxis().SetBinLabel(ibin + 1, components)
+        fitresult = w.obj('_'.join(['fitresult', label, components]))
+        yvar = fitresult.floatParsFinal().find(varname)
+        if not yvar:
+            yvar = fitresult.constPars().find(varname)
+        hist.Fill(ibin, yvar.getVal())
+        hist.SetBinError(ibin + 1, yvar.getError())
+    return hist
+## End of plot_floatvar_vs_combo(varname, label, combos)
+
+
+#-------------------------------------------------------------------------------
+def plot_gofvar_vs_combo(varname, label, combos):
+    hname = 'h_%s_vs_combo' % varname
+    npoints = len(combos)
+    hist = ROOT.TH1F(hname, '', npoints, -0.5, npoints - 0.5)
+    hist.SetStats(0)
+    hist.GetXaxis().SetTitle('Fit Model Components')
+    yvar = w.var(varname)
+    for ibin, components in enumerate(combos):
+        hist.GetXaxis().SetBinLabel(ibin + 1, components)
+        fitresult = w.obj('_'.join(['fitresult', label, components]))
+        snapshot = '_'.join(['gof', label, components])
+        if not w.loadSnapshot(snapshot):
+            RuntimeError, "Snapshot `%s' not found!" % snapshot
+        hist.Fill(ibin, yvar.getVal())
+        hist.SetBinError(ibin + 1, yvar.getError())
+    return hist
+## End of plot_floatvar_vs_combo(varname, label, combos)
 
 
 #-------------------------------------------------------------------------------
