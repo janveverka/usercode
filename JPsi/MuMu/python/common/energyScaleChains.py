@@ -9,10 +9,10 @@ if (_hostname == 't3-susy.ultralight.org'
     or ('compute-' in _hostname and '.local' in _hostname)) :
     ## Path for the t3-susy
     ##_path = '/raid2/veverka/esTrees/'#original place changed after raid2 problem
-    ##_path = '/mnt/hadoop/user/veverka/esTrees/'
+    _path = '/mnt/hadoop/user/veverka/esTrees/'
     ##_path = '/home/cmorgoth/ZmumuGammaData/sixie_2012_hgg_regresion_v3/'
     ##_path = '/home/cmorgoth/scratch/CMSSW_5_2_5/src/UserCode/CPena/src/PhosphorCorrFunctor/MuonCorrectedTrees/'##MuonCorrectedTrees 2011 and 2012
-    _path = '/home/cmorgoth/scratch/CMSSW_5_2_5/src/UserCode/CPena/src/PhosphorCorrFunctor/GaussSmearingTrees'##Test for Gaussian Smearing
+    # _path = '/home/cmorgoth/scratch/CMSSW_5_2_5/src/UserCode/CPena/src/PhosphorCorrFunctor/GaussSmearingTrees'##Test for Gaussian Smearing
     #_path = '/home/cmorgoth/scratch/CMSSW_5_2_5/src/UserCode/CPena/src/PhosphorCorrFunctor/FabSmearing'##Test for Fabrice Smearing
     ##_path = '/home/cmorgoth/ZmumuGammaData/SIXIE_LAST_VERSION/'
     
@@ -297,17 +297,16 @@ _files['v15'] = {
 _files['sixie'] = {
         #'data': [ ( 'ZmumuGammaNtuple_Run2012AB_Jun29Rereco.root' ) ],#Original Line
         #'z'   : [ ( 'ZmumuGammaNtuple_DYM50_52X.root' ) ],#Original Line
-        #THIS LINE IS USED AS CLOSURE TEST(Must Comment other MC->z)
-        
+        #THIS LINE IS USED AS CLOSURE TEST(Must Comment other MC->z)        
     'z': [('MC_sixie_muon_corr_2012.root')],#Muon Corrected MC
     'data': [('Data_sixie_muon_corr_2012.root')],#Muon Corrected data   
-        
-	}
+    
+    }
 
 _files['sixie2'] = {
-	'data': [ ( 'ZmumuGammaNtuple_Run2012AB_Jun29Rereco.root' ) ],
-	'z'   : [ ( 'testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythiaFall11-PU_S6_START42_V14B-v1AODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root' ) ],
-	}
+    'data': [ ( 'ZmumuGammaNtuple_Run2012AB_Jun29Rereco.root' ) ],
+    'z'   : [ ( 'testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythiaFall11-PU_S6_START42_V14B-v1AODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root' ) ],
+    }
 
 
 _treeNames = {
@@ -390,9 +389,7 @@ def getChains(version='v4'):
                 es_name, sixie_name = name_pair.split()
                 print "====es_name: ", es_name, "sixie_name:  ", sixie_name
                 ch.SetAlias(es_name, sixie_name)
-                
     if version in 'yyv1 yyv2 yyv3 yyv3corr yyv3_e5x5 yyv4 yyv5 yyv6 yyv4NoJSON sixie2'.split():
-
         ## On each line corresponding to a list item, 
         ## 1st is esTree name, 2nd is YY tree name in Yong's trees.
         es_to_yy_name_map = '''mmMass          mm 
