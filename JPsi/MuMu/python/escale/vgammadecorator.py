@@ -39,6 +39,7 @@ class Decorator:
         Initializes the canvas.
         '''
         self.name = name
+        self.latex_labels = []
                 
         ## Open the file
         filename = ('phosphor5_model_and_fit_'
@@ -117,13 +118,14 @@ class Decorator:
                 phoRes.getVal(), phoRes.getError()
                 ),
             ],
-            position=(0.65, 0.8), textsize=22, rowheight=0.07
+            position=(0.65, 0.8), textsize=22, rowheight=0.07,
+            textfont=42
             ).draw()
         
         ## CMS Preliminary:
-        Latex(['CMS Preliminary 2011,  #sqrt{s} = 7 TeV'], 
-              position=(0.17, 0.93), textsize=22).draw()
-        
+        Latex(['CMS 2011,  #sqrt{s} = 7 TeV'], 
+              position=(0.17, 0.93), textsize=22,
+              textfont=42).draw()        
 
         labels = []
         tokens = self.name.split('_')
@@ -156,7 +158,7 @@ class Decorator:
             labels.append('Photon E_{T} #in [%s, %s) GeV' % (lo, hi))
                 
         Latex(labels, position=(0.22, 0.8), textsize=22, 
-              rowheight=0.07
+              rowheight=0.07, textfont = 42
               ).draw()
         
         canvas.Modified()
