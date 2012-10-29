@@ -1,4 +1,5 @@
 '''Facilitates the creation and use of multiple canvases.'''
+import os
 import commands
 import ROOT
 
@@ -39,18 +40,21 @@ def next(name=None, title=None):
 ## end of next()
 
 #______________________________________________________________________________
-def make_plots(graphics_extensions = ['png']):
+def make_plots(graphics_extensions = ['png'], path='.'):
+    if 'pdf' in graphics_extensions:
+        make_pdf_from_eps(path)
+        graphics_extensions.remove('pdf')
     for c in canvases:
         if not c:
             continue
         for ext in graphics_extensions:
-            c.Print(''.join([c.GetName(), '.', ext]))
+            c.Print(os.path.join(path, ''.join([c.GetName(), '.', ext])))
         ## end of loop over graphics_extensions
     ## end of loop over canvases
 ## end of make_plots()
 
 #______________________________________________________________________________
-def make_pdf_from_eps():
+def make_pdf_from_eps(path='.'):
     '''
     Creates an eps output and uses GhostScript-based ps2pdf command to convert
     it to a pdf.
@@ -58,9 +62,10 @@ def make_pdf_from_eps():
     for c in canvases:
         if not c:
             continue
-        c.Print(c.GetName() + '.eps')
-        command = '''ps2pdf -dEPSCrop {name}.eps
-                     rm {name}.eps'''.format(name=c.GetName())
+        fpath = os.path.join(path, c.GetName())
+        c.Print(fpath + '.eps')
+        command = '''ps2pdf -dEPSCrop {name}.eps {name}.pdf
+                     rm {name}.eps'''.format(name=fpath)
         (exitstatus, outtext) = commands.getstatusoutput(command)
         if  exitstatus != 0:
             raise RuntimeError, '"%s" failed: "%s"!' % (command, outtext)
