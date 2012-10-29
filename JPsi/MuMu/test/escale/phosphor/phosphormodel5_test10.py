@@ -66,7 +66,7 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'mass_landscape_test_data_EB_pt25to999_yyv5'
+name = 'mass_landscape_batch_test_data_EE_highR9_pt30to999_yyv5'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -733,12 +733,12 @@ def outro(make_plots=True, save_workspace=True):
     'Closing stuff'
     canvases.update()
     if make_plots:
-        canvases.make_plots(['png', 'root'])
+        canvases.make_plots(['png', 'eps', 'root'])
         canvases.make_pdf_from_eps()
 
     for label, dataset in data.items():
         dataset.SetName('data_' + label)
-        w.Import(dataset)
+        # w.Import(dataset)
     
     if save_workspace:
         for c in canvases.canvases:
@@ -1059,63 +1059,13 @@ def process_real_data_single_dataset(label):
     "data" (full 2011A+B), "2011A" or "2011B".
     '''
     get_real_data(label)
-
     ## store the the mc truth values in the workspace
     set_mc_truth(fit_calibrator.s, fit_calibrator.r)
     w.saveSnapshot('_'.join(['mc_truth', label]),
                    ROOT.RooArgSet(phoScaleTrue, phoResTrue))    
-
     # for components in ['SEB']:
     for components in 'S SE SB SEB E B EB'.split() + ['']:
         process_real_data_for_label_and_components(label, components)
-
-    # set_fit_components('S')
-    # fit_result = fit_real_data(label)
-    # plot_fit_to_real_data(label)
-    # draw_latex_for_fit_to_real_data()
-    # validate_mass_fit(data[label], fit_result)
-       
-    # set_fit_components('SE')
-    # fit_result = fit_real_data(label)
-    # plot_fit_to_real_data(label)
-    # draw_latex_for_fit_to_real_data()
-    # validate_mass_fit(data[label], fit_result)
-    
-    # set_fit_components('SB')
-    # fit_result = fit_real_data(label)
-    # plot_fit_to_real_data(label)
-    # draw_latex_for_fit_to_real_data()
-    # validate_mass_fit(data[label], fit_result)
-       
-    # set_fit_components('SEB')
-    # fit_result = fit_real_data(label)
-    # plot_fit_to_real_data(label)
-    # draw_latex_for_fit_to_real_data()
-    # validate_mass_fit(data[label], fit_result)    
-
-    # set_fit_components('')
-    # fit_result = fit_real_data(label)
-    # plot_fit_to_real_data(label)
-    # draw_latex_for_fit_to_real_data()
-    # validate_mass_fit(data[label], fit_result)
-       
-    # set_fit_components('E')
-    # fit_result = fit_real_data(label)
-    # plot_fit_to_real_data(label)
-    # draw_latex_for_fit_to_real_data()
-    # validate_mass_fit(data[label], fit_result)
-       
-    # set_fit_components('B')
-    # fit_result = fit_real_data(label)
-    # plot_fit_to_real_data(label)
-    # draw_latex_for_fit_to_real_data()
-    # validate_mass_fit(data[label], fit_result)
-       
-    # set_fit_components('EB')
-    # fit_result = fit_real_data(label)
-    # plot_fit_to_real_data(label)
-    # draw_latex_for_fit_to_real_data()
-    # validate_mass_fit(data[label], fit_result)
 ## End of process_real_data_single_dataset().
 
 
@@ -1482,6 +1432,7 @@ def plot_mass_varbins(dataset, plot_range, logy=False):
     #plot.Draw()
     if (logy):
         plot.SetMaximum(math.pow(plot.GetMaximum(), 1.2))
+        plot.SetMinimum(1e-1)
         #canvas.SetLogy()
     return plot
 ## End of plot_mass_varbins(dataset).
@@ -1499,7 +1450,7 @@ def plot_residuals(source, fit_result, normalize=False):
         ytitle = '(Data - Fit) / #sqrt{Fit}'
         # canvases.next(source.GetName() + '_pulls').SetGrid()
     else:
-        hist = chi2calculator.residHist('h_data', 'pm_Norm[mmgMass]', True, True)
+        hist = chi2calculator.residHist('h_data', 'pm_Norm[mmgMass]', False, True)
         plot.SetTitle('#chi^{2} Residuals')
         ytitle = 'Data - Fit'
         # canvases.next(source.GetName() + '_residuals').SetGrid()
@@ -1545,8 +1496,12 @@ def draw_gof_latex(position=(0.2, 0.8), rowheight=0.055):
     ndof = w.var('ndof').getVal()
     chi2 = w.var('chi2').getVal()
     pval = w.var('pvalue').getVal()
+    if pval < 1e-3:
+        pvaltext = '%.2g' % pval
+    else:
+        pvaltext = '%.2g %%' % (100 * pval)
     Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
-           'p-value: %.2g %%' % (100 * pval),],
+           'p-value: ' + pvaltext,],
           position, rowheight=rowheight,
           ).draw()
 ## End of draw_gof_latex()
@@ -1576,7 +1531,7 @@ def get_hist_range(hist):
 ## End of get_plot_range(plot)
 
 
-#
+#-------------------------------------------------------------------------------
 def plot_pull_distribution(pull_plot):
     '''
     Returns a RooPlot with the distribution of pulls overlayed with
@@ -1738,7 +1693,7 @@ def main():
     else:
         process_monte_carlo()
 
-    # outro()
+    outro()
 ## End of main().
 
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
