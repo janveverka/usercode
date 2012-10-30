@@ -66,7 +66,7 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'version2_test_mc_EE_lowR9_pt25to999_yyv6'
+name = 'version2_test_data_EE_lowR9_pt25to999_yyv6'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -737,7 +737,8 @@ def outro(make_plots=True, save_workspace=True):
     'Closing stuff'
     canvases.update()
     if make_plots:
-        canvases.make_plots(['png', 'eps', 'root'])
+        canvases.make_plots(['png', 'eps', 'root'],
+                            ROOT.gSystem.WorkingDirectory())
         canvases.make_pdf_from_eps()
 
     for label, dataset in data.items():
@@ -977,15 +978,8 @@ def plot_fit_to_real_data(label):
     Plot fit to real data for a dataset specified by the label:
     "data" (full 2011A+B), "2011A" or "2011B".
     '''
-    # mmgMass.setRange('plot', 70, 110)
     mmgMass.setBins(80)
-    #plot = mmgMass.frame(roo.Range('plot'))
-    #if label == 'data':
-        #title_start = '2011A+B'
-    #else:
-        #title_start = label
-       
-    # plot.SetTitle('%s, %s' % (title_start, latex_title))
+    plot = mmgMass.frame(roo.Range('plot'))
     plot.SetTitle('%s, %s' % (title_prefix, latex_title))
     data[label].plotOn(plot)
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
@@ -1074,6 +1068,7 @@ def process_real_data_single_dataset(label):
     for components in components_combinations:
         process_real_data_for_label_and_components(label, components)
         pvalue_combo_map[w.var('pvalue').getVal()] = components
+    remove_fit_components_from_name()
     plot_combo_summaries(label, components_combinations)
     ## Load the combo with the best pvalue.
     best_pvalue = max(pvalue_combo_map.keys())
@@ -1096,13 +1091,26 @@ def process_real_data_for_label_and_components(label, components):
 
 
 #-------------------------------------------------------------------------------
+def remove_fit_components_from_name():
+    global name
+    tokens = name.split('_')
+    for i, tok in enumerate(tokens):
+        if 'fit' in tok:
+            del tokens[i]
+    name = '_'.join(tokens)
+## End of remove_fit_components_from_name()
+
+
+#-------------------------------------------------------------------------------
 def plot_combo_summaries(label, combos):
     ## p-value
     title = ','.join([title_prefix, latex_title])
     hist = plot_gofvar_vs_combo('pvalue', label, combos)
     hist.SetTitle(title)
     hist.GetYaxis().SetTitle('Fit #chi^{2} p-value')
-    canvas = canvases.next(name + '_pvalue_vs_combo')
+    canvas = canvases.next(name + '_pvalue_vs_combo').SetGridy()
+    hist.DrawCopy('p')
+    canvas = canvases.next(name + '_pvalue_vs_combo_logy')
     canvas.SetGridy()
     canvas.SetLogy()
     hist.DrawCopy('p')
