@@ -173,12 +173,6 @@ _files['yyv3'] = {
     'z': [('MC_yyv3_muon_corr_2011.root')],##Muon Corrected Trees
     }
 
-##Fabrice Smearing threes
-_files['yyv6'] = {
-    'data': [('Data_yyv3_muon_corr_2011.root')],##Muon Corrected Trees 
-    'z': [('MC_muon_corr_2011_FabSmearTest.root')],##Muon Corrected Trees + Fab Smearing
-    }
-
 ## Yong's trees with the Hgg photon regression v2
 ## Montecarlo Scale is corrected to zero, resolution is corrected to match data(resolution)
 ## For now data is uncorrected/. todo correct data!
@@ -250,6 +244,13 @@ _files['yyv5'] = {
     'z'   : ['MC_yyv3_muon_corr_2011.root']
     }
     
+## Yong's trees with the Hgg photon regression v2, looser selection,
+## Rochester muon corrections and Fabrice's photon energy smearing.
+_files['yyv6'] = {
+    'data': [('Data_yyv3_muon_corr_2011.root')],##Muon Corrected Trees 
+    'z': [('MC_muon_corr_2011_FabSmearTest.root')],##Muon Corrected Trees + Fab Smearing
+    }
+
 _files['v13'] = {
     'z' : [('esTree_V13_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
             'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
