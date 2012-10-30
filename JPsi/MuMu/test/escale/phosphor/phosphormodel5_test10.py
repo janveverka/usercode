@@ -66,7 +66,7 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'mass_landscape_batch_test_data_EE_highR9_pt30to999_yyv5'
+name = 'version2_test_mc_EE_lowR9_pt25to999_yyv6'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -237,7 +237,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 v11 v13 v14 v15'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 v11 v13 v14 v15'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -275,7 +275,7 @@ def parse_name_to_title():
     if model_tree_version in 'v11'.split():
         tokens.append('2011A+B PU S4 MC Model')
         latex_labels.append('2011A+B PU S4 MC Model')
-    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5'.split():
+    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6'.split():
         tokens.append('2011A+B PU S6 MC Model')
         latex_labels.append('2011A+B PU S6 MC Model')
     elif model_tree_version == 'v14':
@@ -285,9 +285,13 @@ def parse_name_to_title():
         tokens.append('2011B PU')
         latex_labels.append('2011B PU S6 MC Model')
         
-    if model_tree_version in 'yyv5'.split():
+    if model_tree_version in 'yyv5 yyv6'.split():
         tokens.append('mu corrections')
         latex_labels.append('#mu corr.')
+    
+    if model_tree_version in 'yyv6'.split():
+        tokens.append('Fabrice smear.')
+        latex_labels.append('Fabrice smear.')
     
     if 'EB' in name:
         tokens.append('Barrel')
@@ -332,7 +336,7 @@ def parse_name_to_title():
     elif model_tree_version == 'yyv2':        
         tokens.append('Caltech Regression')
         latex_labels.append('Caltech Regression')
-    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5'.split():        
+    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5 yyv6'.split():        
         tokens.append('Hgg v2 Regr.')
         latex_labels.append('Hgg v2 Regr.')
     
@@ -738,7 +742,7 @@ def outro(make_plots=True, save_workspace=True):
 
     for label, dataset in data.items():
         dataset.SetName('data_' + label)
-        w.Import(dataset)
+        # w.Import(dataset)
     
     if save_workspace:
         for c in canvases.canvases:
@@ -975,23 +979,20 @@ def plot_fit_to_real_data(label):
     '''
     # mmgMass.setRange('plot', 70, 110)
     mmgMass.setBins(80)
-    plot = mmgMass.frame(roo.Range('plot'))
-    if label == 'data':
-        title_start = '2011A+B'
-    else:
-        title_start = label
+    #plot = mmgMass.frame(roo.Range('plot'))
+    #if label == 'data':
+        #title_start = '2011A+B'
+    #else:
+        #title_start = label
        
-    plot.SetTitle('%s, %s' % (title_start, latex_title))
+    # plot.SetTitle('%s, %s' % (title_start, latex_title))
+    plot.SetTitle('%s, %s' % (title_prefix, latex_title))
     data[label].plotOn(plot)
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+              roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
+    pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
+              roo.Components('*exp*'), roo.LineStyle(ROOT.kDotted))
     pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'))
-    if use_exp_bkg:
-        pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-                  roo.Components('*zj*,*exp*'), roo.LineStyle(ROOT.kDashed))
-    else:
-        pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-                  roo.Components('*zj*'), roo.LineStyle(ROOT.kDotted))
-    #pm.plotOn(plot, roo.Range('plot'), roo.NormRange('plot'),
-              #roo.Components('bkg*'), roo.LineStyle(ROOT.kDotted))
     canvases.next(name + '_' + label).SetGrid()
     plot.Draw()
     global plots
@@ -1058,14 +1059,27 @@ def process_real_data_single_dataset(label):
     Get, fit and plot real data for a dataset specified by the label:
     "data" (full 2011A+B), "2011A" or "2011B".
     '''
+    global title_prefix
+    if label == 'data':
+        title_prefix = '2011A+B'
+    else:
+        title_prefix = label
+    
     get_real_data(label)
     w.saveSnapshot('_'.join(['mc_truth', label]),
                    ROOT.RooArgSet(phoScaleTrue, phoResTrue))
-    #components_combinations = 'E B EB S SE SB SEB'.split()
-    components_combinations = 'S SB SE SEB'.split()    
+    components_combinations = [''] + 'B E EB S SB SE SEB'.split()
+    #components_combinations = 'S SB SE SEB'.split()
+    pvalue_combo_map = {}
     for components in components_combinations:
         process_real_data_for_label_and_components(label, components)
+        pvalue_combo_map[w.var('pvalue').getVal()] = components
     plot_combo_summaries(label, components_combinations)
+    ## Load the combo with the best pvalue.
+    best_pvalue = max(pvalue_combo_map.keys())
+    best_combo = pvalue_combo_map[best_pvalue]
+    print 'Best p-value: %.2g for %s' % (best_pvalue, best_combo)
+    load_fit_result(label, best_combo)
 ## End of process_real_data_single_dataset().
 
 
@@ -1084,31 +1098,93 @@ def process_real_data_for_label_and_components(label, components):
 #-------------------------------------------------------------------------------
 def plot_combo_summaries(label, combos):
     ## p-value
+    title = ','.join([title_prefix, latex_title])
     hist = plot_gofvar_vs_combo('pvalue', label, combos)
+    hist.SetTitle(title)
     hist.GetYaxis().SetTitle('Fit #chi^{2} p-value')
-    canvases.next('pvalue_vs_combo')
+    canvas = canvases.next(name + '_pvalue_vs_combo')
+    canvas.SetGridy()
+    canvas.SetLogy()
     hist.DrawCopy('p')
+    hist0 = hist
     w.Import(hist)
     ## chi2
     hist = plot_gofvar_vs_combo('chi2', label, combos)
+    hist.SetTitle(title)
     hist.GetYaxis().SetTitle('Fit #chi^{2}')
-    canvases.next('chi2_vs_combo')
+    canvases.next(name + '_chi2_vs_combo').SetGridy()
     hist.DrawCopy('p')
     w.Import(hist)
+    ## chi2 and p-value overlayed
+    #c1 = canvases.next('chi2npval_vs_combo')
+    #global pad1, pad2
+    #pad1 = ROOT.TPad("pad1","",0,0,1,1)
+    #pad2 = ROOT.TPad("pad2","",0,0,1,1)
+    #pad2.SetFillStyle(4000) #will be transparent
+    #pad1.Draw()
+    #pad1.cd()
+    #hist.DrawCopy('p')
+    #pad1.Update() #this will force the generation of the "stats" box
+    #pad1.Modified()
+    #c1.cd()
+    #ymin = hist0.GetYaxis().GetXmin()
+    #ymax = hist0.GetYaxis().GetXmax()
+    #dy = (ymax-ymin)/0.8 #10 per cent margins top and bottom
+    #xmin = hist0.GetYaxis().GetXmin()
+    #xmax = hist0.GetYaxis().GetXmax()
+    #dx = (xmax-xmin)/0.8 #10 per cent margins left and right
+    #pad2.Range(xmin-0.1*dx,ymin-0.1*dy,xmax+0.1*dx,ymax+0.1*dy)
+    #pad2.Draw()
+    #pad2.cd()
+    #hist0.SetLineColor(ROOT.kRed)
+    #hist0.DrawCopy("][sames")
+    #pad2.Update()
+    #global axis
+    #axis = ROOT.TGaxis(xmax,ymin,xmax,ymax,ymin,ymax,50510,"+L")
+    #axis.SetLabelColor(ROOT.kRed)
+    #axis.Draw()
     ## Resolution
     hist = plot_floatvar_vs_combo('phoRes', label, combos)
     hist.SetMinimum(0)
+    hist.SetTitle(title)
     hist.GetYaxis().SetTitle('E^{#gamma} Resolution (%)')
-    canvases.next('phoRes_vs_combo')
+    canvases.next(name + '_phoRes_vs_combo').SetGridy()
     hist.DrawCopy('e1x0')
     w.Import(hist)
     ## Scale
     hist = plot_floatvar_vs_combo('phoScale', label, combos)
+    hist.SetTitle(title)
     hist.GetYaxis().SetTitle('E^{#gamma} Scale (%)')
-    canvases.next('phoScale_vs_combo')
+    canvases.next(name + '_phoScale_vs_combo').SetGridy()
     hist.DrawCopy('e1x0')
     w.Import(hist)
 ## End of plot_combo_summaries(label, combos)
+
+
+#-------------------------------------------------------------------------------
+def load_fit_result(label, combo):
+    fit_result = w.obj('_'.join(['fitresult', label, combo]))
+    phos = fit_result.floatParsFinal().find('phoScale')
+    phor = fit_result.floatParsFinal().find('phoRes')
+    if not phos:
+        phos = fit_result.constPars().find('phoScale')
+    if not phor:
+        phor = fit_result.constPars().find('phoRes')
+    copy_value_and_errors(phos, phoScale)
+    copy_value_and_errors(phor, phoRes)
+## End of load_fit_result(label, combo)
+
+
+#-------------------------------------------------------------------------------
+def copy_value_and_errors(source_var, destination_var):
+    destination_var.setVal(source_var.getVal())
+    destination_var.setError(source_var.getError())
+    if source_var.hasAsymError():
+        destination_var.setAsymError(source_var.getErrorLo(),
+                                     source_var.getErrorHi())
+## End of copy_value_and_errors(source_var, destination_var)
+
+
 
 
 #-------------------------------------------------------------------------------
@@ -1226,9 +1302,23 @@ def fit_mc_truth(idata):
     fitresult = calibrator0.phoEResPdf.fitTo(
         idata, roo.Range(-50, 50), roo.Strategy(2), roo.Save()
         )
+    ## Include systematics
+    scale_errors(calibrator0.s, 5.)
+    scale_errors(calibrator0.r, 1.2)
     set_default_integrator_precision(*old_precision)
     return fitresult
 ## End of fit_mc_truth().
+
+
+#-------------------------------------------------------------------------------
+def scale_errors(var, factor):
+    '''
+    Scales the errors of var by the given factor.
+    '''
+    var.setError(factor * var.getError())
+    if var.hasAsymError():
+        var.setAsymError(factor * var.getErrorLo(), factor * var.getErrorHi())
+## End of scale_errors(var, factor)
 
 
 #-------------------------------------------------------------------------------
@@ -1341,16 +1431,16 @@ def process_monte_carlo():
     canvases.next(name + '_fit').SetGrid()
     plot.Draw()
     ## Estimate the MC truth phos and phor:
-    fitresult_mctrue = fit_mc_truth(data['fsr1'])
+    fitresult_mctruth = fit_mc_truth(data['fsr1'])
+    draw_latex_for_fit_to_monte_carlo()
     set_mc_truth(calibrator0.s, calibrator0.r)
-
+    validate_response_fit(data['fsr1'], fitresult_mctruth)
     ## Store the result in the workspace:
+    w.Import(fitresult_mctruth, 'fitresult_mctruth')
     w.saveSnapshot('mc_fit', ROOT.RooArgSet(phoScale, phoRes,
                                             phoScaleTrue, phoResTrue))
-    w.Import(fitresult_mctrue, 'fitresult_mctrue')
-                                            
-    draw_latex_for_fit_to_monte_carlo()
-    
+    validate_mass_fit(fitdata1, fitres)
+                                                
     check_timer('8. fast plots')
 ## End of process_monte_carlo
 
@@ -1487,7 +1577,7 @@ def validate_response_fit(idata, fit_result):
     resid_plot = plot_response_residuals(peak_plot, fit_result)
     for p in [peak_plot, resid_plot]:
         p.GetXaxis().SetRangeUser(*zoom_range)
-    canvas = canvases.next(name + '_mass_landscape')
+    canvas = canvases.next(name + '_response_landscape')
     canvas.SetWindowSize(1200, 600)
     canvas.Divide(3,2)
     myplots = [tails_plot, peak_plot, pulldist_plot, pulls_plot, resid_plot]
@@ -1523,6 +1613,7 @@ def plot_mass_varbins(dataset, plot_range, logy=False):
     reduced_data = dataset.reduce(
         '%f < mmgMass & mmgMass < %f' % plot_range
         )
+    reduced_data = reduced_data.reduce(ROOT.RooArgSet(mmgMass))
     ddbins = get_auto_binning(reduced_data)
     bins = ddbins.binning(ROOT.RooBinning())
     bins.SetName('chi2')
@@ -1597,13 +1688,16 @@ def plot_mass_residuals(source, fit_result, normalize=False):
     plot = mmgMass.frame(roo.Range(*get_plot_range(source)))
     plots.append(plot)
     chi2calculator = RooChi2Calculator(source)
+    for hname in 'h_data h_data_fit1 h_fitdata1'.split():
+        if source.getHist(hname):
+            break
     if normalize:
-        hist = chi2calculator.pullHist('h_data', 'pm_Norm[mmgMass]', True)
+        hist = chi2calculator.pullHist(hname, 'pm_Norm[mmgMass]', True)
         plot.SetTitle('#chi^{2} Pulls')
         ytitle = '(Data - Fit) / #sqrt{Fit}'
         # canvases.next(source.GetName() + '_pulls').SetGrid()
     else:
-        hist = chi2calculator.residHist('h_data', 'pm_Norm[mmgMass]', False, True)
+        hist = chi2calculator.residHist(hname, 'pm_Norm[mmgMass]', False, True)
         plot.SetTitle('#chi^{2} Residuals')
         ytitle = 'Data - Fit'
         # canvases.next(source.GetName() + '_residuals').SetGrid()
@@ -1865,15 +1959,15 @@ def main():
     sw.Start()
     sw2.Start()
 
-    # init()
-    init_from_file(inputfile)
+    init()
+    # init_from_file(inputfile)
     
     if use_real_data:
         process_real_data()
     else:
         process_monte_carlo()
 
-    # outro()
+    outro()
 ## End of main().
 
 # ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(1e-07)
