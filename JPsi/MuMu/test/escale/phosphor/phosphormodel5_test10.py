@@ -66,7 +66,7 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'version2_test_data_EE_lowR9_pt25to999_yyv6'
+name = 'zg_test_data_EE_highR9_pt25to999_sixie'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -237,7 +237,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 v11 v13 v14 v15'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 v11 v13 v14 v15 sixie'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -271,6 +271,9 @@ def parse_name_to_title():
     elif data_tree_version in 'yyv4 yyv4NoJSON'.split():
         tokens.append('14 Jul Re-reco')
         latex_labels.append('14 Jul Re-reco')
+    elif data_tree_version in 'sixie sixie2'.split():
+        tokens.append('2012ABC')
+        latex_labels.append('2012ABC')
     
     if model_tree_version in 'v11'.split():
         tokens.append('2011A+B PU S4 MC Model')
@@ -278,6 +281,9 @@ def parse_name_to_title():
     elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6'.split():
         tokens.append('2011A+B PU S6 MC Model')
         latex_labels.append('2011A+B PU S6 MC Model')
+    elif model_tree_version in 'sixie sixie2'.split():
+        tokens.append('2012 Madgraph')
+        latex_labels.append('2012 Madgraph')
     elif model_tree_version == 'v14':
         tokens.append('2011A PU S6 MC Model')
         latex_labels.append('2011A PU S6 MC Model')        
@@ -285,7 +291,7 @@ def parse_name_to_title():
         tokens.append('2011B PU')
         latex_labels.append('2011B PU S6 MC Model')
         
-    if model_tree_version in 'yyv5 yyv6'.split():
+    if model_tree_version in 'yyv5 yyv6 sixie'.split():
         tokens.append('mu corrections')
         latex_labels.append('#mu corr.')
     
@@ -336,9 +342,12 @@ def parse_name_to_title():
     elif model_tree_version == 'yyv2':        
         tokens.append('Caltech Regression')
         latex_labels.append('Caltech Regression')
-    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5 yyv6'.split():        
+    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5 yyv6'.split():
         tokens.append('Hgg v2 Regr.')
         latex_labels.append('Hgg v2 Regr.')
+    elif model_tree_version in 'sixie sixie2'.split():
+        tokens.append('Hgg v3 Regr.')
+        latex_labels.append('Hgg v3 Regr.')
     
     if 'sfit' in name:
         tokens.append('starget: %g %%' % sfit)
@@ -737,9 +746,8 @@ def outro(make_plots=True, save_workspace=True):
     'Closing stuff'
     canvases.update()
     if make_plots:
-        canvases.make_plots(['png', 'eps', 'root'],
+        canvases.make_plots(['png', 'pdf', 'eps', 'root'],
                             ROOT.gSystem.WorkingDirectory())
-        canvases.make_pdf_from_eps()
 
     for label, dataset in data.items():
         dataset.SetName('data_' + label)
