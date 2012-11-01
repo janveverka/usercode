@@ -1,11 +1,11 @@
 #!/bin/sh
 
-QSUBDIR=/home/cmorgoth/phosphor/CMSSW_4_2_8_patch7/src/JPsi/MuMu/test/escale/phosphor/Phosphor_Interface/QsubScripts_yyv3_LowR9
+QSUBDIR=/home/cmorgoth/phosphor/CMSSW_4_2_8_patch7/src/JPsi/MuMu/test/escale/phosphor/Phosphor_Interface/QsubScripts_yyv3_HighR9
 
 
 NEWDIR=`date | gawk '{ print $1 $2 $3"_" $6 }'`
-RESULTS=sixie_muon_corr_LowR9
-LOGS=sixie_muon_corr_LowR9_log
+RESULTS=sixie_muon_corr_HighR9
+LOGS=sixie_muon_corr_HighR9_log
 
 if [ -d $NEWDIR ]; then
 	echo "DIR $NEWDIR exists."
@@ -39,12 +39,9 @@ for qfiles in $QSUBDIR/*.sge; do
     if [ -a $SGEFILE ] 
 	then 
 	echo "QSUB"
-	#qsub -j y -o `pwd` -q all.q $SGEFILE;
-	#qsub -j y -o `pwd` -q all.q@compute-1-6.local,all.q@compute-0-1.local,all.q@compute-0-3.local,all.q@compute-1-7.local,all.q@compute-1-8.local,all.q@compute-1-9.local,all.q@compute-0-14.local,all.q@compute-0-2.local,all.q@compute-0-4.local,all.q@compute-0-6.local $SGEFILE;
-	
-	#qsub -j y -o `pwd` -q all.q@compute-1-5.local,all.q@compute-1-8.local,all.q@compute-1-9.local,all.q@compute-1-6.local,all.q@compute-1-0.local  $SGEFILE;
-	qsub -j y -o $NEWDIR/$LOGS -q all.q@compute-0-1.local,all.q@compute-0-2.local,all.q@compute-0-6.local,all.q@compute-0-14.local,all.q@compute-1-0.local,all.q@compute-1-4.local,all.q@compute-1-7.local,all.q@compute-1-3.local,all.q@compute-1-2.local,all.q@compute-1-6.local $SGEFILE  -- $NEWDIR/$RESULTS;
-	#qsub -j y -o $NEWDIR/$LOGS -q all.q@compute-0-5.local,all.q@compute-1-5.local $SGEFILE  -- $NEWDIR/$RESULTS;
+
+	#qsub -j y -o $NEWDIR/$LOGS -q all.q@compute-0-1.local,all.q@compute-0-2.local,all.q@compute-0-6.local,all.q@compute-0-14.local,all.q@compute-1-0.local,all.q@compute-1-4.local,all.q@compute-1-7.local,all.q@compute-1-3.local,all.q@compute-1-2.local,all.q@compute-1-6.local $SGEFILE  -- $NEWDIR/$RESULTS;
+	qsub -j y -o $NEWDIR/$LOGS -q all.q@compute-0-5.local,all.q@compute-1-5.local $SGEFILE  -- $NEWDIR/$RESULTS;
 	#sdfdf
 
     else

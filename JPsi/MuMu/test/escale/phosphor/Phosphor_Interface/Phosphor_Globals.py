@@ -10,6 +10,7 @@ class Globals:
     data_tree_version = 'yyv3'
     DataType = 'not_defined'
     name = 'Default'
+    exp_bkg = False
 
 version = '1.0'
 debug = False

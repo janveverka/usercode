@@ -99,9 +99,9 @@ def get_categories():
     '''
     categories = []
     for subdet in 'Barrel Endcaps'.split():
-        for pt in 'PtLow_10_PtHigh_12 PtLow_12_PtHigh_15 PtLow_15_PtHigh_20 PtLow_20_PtHigh_999'.split():
+        for pt in 'pt10to12 pt12to15 pt15to20 pt20to999'.split():
             for data in 'MonteCarlo RealData'.split():
-                for period in '2011'.split():
+                for period in '2011 2012'.split():
                 #for period in '2011 2012'.split():
                     categories.append((data, period, subdet, pt))
     #print "CATEGORIES" ,categories               
@@ -122,15 +122,15 @@ def get_category_names(categories):
         '2012' : '1',
         'Barrel' : '0',
         'Endcaps' : '1',
-        'PtLow_10_PtHigh_12' : '0',
-        'PtLow_12_PtHigh_15' : '1',
-        'PtLow_15_PtHigh_20' : '2',
-        'PtLow_20_PtHigh_999' : '3',
+        'pt10to12' : '0',
+        'pt12to15' : '1',
+        'pt15to20': '2',
+        'pt20to999' : '3',
         'scale' : '0',
         'resolution' : '1',
         }
     #print "Scales"
-    print "PERIOD(2011, 2012)=(0,1) DATA(mc,data)=(0,1) Detector(EB,EE)=(0,1) Pt(0,1,2,3) Correction(scale,resolution)=(0,1) Number"
+    print "PERIOD(2011, 2012)=(0,1) DATA(mc,data)=(0,1) Detector(EB,EE)=(0,1) R9(Inc, high, low)=(0,1,2) Pt(0,1,2,3) Correction(scale,resolution)=(0,1) Number"
     for data, period, subdet, pt in categories:
         print name_to_number[period],name_to_number[data],name_to_number[subdet],"1", name_to_number[pt], name_to_number['scale'], "%0.2f"%get_value('scale' , data, period, subdet, pt)
     for data, period, subdet, pt in categories:   
@@ -159,8 +159,8 @@ def get_value(varname, data, period, subdet, pt):
         }
 
     period_to_fitresult_map = {
-        '2011'   : 'fitresult_2011ABC',
-        '2012'   : 'fitresult_2012AB',
+        '2011'   : 'fitresult_data_SEB',
+        '2012'   : 'fitresult_data_SEB',
         }
 
     workspace = get_workspace(data, period, subdet, pt)
@@ -191,7 +191,7 @@ def get_jobname(data, period, subdet, pt):
         }
 
     period_version_map = {
-        '2011' : 'yyv3',#name on file
+        '2011' : 'yyv5',#name on file
         '2012' : 'sixie',#name on file
         }
     
@@ -205,13 +205,21 @@ def get_jobname(data, period, subdet, pt):
     subdet_label = subdet_label_map[subdet]
 
     if period == '2012':
-        jobname = 'phosphor5_model_and_fit_{data}_{subdet}_{version}_R9Low_0_R9high_0.94_{pt}.root'.format(
-            data=data_label, subdet=subdet_label, pt=pt, version=version
-            ) + postfix
+        if subdet_label == 'EB' :
+            jobname = 'phosphor5_model_and_fit_htozg_{data}_{subdet}_highR9_{pt}_{version}.root'.format(
+                data=data_label, subdet=subdet_label, pt=pt, version=version) + postfix
+        elif subdet_label == 'EE' :
+             jobname = 'phosphor5_model_and_fit_htozg_{data}_{subdet}_{pt}_{version}.root'.format(
+                 data=data_label, subdet=subdet_label, pt=pt, version=version) + postfix
+             
     elif period == '2011':
-        jobname = 'phosphor5_model_and_fit_{data}_{subdet}_{version}_R9Low_0_R9high_0.94_{pt}.root'.format(
-            data=data_label, subdet=subdet_label, pt=pt, version=version
-            ) + postfix 
+        if subdet_label == 'EB' :
+            jobname = 'phosphor5_model_and_fit_htozg_{data}_{subdet}_highR9_{pt}_{version}.root'.format(
+                data=data_label, subdet=subdet_label, pt=pt, version=version) + postfix 
+        elif subdet_label == 'EE' :
+            jobname = 'phosphor5_model_and_fit_htozg_{data}_{subdet}_{pt}_{version}.root'.format(
+                data=data_label, subdet=subdet_label, pt=pt, version=version) + postfix 
+            
 
     return jobname
 ## End of get_jobname(data, period, subdet, pt)
@@ -230,14 +238,14 @@ def get_workspace(data, period, subdet, pt):
     
     period_version_map = {
         '2011' : 'HighR9_yyv3',#modifiy folder inside day it was created
-        '2012' : 'sixie_muon_corr_LowR9',#modifiy folder inside day it was created
+        '2012' : 'HighR9_sixie',#modifiy folder inside day it was created
         }
     version = period_version_map[period]
     
     filename = os.path.join(basepath, jobname, basefilename)
-    print "filename= ", filename
+    #print "filename= ", filename
     filename = os.path.join(basepath, version, jobname)
-    print "filename= ", filename
+    #print "filename= ", filename
     #print "jobname= ",  jobname.replace(" ", "").rstrip(jobname[-5:])
     jobname_aux =jobname.replace(" ", "").rstrip(jobname[-5:])
     #print "jobname= ",  jobname_aux[24:]

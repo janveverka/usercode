@@ -94,6 +94,9 @@ def parse_cfg_file(cfg_file):
         elif option=='treeversion':
             Globals.model_tree_version = Globals.data_tree_version = cp.getoption(option)
             continue
+        elif option=='exp_bkg':
+             Globals.exp_bkg = cp.getoption(option)
+             continue
         elif option=='ptlow':
             Globals.cuts.append('phoPt >= %s' % cp.getoption(option))
             ptlow = '_PtLow_%s' % cp.getoption(option)
