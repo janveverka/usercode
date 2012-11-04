@@ -66,7 +66,7 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'zg_test_data_EE_highR9_pt25to999_sixie'
+name = 'reftest_data_yyv7_EB_highR9_pt25to999'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -202,9 +202,10 @@ def parse_name_to_cuts():
     ## For EGM-11-001 to help with regression
     # cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5', 'minDeltaR > 0.1']
     cuts = ['mmMass + mmgMass < 180', 
-            'minDeltaR < 1.5', 
+            'minDeltaR < 0.8', 
             'mu1Pt > 15', 
-            'mu2Pt > 10']
+            'mu2Pt > 10',
+            'mmgMass > 55',]
     # cuts = ['mmMass + mmgMass < 180']
     if 'EB' in name:
         cuts.append('phoIsEB')
@@ -237,7 +238,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 v11 v13 v14 v15 sixie'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 v11 v13 v14 v15 sixie'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -278,7 +279,7 @@ def parse_name_to_title():
     if model_tree_version in 'v11'.split():
         tokens.append('2011A+B PU S4 MC Model')
         latex_labels.append('2011A+B PU S4 MC Model')
-    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6'.split():
+    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7'.split():
         tokens.append('2011A+B PU S6 MC Model')
         latex_labels.append('2011A+B PU S6 MC Model')
     elif model_tree_version in 'sixie sixie2'.split():
@@ -342,7 +343,7 @@ def parse_name_to_title():
     elif model_tree_version == 'yyv2':        
         tokens.append('Caltech Regression')
         latex_labels.append('Caltech Regression')
-    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5 yyv6'.split():
+    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7'.split():
         tokens.append('Hgg v2 Regr.')
         latex_labels.append('Hgg v2 Regr.')
     elif model_tree_version in 'sixie sixie2'.split():
@@ -778,7 +779,7 @@ def build_signal_model():
     # phortargets =  [0.5 + 0.5 * i for i in range(30)]
 
     ## This was used as a default for Adi's placeholders plots
-    phortargets = [0.1, 0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
+    # phortargets = [0.1, 0.5, 1, 2, 3, 4, 5, 7, 10, 15, 25]
  
     ## Trying to find something that would not converge to the reference value
     ## for the EGM plots
@@ -787,6 +788,11 @@ def build_signal_model():
     # phortargets = [0.5, 6, 7, 7.5, 8, 8.5, 8.75, 9, 9.5, 10, 10.5, 11, 11.5, 11.75, 12, 12.5, 13, 14]
     # phortargets = [0.5, calibrator0.r0.getVal(), 10, 20]
     # phortargets.append(calibrator0.r0.getVal())
+
+    ## Trying to find something that would not converge to the reference value
+    ## for the HtoZg fits
+    phortargets = [0.1, 0.5, 1, 2, 3, 5, 7, 10, 15, 25]
+    
     phortargets.sort()
 
     ROOT.RooAbsReal.defaultIntegratorConfig().setEpsAbs(0.1e-08)
@@ -968,7 +974,7 @@ def fit_real_data(label):
     '''
     ## Set initial values to MC truth
     phoScale.setVal(calibrator0.s.getVal())
-    phoRes.setVal(calibrator0.r.getVal())
+    phoRes.setVal(1.5 * calibrator0.r.getVal())
     ## Do the fit
     fit_result = pm.fitTo(data[label], roo.Range('fit'),  roo.NumCPU(8),
                           roo.Timer(), # roo.Verbose()
@@ -1792,7 +1798,7 @@ def draw_gof_latex(position=(0.2, 0.8), rowheight=0.055):
         pvaltext = '%.2g' % pval
     else:
         pvaltext = '%.2g %%' % (100 * pval)
-    Latex(['#chi^{2} / N_{DOF}: %.2g / %d' % (chi2, ndof),
+    Latex(['#chi^{2} / N_{DOF}: %.1f / %d' % (chi2, ndof),
            'p-value: ' + pvaltext,],
           position, rowheight=rowheight,
           ).draw()
