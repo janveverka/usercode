@@ -250,6 +250,33 @@ _files['yyv6'] = {
     'data': [('Data_yyv3_muon_corr_2011.root')],##Muon Corrected Trees 
     'z': [('MC_muon_corr_2011_FabSmearTest.root')],##Muon Corrected Trees + Fab Smearing
     }
+    
+## Yong's trees for Jul2012ReReco (JSON applied) with Hggv2 regression
+## looser selection (dr < 2.0, no sum-pt combinatorics arbitration), and 
+## muon charge information for the Rochcor (which is not applied).
+## MC is the defualt PU S6 2011 as for yyv3.  Also no Rochcor.
+_files['yyv7'] = {
+    'data': '''
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMu03Oct2011v1ZmmgSkim11Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMu03Oct2011v1ZmmgSkim11Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r2.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim10Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim10Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r2.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim10Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r3.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim10Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r4.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMu05Jul2011ReRecoECALv1ZmmgSkim10Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r5.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMuPromptSkimv5ZmmgSkim111111111111Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMuPromptSkimv5ZmmgSkim111111111111Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r2.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r1.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r2.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r3.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r4.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r5.scale0.root
+        Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r6.scale0.root
+    '''.split(),
+    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
+              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
+              'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
+    }
 
 _files['v13'] = {
     'z' : [('esTree_V13_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
@@ -330,10 +357,11 @@ _treeNames = {
     'yyv3' : 'Analysis',
     'yyv3corr' : 'Analysis',
     'yyv3_e5x5' : 'Analysis',    
+    'yyv4NoJSON' : 'Analysis',    
     'yyv4' : 'Analysis',
     'yyv5' : 'Analysis',
     'yyv6' : 'Analysis',
-    'yyv4NoJSON' : 'Analysis',    
+    'yyv7' : 'Analysis',
     'sixie' : 'ZmumuGammaEvent',
     'sixie2': 'ZmumuGammaEvent'
 }
@@ -390,7 +418,7 @@ def getChains(version='v4'):
                 es_name, sixie_name = name_pair.split()
                 print "====es_name: ", es_name, "sixie_name:  ", sixie_name
                 ch.SetAlias(es_name, sixie_name)
-    if version in 'yyv1 yyv2 yyv3 yyv3corr yyv3_e5x5 yyv4 yyv5 yyv6 yyv4NoJSON sixie2'.split():
+    if version in 'yyv1 yyv2 yyv3 yyv3corr yyv3_e5x5 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 sixie2'.split():
         ## On each line corresponding to a list item, 
         ## 1st is esTree name, 2nd is YY tree name in Yong's trees.
         es_to_yy_name_map = '''mmMass          mm 
@@ -416,7 +444,7 @@ def getChains(version='v4'):
                   phoPt           gamenergy/cosh(gameta)'''.split('\n')
                   )
 
-        elif version in 'yyv2 yyv3 yyv3corr yyv4 yyv5 yyv6 yyv4NoJSON sixie2'.split():
+        elif version in 'yyv2 yyv3 yyv3corr yyv4 yyv4NoJSON yyv5 yyv6 yyv7 sixie2'.split():
 
             ## Use the regression cluster corrections
             es_to_yy_name_map.extend(
