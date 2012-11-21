@@ -321,6 +321,50 @@ _files['v15'] = {
             'batch2_of2.root')],       
 }
 
+
+## PU reweighting for 2011A + 2011B
+_files['v16'] = {
+    'z': [('esTree_V16_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
+           'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
+           'reduced.root')],
+    'data': '''
+        esTree_V16_data_2011A.root
+        esTree_V16_DoubleMu_Run2011B-PromptReco-v4_glite_Dimuon_RECO-42X-v9_reduced.root
+        '''.split(),
+    '2011A': '''
+        esTree_V16_data_2011A
+        '''.split(),
+    '2011B': '''
+        esTree_V16_DoubleMu_Run2011B-PromptReco-v4_glite_Dimuon_RECO-42X-v9_reduced.root
+        '''.split(),
+}
+
+
+## PU reweighting for 2011A
+_files['v17'] = {
+    'z': [('esTree_V17_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
+           'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
+           'reduced.root')],
+}
+
+## PU reweighting for 2011B
+_files['v18'] = {
+    'z': [('esTree_V18_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
+           'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
+           'reduced.root')],
+    'data': '''
+        esTree_V16_data_2011A.root
+        esTree_V16_DoubleMu_Run2011B-PromptReco-v4_glite_Dimuon_RECO-42X-v9_reduced.root
+        '''.split(),
+    '2011A': '''
+        esTree_V16_data_2011A
+        '''.split(),
+    '2011B': '''
+        esTree_V16_DoubleMu_Run2011B-PromptReco-v4_glite_Dimuon_RECO-42X-v9_reduced.root
+        '''.split(),
+}
+
+
 ##New Sixie trees first try to make it work
 _files['sixie'] = {
         #'data': [ ( 'ZmumuGammaNtuple_Run2012AB_Jun29Rereco.root' ) ],#Original Line
@@ -352,6 +396,9 @@ _treeNames = {
     'v13' : 'tree/pmv',
     'v14' : 'tree/pmv',
     'v15' : 'tree/pmv',
+    'v16' : 'tree/pmv',
+    'v17' : 'tree/pmv',
+    'v18' : 'tree/pmv',
     'yyv1' : 'Analysis',
     'yyv2' : 'Analysis',    
     'yyv3' : 'Analysis',
