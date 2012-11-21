@@ -322,7 +322,7 @@ _files['v15'] = {
 }
 
 
-## PU reweighting for 2011A + 2011B
+## PU reweighting for 2011A + 2011B, has muon charge
 _files['v16'] = {
     'z': [('esTree_V16_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
            'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
@@ -340,14 +340,14 @@ _files['v16'] = {
 }
 
 
-## PU reweighting for 2011A
+## PU reweighting for 2011A, has muon charge
 _files['v17'] = {
     'z': [('esTree_V17_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
            'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
            'reduced.root')],
 }
 
-## PU reweighting for 2011B
+## PU reweighting for 2011B, has muon charge
 _files['v18'] = {
     'z': [('esTree_V18_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
            'Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb_'
