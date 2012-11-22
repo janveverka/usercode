@@ -5,7 +5,7 @@
 struct Config {
   enum Host {t3_susy, JansMacBookPro} host;
   enum Analysis {k30Nov2011ReReco, k16Jan2012ReReco} analysis;
-  enum Veto {kMvaVeto, kCiCVeto, kPixelMatch} veto;
+  enum Veto {kMvaVeto, kCiCVeto, kPixelMatch, kR9} veto;
   TFile * outputFile;
   enum Period {k2011AplusB, k2011A, k2011B} period;
   enum Subdetector {EcalBarrel, EcalEndcaps} subdetector;
@@ -14,14 +14,17 @@ struct Config {
     Eta1of4=0, Eta2of4, Eta3of4, Eta4of4, 
     Eta1of6, Eta2of6, Eta3of6, Eta4of6, Eta5of6, Eta6of6                    
   } etaCategory;
+  enum PtBin {kPt10to12=0, kPt12to15, kPt15to20, kPt20up} ptBin;
   bool do4EtaCategories;
   bool do6EtaCategories;
   bool doR9Categories;
+  bool doPtBins;
 };
 
 string calculateEfficiencies(const Config &);
 string loopOverPeriods(Config &);
 string loopOverCategories(Config &);
+string loopOverPtBins(Config &);
 string latexHeader(Config const&);
 string latexFooter(Config const&);
 
@@ -31,20 +34,27 @@ void cutAndCount_42x(){
   
   /// Common configuration
   Config cfg;
-  cfg.host        = Config::t3_susy;
-  // cfg.host       = Config::JansMacBookPro;
+  // cfg.host        = Config::t3_susy;
+  cfg.host       = Config::JansMacBookPro;
   
   cfg.analysis   = Config::k16Jan2012ReReco;
   // cfg.analysis   = Config::k30Nov2011ReReco;
-
-  // cfg.veto       = Config::kPixelMatch;
-  cfg.veto       = Config::kCiCVeto;
-  // cfg.veto       = Config::kMvaVeto;
   
+  // cfg.veto       = Config::kMvaVeto;
+  // cfg.veto       = Config::kPixelMatch;
+  // cfg.veto       = Config::kCiCVeto;
+  cfg.veto       = Config::kR9;  
+  
+  // cfg.doEtaCategories = true;
+  // cfg.doR9Categories = true;
+
   cfg.outputFile = new TFile("cutAndCount_42x_devel.root", "RECREATE");
   cfg.do4EtaCategories = false;
-  cfg.do6EtaCategories = true;
+  cfg.do6EtaCategories = false;
   cfg.doR9Categories = false;
+  cfg.doPtBins = true;
+
+  cfg.r9Category = Config::AllR9;
 
   string latex = "";  
 
@@ -70,6 +80,9 @@ string latexHeader(Config const & cfg) {
     break;
   case Config::kMvaVeto:
     caption = "MVA photon ID electron rejection cut ";
+    break;
+  case Config::kR9:
+    caption = "High R9 categorization cut ";
     break;
   }
   
@@ -123,7 +136,8 @@ string latexFooter(Config const & cfg) {
   switch(cfg.veto) {
   case Config::kPixelMatch: label += "_PMV"    ; break;
   case Config::kCiCVeto   : label += "_CiCVeto"; break;  
-  case Config::kMvaVeto    : label += "_MVAVeto"; break;
+  case Config::kMvaVeto   : label += "_MVAVeto"; break;
+  case Config::kR9        : label += "_R9"     ; break;
   }
   
   switch (cfg.analysis) {
@@ -200,6 +214,11 @@ string loopOverCategories(Config& cfg) {
   if (cfg.do6EtaCategories == true) {
     cfg.r9Category  = Config::AllR9;
     return loopOver6EtaCategories(cfg);
+  }
+
+  if (cfg.veto == Config::kR9) {
+    cfg.r9Category = Config::AllR9;
+    return loopOverPtBins(cfg);
   }
   
   
@@ -375,6 +394,25 @@ string loopOverEtaR9Categories(Config& cfg) {
   return latex;
 } // loopOverEtaR9Categories(..)
 
+///____________________________________________________________________________
+string loopOverPtBins(Config& cfg) {  
+  string row = "";
+  string latex = "";
+    
+  cfg.subdetector = Config::EcalBarrel;
+  for (unsigned ptBin = Config::kPt10to12; ptBin <= Config::kPt20up; ++ptBin) {
+    cfg.ptBin = ptBin;
+    row = calculateEfficiencies(cfg);
+    unsigned catNumber = 29 + ptBin;
+    cout << row << endl;
+    string rowWithCatNumber = Form(" %u & %s \\\\\n", catNumber, row.c_str());
+    cout << rowWithCatNumber << endl;
+    latex += rowWithCatNumber;
+  }
+  return latex;
+} // loopOverPtBins(..)
+
+
 
 ///____________________________________________________________________________
 string calculateEfficiencies(const Config &cfg)
@@ -433,6 +471,7 @@ string calculateEfficiencies(const Config &cfg)
   case Config::kMvaVeto:    label = "MVAVeto"; break;
   case Config::kCiCVeto:    label = "CiCVeto"; break;
   case Config::kPixelMatch: label = "PMVeto" ; break;
+  case Config::kR9:         label = "R9"     ; break;
   }
 
   switch (cfg.analysis) {
@@ -566,6 +605,10 @@ string calculateEfficiencies(const Config &cfg)
   TCut etaBin4of6("phoIsEB & 65 < abs(phoIEtaX) & abs(phoIEtaX) <= 85"); // module 4
   TCut etaBin5of6("!phoIsEB & 1.5 <= abs(scEta) & abs(scEta) < 2.0");
   TCut etaBin6of6("!phoIsEB & 2.0 <= abs(scEta) & abs(scEta) < 2.5");
+  TCut pt10to12("10 <= phoPt & phoPt < 12");
+  TCut pt12to15("12 <= phoPt & phoPt < 15");
+  TCut pt15to20("15 <= phoPt & phoPt < 20");
+  TCut pt20up("20 <= phoPt");
   
   TCut vetoCut, ebLowR9, eeLowR9, ebHighR9, eeHighR9, ebSelection, eeSelection;
   switch (cfg.veto) {
@@ -605,6 +648,16 @@ string calculateEfficiencies(const Config &cfg)
     // These cuts are for the pixel match veto
     ebSelection = ("(minDEta > 0.04 | minDPhi > 0.3) & phoIsEB");
     eeSelection = ("(minDEta > 0.08 | minDPhi > 0.3) & !phoIsEB");
+    break;   
+  case Config::kR9:
+    vetoCut = "phoR9 > 0.94";
+    ebLowR9 = ("phoR9 <= 0.94");
+    eeLowR9 = ("phoR9 <= 0.95");
+    ebHighR9 = ("phoR9 > 0.94");
+    eeHighR9 = ("phoR9 > 0.95");
+    // These cuts are for the pixel match veto
+    ebSelection = ("phoIsEB");
+    eeSelection = ("!phoIsEB");
     break;   
   }
 
@@ -683,6 +736,26 @@ string calculateEfficiencies(const Config &cfg)
     case Config::HighR9: label += "_highR9"; break;
   }
 
+  if (cfg.doPtBins) {
+    switch (cfg.ptBin) {
+    case Config::kPt10to12 : 
+      selection = selection && pt10to12; 
+      label += "_pt10to12" ; 
+      break;
+    case Config::kPt12to15 : 
+      selection = selection && pt12to15; 
+      label += "_pt12to15" ; 
+      break;
+    case Config::kPt15to20 : 
+      selection = selection && pt15to20; 
+      label += "_pt15to20" ; 
+      break;
+    case Config::kPt20up : 
+      selection = selection && pt20up; 
+      label += "_pt20up" ; 
+      break;
+    }
+  }
   // TCut selection = ebSelection;
   // TCut selection = eeSelection;
   // TCut selection = ebSelection && highR9;
