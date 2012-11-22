@@ -5,7 +5,7 @@
 struct Config {
   enum Host {t3_susy, JansMacBookPro} host;
   enum Analysis {k30Nov2011ReReco, k16Jan2012ReReco} analysis;
-  enum Veto {kMvaVeto, kCiCVeto, kPixelMatch, kR9} veto;
+  enum Veto {kMvaVeto, kCiCVeto, kPixelMatch, kR9, kCorrR9} veto;
   TFile * outputFile;
   enum Period {k2011AplusB, k2011A, k2011B} period;
   enum Subdetector {EcalBarrel, EcalEndcaps} subdetector;
@@ -34,8 +34,8 @@ void cutAndCount_42x(){
   
   /// Common configuration
   Config cfg;
-  // cfg.host        = Config::t3_susy;
-  cfg.host       = Config::JansMacBookPro;
+  cfg.host        = Config::t3_susy;
+  // cfg.host       = Config::JansMacBookPro;
   
   cfg.analysis   = Config::k16Jan2012ReReco;
   // cfg.analysis   = Config::k30Nov2011ReReco;
@@ -43,7 +43,8 @@ void cutAndCount_42x(){
   // cfg.veto       = Config::kMvaVeto;
   // cfg.veto       = Config::kPixelMatch;
   // cfg.veto       = Config::kCiCVeto;
-  cfg.veto       = Config::kR9;  
+  // cfg.veto       = Config::kR9;  
+  cfg.veto       = Config::kCorrR9;  
   
   // cfg.doEtaCategories = true;
   // cfg.doR9Categories = true;
@@ -83,6 +84,9 @@ string latexHeader(Config const & cfg) {
     break;
   case Config::kR9:
     caption = "High R9 categorization cut ";
+    break;
+  case Config::kCorrR9:
+    caption = "Corrected high R9 categorization cut ";
     break;
   }
   
@@ -138,6 +142,7 @@ string latexFooter(Config const & cfg) {
   case Config::kCiCVeto   : label += "_CiCVeto"; break;  
   case Config::kMvaVeto   : label += "_MVAVeto"; break;
   case Config::kR9        : label += "_R9"     ; break;
+  case Config::kCorrR9    : label += "_CorrR9" ; break;
   }
   
   switch (cfg.analysis) {
@@ -216,7 +221,7 @@ string loopOverCategories(Config& cfg) {
     return loopOver6EtaCategories(cfg);
   }
 
-  if (cfg.veto == Config::kR9) {
+  if (cfg.veto == Config::kR9 || cfg.veto == Config::kCorrR9) {
     cfg.r9Category = Config::AllR9;
     return loopOverPtBins(cfg);
   }
@@ -420,7 +425,7 @@ string calculateEfficiencies(const Config &cfg)
   
   switch (cfg.host) {
     case Config::t3_susy:
-      const char *path = "/raid2/veverka/pmvTrees/";
+      const char *path = "/mnt/hadoop/user/veverka/pmvTrees/";
       break;
     case Config::JansMacBookPro:
       const char *path = "/Users/veverka/Work/Data/pmvTrees/";
@@ -611,6 +616,7 @@ string calculateEfficiencies(const Config &cfg)
   TCut pt20up("20 <= phoPt");
   
   TCut vetoCut, ebLowR9, eeLowR9, ebHighR9, eeHighR9, ebSelection, eeSelection;
+  TCut vetoCutData, vetoCutEBMC, vetoCutEEMC;
   switch (cfg.veto) {
   case Config::kMvaVeto:
     vetoCut = "phoPassElectronVeto";
@@ -655,6 +661,20 @@ string calculateEfficiencies(const Config &cfg)
     eeLowR9 = ("phoR9 <= 0.95");
     ebHighR9 = ("phoR9 > 0.94");
     eeHighR9 = ("phoR9 > 0.95");
+    // These cuts are for the pixel match veto
+    ebSelection = ("phoIsEB");
+    eeSelection = ("!phoIsEB");
+    break;   
+  case Config::kCorrR9:
+    // HtoZg correction for barrel in 2011
+    // See https://twiki.cern.ch/twiki/bin/view/CMS/HtoZgPhotonID
+    vetoCutData = "phoR9 > 0.94";
+    vetoCutEBMC   = "1.0048 * phoR9 > 0.94";
+    vetoCutEEMC   = "1.00492 * phoR9 > 0.94";
+    ebLowR9 = ("1.0048 * phoR9 <= 0.94");
+    eeLowR9 = ("1.00492 * phoR9 <= 0.95");
+    ebHighR9 = ("1.0048 * phoR9 > 0.94");
+    eeHighR9 = ("1.00492 * phoR9 > 0.95");
     // These cuts are for the pixel match veto
     ebSelection = ("phoIsEB");
     eeSelection = ("!phoIsEB");
@@ -874,6 +894,10 @@ string calculateEfficiencies(const Config &cfg)
   // double efs = Oplus(sqrt(f), fb + pb_qcd + fb_w + fb_tt); // 100 % error on bg
 
   // Barrel MC, passing probes
+  if (cfg.veto == Config::kCorrR9) {
+    if (cfg.subdetector == Config::EcalBarrel) vetoCut = vetoCutEBMC;
+    else                                       vetoCut = vetoCutEEMC;
+  }
   double p_mc = tmc->Draw("mmgMass>>hp_mc(30,75,105)",
 			  Form("pileup.weight * %f * (%s)",
 			      weight[z],
@@ -945,6 +969,10 @@ string calculateEfficiencies(const Config &cfg)
 
 
   // Barrel data
+  if (cfg.veto == Config::kCorrR9) {
+    vetoCut = vetoCutData;
+  }
+  
   double p = tdata->Draw("mmgMass>>hp(30,75,105)", selection && vetoCut);
   double f = tdata->Draw("mmgMass>>hf(15,75,105)", selection && !vetoCut);
 
@@ -1266,7 +1294,12 @@ string calculateEfficiencies(const Config &cfg)
   g_eff->Draw("p");
   c2->Modified();
   c2->Update();
-  TH2F *frame = new TH2F("frame","",2,0.5,2.5,1,0.7,1);
+  TH2F *frame;
+  if (cfg.veto == Config::kR9 || cfg.veto == Config::kCorrR9) {
+    frame = new TH2F("frame","",2,0.5,2.5,1,0.35,0.65);
+  } else {
+    frame = new TH2F("frame","",2,0.5,2.5,1,0.7,1);
+  }
   frame->SetStats(0);
   frame->GetYaxis()->SetTitleOffset(1.5);
   frame->GetYaxis()->SetTitle("Efficiency");
