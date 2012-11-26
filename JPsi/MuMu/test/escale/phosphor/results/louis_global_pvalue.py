@@ -26,4 +26,4 @@ for name, x, y, ex, ey in zip(names, true, mc, etrue, emc):
     print name, pull
     chi2 += pull * pull
 
-print 'global chi2:', ROOT.TMath.Prob(chi2, 3)
+print 'global chi2 p-value:', ROOT.TMath.Prob(chi2, 3)
