@@ -7,6 +7,7 @@
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TH2F.h"
+#include "TMath.h"
 #include "TRandom.h"
 #include "TROOT.h"
 #include "TSeqCollection.h"
