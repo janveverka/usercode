@@ -36,7 +36,8 @@ customPalette() {
   /// Default palettes, see
   /// http://root.cern.ch/root/html/TColor.html#TColor:SetPalette
   // int paletteCodes[] = {1, 51, 52, 53, 54, 55};
-  int paletteCodes[] = {56};
+  /// Only these two default palette codes seem to lead to distinct settings.
+  int paletteCodes[] = {1, 51};
   int numPalettes = sizeof(paletteCodes) / sizeof(int);
   
   /// Draw the default palettes
@@ -47,10 +48,10 @@ customPalette() {
   }
 
   /// Draw the custom palette
-  // setCustomPalette();
-  // makeCanvas(hist, "Custom_Palette")->Draw();
+  setCustomPalette();
+  makeCanvas(hist, "Custom_Palette")->Draw();
   
-  // saveAllCanvases();
+  saveAllCanvases();
 } // customPalette()
 
 
