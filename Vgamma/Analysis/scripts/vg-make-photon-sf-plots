@@ -1,0 +1,7 @@
+#!/bin/bash
+## Produces pdf plots of photon data/efficiency scale factors in 
+## the current location.
+## USAGE: vg-make-photon-sf-plots
+PYTHON_SCRIPT=$CMSSW_BASE/src/Vgamma/Analysis/python/plotting/photonsf.py
+python -i $PYTHON_SCRIPT
+
