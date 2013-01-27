@@ -1,4 +1,4 @@
-## Produces pdf plots of muon data/efficiency scale factors in 
+## Produces pdf plots of electrons data/efficiency scale factors in 
 ## the current location.
 ## USAGE: python -i photonsf.py
 
@@ -31,14 +31,12 @@ class Plotter:
         sfhisto.SetStats(False)
 
         self.canvas = canvases.next(self.name)
-        self.canvas.SetLogy()
-        sfhisto.DrawCopy('colz text')
+        sfhisto.DrawCopy('colz texte')
         self.histo = self.canvas.GetListOfPrimitives().FindObject(
             sfhisto.GetName()
             )
-        self.histo.GetYaxis().SetMoreLogLabels()
         Latex([self.leftlabel], (0.15, 0.92), textsize=25).draw()
-        Latex([self.rightlabel], (0.6, 0.92), textsize=25).draw()
+        Latex([self.rightlabel], (0.615, 0.92), textsize=25).draw()
 
         canvases.update()
     ## End of makeplot
@@ -49,26 +47,37 @@ plots = []
 basepath = os.environ['CMSSW_BASE']
 
 plot = Plotter()
+
 ## Common for all plots
-plot.sourcedir = 'src/Vgamma/Analysis/data/muonSF'
+plot.sourcedir = 'src/Vgamma/Analysis/data/EIDSF'
 plot.title = ''
 plot.rightlabel = 'CMS Preliminary'
-plot.xtitle = 'Muon #eta'
-plot.ytitle = 'Muon p_{T} (GeV)'
+plot.xtitle = 'Vertex Multiplicity'
+plot.ytitle = 'Electron p_{T} (GeV)'
 
-## Specific for2011A/2011B
-plot.sourcefilename = 'bigSFa_Eta_Pt.root'
-plot.sourcehistoname = 'muonSF'
-plot.leftlabel = 'Run 2011A'
-plot.name = 'Muon_SF_A'
-
+## Specific for 2011A/2011B x EB/EE
+plot.sourcefilename = 'eleIDSF_2011A.root'
+plot.sourcehistoname = 'eleSF_EB'
+plot.leftlabel = 'Run 2011A, ECAL Barrel'
+plot.name = 'Electron_SF_A_EB'
 plots.append(copy.deepcopy(plot))
 
-plot.sourcefilename = 'bigSFb_Eta_Pt.root'
-plot.sourcehistoname = 'muonSF'
-plot.leftlabel = 'Run 2011B'
-plot.name = 'Muon_SF_B'
+plot.sourcefilename = 'eleIDSF_2011A.root'
+plot.sourcehistoname = 'eleSF_EE'
+plot.leftlabel = 'Run 2011A, ECAL Endcap'
+plot.name = 'Electron_SF_A_EE'
+plots.append(copy.deepcopy(plot))
 
+plot.sourcefilename = 'eleIDSF_2011B.root'
+plot.sourcehistoname = 'eleSF_EB'
+plot.leftlabel = 'Run 2011B, ECAL Barrel'
+plot.name = 'Electron_SF_A_EB'
+plots.append(copy.deepcopy(plot))
+
+plot.sourcefilename = 'eleIDSF_2011B.root'
+plot.sourcehistoname = 'eleSF_EE'
+plot.leftlabel = 'Run 2011B, ECAL Endcap'
+plot.name = 'Electron_SF_A_EE'
 plots.append(copy.deepcopy(plot))
 
 ## Configuration END
