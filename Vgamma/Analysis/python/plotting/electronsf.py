@@ -71,13 +71,13 @@ plots.append(copy.deepcopy(plot))
 plot.sourcefilename = 'eleIDSF_2011B.root'
 plot.sourcehistoname = 'eleSF_EB'
 plot.leftlabel = 'Run 2011B, ECAL Barrel'
-plot.name = 'Electron_SF_A_EB'
+plot.name = 'Electron_SF_B_EB'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'eleIDSF_2011B.root'
 plot.sourcehistoname = 'eleSF_EE'
 plot.leftlabel = 'Run 2011B, ECAL Endcap'
-plot.name = 'Electron_SF_A_EE'
+plot.name = 'Electron_SF_B_EE'
 plots.append(copy.deepcopy(plot))
 
 ## Configuration END
