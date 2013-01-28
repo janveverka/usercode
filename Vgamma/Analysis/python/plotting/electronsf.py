@@ -59,25 +59,25 @@ plot.ytitle = 'Electron p_{T} (GeV)'
 plot.sourcefilename = 'eleIDSF_2011A.root'
 plot.sourcehistoname = 'eleSF_EB'
 plot.leftlabel = 'Run 2011A, ECAL Barrel'
-plot.name = 'Electron_SF_A_EB'
+plot.name = 'Electron_SF_EB_A'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'eleIDSF_2011A.root'
 plot.sourcehistoname = 'eleSF_EE'
 plot.leftlabel = 'Run 2011A, ECAL Endcap'
-plot.name = 'Electron_SF_A_EE'
+plot.name = 'Electron_SF_EE_A'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'eleIDSF_2011B.root'
 plot.sourcehistoname = 'eleSF_EB'
 plot.leftlabel = 'Run 2011B, ECAL Barrel'
-plot.name = 'Electron_SF_B_EB'
+plot.name = 'Electron_SF_EB_B'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'eleIDSF_2011B.root'
 plot.sourcehistoname = 'eleSF_EE'
 plot.leftlabel = 'Run 2011B, ECAL Endcap'
-plot.name = 'Electron_SF_B_EE'
+plot.name = 'Electron_SF_EE_B'
 plots.append(copy.deepcopy(plot))
 
 ## Configuration END
