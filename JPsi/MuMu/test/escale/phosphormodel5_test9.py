@@ -60,7 +60,7 @@ from JPsi.MuMu.escale.phosphormodel5 import PhosphorModel5
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'egm_fc_expbkg_data_EE_lowR9_pt25to999_yyv5'
+name = 'egm_fc_mc_EB_highR9_pt25to999_yyv5'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -166,7 +166,7 @@ def parse_name_whether_use_exp_bkg(name):
     '''
     global use_exp_bkg
     use_exp_bkg = False
-    if 'expbkg' in name.split('_'):
+    if 'expbkg' in name.split('_') and 'data' in name.split('_'):
         use_exp_bkg = True
 ## End of parse_name_whether_use_exp_bkg(name)
 
@@ -791,7 +791,7 @@ def build_model():
     
     ## Build the PDF for other backgrounds.
     global exp_pdf
-    exp_pdf = w.factory('Exponential::exp_pdf(mmgMass, exp_c[-0.05,-10,0])')
+    exp_pdf = w.factory('Exponential::exp_pdf(mmgMass, exp_c[-0.05,-0.1,0])')
     
     # global bkg_pdf
     # bkg_pdf = w.factory('SUM::bkg_pdf(exp_f[0.2, 0, 1] * exp_pdf, zj0_pdf)')
@@ -799,9 +799,12 @@ def build_model():
     ## Build the composite model PDF
     global pm
     pm = w.factory(
-        'SUM::pm(signal_N[1e3,0,1e10] * signal_model0, exp_N[2e2,0,1e10] * exp_pdf, zj_N[2e2,0,1e10] *zj0_pdf)'
+        'SUM::pm(signal_N[1e3,0,1e4] * signal_model0, exp_N[2e2,0,1e3] * exp_pdf, zj_N[2e2,0,1e3] *zj0_pdf)'
         )
-        
+
+    for yieldvar in 'signal_N exp_N zj_N'.split():
+        w.var(yieldvar).removeMax()
+      
     if not use_exp_bkg:
         w.var('exp_N').setVal(0)
         w.var('exp_N').setConstant()
@@ -903,9 +906,9 @@ def fit_real_data(label):
     phoRes.setVal(fit_calibrator.r.getVal())
     ## Do the fit
     fit_result = pm.fitTo(data[label], roo.Range('fit'),  roo.NumCPU(8),
-                             roo.Timer(), # roo.Verbose()
-                             roo.InitialHesse(True), roo.Minos(),
-                             roo.Save(), 
+                          roo.Timer(), # roo.Verbose()
+                          roo.InitialHesse(True), roo.Minos(),
+                          roo.Save(), roo.Extended(True)
         )
     w.Import(fit_result, 'fitresult_' + label)
 ## End of fit_real_data()
@@ -947,9 +950,22 @@ def draw_latex_for_fit_to_real_data():
     Draw latex results to the plot of the fit to real data.
     '''
     global fsr_purity
-    ntot = 0
-    for x in 'signal_N zj_N'.split():
+    ntot, nztot = 0, 0
+    for x in 'signal_N zj_N exp_N'.split():
         ntot += w.var(x).getVal()
+        if x != 'exp_N':
+            nztot += w.var(x).getVal()
+    
+    oplus = lambda x, y: math.sqrt(x*x + y*y)
+    
+    nsig = w.var('signal_N').getVal()
+    nbkg = w.var('zj_N').getVal() + w.var('exp_N').getVal()
+    
+    esig = w.var('signal_N').getError()
+    ebkg = oplus(w.var('zj_N').getError(), w.var('exp_N').getError())
+    
+    fsigerr = 100 * oplus(nbkg * esig, nsig * ebkg) / pow(nsig + nbkg, 2)
+    
     Latex([
         'E^{#gamma} Scale (%)',
         '  MC Truth: %.2f #pm %.2f' % (fit_calibrator.s.getVal(),
@@ -968,10 +984,12 @@ def draw_latex_for_fit_to_real_data():
             ),
         '',
             'Signal Purity (%)',
-            '  MC Truth: %.2f' % fsr_purity,
+            '  MC Truth: %.2f' % (
+                fsr_purity / (1. + w.var('exp_N').getVal() / nztot)
+                ),
             '  Data Fit: %.2f #pm %.2f' % (
                 100 * w.var('signal_N').getVal() / ntot,
-                100 * w.var('signal_N').getError() / ntot
+                fsigerr
                 )
         ],
         position=(0.2, 0.8)
@@ -1044,7 +1062,8 @@ def process_monte_carlo():
                                              fitdata1.numEntries()))
     check_timer('3. get fit data (%d entries)' % fitdata1.numEntries())
 
-    nll = pm.createNLL(fitdata1, roo.Range('fit'), roo.NumCPU(8))
+    nll = pm.createNLL(fitdata1, roo.Range('fit'), roo.NumCPU(8), 
+                       roo.Extended(True))
 
     minuit = ROOT.RooMinuit(nll)
     minuit.setProfile()
@@ -1132,7 +1151,22 @@ def process_monte_carlo():
     ## Store the result in the workspace:
     w.saveSnapshot('mc_fit', ROOT.RooArgSet(phoScale, phoRes,
                                             phoScaleTrue, phoResTrue))
+                                            
+    draw_latex_for_fit_to_monte_carlo()
+    
+    check_timer('8. fast plots')
+## End of process_monte_carlo
+
+
+#-------------------------------------------------------------------------------
+def draw_latex_for_fit_to_monte_carlo():
     ## Draw the results on the canvas:
+    global fsr_purity
+    ntot, nztot = 0, 0
+    for x in 'signal_N zj_N exp_N'.split():
+        ntot += w.var(x).getVal()
+        if x != 'exp_N':
+            nztot += w.var(x).getVal()
     Latex([
         'E^{#gamma} Scale (%)',
         '  MC Truth: %.2f #pm %.2f' % (calibrator0.s.getVal(),
@@ -1151,17 +1185,17 @@ def process_monte_carlo():
             ),
         '',
             'Signal Purity (%)',
-            '  MC Truth: %.2f' % fsr_purity,
+            '  MC Truth: %.2f' % (
+                fsr_purity / (1. + w.var('exp_N').getVal() / nztot)
+                ),
             '  MC Fit: %.2f #pm %.2f' % (
-                100 * w.var('signal_f').getVal(),
-                100 * w.var('signal_f').getError()
+                100 * w.var('signal_N').getVal() / ntot,
+                100 * w.var('signal_N').getError() / ntot
                 )
         ],
         position=(0.2, 0.8)
         ).draw()
-    
-    check_timer('8. fast plots')
-## End of process_real_data
+## End of draw_latex_for_fit_to_monte_carlo()
 
 
 ##------------------------------------------------------------------------------

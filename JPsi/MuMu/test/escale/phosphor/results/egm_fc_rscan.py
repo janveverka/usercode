@@ -46,7 +46,8 @@ def get_basepath():
         't3-susy.ultralight.org':
 #            '/raid2/veverka/jobs/outputs/regressions_no_muon_bias',
 #            '/raid2/veverka/jobs/outputs/regressions_at_low_pt',
-            '/home/veverka/jobs/outputs/egm_fc_rscan',
+#            '/home/veverka/jobs/outputs/egm_fc_rscan',
+            '/mnt/hadoop/user/veverka/phosphor/egm_fc_rscan',
         #'Jan-Veverkas-MacBook-Pro.local':
             #'/Users/veverka/Work/Data/phosphor/regressions_no_muon_bias',
         }
@@ -373,7 +374,7 @@ def main():
     Main entry point of execution.
     '''
     # make_scale_plots(scale_configurations)
-    make_plots(configurations)
+    make_plots(configurations[1:2])
     # save_graphs_to_file(plotters, 'test.root')
 ## End of main(..)
 

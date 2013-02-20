@@ -46,7 +46,8 @@ def get_basepath():
         't3-susy.ultralight.org':
 #            '/raid2/veverka/jobs/outputs/regressions_no_muon_bias',
 #            '/raid2/veverka/jobs/outputs/regressions_at_low_pt',
-            '/home/veverka/jobs/outputs/egm_fc_sscan',
+#            '/home/veverka/jobs/outputs/egm_fc_sscan',
+            '/mnt/hadoop/user/veverka/phosphor/egm_fc_sscan',
         #'Jan-Veverkas-MacBook-Pro.local':
             #'/Users/veverka/Work/Data/phosphor/regressions_no_muon_bias',
         }

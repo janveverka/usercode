@@ -7,3 +7,6 @@ plots*
 11-??-??
 *.log
 .DS_Store
+Roo*.cxx
+Roo*.h
+Roo*.d

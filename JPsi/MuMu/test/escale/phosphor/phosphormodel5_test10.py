@@ -66,7 +66,9 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'test_data_EE_pt25to999_yyv3'
 # name = 'truevalidation_mc_EE_lowR9_pt10to12_v13_evt2of4'
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
-name = 'reftest_data_yyv7_EB_highR9_pt25to999'
+# name = 'egm_data_EB_pt25to999_highR9_yyv4'
+# name = 'reftest_data_yyv12_EB_highR9_pt25to999'
+name = 'sync_data_yyv15_EE_highR9_pt30to999'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -81,7 +83,8 @@ rfit = 'nominal'
 #rfit = 1.0
 
 fit_data_fraction = 0.25
-reduce_data = False
+#reduce_data = False
+reduce_data = True
 
 #fake_data_cut = 'Entry$ % 4 == 0'
 #use_independent_fake_data = True
@@ -202,10 +205,11 @@ def parse_name_to_cuts():
     ## For EGM-11-001 to help with regression
     # cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5', 'minDeltaR > 0.1']
     cuts = ['mmMass + mmgMass < 180', 
-            'minDeltaR < 0.8', 
-            'mu1Pt > 15', 
+            'minDeltaR < 1.5', 
             'mu2Pt > 10',
-            'mmgMass > 55',]
+            'mu1Pt > 20', 
+            'mmMass > 30',
+            ]
     # cuts = ['mmMass + mmgMass < 180']
     if 'EB' in name:
         cuts.append('phoIsEB')
@@ -238,7 +242,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 v11 v13 v14 v15 sixie'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 yyv8 yyv9 yyv10 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16 v11 v13 v14 v15 sixie'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -269,7 +273,7 @@ def parse_name_to_title():
     if data_tree_version in 'yyv1 yyv2 yyv3'.split():
         tokens.append('16 Jan Re-reco')
         latex_labels.append('16 Jan Re-reco')
-    elif data_tree_version in 'yyv4 yyv4NoJSON'.split():
+    elif data_tree_version in 'yyv4 yyv4NoJSON yyv7 yyv8 yyv9 yyv10 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16'.split():
         tokens.append('14 Jul Re-reco')
         latex_labels.append('14 Jul Re-reco')
     elif data_tree_version in 'sixie sixie2'.split():
@@ -279,7 +283,7 @@ def parse_name_to_title():
     if model_tree_version in 'v11'.split():
         tokens.append('2011A+B PU S4 MC Model')
         latex_labels.append('2011A+B PU S4 MC Model')
-    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7'.split():
+    elif model_tree_version in 'v13 yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 yyv8 yyv9 yyv10 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16'.split():
         tokens.append('2011A+B PU S6 MC Model')
         latex_labels.append('2011A+B PU S6 MC Model')
     elif model_tree_version in 'sixie sixie2'.split():
@@ -292,7 +296,7 @@ def parse_name_to_title():
         tokens.append('2011B PU')
         latex_labels.append('2011B PU S6 MC Model')
         
-    if model_tree_version in 'yyv5 yyv6 sixie'.split():
+    if model_tree_version in 'yyv5 yyv6 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16 sixie'.split():
         tokens.append('mu corrections')
         latex_labels.append('#mu corr.')
     
@@ -343,7 +347,7 @@ def parse_name_to_title():
     elif model_tree_version == 'yyv2':        
         tokens.append('Caltech Regression')
         latex_labels.append('Caltech Regression')
-    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7'.split():
+    elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 yyv8 yyv9 yyv10 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16'.split():
         tokens.append('Hgg v2 Regr.')
         latex_labels.append('Hgg v2 Regr.')
     elif model_tree_version in 'sixie sixie2'.split():
@@ -752,7 +756,7 @@ def outro(make_plots=True, save_workspace=True):
 
     for label, dataset in data.items():
         dataset.SetName('data_' + label)
-        # w.Import(dataset)
+        w.Import(dataset)
     
     if save_workspace:
         for c in canvases.canvases:
