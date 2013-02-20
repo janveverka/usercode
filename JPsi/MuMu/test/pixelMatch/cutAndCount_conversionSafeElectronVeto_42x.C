@@ -5,7 +5,10 @@
 struct Configuration {
   enum Dataset {AN_2011_048_HggMVA_2011AplusB, 
                 AN_2011_048_HggMVA_2011A,
-                AN_2011_048_HggMVA_2011B} dataset;
+                AN_2011_048_HggMVA_2011B,
+                Reload_16Jan_2011AplusB,
+                Reload_16Jan_2011A,
+                Reload_16Jan_2011B} dataset;
   enum Subdetector {EcalBarrel, 
                     EcalEndcaps} subdetector;
   enum R9Category {LowR9, HighR9, AllR9} r9Category;
@@ -14,18 +17,34 @@ struct Configuration {
 };
 
 string calculateEfficiencies(const Configuration &);
+string processDataset(Configuration::Dataset dataset, TFile& outputFile);
 
+///____________________________________________________________________________
 void cutAndCount_conversionSafeElectronVeto_42x(){
   
   gROOT->LoadMacro("../resolutionErrors.C");
+  TFile * outputFile = new TFile(
+    "cutAndCount_conversionSafeElectronVeto_42x.root", "RECREATE"
+  );
+  
+  string table = "";
+  table += processDataset(Configuration::AN_2011_048_HggMVA_2011AplusB, 
+                          *outputFile);
+  
+  cout << table << endl;
+}
+
+  
+///____________________________________________________________________________
+string processDataset(Configuration::Dataset datset, TFile& outputFile) {  
   string row = "", report = "";
   Configuration cfg;
   
   /// Common configuration
-  cfg.host        = Configuration::JansMacBookPro;
-  cfg.dataset     = Configuration::AN_2011_048_HggMVA_2011AplusB;
-  cfg.outputFile  = new TFile("cutAndCount_conversionSafeElectronVeto_42x.root",
-                              "RECREATE");
+  cfg.host        = Configuration::t3_susy;
+  cfg.dataset     = datset;
+  cfg.outputFile  = &outputFile;
+  
   /// Category 1
   cfg.subdetector = Configuration::EcalBarrel;
   cfg.r9Category  = Configuration::HighR9;
@@ -106,7 +125,6 @@ string calculateEfficiencies(const Configuration &cfg;)
 
   switch (cfg.dataset) {
     // Datasets for AN 2012/048 Hgg MVA 2011A+B
-    // 2011A+B
     case Configuration::AN_2011_048_HggMVA_2011AplusB:
       label = "AN_2011_048_HggMVA_2011AplusB";
       const char *filenameData = "pmvTree_V19_DoubleMu_Run2011AB-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
@@ -117,7 +135,6 @@ string calculateEfficiencies(const Configuration &cfg;)
       break;
       
     // Datasets for AN 2012/048 Hgg MVA 2011A
-    // 2011A
     case Configuration::AN_2011_048_HggMVA_2011A:
       label = "AN_2011_048_HggMVA_2011A";
       const char *filenameData = "pmvTree_V19_DoubleMu_Run2011A-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
@@ -128,7 +145,6 @@ string calculateEfficiencies(const Configuration &cfg;)
       break;
       
     // Datasets for AN 2012/048 Hgg MVA 2011B
-    // 2011B
     case Configuration::AN_2011_048_HggMVA_2011B:
       label = "AN_2011_048_HggMVA_2011B";
       const char *filenameData = "pmvTree_V19_DoubleMu_Run2011B-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
@@ -137,6 +153,37 @@ string calculateEfficiencies(const Configuration &cfg;)
       const char *filenameTT   = "pmvTree_V21_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
       const char *filenameW    = "pmvTree_V21_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
       break;
+
+    // Datasets for reload of 16Jan 2011A+B
+    case Configuration::Reload_16Jan_2011AplusB:
+      label = "Reload_16Jan_2011AplusB";
+      const char *filenameData = "pmvTree_V19_DoubleMu_Run2011AB-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
+      const char *filenameMC   = "pmvTree_V19_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      const char *filenameQCD  = "pmvTree_V19_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      const char *filenameTT   = "pmvTree_V19_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      const char *filenameW    = "pmvTree_V19_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      break;
+      
+    // Datasets for reload of 16Jan 2011A
+    case Configuration::Reload_16Jan_2011A:
+      label = "Reload_16Jan_2011A";
+      const char *filenameData = "pmvTree_V19_DoubleMu_Run2011A-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
+      const char *filenameMC   = "pmvTree_V20_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      const char *filenameQCD  = "pmvTree_V20_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      const char *filenameTT   = "pmvTree_V20_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      const char *filenameW    = "pmvTree_V20_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      break;
+      
+    // Datasets for reload of 16Jan 2011B
+    case Configuration::Reload_16Jan_2011A:
+      label = "Reload_16Jan_2011A";
+      const char *filenameData = "pmvTree_V19_DoubleMu_Run2011B-30Nov2011-v1_condor_Dimuon_AOD-42X-v10_DBS.root";
+      const char *filenameMC   = "pmvTree_V21_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      const char *filenameQCD  = "pmvTree_V21_QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      const char *filenameTT   = "pmvTree_V21_TT_TuneZ2_7TeV-powheg-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      const char *filenameW    = "pmvTree_V21_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1_condor_Dimuon_AOD-42X-v10_10Feb.root";
+      break;
+    
   }
 
   enum mcSample {z=0, qcd, w, tt};
@@ -193,6 +240,9 @@ string calculateEfficiencies(const Configuration &cfg;)
     case Configuration::AN_2011_048_HggMVA_2011A:
     case Configuration::AN_2011_048_HggMVA_2011B:
     case Configuration::AN_2011_048_HggMVA_2011AplusB:
+    case Configuration::Reload_16Jan_2011A:
+    case Configuration::Reload_16Jan_2011B:
+    case Configuration::Reload_16Jan_2011AplusB:
       // TCut highR9("0.9 < phoR9");
       TCut ebLowR9("0 < phoR9 && phoR9 <= 0.9");
       TCut eeLowR9("0 < phoR9 && phoR9 <= 0.9");

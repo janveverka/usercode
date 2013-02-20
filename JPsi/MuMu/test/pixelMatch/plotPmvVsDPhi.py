@@ -3,6 +3,14 @@ from ROOT import *
 from array import array
 from JPsi.MuMu.common.pmvTrees import getChains
 
+#weight = {
+    #"data": 1.,
+    #"z"  : 0.030541912803076,
+    #"qcd": 0.10306919044126,
+    #"w"  : 0.074139194512438,
+    #"tt" : 0.005083191122289,
+#}
+
 tree = getChains('v15reco')
 
 canvases = []

@@ -107,11 +107,16 @@ def get_plotted_variable_in_mc_and_data():
         
     else:
         ## Shifting for Endcap from AN 11/251 Vg
+        #var = RooRealVar("1000*phoSigmaIetaIeta - 0.16",
+                        #"Photon #sigma_{i#etai#eta} #times 10^{3}", 10, 40)
+        #varData = RooRealVar("1000*phoSigmaIetaIeta",
+                            #"Photon #sigma_{i#etai#eta} #times 10^{3}", 10, 40)
+        ## Same binning as Poter
         var = RooRealVar("1000*phoSigmaIetaIeta - 0.16",
-                        "Photon #sigma_{i#etai#eta} #times 10^{3}", 10, 40)
+                        "Photon #sigma_{i#etai#eta} #times 10^{3}", 9.5, 39.5)
         varData = RooRealVar("1000*phoSigmaIetaIeta",
-                            "Photon #sigma_{i#etai#eta} #times 10^{3}", 10, 40)
-        var.setBins(60)
+                            "Photon #sigma_{i#etai#eta} #times 10^{3}", 9.5, 39.5)
+        var.setBins(40)
     
     return var, varData
     
@@ -203,7 +208,7 @@ def get_yrange():
     if 'EB' in name:
         yrange = (1e-4, 700.)
     else:
-        yrange = (1e-4, 250.)
+        yrange = (1e-4, 375.)
     
     return yrange
 ## End of get_yrange()

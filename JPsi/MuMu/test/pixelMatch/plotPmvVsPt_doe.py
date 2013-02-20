@@ -12,7 +12,7 @@ tree['tt'] = esChainsV2['tt']
 tree['qcd'] = esChainsV2['qcd']
 
 tree['hgg'] = TTree('gg', 'gg tree excerpt')
-tree['hgg'].ReadTree('phoPt/F:phoEta:phoHaxPixelMatch/I')
+#tree['hgg'].ReadFile('phoPt/F:phoEta:phoHaxPixelMatch/I')
 
 cweight = {
     "data": 1.,

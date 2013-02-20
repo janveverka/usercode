@@ -5,17 +5,26 @@ from array import array
 # path = "/home/veverka/Work/data/pmv"
 path = "/raid2/veverka"
 
+## Restrict the maximum number of events used for plotting to speed
+## up debugging trunaround. 
+maxevents = -1
+
 fileName = {
-#     "data": "PMVTrees_v1/pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
-    'data': 'PMVTrees_v6/pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root',
+    # "data": "PMVTrees_v1/pmvTree_Mu_Run2010AB-Dec22ReReco_v1_json_V3.root",
+    # 'data': 'PMVTrees_v6/pmvTree_ZMu_May10ReReco-42X-v3_Plus_PromptSkim-v4_42X-v5_V6.root',
+    #'data': 'pmvTrees/pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1_PromptReco-v1B.root',
+    # 'data' : 'pmvTrees/pmvTree_V21_DoubleMu_Run2011AB-16Jan2012-v1_condor_Dimuon_AOD-42X-v10.root',
+    'data' : 'pmvTrees/pmvTree_V15_05Jul2011ReReco_05Aug2011_03Oct2011-v1_PromptReco-v1B_RECO.root',
+    #"z"  : "PMVTrees_v1/pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",
     #"z"   : "pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v1_V3.root",
-#     "z"  : "PMVTrees_v1/pmvTree_DYToMuMu_M-20-powheg-pythia_Winter10-v2_V3.root",
-    'z'  : 'PMVTrees_v6/pmvTree_DYToMuMu_pythia6_AOD-42X-v4_V6.root',
+    'z' : 'PMVTrees_v6/pmvTree_DYToMuMu_pythia6_AOD-42X-v4_V6.root',
+#    'z' : 'pmvTrees/pmvTree_V12_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_S4-v1_condor_Dimuon_AOD-42X-v9.root',
     #"tt"  : "pmvTree_TTJets_TuneZ2-madgraph-Winter10_V2.root",
     #"w"   : "",
     #"qcd" : "",
+    #"gj"  : "PMVTrees_v1/pmvTree_GJets_TuneD6T_HT-40To100-madgraph_Winter10_V3_numEvents40k.root",
     "gj"  : "PMVTrees_v6/pmvTree_G_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6_Summer11_AOD_42X-v4_V6.root",
-#     "gj"  : "PMVTrees_v1/pmvTree_GJets_TuneD6T_HT-40To100-madgraph_Winter10_V3_numEvents40k.root",
+    #'gj' : 'pmvTrees/pmvTree_V12_G_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6_S4-v1_condor_Inclusive_AOD-42X-v9.root',
 }
 
 weight = {
@@ -25,6 +34,9 @@ weight = {
     "w"  : 0.074139194512438,
     "tt" : 0.005083191122289,
 }
+
+if maxevents < 0:
+    maxevents = 1000000000
 
 canvases = []
 graphs = {}
@@ -56,6 +68,11 @@ tree = {}
 for tag, f in file.items():
     tree[tag] = f.Get("pmvTree/pmv")
 
+import JPsi.MuMu.common.pmvTrees as pmvtrees
+treev15reco = pmvtrees.getChains('v15reco')
+tree['z'] = treev15reco['z']
+tree['data'] = treev15reco['data']
+
 ## make histos of pmv vs deta
 
 ###############################################################################
@@ -63,15 +80,20 @@ for tag, f in file.items():
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [0., 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5]
+#xbins = [0., 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5]
+xbins = [0.1 * i for i in range(26)]
 
 h_Eta = TH1F("h_Eta_data_eb", "#eta^#gamma", len(xbins)-1, array("d", xbins))
 
 selection = " abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
-tree["data"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection)
+eventweight = selection
+tree["data"].Draw("abs(phoEta)>>" + h_Eta.GetName(), eventweight, '', 
+                  maxevents)
 htot = h_Eta.Clone(h_Eta.GetName() + "_tot")
 
-tree["data"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection + "& !phoHasPixelMatch")
+eventweight = selection + "& !phoHasPixelMatch"
+tree["data"].Draw("abs(phoEta)>>" + h_Eta.GetName(), eventweight, '', 
+                  maxevents)
 hpass = h_Eta.Clone(h_Eta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
@@ -93,15 +115,24 @@ c1.Update()
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [0.25 * i for i in range(11)]
+# xbins = [0.25 * i for i in range(11)]
+xbins = [0.1 * i for i in range(26)]
 
 h_Eta = TH1F("h_Eta_mc_eb", "#eta^#gamma", len(xbins)-1, array("d", xbins))
 
 selection = " abs(mmgMass-90)<15 & (minDEta > 0.04 | minDPhi > 0.3)"
-tree["z"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection )
+## Want to include pileup weights but the 
+## TGraphAsymmErrors::BayesDivide then breaks because it gets 
+## fractional numbers of events. TODO: fix this
+# eventweight = "pileup.weight * (%s)" % selection
+eventweight = "1 * (%s)" % selection
+tree["z"].Draw("abs(phoEta)>>" + h_Eta.GetName(), eventweight)
 htot = h_Eta.Clone(h_Eta.GetName() + "_tot")
 
-tree["z"].Draw("abs(phoEta)>>" + h_Eta.GetName(), selection + "& !phoHasPixelMatch")
+# eventweight = "pileup.weight * (%s)" % (selection + "& !phoHasPixelMatch")
+#eventweight = "pileup.weight * (%s)" % (selection + "& !phoHasPixelMatch")
+eventweight = "1 * (%s)" % (selection + "& !phoHasPixelMatch")
+tree["z"].Draw("abs(phoEta)>>" + h_Eta.GetName(), eventweight)
 hpass = h_Eta.Clone(h_Eta.GetName() + "_pass")
 
 geff = TGraphAsymmErrors()
@@ -121,7 +152,9 @@ c1.Update()
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [0.05 * i for i in range(61)]
+#xbins = [0.05 * i for i in range(51)]
+xbins = [0.1 * i for i in range(26)]
+# xbins = [0.25 * i for i in range(11)]
 
 andCuts = lambda cuts: "&".join( "(%s)" % c for c in cuts )
 
@@ -168,7 +201,8 @@ c1.Update()
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [0.05 * i for i in range(61)]
+#xbins = [0.05 * i for i in range(51)]
+xbins = [0.1 * i for i in range(26)]
 # xbins = [0.25 * i for i in range(11)]
 
 andCuts = lambda cuts: "&".join( "(%s)" % c for c in cuts )
@@ -216,7 +250,8 @@ c1.Update()
 c1 = TCanvas()
 canvases.append(c1)
 
-xbins = [0.05 * i for i in range(61)]
+# xbins = [0.05 * i for i in range(51)]
+xbins = [0.1 * i for i in range(26)]
 # xbins = [0.25 * i for i in range(11)]
 
 andCuts = lambda cuts: "&".join( "(%s)" % c for c in cuts )
@@ -307,6 +342,6 @@ legend.Draw()
 c1.SetGridx()
 c1.SetGridy()
 
-c1.Print("pmvVsEta_data_z_gj_variousID_v2.eps")
-c1.Print("pmvVsEta_data_z_gj_variousID_v2.C")
+print 'c1.Print("pmvVsEta_data_z_gj_variousID_v1.eps")'
+#c1.Print("pmvVsEta_data_z_gj_variousID_v1.C")
 

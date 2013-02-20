@@ -1,11 +1,8 @@
 import os
-import JPsi.MuMu.common.canvases as canvases
-
 from ROOT import *
 from array import array
 
-
-
+## Permanent location
 path = "/raid2/veverka/various"
 
 fileName = {
@@ -23,7 +20,7 @@ legendTitles = {
     'ele_data' : 'Z#rightarrow ee data' ,
 }
 
-# canvases = []
+canvases = []
 graphs = []
 
 ## Set TDR style
@@ -90,11 +87,9 @@ for hkey in '''ele_data_Barrel
                ele_mc_Endcap'''.split():
     hist[hkey].GetXaxis().SetRangeUser(xlo, xhi)
 
-    
-canvases.next()    
 # hdata.Draw("e1 same")
-c1.RedrawAxis()
-
+# c1.RedrawAxis()
+#
 # latexLabel.DrawLatex(0.15, 0.96, "CMS Preliminary 2011")
 # latexLabel.DrawLatex(0.75, 0.96, "#sqrt{s} = 7 TeV")
 # # latexLabel.DrawLatex(0.7, 0.2, "Barrel")
@@ -123,5 +118,4 @@ c1.RedrawAxis()
 
 # c1.Update()
 
-if __name__ == '__main__': 
-    import user
+if __name__ == '__main__': import user
