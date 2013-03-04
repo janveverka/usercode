@@ -325,3 +325,12 @@ Double_t effSigma(TH1 * hist)
   
 }
 /// end of cit::effSigma
+
+
+///-----------------------------------------------------------------------------
+Double_t deltaR(Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2) {
+  static TLorentzVector p1, p2;
+  p1.SetPtEtaPhiM(1, eta1, phi1, 0);
+  p2.SetPtEtaPhiM(1, eta2, phi2, 0);
+  return p1.DeltaR(p2);
+}

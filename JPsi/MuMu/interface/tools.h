@@ -54,5 +54,6 @@ Double_t threeBodyMass(Double_t pt1, Double_t eta1, Double_t phi1, Double_t m1,
 		       Double_t pt2, Double_t eta2, Double_t phi2, Double_t m2,
 		       Double_t pt3, Double_t eta3, Double_t phi3, Double_t m3);
 Double_t effSigma(TH1 * hist);
+Double_t deltaR(Double_t eta1, Double_t phi1, Double_t eta2, Double_t phi2);
 
 #endif

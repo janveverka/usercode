@@ -94,5 +94,6 @@
 #pragma link C++ function mmgMassPhoSmearE(Double_t, Double_t, Double_t,\
 					   Double_t, Double_t, Double_t,\
 					   Double_t, Double_t)
+#pragma link C++ function deltaR(Double_t, Double_t, Double_t, Double_t)
 /// TODO: add all functions from tools.h
 #endif
