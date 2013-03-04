@@ -1,0 +1,34 @@
+#!/bin/bash
+## Add a weight to a tree such that it corresponds to L = 1/fb
+
+## Cross-section in pb
+XSECTION=${1:-3048}
+
+## Dataset
+SOURCE_PATH=/home/cms/veverka/Vgamma2011/VgKitV14/MC_mmgSkim
+SRC=${2:-$SOURCE_PATH/DYJetsToLL_TuneZ2_M50_Madgraph_Fall11_mmgSkim.root}
+
+## Target lumi in pb
+LUMI=1000
+
+## Suffix to be appended to the file name
+SUFFIX=_w1fb
+
+## Takes the path to a root file, xsection and luminosity and prints the weight
+## to STDOUT
+function get_weight() {
+    FILE=$1
+    XS=$2
+    L=$3
+    root -l -b << EOF
+    file1 = TFile::Open("$FILE");
+    cout << (float) $L * $XS / hEvents->GetBinContent(1) << endl;
+    .q
+EOF
+}
+
+DEST=${SRC%*.root}${SUFFIX}.root
+WEIGHT=$(get_weight $SRC $XSECTION $LUMI)
+
+COMMAND="skim EventTree $DEST $SRC -w$WEIGHT -e1000"
+echo $COMMAND
