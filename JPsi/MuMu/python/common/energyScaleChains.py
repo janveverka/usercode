@@ -254,7 +254,8 @@ _files['yyv6'] = {
 ## Yong's trees for Jul2012ReReco (JSON applied) with Hggv2 regression
 ## looser selection (dr < 2.0, no sum-pt combinatorics arbitration), and 
 ## muon charge information for the Rochcor (which is not applied).
-## MC is the defualt PU S6 2011 as for yyv3.  Also no Rochcor.
+## MC is the defualt PU S6 2011 as for yyv3 but with the looser selection,
+## same as data.  Also no Rochcor.
 _files['yyv7'] = {
     'data': '''
         Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011AZMu03Oct2011v1ZmmgSkim11Jul2011ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r1.scale0.root
@@ -273,10 +274,111 @@ _files['yyv7'] = {
         Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r5.scale0.root
         Jul2012ReReco_v2/testSelectionfsr.v3.veverkaRun2011BZMuPromptSkimv1ZmmgSkim11Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.r6.scale0.root
     '''.split(),
-    'z'   : [('testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia'
-              'Fall11-PU_S6_START42_V14B-v1AODSIM.'
-              'muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root')],
+    'z'   : [('testSelectionfsr.v3.dy2mmpowhegpythias6v02b.muid2.'
+              'phtid2.phtcorr96.datapu0.mcpu0.scale0.root'),],
     }
+
+## Yong's trees for Jul2012ReReco (JSON applied) with Hggv2 regression
+## looser selection (dr < 2.0, no sum-pt combinatorics arbitration), and 
+## muon charge information for the Rochcor (which is not applied).
+## MC is the defualt PU S6 2011 as for yyv3 but with the looser selection,
+## same as data.  Rochcor for data only.
+_files['yyv8'] = {
+    'data': 'esTree_yyv7_data_Jul2012ReRecoTotal_rochcor.root',
+    'z'   : [('testSelectionfsr.v3.dy2mmpowhegpythias6v02b.muid2.'
+              'phtid2.phtcorr96.datapu0.mcpu0.scale0.root'),],
+}
+
+## Same as yyv7 but the same for both data and MC.  Both have muon charge info.
+_files['yyv9'] = {
+    'data': '''
+        testSelectionfsr.v3.Data2011.Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.scale0.root
+    '''.split(),
+    'z'   : '''
+        testSelectionfsr.v3.dy2mmpowhegpythias6v02bAODSIM.muid2.phtid2.phtcorr96.datapu6.mcpu1.scale0.root
+    '''.split(),
+    }
+
+
+## Same as yyv9 but tighter selection ("phtid1": dr < 0.8, sum-pt combinatorics)
+_files['yyv10'] = {
+    'data': '''
+        testSelectionfsr.v3.Data2011.Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.scale0.root
+    '''.split(),
+    'z'   : '''
+        testSelectionfsr.v3.dy2mmpowhegpythias6v02bAODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.scale0.root
+    '''.split(),
+    }
+
+
+## Same as yyv9 but with rochcor for both data and MC.
+_files['yyv11'] = {
+    'data': '''
+        testSelectionfsr.v3.Data2011.Jul2012ReReco.muid2.phtid2.phtcorr96.datapu0.mcpu0.scale0.rochcor.root
+    '''.split(),
+    'z'   : '''
+        testSelectionfsr.v3.dy2mmpowhegpythias6v02bAODSIM.muid2.phtid2.phtcorr96.datapu6.mcpu1.scale0.rochcor.root
+    '''.split(),
+    }
+
+
+## Same as yyv10 but with rochcor for both data and MC.
+_files['yyv12'] = {
+    'data': '''
+        testSelectionfsr.v3.Data2011.Jul2012ReReco.muid2.phtid1.phtcorr96.datapu0.mcpu0.scale0.rochcor.root
+    '''.split(),
+    'z'   : '''
+        testSelectionfsr.v3.dy2mmpowhegpythias6v02bAODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.scale0.rochcor.root
+    '''.split(),
+    }
+
+
+## Same as yyv12 but with Lyon trees (phoPt > 25 GeV) for data.
+_files['yyv13'] = {
+    'data': '''
+        Data_2011LyonSync_Louis_28Jan2013.root
+    '''.split(),
+    'z'   : '''
+        testSelectionfsr.v3.dy2mmpowhegpythias6v02bAODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.scale0.rochcor.root
+    '''.split(),
+    }
+
+
+## Same as yyv13 but with Lyon MC trees (phoPt > 25 GeV) for data.
+_files['yyv14'] = {
+    'data': '''
+        MC_2011LyonSync_Louis_28Jan2013.root
+    '''.split(),
+    'z'   : '''
+        testSelectionfsr.v3.dy2mmpowhegpythias6v02bAODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.scale0.rochcor.root
+    '''.split(),
+    }
+
+
+## Same as yyv13 but with dummy values for mmMass for data to 
+## circumvent the mmMass > 30 GeV cut for the 0.5% of events that have it.
+_files['yyv15'] = {
+    'data': '''
+        Data_2011LyonSync_Louis_28Jan2013_mmMassDummies.root
+    '''.split(),
+    'z'   : '''
+        testSelectionfsr.v3.dy2mmpowhegpythias6v02bAODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.scale0.rochcor.root
+    '''.split(),
+    }
+
+
+## Same as yyv14 but with dummy values for mmMass for data to 
+## circumvent the mmMass > 30 GeV cut for the 0.5% of events that have it.
+_files['yyv16'] = {
+    'data': '''
+        MC_2011LyonSync_Louis_28Jan2013_mmMassDummies.root
+    '''.split(),
+    'z'   : '''
+        testSelectionfsr.v3.dy2mmpowhegpythias6v02bAODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.scale0.rochcor.root
+    '''.split(),
+    }
+
+
 
 _files['v13'] = {
     'z' : [('esTree_V13_DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_'
@@ -364,6 +466,12 @@ _files['v18'] = {
         '''.split(),
 }
 
+## Same as v16 with Rochcor applied
+## PU reweighting for 2011A + 2011B
+_files['v19'] = {
+    'z': ['MC_V16_muon_corr_2011.root'],
+    'data': ['Data_V16_muon_corr_2011.root'],
+}
 
 ##New Sixie trees first try to make it work
 _files['sixie'] = {
@@ -380,6 +488,10 @@ _files['sixie2'] = {
     'z'   : [ ( 'testSelectionfsr.v3.DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythiaFall11-PU_S6_START42_V14B-v1AODSIM.muid2.phtid1.phtcorr96.datapu6.mcpu1.r1to50.root' ) ],
     }
 
+_files['sixie3'] = {
+    'data': ['CPena/SIXIE_LAST_VERSION/PhotonRegression/ZmumuGammaNtuple_Full2012_MuCorr.root'],
+    'z'   : ['CPena/SIXIE_LAST_VERSION/PhotonRegression/ZmumuGammaNtuple_DYM50_MuCorr.root'],
+    }
 
 _treeNames = {
     'v1' : 'tree/es',
@@ -399,6 +511,7 @@ _treeNames = {
     'v16' : 'tree/pmv',
     'v17' : 'tree/pmv',
     'v18' : 'tree/pmv',
+    'v19' : 'pmv',
     'yyv1' : 'Analysis',
     'yyv2' : 'Analysis',    
     'yyv3' : 'Analysis',
@@ -409,8 +522,18 @@ _treeNames = {
     'yyv5' : 'Analysis',
     'yyv6' : 'Analysis',
     'yyv7' : 'Analysis',
+    'yyv8' : 'Analysis',
+    'yyv9' : 'Analysis',
+    'yyv10' : 'Analysis',
+    'yyv11' : 'Analysis',
+    'yyv12' : 'Analysis',
+    'yyv13' : 'Analysis',
+    'yyv14' : 'Analysis',
+    'yyv15' : 'Analysis',
+    'yyv16' : 'Analysis',
     'sixie' : 'ZmumuGammaEvent',
-    'sixie2': 'ZmumuGammaEvent'
+    'sixie2': 'ZmumuGammaEvent',
+    'sixie3': 'ZmumuGammaEvent',
 }
 
 
@@ -431,8 +554,8 @@ def getChains(version='v4'):
 
     # print "=====version: ", version
 
-    if version == 'sixie' or version == 'sixie2':
-        print "version == 'sixie' or version == 'sixie2'"
+    if version in 'sixie sixie2 sixie3'.split():
+        print "version in 'sixie sixie2 sixie3'.split()"
 	es_to_sixie_name_map ='''mmMass DileptonMass
         mmgMass Mass
         phoEta PhotonEta
@@ -465,7 +588,7 @@ def getChains(version='v4'):
                 es_name, sixie_name = name_pair.split()
                 print "====es_name: ", es_name, "sixie_name:  ", sixie_name
                 ch.SetAlias(es_name, sixie_name)
-    if version in 'yyv1 yyv2 yyv3 yyv3corr yyv3_e5x5 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 sixie2'.split():
+    if version in 'yyv1 yyv2 yyv3 yyv3corr yyv3_e5x5 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 yyv8 yyv9 yyv10 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16'.split():
         ## On each line corresponding to a list item, 
         ## 1st is esTree name, 2nd is YY tree name in Yong's trees.
         es_to_yy_name_map = '''mmMass          mm 
@@ -491,7 +614,7 @@ def getChains(version='v4'):
                   phoPt           gamenergy/cosh(gameta)'''.split('\n')
                   )
 
-        elif version in 'yyv2 yyv3 yyv3corr yyv4 yyv4NoJSON yyv5 yyv6 yyv7 sixie2'.split():
+        elif version in 'yyv2 yyv3 yyv3corr yyv4 yyv4NoJSON yyv5 yyv6 yyv7 yyv8 yyv9 yyv10 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16 sixie2'.split():
 
             ## Use the regression cluster corrections
             es_to_yy_name_map.extend(
