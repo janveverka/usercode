@@ -68,7 +68,7 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
 # name = 'egm_data_EB_pt25to999_highR9_yyv4'
 # name = 'reftest_data_yyv12_EB_highR9_pt25to999'
-name = 'sync_data_yyv15_EE_highR9_pt30to999'
+name = 'perf_data_sixie3_EB_highR9_pt25to999'
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -204,11 +204,12 @@ def parse_name_to_cuts():
     global cuts
     ## For EGM-11-001 to help with regression
     # cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5', 'minDeltaR > 0.1']
-    cuts = ['mmMass + mmgMass < 180', 
+    cuts = ['mmMass + mmgMass < 180',
+            # '0.1 < minDeltaR',
             'minDeltaR < 1.5', 
-            'mu2Pt > 10',
-            'mu1Pt > 20', 
-            'mmMass > 30',
+            'mu2Pt > 10.5',
+            'mu1Pt > 21', 
+            'mmMass > 55',
             ]
     # cuts = ['mmMass + mmgMass < 180']
     if 'EB' in name:
@@ -242,7 +243,7 @@ def parse_name_to_cuts():
     ## Set the default
     model_tree_version, data_tree_version = 'v11', 'v11'
     
-    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 yyv8 yyv9 yyv10 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16 v11 v13 v14 v15 sixie'.split():
+    for tree_version in 'yyv1 yyv2 yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 yyv8 yyv9 yyv10 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16 v11 v13 v14 v15 sixie sixie3'.split():
         if tree_version in name.split('_'):
             model_tree_version = data_tree_version = tree_version  
     
@@ -279,6 +280,9 @@ def parse_name_to_title():
     elif data_tree_version in 'sixie sixie2'.split():
         tokens.append('2012ABC')
         latex_labels.append('2012ABC')
+    elif data_tree_version in ['sixie3']:
+        tokens.append('2012ABCD')
+        latex_labels.append('2012ABCD')
     
     if model_tree_version in 'v11'.split():
         tokens.append('2011A+B PU S4 MC Model')
@@ -289,6 +293,9 @@ def parse_name_to_title():
     elif model_tree_version in 'sixie sixie2'.split():
         tokens.append('2012 Madgraph')
         latex_labels.append('2012 Madgraph')
+    elif model_tree_version in ['sixie3']:
+        tokens.append('2012 MG 53X')
+        latex_labels.append('2012 MG 53X')
     elif model_tree_version == 'v14':
         tokens.append('2011A PU S6 MC Model')
         latex_labels.append('2011A PU S6 MC Model')        
@@ -296,7 +303,7 @@ def parse_name_to_title():
         tokens.append('2011B PU')
         latex_labels.append('2011B PU S6 MC Model')
         
-    if model_tree_version in 'yyv5 yyv6 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16 sixie'.split():
+    if model_tree_version in 'yyv5 yyv6 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16 sixie sixie3'.split():
         tokens.append('mu corrections')
         latex_labels.append('#mu corr.')
     
@@ -350,7 +357,7 @@ def parse_name_to_title():
     elif model_tree_version in 'yyv3 yyv4 yyv4NoJSON yyv5 yyv6 yyv7 yyv8 yyv9 yyv10 yyv11 yyv12 yyv13 yyv14 yyv15 yyv16'.split():
         tokens.append('Hgg v2 Regr.')
         latex_labels.append('Hgg v2 Regr.')
-    elif model_tree_version in 'sixie sixie2'.split():
+    elif model_tree_version in 'sixie sixie2 sixie3'.split():
         tokens.append('Hgg v3 Regr.')
         latex_labels.append('Hgg v3 Regr.')
     
