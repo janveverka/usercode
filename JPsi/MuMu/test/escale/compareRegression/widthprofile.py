@@ -7,23 +7,6 @@ import FWLite.Tools.roofit as roo
 from FWLite.Tools.modalinterval import ModalInterval
 from FWLite.Tools.legend import Legend
 from FWLite.Tools.resampler import Resampler
-basepath = '/home/cmorgoth/scratch/CMSSW_5_2_5/src/UserCode/CPena/src/PhosphorCorrFunctor/SIXIE_LAST_VERSION'
-
-basecuts = [
-    'DileptonMass + Mass < 180',
-    #'0.4 < MinDeltaR',
-    '0.05 < min(abs(Mu1Eta - PhotonEta), abs(Mu2Eta - PhotonEta)) || 0.3 < MinDeltaR',    
-    'MinDeltaR < 1.5', 
-    'Mu2Pt > 10.5',
-    'Mu1Pt > 21', 
-    'DileptonMass > 55',
-    ]
-    
-catcuts = [
-    'PhotonIsEB',
-    '25 < PhotonPt && PhotonPt < 99',
-    '0.94 < PhotonR9',
-    ]
 
 #==============================================================================
 class Source:
@@ -192,9 +175,12 @@ class WidthComparator:
     Compares the width of two different variables for given data.
     '''
     #__________________________________________________________________________
-    def __init__(self, data, granularity=40):
+    def __init__(self, name, title, data, granularity=40, nboot=500):
+        self.name = name
+        self.title = title
         self.data = data
         self.granularity = granularity
+        self.nboot = nboot
         self.setup()
 
     #__________________________________________________________________________
@@ -209,7 +195,7 @@ class WidthComparator:
         self.widths = [self.get_width(x) for x in self.variables]
         self.width_ratio = self.divide_graphs(self.widths[0].graph,
                                               self.widths[1].graph)
-        errors =  self.bootstrap(500)
+        errors =  self.bootstrap(self.nboot)
         (self.errors_rms, self.errors_mi1, self.errors_mi2) = errors
     #__________________________________________________________________________
     def get_fractions(self):
@@ -253,9 +239,12 @@ class WidthComparator:
         nbinsx = len(self.fractions)
         xlow = 0.5 * self.fractions[0]
         xup = self.fractions[-1] + xlow
-        errors_rms = ROOT.TProfile('errors_rms', '', nbinsx, xlow, xup, 's')
+        errors_rms = ROOT.TProfile(self.name + '_errors_rms', self.title, 
+                                   nbinsx, xlow, xup, 's')
         errors_mi1 = ROOT.TGraphAsymmErrors(nbinsx)
         errors_mi2 = ROOT.TGraphAsymmErrors(nbinsx)
+        for graph in [errors_mi1, errors_mi2]:
+            graph.SetTitle(self.title)
         resampler = Resampler(self.data)
         bootdata = {}
         for iteration in range(repeat):
@@ -287,38 +276,48 @@ class WidthComparator:
         
     #__________________________________________________________________________
     def make_plots(self):
+        #self.make_width_profiles_plot()
+        #self.make_width_ratio_plot()        
+        self.make_width_ratio_booterrors_plot()
+
+    #__________________________________________________________________________
+    def make_width_profiles_plot(self):
+        canvases.next(self.name + '_width_profiles').SetGrid()
         self.widths[0].graph.SetLineColor(ROOT.kRed)
-        canvases.next('width_profiles').SetGrid()
         self.widths[0].graph.Draw('al')
         self.widths[1].graph.Draw('l')
         graphs = [w.graph for w in self.widths]
         titles = [x.GetTitle() for x in self.variables]
         Legend(graphs, titles, opt = 'l').draw()
 
-        canvases.next('width_ratio').SetGrid()
-        
+    #__________________________________________________________________________
+    def make_width_ratio_plot(self):
+        canvases.next(self.name + '_width_ratio').SetGrid()        
         self.copy_axes_titles(self.width_ratio, self.errors_rms)
         #self.errors_rms.GetXaxis().SetTitle(self.width_ratio.GetXaxis().GetTitle())
         #self.errors_rms.GetYaxis().SetTitle(self.width_ratio.GetYaxis().GetTitle())
         self.errors_rms.SetFillColor(ROOT.kGreen)
-        self.errors_rms.GetYaxis().SetRangeUser(0.9, 1.1)
+        #self.errors_rms.GetYaxis().SetRangeUser(0.9, 1.1)
         #self.errors_rms.GetXaxis().SetRangeUser(0.05, 0.95)
         self.errors_rms.DrawCopy('E4')
         self.errors_rms.SetFillColor(ROOT.kWhite)
         self.errors_rms.DrawCopy('HIST L SAME')
         self.width_ratio.SetLineColor(ROOT.kRed)
-        self.width_ratio.Draw('L')
+        self.width_ratio.Draw('L')        
 
-        canvas = canvases.next('width_ratio_booterrors')
+    #__________________________________________________________________________
+    def make_width_ratio_booterrors_plot(self):
+        canvas = canvases.next(self.name + '_width_ratio_booterrors')
         canvas.SetGrid()
         self.copy_axes_titles(self.width_ratio, self.errors_mi1)
         self.copy_axes_titles(self.width_ratio, self.errors_mi2)
         self.errors_mi1.SetFillColor(ROOT.kYellow)
         self.errors_mi2.SetFillColor(ROOT.kGreen)
-        self.errors_mi2.GetYaxis().SetRangeUser(0.9, 1.1)
+        # self.errors_mi2.GetYaxis().SetRangeUser(0.9, 1.1)
         self.errors_mi2.Draw('3a')
         self.errors_mi1.Draw('3')
         self.errors_mi1.Draw('lx')
+        self.width_ratio.SetLineColor(ROOT.kRed)
         self.width_ratio.Draw('l')
         ## Some ROOT Voodoo to make the grid lines appear above the bands
         self.errors_mi2.GetHistogram().Draw('sameaxig')
@@ -332,43 +331,98 @@ class WidthComparator:
     #__________________________________________________________________________
     def copy_title(self, source, destination):
         destination.SetTitle(source.GetTitle())
+
+    #__________________________________________________________________________
+    def save_plots(self):
+        canvases.make_plots(['root'])
+        canvases.make_pdf_from_eps()
 ## End of class WidthComparator
     
-variable = ROOT.RooRealVar('Mass', 'Mass', 60, 120, 'GeV')
-
-sources = [
-    Source(
-        name = 'regression',
-        title = 'Regression',
-        filename = os.path.join(
-            basepath, 
-            'PhotonRegression/ZmumuGammaNtuple_Full2012_MuCorr.root'
-            ),
-        cuts = basecuts + catcuts,
-        ),
     
-    Source(
-        name = 'default',
-        title = 'Default',
-        filename = os.path.join(
-            basepath, 
-            'NoPhotonRegression/ZmumuGammaNtuple_Full2012_MuCorr.root',
+#==============================================================================
+class WidthProfile:
+    #__________________________________________________________________________
+    def __init__(self, name, title, sources, granularity=10, nboot=200):
+        self.name = name
+        self.title = title
+        self.sources = sources
+        self.granularity = granularity
+        self.nboot = nboot
+    
+    #__________________________________________________________________________
+    def run(self):
+        variable = ROOT.RooRealVar('Mass', 'Mass', 60, 120, 'GeV')
+        self.merger = Merger(variable, self.sources)
+        self.merger.report()
+        self.comparator = WidthComparator(self.name,
+                                          self.title,
+                                          self.merger.merged_dataset,
+                                          self.granularity,
+                                          self.nboot)
+        self.comparator.make_plots()        
+## End of class WidthProfile
+
+
+#==============================================================================
+def main():
+    '''
+    Main entry point of execution of a test.
+    '''
+    global widthprofile
+    basepath = '/home/cmorgoth/scratch/CMSSW_5_2_5/src/UserCode/CPena/src/PhosphorCorrFunctor/SIXIE_LAST_VERSION'
+
+    basecuts = [
+        'DileptonMass + Mass < 180',
+        #'0.4 < MinDeltaR',
+        '0.05 < min(abs(Mu1Eta - PhotonEta), abs(Mu2Eta - PhotonEta)) || 0.3 < MinDeltaR',    
+        'MinDeltaR < 1.5', 
+        'Mu2Pt > 10.5',
+        'Mu1Pt > 21', 
+        'DileptonMass > 55',
+        ]
+        
+    catcuts = [
+        'PhotonIsEB',
+        '25 < PhotonPt && PhotonPt < 99',
+        'PhotonR9 >= 0.94',
+        #'PhotonR9 < 0.94',
+        #'RunNumber >= 197770', ## Beginning of 2012C
+        'RunNumber < 197770', ## Beginning of 2012C
+        ]
+
+    name = 'EB_highR9_2012CD'
+    title = 'Barrel, R9 > 0.94, 2012CD'
+
+    sources = [
+        Source(
+            name = 'regression',
+            title = 'Regression',
+            filename = os.path.join(
+                basepath, 
+                'PhotonRegression/ZmumuGammaNtuple_Full2012_MuCorr.root'
+                ),
+            cuts = basecuts + catcuts,
             ),
-        cuts = basecuts + catcuts,
-        )
-    ]
+        
+        Source(
+            name = 'default',
+            title = 'Default',
+            filename = os.path.join(
+                basepath, 
+                'NoPhotonRegression/ZmumuGammaNtuple_Full2012_MuCorr.root',
+                ),
+            cuts = basecuts + catcuts,
+            )
+        ]
 
-merger = Merger(variable, sources)
-merger.report()
+    widthprofile = WidthProfile(name, title, sources, 20, 500)
+    widthprofile.run()
+    
+    canvases.update()
+## End of main()
 
-comparator = WidthComparator(merger.merged_dataset, 40)
-comparator.make_plots()
 
-canvases.update()
-
-#output = ROOT.TFile(outpath, 'RECREATE')
-#graph.Write('width')
-#output.Write()
-
+#==============================================================================
 if __name__ == '__main__':
+    main()
     import user
