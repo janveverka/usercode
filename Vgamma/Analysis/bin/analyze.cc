@@ -18,7 +18,7 @@
  * Declare all functions here
  *****************************************************************************/
 int checkCommandLineArguments(int, char **);
-void printUsage();
+void printUsage(char **);
 void printWelcomeMessage();
 void printGoodbyeMessage();
 int main(int, char **);
@@ -32,7 +32,7 @@ int main(int, char **);
  */
 int checkCommandLineArguments(int argc, char **argv) {
   if ( argc < 2 ) {
-    printUsage();
+    printUsage(argv);
     return 1;
   }
   return 0;
@@ -43,8 +43,8 @@ int checkCommandLineArguments(int argc, char **argv) {
 /**
  * Prints usage to the standard output.
  */
-void printUsage() {
-  std::cout << "Usage: analyze-vecbos [cfg.py]" << std::endl; 
+void printUsage(char **argv) {
+  std::cout << "Usage: " << argv[0] << " [cfg.py]" << std::endl; 
 } // printUsage
 
 
