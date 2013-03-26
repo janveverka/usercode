@@ -41,12 +41,12 @@ VgMMGHistoFiller::bookHistograms()
   histos_["mmgN"] = new TH1F("mmgN", ";Z#gamma Multiplicity;Events / 1", 
                              51, -0.5, 50.5);
   histos_["mmgMass"] = new TH1F("mmgMass", ";M_{Z#gamma} (GeV);Events / GeV",
-                                150, 0., 150.);
+                                200, 50., 250.);
   histos_["mmgPt"] = new TH1F("mmgPt", ";P_{T}^{Z#gamma} (GeV);Events / GeV", 
                               100, 0., 100.);
   histos_["mmgEta"] = new TH1F("mmgEta", 
 			       ";#eta_{Z#gamma};Events / 0.1", 
-                               100, -5, 5);
+                               120, -6, 6);
   histos_["mmgPhi"] = new TH1F("mmgPhi", 
                                ";#phi_{Z#gamma};Events / #frac{#pi}{50}", 
                                100, -TMath::Pi(), TMath::Pi());
