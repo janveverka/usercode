@@ -376,7 +376,7 @@ VgAnalyzer::reportEvent(Long64_t thisEntry, Long64_t entriesToProcess)
     string etastring = "?";
     if (eta < 9999999) etastring = humanReadableTime(eta);
     
-    cout.precision(2);
+    cout.precision(3);
     cout << "Processing record " << thisEntry + 1
          << " of " << entriesToProcess << ", "
          << 100 * progress << "%"
