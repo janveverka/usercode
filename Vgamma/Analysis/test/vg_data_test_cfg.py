@@ -19,22 +19,22 @@ process.inputs = cms.PSet(
     activeBranches = copy.deepcopy(activeBranchesData),
     )
 
-process.inputs.fileNames = load_input_files('files_mmg_data_hadoop.dat')
+process.inputs.fileNames = load_input_files('RealData/2011AB_hadoop.dat')
 
 process.outputs = cms.PSet(
     outputName = cms.string('vg_data_test.root')
     )
     
 process.maxEvents = cms.PSet(
-    input = cms.untracked.int64(100000),
-    reportEvery = cms.untracked.int64(1000)
+    input = cms.untracked.int64(int(1e7)),
+    reportEvery = cms.untracked.int64(10000)
     )
     
 
 ## Histograms configuration
 process.histograms = cms.PSet(
     isMC = cms.bool(False),
-    NoSelection   = copy.deepcopy(noSelection  ),
+    #NoSelection   = copy.deepcopy(noSelection  ),
     FullSelection = copy.deepcopy(fullSelection),
     )
 
