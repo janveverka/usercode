@@ -19,7 +19,7 @@ process.inputs = cms.PSet(
     activeBranches = copy.deepcopy(activeBranchesData),
     )
 
-process.inputs.fileNames = load_input_files('files_data_hadoop.dat')
+process.inputs.fileNames = load_input_files('files_mmg_data_susy.dat')
 
 process.outputs = cms.PSet(
     outputName = cms.string('vg_data.root')
