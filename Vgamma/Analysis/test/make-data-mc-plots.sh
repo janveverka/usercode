@@ -1,6 +1,6 @@
 ## Source me to make data/MC comparison plots
-rootplot vg_data_test.root vg_zg_test.root \
-    --legend-entries=Data,MC \
+rootplot data.root zz.root wz.root zjets.root zg2jmg5.root \
+    --legend-entries=Data,zz,wz,Zjets,Zgamma \
     --data=1 \
     --normalize=1 \
     --draw='hist' \
@@ -9,3 +9,4 @@ rootplot vg_data_test.root vg_zg_test.root \
     --grid \
     --ratio-split=1 \
     --output=test.plots \
+    --logy
