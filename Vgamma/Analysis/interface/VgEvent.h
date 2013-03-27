@@ -26,11 +26,12 @@ namespace cit {
     VgEvent(VgEvent const &);
     ~VgEvent();
     /// Accessors
-    VgAnalyzerTree       const & tree   () const {return tree_   ;}
-    VgLeafCandidates     const & muons  () const {return muons_  ;}
-    VgLeafCandidates     const & photons() const {return photons_;}
-    VgCombinedCandidates const & dimuons() const {return dimuons_;}
+    VgAnalyzerTree       const & tree   ()  const {return tree_    ;}
+    VgLeafCandidates     const & muons  ()  const {return muons_   ;}
+    VgLeafCandidates     const & photons()  const {return photons_ ;}
+    VgCombinedCandidates const & dimuons()  const {return dimuons_ ;}
     VgCombinedCandidates const & mmgCands() const {return mmgCands_;}
+    double               const & weight ()  const {return weight_  ;}
     /// Producers
     void readFromTree();
     void putPhotons(VgLeafCandidates const &);
@@ -46,6 +47,7 @@ namespace cit {
     VgLeafCandidates photons_;
     VgCombinedCandidates dimuons_;
     VgCombinedCandidates mmgCands_;
+    double weight_;
   }; // class VgEvent
   
 } // namespace cit

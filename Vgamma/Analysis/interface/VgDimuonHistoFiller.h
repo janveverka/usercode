@@ -21,7 +21,7 @@ namespace cit {
     ~VgDimuonHistoFiller();
     void bookHistograms();
     void fillHistograms(VgEvent const&);
-    void fillCand(VgCombinedCandidate const&);
+    void fillCand(VgCombinedCandidate const&, double);
   }; // class VgDimuonHistoFiller
   
 } // namespace cit

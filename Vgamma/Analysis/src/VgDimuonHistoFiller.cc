@@ -75,7 +75,7 @@ VgDimuonHistoFiller::fillHistograms(cit::VgEvent const& event)
   /// Loop over dimuons
   for (cit::VgCombinedCandidates::const_iterator mm = dimuons.begin();
        mm != dimuons.end(); ++mm) {
-    fillCand(*mm);
+    fillCand(*mm, event.weight());
   } /// Loop over dimuons  
 } // VgDimuonHistoFiller::fillHistograms(..)
 
@@ -84,19 +84,20 @@ VgDimuonHistoFiller::fillHistograms(cit::VgEvent const& event)
  * Fills the histograms for object with index i.
  */
 void
-VgDimuonHistoFiller::fillCand(cit::VgCombinedCandidate const & mm)
+VgDimuonHistoFiller::fillCand(cit::VgCombinedCandidate const & mm, 
+                              double weight)
 {
   // LeafCand const & mu = dynamic_cast<LeafCand const &>(cand);
   // unsigned i = mu.key();
-  double wgt = mm.weight();
+  weight *= mm.weight();
   VgLeafCandidate const & mu1 = mm.daughter(0);
   VgLeafCandidate const & mu2 = mm.daughter(1);
-  histos_["dimuMass"]->Fill(mm.m (), wgt);
-  histos_["dimuPt" ]->Fill(mm.pt (), wgt);
-  histos_["dimuEta"]->Fill(mm.eta(), wgt);
-  histos_["dimuPhi"]->Fill(mm.phi(), wgt);
-  histos_["dimuY"  ]->Fill(mm.y  (), wgt);
-  histos_["mu1Pt"]->Fill(mu1.pt(), wgt);  // Should this be wgt1?
-  histos_["mu2Pt"]->Fill(mu2.pt(), wgt);  // Should this be wgt2?
-  histos_["mu2PtOverMu1Pt"]->Fill(100. * mu2.pt() / mu1.pt(), wgt);
+  histos_["dimuMass"]->Fill(mm.m (), weight);
+  histos_["dimuPt" ]->Fill(mm.pt (), weight);
+  histos_["dimuEta"]->Fill(mm.eta(), weight);
+  histos_["dimuPhi"]->Fill(mm.phi(), weight);
+  histos_["dimuY"  ]->Fill(mm.y  (), weight);
+  histos_["mu1Pt"]->Fill(mu1.pt(), weight);  // Should this be weight1? No.
+  histos_["mu2Pt"]->Fill(mu2.pt(), weight);  // Should this be weight2? No.
+  histos_["mu2PtOverMu1Pt"]->Fill(100. * mu2.pt() / mu1.pt(), weight);
 } // VgDimuonHistoFiller::fillObjectWithIndex(..)

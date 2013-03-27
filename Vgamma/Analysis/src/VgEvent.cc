@@ -34,7 +34,8 @@ VgEvent::VgEvent(VgAnalyzerTree const& tree) :
  * Copy ctor
  */
 VgEvent::VgEvent(VgEvent const& other) :
-  tree_(other.tree_)
+  tree_(other.tree_),
+  weight_(other.weight_)
 {
   putPhotons(other.photons_);
   putMuons(other.muons_);
@@ -58,6 +59,8 @@ VgEvent::~VgEvent()
 void
 VgEvent::readFromTree()
 {
+  weight_ = tree_.fChain->GetWeight();
+  
   photons_.clear();
   muons_  .clear();
 

@@ -10,6 +10,7 @@ from Vgamma.Analysis.activeBranches_cff import activeBranchesMC
 
 process = cms.Process('VgammaAnalysis')
 
+#______________________________________________________________________________
 process.inputs = cms.PSet(
     fileNames = cms.vstring(),
     treeName = cms.string('EventTree'),
@@ -28,15 +29,18 @@ for filename in [
         os.path.join(dataset_path, filename)
         )
 
+#______________________________________________________________________________
 process.outputs = cms.PSet(
     outputName = cms.string('vg_test.root')
     )
     
+#______________________________________________________________________________
 process.maxEvents = cms.PSet(
-    input = cms.untracked.int64(-1),
+    toProcess = cms.untracked.int64(-1),
     reportEvery = cms.untracked.int64(100)
     )
     
+#______________________________________________________________________________
 allEvents = copy.deepcopy(noSelection)
 allMuons = copy.deepcopy(fullSelection)
 selectedMuons = copy.deepcopy(fullSelection)
@@ -67,7 +71,7 @@ selectedZgs.do = ['mmgCands']
 
 histograms = cms.PSet(
     isMC = cms.bool(True),
-    AllEvents = copy.deepcopy(allEvents),
+    #AllEvents = copy.deepcopy(allEvents),
 #    allMuons = copy.deepcopy(allMuons),
     #selectedMuons = copy.deepcopy(selectedMuons),
     #selectedDimuons = copy.deepcopy(selectedDimuons),
@@ -80,6 +84,19 @@ histograms = cms.PSet(
 ## Histograms configuration
 process.histograms = copy.deepcopy(histograms)
 
+#______________________________________________________________________________
+## Event weight
+process.eventWeight = cms.PSet(
+    crossSectionInPicoBarns = cms.double(45.2),
+    scaleToLumiInInverseFemtoBarns = cms.double(4.9989),
+    totalProcessedEvents = cms.int64(472380),
+    )
+
+#______________________________________________________________________________
+process.options = cms.PSet(
+    verbosity = cms.int64(1)
+    )
+    
 if __name__ == '__main__':
     import user
     

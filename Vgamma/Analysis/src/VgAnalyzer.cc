@@ -29,11 +29,13 @@ VgAnalyzer::VgAnalyzer(
   cfg_(cfg),
   tree_(0),
   output_(0),
-  maxEventsInput_(-1),
+  maxEventsToProcess_(-1),
   reportEvery_(1),
   titleStyle_(""),
   histoManagers_(),
-  stopwatch_()
+  stopwatch_(),
+  eventWeight_(1),
+  verbosity_(0)
 {
   init();
 } // ctor
@@ -78,8 +80,8 @@ VgAnalyzer::run()
   // Long64_t totalEntries = tree_->fChain->GetEntriesFast();
   Long64_t totalEntries = tree_->fChain->GetEntries();
   Long64_t maxEntry = totalEntries;
-  if (0 <= maxEventsInput_ && maxEventsInput_ < maxEntry) {
-    maxEntry = maxEventsInput_;
+  if (0 <= maxEventsToProcess_ && maxEventsToProcess_ < maxEntry) {
+    maxEntry = maxEventsToProcess_;
   }
 
   // Loop over the events.
@@ -130,18 +132,9 @@ VgAnalyzer::parseConfiguration()
   parseInputs();
   parseOutputs();
   parseHistograms();
-
-  if (cfg_->existsAs<PSet>("maxEvents")) {
-    PSet const& maxEvents = cfg_->getParameter<PSet>("maxEvents");
-    maxEventsInput_ = maxEvents.getUntrackedParameter<Long64_t>("input", -1);
-    reportEvery_ = maxEvents.getUntrackedParameter<Long64_t>("reportEvery", 1);
-  } // exists maxEvents
-  
-  if (cfg_->existsAs<PSet>("options")) {
-    PSet const& options = cfg_->getParameter<PSet>("options");
-    if (options.existsAs<string>("titleStyle"))
-      titleStyle_ = options.getParameter<string>("titleStyle");
-  }
+  parseMaxEvents();
+  parseOptions();
+  parseEventWeight();
 } // parseConfiguration
 
 
@@ -291,6 +284,71 @@ VgAnalyzer::parseHistograms()
 
 //_____________________________________________________________________________
 /**
+ * Parses the configuration and sets the data members of 
+ * the maximum number of events to process maxEventsToProcess_
+ * and the frequency of the event processesing reporting
+ * reportEvery_.
+ */
+void
+VgAnalyzer::parseMaxEvents()
+{
+  if (cfg_->existsAs<PSet>("maxEvents")) {
+    PSet const& maxEvents = cfg_->getParameter<PSet>("maxEvents");
+    maxEventsToProcess_ = maxEvents.getUntrackedParameter<Long64_t>("toProcess", -1);
+    reportEvery_ = maxEvents.getUntrackedParameter<Long64_t>("reportEvery", 1);
+  } // exists maxEvents
+} // parseMaxEvents()
+
+
+//_____________________________________________________________________________
+/**
+ * Parses the configuration of options and sets the data members of 
+ * the titleStyle_ and verbosity_.
+ */
+void
+VgAnalyzer::parseOptions()
+{
+  if (cfg_->existsAs<PSet>("options")) {
+    cout << "Parsing options ..." << endl;
+    PSet const& options = cfg_->getParameter<PSet>("options");
+    if (options.existsAs<string>("titleStyle")) {
+      titleStyle_ = options.getParameter<string>("titleStyle");
+    }
+    if (options.existsAs<Long64_t>("verbosity")) {
+      cout << "Found option verbosity = " 
+           << options.getParameter<Long64_t>("verbosity") << endl;
+      verbosity_ = options.getParameter<Long64_t>("verbosity");
+    } else {
+      cout << "No option verbosity found." << endl;
+    } // verbosity
+  } else {
+    cout << "No configuration options found." << endl;
+  }// exists options
+} // parseOptions()
+
+
+//_____________________________________________________________________________
+/**
+ * Parses the configuration of the event weight inputs. Calculates and sets
+ * it when found. 
+ */
+void
+VgAnalyzer::parseEventWeight()
+{
+  if (cfg_->existsAs<PSet>("eventWeight")) {
+    PSet const& ew = cfg_->getParameter<PSet>("eventWeight");
+    double   xs   = ew.getParameter<double  >("crossSectionInPicoBarns");
+    double   lumi = ew.getParameter<double  >("scaleToLumiInInverseFemtoBarns");
+    Long64_t nevt = ew.getParameter<Long64_t>("totalProcessedEvents");
+    // convert lumi to inverse picobarns 1/pb
+    lumi *= 1e3;
+    eventWeight_ = xs * lumi / nevt;
+  } // exists eventWeight  
+} // parseEventWeight
+
+
+//_____________________________________________________________________________
+/**
  * Sets the status of the unused branches to 0 to save time.
  */
 void
@@ -318,10 +376,26 @@ void
 VgAnalyzer::init()
 {
   parseConfiguration();
+  applyConfiguration();
   setBranchesStatus();
   turnOnTreeCaching(5e8); // 5e8 = 500,000,000 = 500 MB
   // histoManagers_.push_back(new cit::VgHistoManager(*tree_, *output_));
 } // init
+
+
+//_____________________________________________________________________________
+/**
+ * Initialization.
+ * Precondition: parseConfiguration() was called
+ */
+void
+VgAnalyzer::applyConfiguration()
+{
+  if (verbosity_ > 0) {
+    cout << "Applying event weight " << eventWeight_ << endl;
+  }
+  tree_->fChain->SetWeight(eventWeight_, "global");  
+} // applyConfiguration
 
 
 //_____________________________________________________________________________

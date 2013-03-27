@@ -30,7 +30,7 @@ typedef boost::shared_ptr<VgAnalyzerTree> TreePtr;
  */
 int main(int, char**);
 TTree * getTree();
-// bool areEqual(double, double);
+bool areEqual(double, double);
 
 //_____________________________________________________________________________
 /**
@@ -53,8 +53,16 @@ main(int argc, char **argv) {
     if (tree->LoadTree(ientry) < 0) break;
     tree->fChain->GetEntry(ientry);
     
-    VgEvent event(*tree);    
+    tree->fChain->SetWeight(1);
+    VgEvent event(*tree);
+    
+    /// Test the weight assignments
+    assert(event.weight() == tree->fChain->GetWeight());
+
+    tree->fChain->SetWeight(12345);
     VgEvent otherEvent(*tree);
+    assert(otherEvent.weight() == tree->fChain->GetWeight());
+    assert(otherEvent.weight() != event.weight());
 
     /// Test putting empty collections
     otherEvent.putMuons  (cit::VgLeafCandidates());
@@ -72,6 +80,8 @@ main(int argc, char **argv) {
     VgEvent eventCopy(event);
     assert(event.muons()  .size() == eventCopy.muons()  .size());
     assert(event.photons().size() == eventCopy.photons().size());
+    assert(event.weight()         == eventCopy.weight()        );
+
   } // loop over entries
 
   return 0;
@@ -104,13 +114,13 @@ getTree() {
 /**
  * Tests if two floats are almost equal.
  */
-// bool
-// areEqual(double x, double y)
-// {
-//   double epsilonRelative = 1e-5;
-//   double epsilonAbsolute = 1e-5;
-//   if (fabs(y) < epsilonAbsolute) 
-//     return fabs(x - y) < epsilonAbsolute;
-//   else
-//     return fabs(x / y - 1.) < epsilonRelative;
-// }
+bool
+areEqual(double x, double y)
+{
+  double epsilonRelative = 1e-5;
+  double epsilonAbsolute = 1e-5;
+  if (fabs(y) < epsilonAbsolute) 
+    return fabs(x - y) < epsilonAbsolute;
+  else
+    return fabs(x / y - 1.) < epsilonRelative;
+}

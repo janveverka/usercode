@@ -40,21 +40,27 @@ namespace cit {
   private:
     void init();
     void parseConfiguration();
+    void applyConfiguration();
     void parseInputs();
     void parseOutputs();
     void parseHistograms();
+    void parseMaxEvents();
+    void parseOptions();
+    void parseEventWeight();
     void setBranchesStatus();
     void turnOnTreeCaching(long cacheSize = 10000000);
     void reportEvent(Long64_t thisEntry, Long64_t entriesToProcess = -1);
     boost::shared_ptr<PSet> cfg_;
     VgAnalyzerTree *tree_;
     TFile *output_;
-    Long64_t maxEventsInput_;
+    Long64_t maxEventsToProcess_;
     Long64_t reportEvery_;    
     std::string titleStyle_;
     HistoManagers histoManagers_;
     std::vector<std::string> activeBranches_;
     TStopwatch stopwatch_;
+    double eventWeight_;
+    Long64_t verbosity_;
   }; // VgAnalyzer
 
 } // namespace cit

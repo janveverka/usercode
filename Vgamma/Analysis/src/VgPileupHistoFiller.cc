@@ -50,7 +50,8 @@ void
 VgPileupHistoFiller::fillHistograms(cit::VgEvent const& event)
 {
   cit::VgAnalyzerTree const & t = event.tree();
+  double wgt = event.weight();
 
-  histos_["rho"]->Fill(t.rho);
-  histos_["rhoNeutral"]->Fill(t.rhoNeutral);
+  histos_["rho"]->Fill(t.rho, wgt);
+  histos_["rhoNeutral"]->Fill(t.rhoNeutral, wgt);
 } // VgPileupHistoFiller::fillHistograms(..)

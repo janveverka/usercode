@@ -6,6 +6,7 @@
  * \author Jan Veverka, Caltech 
  * \date 19 September 2012
  */
+
 #ifndef Vgamma_Analysis_interface_VgMMGHistoFiller_h
 #define Vgamma_Analysis_interface_VgMMGHistoFiller_h
 
@@ -21,7 +22,7 @@ namespace cit {
     ~VgMMGHistoFiller();
     void bookHistograms();
     void fillHistograms(VgEvent const&);
-    void fillCand(VgCombinedCandidate const&);
+    void fillCand(VgCombinedCandidate const&, double);
   }; // class VgMMGHistoFiller
   
 } // namespace cit

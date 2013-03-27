@@ -85,7 +85,8 @@ void
 VgMCPileupHistoFiller::fillHistograms(cit::VgEvent const& event)
 {
   cit::VgAnalyzerTree const & t = event.tree();
-  histos_["nPU0"]->Fill(t.nPU[0]); 
+  double wgt = event.weight();
+  histos_["nPU0"]->Fill(t.nPU[0], wgt); 
 //   histos_["nPU1"]->Fill(t.nPU[1]);
 //   histos_["nPU2"]->Fill(t.nPU[2]);
 // 

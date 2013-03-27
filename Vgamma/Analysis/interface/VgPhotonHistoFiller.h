@@ -20,7 +20,7 @@ namespace cit {
     ~VgPhotonHistoFiller();
     virtual void bookHistograms();
     virtual void fillHistograms(VgEvent const&);
-    virtual void fillCand(VgLeafCandidate const &);
+    virtual void fillCand(VgLeafCandidate const &, double);
   }; // class VgPhotonHistoFiller
   
 } // namespace cit

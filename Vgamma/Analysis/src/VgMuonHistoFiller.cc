@@ -92,7 +92,7 @@ VgMuonHistoFiller::fillHistograms(cit::VgEvent const& event)
   /// Loop over muons
   for (cit::VgLeafCandidates::const_iterator mu = muons.begin();
        mu != muons.end(); ++mu) {
-    fillCand(*mu);
+    fillCand(*mu, event.weight());
   } /// Loop over muons  
 } // VgMuonHistoFiller::fillHistograms(..)
 
@@ -101,25 +101,25 @@ VgMuonHistoFiller::fillHistograms(cit::VgEvent const& event)
  * Fills the histograms for object with index i.
  */
 void
-VgMuonHistoFiller::fillCand(cit::VgLeafCandidate const & cand)
+VgMuonHistoFiller::fillCand(cit::VgLeafCandidate const & cand, double weight)
 {
   cit::VgMuon mu(cand);
   cit::VgAnalyzerTree const & tree = mu.tree();
   unsigned i = mu.key();
-  double wgt = mu.weight();
+  weight *= mu.weight();
 
-  histos_["muPt"         ]->Fill(mu.pt ()                        , wgt);
-  histos_["muEta"        ]->Fill(mu.eta()                        , wgt);
-  histos_["muPhi"        ]->Fill(mu.phi()                        , wgt);
-  histos_["muIsGlobal"   ]->Fill(mu.isGlobalMuon()               , wgt);
-  histos_["muNormChi2"   ]->Fill(tree.muChi2NDF               [i], wgt);
-  histos_["muChamberHits"]->Fill(tree.muNumberOfValidMuonHits [i], wgt);
-  histos_["muStations"   ]->Fill(tree.muStations              [i], wgt);
-  histos_["muDxy"        ]->Fill(1e4 * tree.muPVD0            [i], wgt);
-  histos_["muDz"         ]->Fill(1e4 * tree.muPVDz            [i], wgt);
-  histos_["muPixelHits"  ]->Fill(tree.muNumberOfValidPixelHits[i], wgt);
-  histos_["muTkHits"     ]->Fill(tree.muNumberOfValidTrkHits  [i], wgt);
-  histos_["muCombRelIso" ]->Fill(mu.combRelIso()                 , wgt);
+  histos_["muPt"         ]->Fill(mu.pt ()                        , weight);
+  histos_["muEta"        ]->Fill(mu.eta()                        , weight);
+  histos_["muPhi"        ]->Fill(mu.phi()                        , weight);
+  histos_["muIsGlobal"   ]->Fill(mu.isGlobalMuon()               , weight);
+  histos_["muNormChi2"   ]->Fill(tree.muChi2NDF               [i], weight);
+  histos_["muChamberHits"]->Fill(tree.muNumberOfValidMuonHits [i], weight);
+  histos_["muStations"   ]->Fill(tree.muStations              [i], weight);
+  histos_["muDxy"        ]->Fill(1e4 * tree.muPVD0            [i], weight);
+  histos_["muDz"         ]->Fill(1e4 * tree.muPVDz            [i], weight);
+  histos_["muPixelHits"  ]->Fill(tree.muNumberOfValidPixelHits[i], weight);
+  histos_["muTkHits"     ]->Fill(tree.muNumberOfValidTrkHits  [i], weight);
+  histos_["muCombRelIso" ]->Fill(mu.combRelIso()                 , weight);
 
 } // VgMuonHistoFiller::fillObjectWithIndex(..)
 

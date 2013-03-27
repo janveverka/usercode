@@ -56,7 +56,9 @@ VgEndcapPhotonHistoFiller::fillHistograms(cit::VgEvent const& event)
   /// Loop over photons
   for (cit::VgLeafCandidates::const_iterator pho = photons.begin();
        pho != photons.end(); ++pho) {
-    if (!cit::VgPhoton(*pho).isInBarrel()) fillCand(*pho);
+    if (!cit::VgPhoton(*pho).isInBarrel()) {
+      fillCand(*pho, event.weight());
+    }
   } /// Loop over photons  
 } // VgEndcapPhotonHistoFiller::fillHistograms(..)
 

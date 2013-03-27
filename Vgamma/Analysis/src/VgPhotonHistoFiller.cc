@@ -109,7 +109,7 @@ VgPhotonHistoFiller::fillHistograms(cit::VgEvent const& event)
   /// Loop over photons
   for (cit::VgLeafCandidates::const_iterator pho = photons.begin();
        pho != photons.end(); ++pho) {
-    fillCand(*pho);
+    fillCand(*pho, event.weight());
   } /// Loop over photons  
 } // VgPhotonHistoFiller::fillHistograms(..)
 
@@ -118,24 +118,24 @@ VgPhotonHistoFiller::fillHistograms(cit::VgEvent const& event)
  * Fills the histograms for object with index i.
  */
 void
-VgPhotonHistoFiller::fillCand(cit::VgLeafCandidate const & cand)
+VgPhotonHistoFiller::fillCand(cit::VgLeafCandidate const & cand, double weight)
 {
   cit::VgPhoton pho(cand);
-  double wgt = pho.weight();
+  weight *= pho.weight();
   unsigned i = pho.key();
   cit::VgAnalyzerTree const & tree = pho.tree();
 
-  histos_["phoPt" ]->Fill(pho.pt (), wgt);
-  histos_["phoEta"]->Fill(pho.eta(), wgt);
-  histos_["phoSCEta"]->Fill(pho.scEta(), wgt);
-  histos_["phoPhi"]->Fill(pho.phi(), wgt);
-  histos_["phoTrkIso"]->Fill(pho.trackIso(), wgt);
-  histos_["phoEcalIso"]->Fill(pho.ecalIso(), wgt);
-  histos_["phoHcalIso"]->Fill(pho.hcalIso(), wgt);
-  histos_["phoHoverE"]->Fill(tree.phoHoverE[i], wgt);
-  histos_["phoHasPixelSeed"]->Fill(tree.phohasPixelSeed[i], wgt);
-  histos_["phoSihih"]->Fill(1000 * tree.phoSigmaIEtaIEta[i], wgt);
-  histos_["phoSipip"]->Fill(1000 * tree.phoSigmaIPhiIPhi[i], wgt);
-  histos_["phoR9"]->Fill(tree.phoR9[i], wgt);
+  histos_["phoPt" ]->Fill(pho.pt (), weight);
+  histos_["phoEta"]->Fill(pho.eta(), weight);
+  histos_["phoSCEta"]->Fill(pho.scEta(), weight);
+  histos_["phoPhi"]->Fill(pho.phi(), weight);
+  histos_["phoTrkIso"]->Fill(pho.trackIso(), weight);
+  histos_["phoEcalIso"]->Fill(pho.ecalIso(), weight);
+  histos_["phoHcalIso"]->Fill(pho.hcalIso(), weight);
+  histos_["phoHoverE"]->Fill(tree.phoHoverE[i], weight);
+  histos_["phoHasPixelSeed"]->Fill(tree.phohasPixelSeed[i], weight);
+  histos_["phoSihih"]->Fill(1000 * tree.phoSigmaIEtaIEta[i], weight);
+  histos_["phoSipip"]->Fill(1000 * tree.phoSigmaIPhiIPhi[i], weight);
+  histos_["phoR9"]->Fill(tree.phoR9[i], weight);
 } // VgPhotonHistoFiller::fillObjectWithIndex(..)
 

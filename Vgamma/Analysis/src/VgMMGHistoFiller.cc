@@ -74,7 +74,7 @@ VgMMGHistoFiller::fillHistograms(cit::VgEvent const& event)
   /// Loop over mmgCands
   for (cit::VgCombinedCandidates::const_iterator mmg = mmgCands.begin();
        mmg != mmgCands.end(); ++mmg) {
-    fillCand(*mmg);
+    fillCand(*mmg, event.weight());
   } /// Loop over mmgCands  
 } // VgMMGHistoFiller::fillHistograms(..)
 
@@ -83,7 +83,7 @@ VgMMGHistoFiller::fillHistograms(cit::VgEvent const& event)
  * Fills the histograms for object with index i.
  */
 void
-VgMMGHistoFiller::fillCand(cit::VgCombinedCandidate const & mmg)
+VgMMGHistoFiller::fillCand(cit::VgCombinedCandidate const & mmg, double weight)
 {
   // Check if we have a got the mu mu gamma right.
   VgLeafCandidate const & mu1 = mmg.daughter(0);
@@ -101,16 +101,18 @@ VgMMGHistoFiller::fillCand(cit::VgCombinedCandidate const & mmg)
     throw cms::Exception("BadMMGCand") << msg.str();                                     
   }
 
-  double wgt = mmg.weight();
+  /// Total weight is a product of the event weight and the candidate 
+  /// efficiency scale factor.
+  weight *= mmg.weight();
   double dr1 = pho.momentum().DeltaR(mu1.momentum());
   double dr2 = pho.momentum().DeltaR(mu2.momentum());
   
-  histos_["mmgMass"]->Fill(mmg.m (), wgt);
-  histos_["mmgPt" ]->Fill(mmg.pt (), wgt);
-  histos_["mmgEta"]->Fill(mmg.eta(), wgt);
-  histos_["mmgPhi"]->Fill(mmg.phi(), wgt);
-  histos_["mmgY"  ]->Fill(mmg.y  (), wgt);
-  histos_["mmgMinDR"]->Fill(TMath::Min(dr1, dr2), wgt);
-  histos_["mmgMaxDR"]->Fill(TMath::Max(dr1, dr2), wgt);
+  histos_["mmgMass"]->Fill(mmg.m (), weight);
+  histos_["mmgPt" ]->Fill(mmg.pt (), weight);
+  histos_["mmgEta"]->Fill(mmg.eta(), weight);
+  histos_["mmgPhi"]->Fill(mmg.phi(), weight);
+  histos_["mmgY"  ]->Fill(mmg.y  (), weight);
+  histos_["mmgMinDR"]->Fill(TMath::Min(dr1, dr2), weight);
+  histos_["mmgMaxDR"]->Fill(TMath::Max(dr1, dr2), weight);
   
 } // VgMMGHistoFiller::fillObjectWithIndex(..)
