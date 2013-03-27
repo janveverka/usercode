@@ -1,4 +1,5 @@
 *.root
 *.plots
 *.log
-
+hists
+logs
