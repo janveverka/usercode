@@ -1,0 +1,14 @@
+#!/bin/bash
+## USAGE: cvs-rename old new
+## Renames a file old to new and propagates the change to the cvs repository.
+
+# set -o verbose
+OLD=$1
+NEW=$2
+mv $OLD $NEW
+cvs remove $OLD
+cvs add $NEW
+cvs ci -m "Renamed\`$OLD' to \`$NEW'" $OLD $NEW
+# set +o verbose
+
+
