@@ -1,0 +1,9 @@
+#!/bin/bash
+## Updates total processed events in sample bookkeeping records
+## with values extracted from the source files with full VgKit 
+## trees.  Customize details in the python script.
+## USAGE: vg-update-processed-events
+PYTHON_SCRIPT=$CMSSW_BASE/python/Vgamma/Analysis/bookkeeping/processedevents.py
+python $PYTHON_SCRIPT
+
+
