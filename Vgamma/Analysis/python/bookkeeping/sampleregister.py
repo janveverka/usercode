@@ -57,9 +57,10 @@ def package_contents(package):
         if module.endswith(_MODULE_EXTENSIONS)])
     if '__init__' in contents:
         contents.remove('__init__')
-        contents = contents.union(set([module
-            for module in os.listdir(pathname)
-            if os.path.isdir(os.path.join(pathname, module))]))
+        subpackages = [module for module in os.listdir(pathname)
+            if (os.path.isdir(os.path.join(pathname, module)) and
+                os.path.isfile(os.path.join(pathname, module, '__init__.py')))]
+        contents = contents.union(set(subpackages))
     return contents
         
 
