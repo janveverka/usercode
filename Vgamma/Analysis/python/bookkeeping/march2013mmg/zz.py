@@ -12,3 +12,4 @@ zz = MonteCarloSampleRecord(
     cross_section_in_pb = 5.9,
     )
 
+zz.total_processed_events = 4066045

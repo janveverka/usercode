@@ -12,3 +12,4 @@ ww = MonteCarloSampleRecord(
     cross_section_in_pb = 5.7,
     )
 
+ww.total_processed_events = 1190173
