@@ -25,7 +25,8 @@ def main():
             if total == sample.total_processed_events:
                 print sample.name, 'up to date'
             else:
-                print sample.name, 'total processed events updating to', total
+                print sample.name, 'updating total_processed_events',
+                print '%d -> %d' % (sample.total_processed_events, total)
                 filename = os.path.join(collection.package.__path__[0], 
                                         sample.name + '.py')
                 with file(filename, 'a') as pyfile:
