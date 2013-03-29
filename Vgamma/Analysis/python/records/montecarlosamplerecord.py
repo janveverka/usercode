@@ -6,6 +6,8 @@ Jan Veverka, Caltech, 27 March 2013.
 
 from Vgamma.Analysis.records.datasamplerecord import DataSampleRecord
 
+_fields = ['cross_section_in_pb']
+
 #==============================================================================
 class MonteCarloSampleRecord(DataSampleRecord):
     '''
@@ -16,13 +18,21 @@ class MonteCarloSampleRecord(DataSampleRecord):
     Possible extensions:
       * cross_section_type - LO, NLO, etc.?
     '''
+    
+    _fields = _fields
+    
     #__________________________________________________________________________
     def __init__(self,
+                 ## Inherited from DataSampleRecord
                  name,
                  title = '',
                  latex_label = '',
                  data_type = 'MC',
-                 cross_section = 0, # (pb)
+                 source_filenames = [],
+                 skim_filenames = [],
+                 total_processed_events = -1,
+                 ## Unique to MonteCarloSampleRecord
+                 cross_section_in_pb = 0, # (pb)
                  ):
 
         if not data_type == 'MC':
@@ -32,19 +42,14 @@ class MonteCarloSampleRecord(DataSampleRecord):
                                   name,
                                   title,
                                   latex_label,
-                                  data_type)
+                                  data_type,
+                                  source_filenames,
+                                  skim_filenames,
+                                  total_processed_events)
                                   
-        self.cross_section = float(cross_section)
+        self.cross_section_in_pb = float(cross_section_in_pb)
 
     #__________________________________________________________________________
-    def repr_attributes(
-            self,
-            attributes = ['cross_section']
-            ):
-        
-        return DataSampleRecord.repr_attributes(
-            self, 
-            attributes,
-            DataSampleRecord.repr_attributes(self)
-            )
+    def repr_fields(self, fields = DataSampleRecord._fields + _fields):
+        return DataSampleRecord.repr_fields(self, fields)
 ## End of MonteCarloSampleRecord

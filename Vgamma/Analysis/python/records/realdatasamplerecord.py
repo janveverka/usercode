@@ -6,23 +6,33 @@ Jan Veverka, Caltech, 27 March 2013.
 
 from Vgamma.Analysis.records.datasamplerecord import DataSampleRecord
 
+_fields = ['lumi_per_pb']
+
 #==============================================================================
 class RealDataSampleRecord(DataSampleRecord):
     '''
     Holds information about a data sample of real collision data
     used in the Vgamma analysis. In addition to the attributes
     inherited from DataSampleRecord, it holds:
-      * lumi - integrated luminosity in inverse femtobarns 1/fb
+      * lumi_per_pb - integrated luminosity in inverse femtobarns 1/pb
     Possible extensions:
       * pileup_target - corresponding PU distribution in data
     '''
+    
+    _fields = _fields
+    
     #__________________________________________________________________________
     def __init__(self,
+                 ## Inherited from DataSampleRecord
                  name,
                  title = '',
                  latex_label = '',
                  data_type = 'data',
-                 lumi = 0, # (1/fb)
+                 source_filenames = [],
+                 skim_filenames = [],
+                 total_processed_events = -1,
+                 ## Unique to MonteCarloSampleRecord
+                 lumi_per_pb = 0, # (1/pb)
                  ):
         
         if not data_type == 'data':
@@ -32,18 +42,14 @@ class RealDataSampleRecord(DataSampleRecord):
                                   name,
                                   title,
                                   latex_label,
-                                  data_type)
-        self.lumi = float(lumi)
+                                  data_type,
+                                  source_filenames,
+                                  skim_filenames,
+                                  total_processed_events)
+        self.lumi_per_pb = float(lumi_per_pb)
         
     #__________________________________________________________________________
-    def repr_attributes(
-            self,
-            attributes = ['lumi']
-            ):
-        
-        return DataSampleRecord.repr_attributes(
-            self, 
-            attributes,
-            DataSampleRecord.repr_attributes(self)
-            )
+    def repr_fields(self,
+                    fields = DataSampleRecord._fields + _fields):
+        return DataSampleRecord.repr_fields(self, fields)
 ## End of RealDataSampleRecord

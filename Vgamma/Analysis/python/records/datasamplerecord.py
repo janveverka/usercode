@@ -4,6 +4,12 @@ Defines the class DataSampleRecord.
 Jan Veverka, Caltech, 27 March 2013.
 '''
 
+import pprint
+import cStringIO
+
+_fields = '''name title latex_label data_type source_filenames
+             skim_filenames total_processed_events'''.split()
+
 #==============================================================================
 class DataSampleRecord:
     '''
@@ -23,12 +29,16 @@ class DataSampleRecord:
       tree_version, 
       histogram_file,    
     '''
+    _fields = _fields
     #__________________________________________________________________________
     def __init__(self,
                  name,
                  title = '',
                  latex_label = '',
                  data_type = '',
+                 source_filenames = [],
+                 skim_filenames = [],
+                 total_processed_events = -1,
                  ):
         if not title:
             title = name
@@ -38,39 +48,54 @@ class DataSampleRecord:
         self.title = str(title)
         self.latex_label = str(latex_label)
         self.data_type = str(data_type)
+        self.source_filenames = list(source_filenames)
+        self.skim_filenames = list(skim_filenames)
+        self.total_processed_events = int(total_processed_events)
         
     #__________________________________________________________________________
-    def str_attributes(self):
-        attributes = 'name title latex_label data_type'.split()
-        return ', '.join([str(getattr(self, attr)) for attr in attributes])
+    def str_fields(self):
+        return ', '.join([str(getattr(self, attr)) for attr in self._fields])
     
     #__________________________________________________________________________
-    def repr_attributes(
-            self, 
-            attributes = 'name title latex_label data_type'.split(),
-            prefix = '',
-            ):
+    def repr_fields(self, 
+                    fields = _fields):
         ret_items = []
-        if prefix:
-            ret_items.append(prefix)
-        for attribute in attributes:
-            value = getattr(self, attribute)
-            ret_items.append('%s = %s' % (attribute, value.__repr__()))
+        max_len = max(map(len, fields))
+        for field in fields:
+            padding = max_len - len(field) + 1
+            #value = getattr(self, field).__repr__()
+            #output = cStringIO.StringIO()
+            #pprint.pprint(getattr(self, field), output)
+            #value = output.getvalue()
+            #output.close()
+            value = pprint.pformat(getattr(self, field), indent=8)
+            ret_items.append('%s%*s = %s' % (field, padding, ' ', value))
         return ',\n    '.join(ret_items)
-
-    ##__________________________________________________________________________
-    #def repr_attributes(self):
-        #attributes = 'name title latex_label data_type'.split()
-        #return ',\n    '.join([
-            #'a = ' + getattr(self, a).__repr__() for a in attributes
-            #])
     
     #__________________________________________________________________________
     def __str__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.str_attributes())
+        return '\n    '.join([self.__class__.__name__ + '(',
+                              self.str_fields(),
+                              ')'])
         
     #__________________________________________________________________________
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.repr_attributes())
+        return '\n    '.join([self.__class__.__name__ + '(',
+                              self.repr_fields(),
+                              ')'])
+    
+    #__________________________________________________________________________
+    def get_total_processed_events(self, verbosity=0):
+        total = 0
+        import ROOT
+        for filename in self.source_filenames:
+            source = ROOT.TFile.Open(filename)
+            histogram = source.Get('VgAnalyzerKit/hEvents')
+            processed_events = int(histogram.GetBinContent(1))
+            if verbosity > 0:
+                print processed_events, 'in', source.GetName()
+            total += processed_events
+            source.Close()
+        return total
     
 ## End of DataSampleRecord
