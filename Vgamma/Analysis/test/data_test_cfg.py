@@ -26,7 +26,7 @@ process.outputs = cms.PSet(
     )
     
 process.maxEvents = cms.PSet(
-    input = cms.untracked.int64(int(1e6)),
+    toProcess = cms.untracked.int64(int(1e6)),
     reportEvery = cms.untracked.int64(10000)
     )
     
