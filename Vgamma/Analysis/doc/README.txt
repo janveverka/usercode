@@ -57,3 +57,21 @@ cd $CMSSW_BASE/src/Vgamma/Analysis/test/analysis
 . launch-jobs.sh
 ## Make sure all jobs finish
 . ../make-data-mc-plots.sh
+
+---+ To Inject Total Processed Evets
+Customize python/bookkeeping/processedevents.py
+Run scram b
+run vg-update-processed-events
+Inspect changes and commit them to CVS.
+
+---+ Bookkeep Datasets
+For each analysis version, create a package in python/bookkeeping like
+march2013mmg.
+
+For each sample, create a python module in that package
+defining a record of the same name, see 
+python/bookkeeping/march2013mmg for examples.  There must
+be no other modules in the package.
+
+Inject the total processed events.
+
