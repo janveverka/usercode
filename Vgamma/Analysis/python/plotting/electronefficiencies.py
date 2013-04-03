@@ -60,49 +60,57 @@ plot.ytitle = 'Electron p_{T} (GeV)'
 ## Specific for 2011A/2011B x Data/MC x EB/EE
 plot.sourcefilename = 'Efficiency_2011A/Efficiency.root'
 plot.sourcehistoname = 'MC_Barrel'
-plot.leftlabel = 'Run 2011A, ECAL Barrel, MC'
+plot.leftlabel = 'Run 2011A, ECAL Barrel'
+plot.rightlabel = 'CMS Simulation'
 plot.name = 'Electron_Reco_Eff_EB_A_MC'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'Efficiency_2011A/Efficiency.root'
 plot.sourcehistoname = 'DataA_Barrel'
-plot.leftlabel = 'Run 2011A, ECAL Barrel, Data'
+plot.leftlabel = 'Run 2011A, ECAL Barrel'
+plot.rightlabel = 'CMS Preliminary'
 plot.name = 'Electron_Reco_Eff_EB_A_Data'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'Efficiency_2011A/Efficiency.root'
 plot.sourcehistoname = 'MC_Endcap'
-plot.leftlabel = 'Run 2011B, ECAL Endcap, MC'
+plot.leftlabel = 'Run 2011B, ECAL Endcap'
+plot.rightlabel = 'CMS Simulation'
 plot.name = 'Electron_Reco_Eff_EE_A_MC'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'Efficiency_2011A/Efficiency.root'
 plot.sourcehistoname = 'DataA_Endcap'
-plot.leftlabel = 'Run 2011A, ECAL Endcap, Data'
+plot.leftlabel = 'Run 2011A, ECAL Endcap'
+plot.rightlabel = 'CMS Preliminary'
 plot.name = 'Electron_Reco_Eff_EE_A_Data'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'Efficiency_2011B/Efficiency.root'
 plot.sourcehistoname = 'MC_Barrel'
-plot.leftlabel = 'Run 2011B, ECAL Barrel, MC'
+plot.leftlabel = 'Run 2011B, ECAL Barrel'
+plot.rightlabel = 'CMS Simulation'
 plot.name = 'Electron_Reco_Eff_EB_B_MC'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'Efficiency_2011B/Efficiency.root'
 plot.sourcehistoname = 'DataB_Barrel'
-plot.leftlabel = 'Run 2011B, ECAL Barrel, Data'
+plot.leftlabel = 'Run 2011B, ECAL Barrel'
+plot.rightlabel = 'CMS Preliminary'
 plot.name = 'Electron_Reco_Eff_EB_B_Data'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'Efficiency_2011B/Efficiency.root'
 plot.sourcehistoname = 'MC_Endcap'
-plot.leftlabel = 'Run 2011B, ECAL Endcap, MC'
+plot.leftlabel = 'Run 2011B, ECAL Endcap'
+plot.rightlabel = 'CMS Simulation'
 plot.name = 'Electron_Reco_Eff_EE_B_MC'
 plots.append(copy.deepcopy(plot))
 
 plot.sourcefilename = 'Efficiency_2011B/Efficiency.root'
 plot.sourcehistoname = 'DataB_Endcap'
-plot.leftlabel = 'Run 2011B, ECAL Endcap, Data'
+plot.leftlabel = 'Run 2011B, ECAL Endcap'
+plot.rightlabel = 'CMS Preliminary'
 plot.name = 'Electron_Reco_Eff_EE_B_Data'
 plots.append(copy.deepcopy(plot))
 
@@ -115,7 +123,7 @@ ROOT.gStyle.SetPadTopMargin(0.1)
 ROOT.gStyle.SetPaintTextFormat('5.3f')
 ROOT.gROOT.ForceStyle()
 
-for p in plots:
+for p in plots[:]:
     p.makeplot()
 
 canvases.make_pdf_from_eps()
