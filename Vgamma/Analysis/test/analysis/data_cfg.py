@@ -13,7 +13,7 @@ from Vgamma.Analysis.tools import load_input_files
 process = cms.Process('VgammaAnalysis')
 
 process.inputs = cms.PSet(
-    fileNames = load_input_files('RealData/2011AB_susy.dat'),
+    fileNames = load_input_files('RealData/mm2011AB_susy.dat'),
     treeName = cms.string('EventTree'),
     version = cms.string('V14Data'),
     activeBranches = copy.deepcopy(activeBranchesData),
