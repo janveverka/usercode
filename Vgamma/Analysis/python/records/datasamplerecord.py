@@ -7,8 +7,9 @@ Jan Veverka, Caltech, 27 March 2013.
 import pprint
 import cStringIO
 
-_fields = '''name title latex_label data_type source_filenames
-             skim_filenames total_processed_events'''.split()
+_fields = '''name title latex_label data_type source_filenames source_tree
+             skim_filenames skim_tree tree_version
+             total_processed_events'''.split()
 
 #==============================================================================
 class DataSampleRecord:
@@ -37,7 +38,10 @@ class DataSampleRecord:
                  latex_label = '',
                  data_type = '',
                  source_filenames = [],
+                 source_tree = '',
                  skim_filenames = [],
+                 skim_tree = '',
+                 tree_version = '',
                  total_processed_events = -1,
                  ):
         if not title:
@@ -49,7 +53,10 @@ class DataSampleRecord:
         self.latex_label = str(latex_label)
         self.data_type = str(data_type)
         self.source_filenames = list(source_filenames)
+        self.source_tree = str(source_tree)
         self.skim_filenames = list(skim_filenames)
+        self.skim_tree = str(skim_tree)
+        self.tree_version = str(tree_version)
         self.total_processed_events = int(total_processed_events)
         
     #__________________________________________________________________________

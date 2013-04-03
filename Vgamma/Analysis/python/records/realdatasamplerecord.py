@@ -29,7 +29,10 @@ class RealDataSampleRecord(DataSampleRecord):
                  latex_label = '',
                  data_type = 'data',
                  source_filenames = [],
+                 source_tree = '',
                  skim_filenames = [],
+                 skim_tree = '',
+                 tree_version = '',
                  total_processed_events = -1,
                  ## Unique to MonteCarloSampleRecord
                  lumi_per_pb = 0, # (1/pb)
@@ -44,7 +47,10 @@ class RealDataSampleRecord(DataSampleRecord):
                                   latex_label,
                                   data_type,
                                   source_filenames,
+                                  source_tree,
                                   skim_filenames,
+                                  skim_tree,
+                                  tree_version,
                                   total_processed_events)
         self.lumi_per_pb = float(lumi_per_pb)
         

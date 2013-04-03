@@ -8,13 +8,15 @@ mm2011AB = RealDataSampleRecord(
         '2011B (PromptReco-v1) Data'),
     latex_label       = 'Data',
     source_filenames  = load_input_files('RealData/mm2011AB_susy.dat'),
+    source_tree       = 'VgAnalyzerKit/EventTree',
     skim_filenames    = load_input_files('RealData/mmg_mm2011AB_susy.dat'),    
+    skim_tree         = 'EventTree',
+    tree_version      = 'V14Data',
     total_processed_events = 56945243,
     ## AN-11-251 rev 153517, p. 150
     lumi_per_pb       = 4998.9,
     )
-
-    
+   
 #______________________________________________________________________________
 if __name__ == '__main__':
     print mm2011AB.__repr__()
