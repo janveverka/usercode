@@ -31,7 +31,7 @@ class Plotter:
         sfhisto.SetStats(False)
 
         self.canvas = canvases.next(self.name)
-        sfhisto.DrawCopy('colz texte')
+        sfhisto.DrawCopy('colz')
 
         Latex([self.leftlabel], (0.15, 0.92), textsize=25).draw()
         Latex([self.rightlabel], (0.6, 0.92), textsize=25).draw()

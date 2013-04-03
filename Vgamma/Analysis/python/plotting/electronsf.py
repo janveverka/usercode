@@ -31,7 +31,7 @@ class Plotter:
         sfhisto.SetStats(False)
 
         self.canvas = canvases.next(self.name)
-        sfhisto.DrawCopy('colz texte')
+        sfhisto.DrawCopy('colz')
         self.histo = self.canvas.GetListOfPrimitives().FindObject(
             sfhisto.GetName()
             )

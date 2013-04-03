@@ -32,7 +32,7 @@ class Plotter:
 
         self.canvas = canvases.next(self.name)
         self.canvas.SetLogy()
-        sfhisto.DrawCopy('colz text')
+        sfhisto.DrawCopy('colz')
         self.histo = self.canvas.GetListOfPrimitives().FindObject(
             sfhisto.GetName()
             )
