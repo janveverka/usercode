@@ -94,7 +94,7 @@ VgAnalyzer::run()
     tree_->fChain->GetEntry(ientry);
 
     VgEvent event(*tree_);
-    event.readFromTree();
+    event.readFromTree(); // Do we need this line?
     
     // Loop over histoManagers_
     for (HistoManagers::iterator worker = histoManagers_.begin();
@@ -309,20 +309,20 @@ void
 VgAnalyzer::parseOptions()
 {
   if (cfg_->existsAs<PSet>("options")) {
-    cout << "Parsing options ..." << endl;
+    // cout << "Parsing options ..." << endl;
     PSet const& options = cfg_->getParameter<PSet>("options");
     if (options.existsAs<string>("titleStyle")) {
       titleStyle_ = options.getParameter<string>("titleStyle");
     }
     if (options.existsAs<Long64_t>("verbosity")) {
-      cout << "Found option verbosity = " 
-           << options.getParameter<Long64_t>("verbosity") << endl;
+      // cout << "Found option verbosity = " 
+      //     << options.getParameter<Long64_t>("verbosity") << endl;
       verbosity_ = options.getParameter<Long64_t>("verbosity");
     } else {
-      cout << "No option verbosity found." << endl;
+      // cout << "No option verbosity found." << endl;
     } // verbosity
   } else {
-    cout << "No configuration options found." << endl;
+    // cout << "No configuration options found." << endl;
   }// exists options
 } // parseOptions()
 
@@ -466,7 +466,7 @@ VgAnalyzer::reportEvent(Long64_t thisEntry, Long64_t entriesToProcess)
 
 //_____________________________________________________________________________
 /**
- * Returns a string representing timeInSeconds in human readable format.
+ * Returns a string representing timeInSeconds in a human readable format.
  */
 string
 VgAnalyzer::humanReadableTime(double timeInSeconds) const
