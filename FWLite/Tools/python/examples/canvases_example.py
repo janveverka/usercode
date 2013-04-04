@@ -57,16 +57,21 @@ def make_canvases(hist):
     '''
     Creates a couple of example canvases and draws the given histogram on them.
     '''
-    ## The function next(name=None, title=None) creates a new canvas
+    ## The function next() creates a new canvas:
+    canvases.next()
+    hist.DrawCopy()
+    
+    ## You can specify the name and title of the canvas like this:
     canvases.next(name='gauss', title='Normal Distribution')
     hist.DrawCopy()
 
-    ## Overloaded canvas names are automatically modified by appending "_<number>"
-    ## Both name and title are optional. The title defaults to name if not given.
+    ## Overloaded canvas names are automatically modified by appending 
+    ## "_<number>." Both name and title are optional. The title defaults to 
+    ## name if not given.
     canvases.next('gauss')
     hist.Draw()
 
-    ## next returns the newly created histogram, so that you can customize it.
+    ## next() returns the newly created canvas, so that you can customize it.
     canvases.next('gauss_logy').SetLogy()
     hist.DrawCopy()
 
@@ -76,12 +81,6 @@ def make_canvases(hist):
     canvas.SetGrid()
     hist.DrawCopy()
 
-    ## You can customize the default canvas window width and height
-    canvases.wwidth = 600
-    canvases.wheight = 600
-    canvases.next('gauss_square')
-    hist.DrawCopy()
-    
     ## Note that the canvas windows are staggered on the screen in x and y
     ## with defualt periods of xperiod=30 in x and yperiod=5 in y.  This
     ## is the 6th canvas, first in this yperiod, so it will be on the
@@ -96,11 +95,17 @@ def make_more_canvases(hist):
     '''
     Creates more of example canvases and draws the given histogram on them.
     '''
-    
-    ## You can customize this behavior like this:
+    ## You can customize the default canvas window width and height
+    canvases.wwidth = 600
+    canvases.wheight = 600
+    canvases.next('gauss_square')
+    hist.DrawCopy()
+        
+    ## You can customize the period of the staggering on the monitor
+    ## like this:
     canvases.yperiod = 1
     ## Now, all the canvases will be rendered at the top of the screen
-    ## since they all start in the y-period
+    ## since they are all the first in the y-period
     canvases.next(title='Red at the top of the display')
     hist.SetLineColor(ROOT.kRed)  ## Just for fun
     hist.DrawCopy()
