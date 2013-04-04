@@ -35,7 +35,8 @@ def next(name=None, title=None):
         c1 = ROOT.TCanvas(name, title)
     else:
         c1 = ROOT.TCanvas()
-        c1.SetTitle(title)
+        if title:
+            c1.SetTitle(title)
 
     c1.SetWindowPosition(wtopx, wtopy)
     c1.SetWindowSize(wwidth, wheight)
@@ -67,7 +68,7 @@ def make_pdf_from_eps(destination = 'plots'):
     it to a pdf.
     '''
     tmpdir = tempfile.mkdtemp()
-    print tmpdir
+    print 'Using', tmpdir, 'for temporary .eps files.'
     for c in canvases:
         if not c:
             continue
