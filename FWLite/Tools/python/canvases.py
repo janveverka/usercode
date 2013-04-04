@@ -1,5 +1,10 @@
-'''Facilitates the creation and use of multiple canvases.'''
+'''
+Facilitates the creation and use of multiple canvases.
+'''
+
 import commands
+import os
+import tempfile
 import ROOT
 
 canvases = []
@@ -15,7 +20,10 @@ def next(name=None, title=None):
     i = len(ROOT.gROOT.GetListOfCanvases())
     wtopx = 20 * (i % xperiod)
     wtopy = 20 * (i % yperiod)
-
+    
+    if not title:
+        title = name
+        
     if name:
         if ROOT.gROOT.GetListOfCanvases().FindObject(name):
             i = 0
@@ -24,12 +32,10 @@ def next(name=None, title=None):
             name = name + '_%d' % i
             if title:
                 title = title + ' %d' % i
-        if title:
-            c1 = ROOT.TCanvas(name, title)
-        else:
-            c1 = ROOT.TCanvas(name, name)
+        c1 = ROOT.TCanvas(name, title)
     else:
         c1 = ROOT.TCanvas()
+        c1.SetTitle(title)
 
     c1.SetWindowPosition(wtopx, wtopy)
     c1.SetWindowSize(wwidth, wheight)
@@ -40,35 +46,41 @@ def next(name=None, title=None):
 
 
 #______________________________________________________________________________
-def make_plots(graphics_extensions = ['png']):
+def make_plots(extensions = ['png'], destination = 'plots'):
+    if not os.path.isdir(destination):
+        os.mkdir(destination)
     for c in canvases:
         if not c:
             continue
-        for ext in graphics_extensions:
-            c.Print(''.join([c.GetName(), '.', ext]))
+        for ext in extensions:
+            filename = ''.join([c.GetName(), '.', ext])
+            c.Print(os.path.join(destination, filename))
         ## end of loop over graphics_extensions
     ## end of loop over canvases
 ## end of make_plots()
 
 
 #______________________________________________________________________________
-def make_pdf_from_eps():
+def make_pdf_from_eps(destination = 'plots'):
     '''
     Creates an eps output and uses GhostScript-based ps2pdf command to convert
     it to a pdf.
     '''
+    tmpdir = tempfile.mkdtemp()
+    print tmpdir
     for c in canvases:
         if not c:
             continue
-        c.Print(c.GetName() + '.eps')
-        command = '''ps2pdf -dEPSCrop {name}.eps
-                     rm {name}.eps'''.format(name=c.GetName())
+        epsname = os.path.join(tmpdir, c.GetName() + '.eps')
+        pdfname = os.path.join(destination, c.GetName() + '.pdf')
+        c.Print(epsname)
+        command = '''ps2pdf -dEPSCrop %(epsname)s %(pdfname)s
+                     rm %(epsname)s''' % locals()
         (exitstatus, outtext) = commands.getstatusoutput(command)
         if  exitstatus != 0:
             raise RuntimeError, '"%s" failed: "%s"!' % (command, outtext)
-        
-        ## end of loop over graphics_extensions
-    ## end of loop over canvases
+        ## end of loop over canvases
+    os.rmdir(tmpdir)
 ## end of make_pdf_from_eps()
 
 
