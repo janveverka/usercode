@@ -1,0 +1,6 @@
+#!/bin/bash
+## Produces pdfs plots of muon efficiency maps
+## USAGE: vg-make-muon-eff-plots
+PYTHON_SCRIPT=$CMSSW_BASE/src/Vgamma/Analysis/python/plotting/muonefficiencies.py
+python -i $PYTHON_SCRIPT
+
