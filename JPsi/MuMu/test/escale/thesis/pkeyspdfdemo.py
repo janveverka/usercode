@@ -28,10 +28,10 @@ def main():
     get_saved_data()
     build_model()
     beautify_response_title_and_unit()
-    #make_scale_dependence_plot()
-    #make_resolution_scan_plot()
+    make_scale_dependence_plot()
+    make_resolution_scan_plot()
     #plot_multiple_models()
-    plot_shape_and_fit()
+    #plot_shape_and_fit()
     canvases.update()
 ## End of main()
 
@@ -166,7 +166,7 @@ def make_scale_dependence_plot():
 
     # plot.SetTitle('Dependence on Scale')
     plot.SetTitle('')
-    plot.GetYaxis().SetTitle('Probability Density f(x) (1/%)')
+    plot.GetYaxis().SetTitle('Probability Density f(x|s,r) (1/%)')
     plot.Draw()
     #Latex(cutlabels, position=(0.2, 0.75)).draw()
     Latex(['r = 1 %',], position=(0.8, 0.8), textsize=24).draw()
@@ -203,7 +203,7 @@ def make_resolution_scan_plot():
 
     #plot.SetTitle('Dependence on Scale and Resolution')
     plot.SetTitle('')
-    plot.GetYaxis().SetTitle('Probability Density f(x) (1/%)')
+    plot.GetYaxis().SetTitle('Probability Density f(x|s,r) (1/%)')
     plot.Draw()
     # Latex(cutlabels, position=(0.2, 0.75)).draw()
     Latex(['s = -4, 0, 2 %',], position=(0.75, 0.8), textsize=24).draw()
