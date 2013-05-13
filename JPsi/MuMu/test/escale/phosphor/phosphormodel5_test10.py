@@ -68,7 +68,9 @@ from JPsi.MuMu.roochi2calculator import RooChi2Calculator
 # name = 'egm_francesca_mc_EE_pt30to999_highR9_sfit0_rfit4.0_yyv5'
 # name = 'egm_data_EB_pt25to999_highR9_yyv4'
 # name = 'reftest_data_yyv12_EB_highR9_pt25to999'
-name = 'perf_data_sixie3_EB_highR9_pt25to999'
+# name = 'perf_data_sixie3_EB_highR9_pt25to999'
+name = 'thesis_data_EE_highR9_pt10to12_v13'
+
 
 inputfile = 'phosphor5_model_and_fit_' + name + '.root'
 outputfile = 'phosphor5_model_and_fit_' + name + '.root'
@@ -83,8 +85,8 @@ rfit = 'nominal'
 #rfit = 1.0
 
 fit_data_fraction = 0.25
-#reduce_data = False
-reduce_data = True
+reduce_data = False
+#reduce_data = True
 
 #fake_data_cut = 'Entry$ % 4 == 0'
 #use_independent_fake_data = True
@@ -206,10 +208,13 @@ def parse_name_to_cuts():
     # cuts = ['mmMass + mmgMass < 180', 'minDeltaR < 1.5', 'minDeltaR > 0.1']
     cuts = ['mmMass + mmgMass < 180',
             # '0.1 < minDeltaR',
-            'minDeltaR < 1.5', 
-            'mu2Pt > 10.5',
-            'mu1Pt > 21', 
-            'mmMass > 55',
+            'minDeltaR < 1.5',
+            'mu2Pt > 10',
+            'mu1Pt > 15',
+            #'mu2Pt > 10.5',
+            #'mu1Pt > 21', 
+            #'mmMass > 55',
+            #'isFSR',
             ]
     # cuts = ['mmMass + mmgMass < 180']
     if 'EB' in name:
@@ -420,7 +425,8 @@ def define_data_observables():
     global mmgMass, mmMass, phoERes, mmgMassPhoGenE, weight
     mmgMass        = w.factory('mmgMass[40, 140]')
     mmMass         = w.factory('mmMass[10, 140]')
-    phoERes        = w.factory('phoERes[-70, 100]')
+    #phoERes        = w.factory('phoERes[-70, 100]')
+    phoERes        = w.factory('phoERes[-100, 100]')
     mmgMassPhoGenE = w.factory('mmgMassPhoGenE[0, 200]')
     weight         = w.factory('weight[1]')
 
@@ -984,8 +990,8 @@ def fit_real_data(label):
     "2011A" or "2011B".
     '''
     ## Set initial values to MC truth
-    phoScale.setVal(calibrator0.s.getVal())
-    phoRes.setVal(1.5 * calibrator0.r.getVal())
+    #phoScale.setVal(calibrator0.s.getVal())
+    #phoRes.setVal(calibrator0.r.getVal())
     ## Do the fit
     fit_result = pm.fitTo(data[label], roo.Range('fit'),  roo.NumCPU(8),
                           roo.Timer(), # roo.Verbose()
@@ -1331,9 +1337,10 @@ def fit_mc_truth(idata):
     '''
     old_precision = set_default_integrator_precision(2e-9, 2e-9)
     calibrator0.s.setRange(-15, 15)
-    calibrator0.r.setRange(0,25)
+    calibrator0.r.setRange(0.01,25)
     fitresult = calibrator0.phoEResPdf.fitTo(
         idata, roo.Range(-50, 50), roo.Strategy(2), roo.Save()
+        #idata, roo.Range(-50, 50), roo.Strategy(2), roo.Save()
         )
     ## Include systematics
     scale_errors(calibrator0.s, 5.)
@@ -1602,6 +1609,9 @@ def validate_response_fit(idata, fit_result):
     rval = fit_result.floatParsFinal().find('r').getVal()
     zoom_range =  (sval - 2 * rval, sval + 2 * rval)
     full_range = (-50, 50)
+    #zoom_range =  (-4, 2.6)
+    #full_range = (-42, 86)
+    #phoERes.setBins(380)
     tails_plot = plot_response_varbins(idata, full_range, True)
     save_gof(tails_plot, fit_result, mctruth=True)
     pulls_plot = plot_response_residuals(tails_plot, fit_result, True)
