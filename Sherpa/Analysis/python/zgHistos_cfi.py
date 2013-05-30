@@ -32,7 +32,7 @@ meInPartons = mePhotons.clone( cut = cms.string(isMeIncoming + "&" + isParton) )
 meOutPartons = mePhotons.clone( cut = cms.string(isMeOutgoing + "&" + isParton) )
 
 # now the prompt particles
-isPrompt="(status=1 & mother(0).mother(0).status=3)"
+isPrompt="(status=1 & numberOfMothers() > 0 & mother(0).numberOfMothers() > 0 & mother(0).mother(0).status=3)"
 promptParticles = cms.EDFilter("GenParticleSelector",
   filter = cms.bool(False),
   src = cms.InputTag("genParticles"),
