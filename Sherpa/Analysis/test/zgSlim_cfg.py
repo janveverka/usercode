@@ -1,7 +1,11 @@
+import sys
 import FWCore.ParameterSet.Config as cms
 
-
-job = '7TeV_Zgg_h3z_h4z_v2'
+## Job name can be passed as a command-line argument
+if len(sys.argv) > 0 and 'Zgg' in sys.argv[-1]:
+    jobs = sys.argv[-1]
+else:
+    job = '7TeV_Zgg_h3z_h4z_v2'
 
 process = cms.Process("HISTO")
 
@@ -30,8 +34,8 @@ process.p = cms.Path( process.zgSlimSequence )
 
 process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string(
-        #'/cms/veverka/Sherpa/Slims/sherpa_%s_10k_slim.root' % job
-        'sherpa_slim_test.root'
+        '/cms/veverka/Sherpa/Slims/sherpa_%s_10k_slim.root' % job
+        #'sherpa_slim_test.root'
         ),
     # save only events passing the full path
     SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
