@@ -1,12 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
-job = '8TeV_Zgg_h3p_h4z'
+job = '7TeV_Zgg_h3m_h4m_v2'
 
 process = cms.Process("HISTO")
 
 ## MessageLogger
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 10
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 from Sherpa.Analysis.srcFileNames_cfi import castorFilesFilterJet10 as srcFileNames
 process.source = cms.Source("PoolSource",
@@ -19,7 +19,7 @@ process.source = cms.Source("PoolSource",
 #     "rfio:/castor/cern.ch/user/v/veverka/mc/Spring10/Sherpa/ZgEle_0j2/GEN/sherpack_lib3/outputGEN_5.root",
 #     "rfio:/castor/cern.ch/user/v/veverka/mc/Spring10/Sherpa/ZgMu_0j2/GEN/sherpack_lib3/outputGEN_5.root",
 #     "rfio:/castor/cern.ch/user/v/veverka/mc/Spring10/Sherpa/ZgTau_0j2/GEN/sherpack_lib3/outputGEN_5.root",
-    "rfio:/afs/cern.ch/user/v/veverka/work/releases/CMSSW_5_2_9/src/Sherpa/%s/test/sherpa_10k_out.root" % job,
+    "rfio:/cms/veverka/Sherpa/%s/test/sherpa_10k_out.root" % job,
   ),
   duplicateCheckMode = cms.untracked.string("checkEachRealDataFile"),
 )

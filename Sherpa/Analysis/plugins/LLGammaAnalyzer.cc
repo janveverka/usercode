@@ -13,7 +13,7 @@
 //
 // Original Author:  Jan Veverka,32 3-A13,+41227677936,
 //         Created:  Mon Mar 22 05:44:30 CET 2010
-// $Id: LLGammaAnalyzer.cc,v 1.1 2010/03/22 21:53:54 veverka Exp $
+// $Id: LLGammaAnalyzer.cc,v 1.1 2010/03/31 23:23:46 veverka Exp $
 //
 //
 
@@ -187,13 +187,13 @@ LLGammaAnalyzer::beginJob()
   h1Container_["dileptonY"]=fs->make<TH1F>("dileptonY", "y(l#bar{l})", 100, -10,  10);
   h1Container_["leptonPtRatio1Over0"]=fs->make<TH1F>("leptonPtRatio1Over0", "lepton p_{#perp}  (1) /p_{#perp}  (0) [GeV/c^{2}]", 100, 0,  5);
   h1Container_["leptonPtRatioTOverL"]=fs->make<TH1F>("leptonPtRatioTOverL", "lepton p_{#perp}  (trailing) /p_{#perp}  (leading) [GeV/c^{2}]", 100, 0,  5);
-  h1Container_["llgMass"]=fs->make<TH1F>("llgMass", "m(l#bar{l}#gamma) [GeV/c^{2}]", 200, 0,  200);
+  h1Container_["llgMass"]=fs->make<TH1F>("llgMass", "m(l#bar{l}#gamma) [GeV/c^{2}]", 200, 0,  500);
   h1Container_["llgMt"]=fs->make<TH1F>("llgMt", "m_{#perp}  (l#bar{l}#gamma) [GeV/c^{2}]", 200, 0,  200);
   h1Container_["llgPt"]=fs->make<TH1F>("llgPt", "P_{#perp}   (l#bar{l}#gamma) [GeV/c]", 200, 0,  200);
   h1Container_["llgEta"]=fs->make<TH1F>("llgEta", "#eta(l#bar{l}#gamma)", 100, -10,  10);
   h1Container_["llgPhi"]=fs->make<TH1F>("llgPhi", "#phi(l#bar{l}#gamma)", 100, -4,  4);
   h1Container_["llgY"]=fs->make<TH1F>("llgY", "y(l#bar{l}#gamma)", 100, -10,  10);
-  h2Container_["llgMass3Vs2Histo"]=fs->make<TH2F>("llgMass3Vs2Histo", "m(l#bar{l}#gamma) vs m(l#bar{l})", 250, 0, 250, 250, 0, 250);
+  h2Container_["llgMass3Vs2Histo"]=fs->make<TH2F>("llgMass3Vs2Histo", "m(l#bar{l}#gamma) vs m(l#bar{l})", 250, 0, 250, 250, 0, 500);
   h2Container_["llgMt3Vs2Histo"]=fs->make<TH2F>("llgMt3Vs2Histo", "m_{#perp}  (l#bar{l}#gamma) vs m_{#perp}  (l#bar{l})", 250, 0, 250, 250, 0, 250);
   llgMass3Vs2_=fs->make<TGraph>(); llgMass3Vs2_->SetNameTitle("llgMass3Vs2Graph", "m(l#bar{l}#gamma) vs m(l#bar{l})");
   llgMt3Vs2_=fs->make<TGraph>(); llgMt3Vs2_->SetNameTitle("llgMt3Vs2Graph", "m_{#perp}  (l#bar{l}#gamma) vs m_{#perp}  (l#bar{l})");

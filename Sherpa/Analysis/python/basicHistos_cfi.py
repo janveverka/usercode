@@ -6,7 +6,7 @@ ptHisto = cms.PSet(
   max = cms.untracked.double(300),
   nbins = cms.untracked.int32(300),
   name = cms.untracked.string("Pt"),
-  description = cms.untracked.string("P_{#perp}   [GeV/c]"),
+  description = cms.untracked.string(";P_{#perp}   (GeV);Events / GeV"),
   plotquantity = cms.untracked.string("pt")
 )
 
@@ -16,7 +16,7 @@ etaHisto = cms.PSet(
   max = cms.untracked.double(10.0),
   nbins = cms.untracked.int32(200),
   name = cms.untracked.string("Eta"),
-  description = cms.untracked.string("#eta"),
+  description = cms.untracked.string(";#eta;Events / 0.1"),
   plotquantity = cms.untracked.string("eta")
 )
 
@@ -26,7 +26,7 @@ phiHisto = cms.PSet(
   max = cms.untracked.double(4),
   nbins = cms.untracked.int32(80),
   name = cms.untracked.string("Phi"),
-  description = cms.untracked.string("#phi"),
+  description = cms.untracked.string(";#phi;Events / 0.1"),
   plotquantity = cms.untracked.string("phi")
 )
 
@@ -40,13 +40,23 @@ rapidityHisto = cms.PSet(
   plotquantity = cms.untracked.string("rapidity")
 )
 
+chargeHisto = cms.PSet(
+  itemsToPlot = cms.untracked.int32(-1),
+  min = cms.untracked.double(-2.5),
+  max = cms.untracked.double(2.5),
+  nbins = cms.untracked.int32(5),
+  name = cms.untracked.string("Charge"),
+  description = cms.untracked.string(";q (e);Events / e"),
+  plotquantity = cms.untracked.string("charge")
+)
+
 massHisto = cms.PSet(
   itemsToPlot = cms.untracked.int32(-1),
   min = cms.untracked.double(0),
   max = cms.untracked.double(200),
   nbins = cms.untracked.int32(200),
   name = cms.untracked.string("Mass"),
-  description = cms.untracked.string("Mass [GeV/c^{2}]"),
+  description = cms.untracked.string(";Mass (GeV);Events / GeV"),
   plotquantity = cms.untracked.string("mass")
 )
 
@@ -182,25 +192,40 @@ daughter0StatusHisto = cms.PSet(
 
 simpleKineGenHistos = cms.PSet(
   histograms = cms.VPSet(
-    ptHisto, etaHisto, phiHisto, pdgIdHisto, statusHisto
+    ptHisto, etaHisto, phiHisto, chargeHisto, pdgIdHisto, statusHisto
   )
 )
 
 simpleKineGenDebugHistos = cms.PSet(
-  histograms = cms.VPSet(
-    ptHisto, etaHisto, phiHisto,
-    pdgIdHisto, statusHisto,
-    motherCountHisto, motherPdgIdHisto, motherStatusHisto,
-    grandmotherCountHisto, grandmotherPdgIdHisto, grandmotherStatusHisto,
-    sisterCountHisto, sisterPdgIdHisto,
-    daughterCountHisto, daughter0PdgIdHisto, daughter0StatusHisto
-  )
+    histograms = simpleKineGenHistos.histograms + cms.VPSet(
+        motherCountHisto,
+        motherPdgIdHisto,
+        motherStatusHisto,
+        grandmotherCountHisto,
+        grandmotherPdgIdHisto,
+        grandmotherStatusHisto,
+        #sisterCountHisto,
+        #sisterPdgIdHisto,
+        #daughterCountHisto,
+        #daughter0PdgIdHisto,
+        #daughter0StatusHisto
+    )
 )
 
 composite2KineHistos = cms.PSet(
   histograms = cms.VPSet(
-    ptHisto, etaHisto, phiHisto, rapidityHisto, massHisto
+    ptHisto, etaHisto, phiHisto, chargeHisto, rapidityHisto,
+    massHisto
   )
 )
 
-
+#______________________________________________________________________________
+def make_histo_analyzer(source, configurations, items_to_plot=-1):
+  analyzer = cms.EDAnalyzer("CandViewHistoAnalyzer",
+    configurations,
+    src = cms.InputTag(source)
+  )
+  for histo in analyzer.histograms:
+    histo.itemsToPlot = items_to_plot
+  return analyzer
+## End of make_histo_analyzer
