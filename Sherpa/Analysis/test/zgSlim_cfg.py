@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 
-job = '7TeV_Zgg_h3m_h4m_v2'
+job = '7TeV_Zgg_h3z_h4z_v2'
 
 process = cms.Process("HISTO")
 
