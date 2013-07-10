@@ -515,8 +515,10 @@ def set_signal_model_normalization_integral_cache_binnings():
     Define the binning for the normalization integral caching.
     '''
     ## This setting was used as a default for Adi's e/gamma paper placeholders.
-    phosbins = ROOT.RooBinning(15, -15, 15, 'normcache')
-    phorbins = ROOT.RooBinning(15, 0.1, 25.1, 'normcache')
+    #phosbins = ROOT.RooBinning(15, -15, 15, 'normcache')#Original from Jan
+    #phorbins = ROOT.RooBinning(15, 0.1, 25.1, 'normcache')#Original from Jan
+    phosbins = ROOT.RooBinning(30, -15, 15, 'normcache')
+    phorbins = ROOT.RooBinning(25, 0.1, 25.1, 'normcache')
     phoScale.setBinning(phosbins, 'normcache')
     phoRes.setBinning(phorbins, 'normcache')
 ## End of set_signal_model_normalization_integral_cache_binnings().
@@ -624,7 +626,9 @@ def get_data(chains): # = getChains('v11')):
     if use_independent_fake_data:
         cuts0.append('!(%s)' % fake_data_cut)
         cuts1.append(fake_data_cut)
-           
+
+    print "+++++CUTS0++++++", cuts0
+    print "+++++CUTS1++++++", cuts1
     ## Get the nominal dataset
     global data
     data = {}
@@ -694,7 +698,9 @@ def calculate_mc_true_purity():
         num_zj_events = data['zj1'].sumEntries()
     else:
         num_fsr_events = data['fsr0'].sumEntries()
+        print "++++Number of Entries, fsr0: ", num_fsr_events, "  ---  ", data['fsr0'].numEntries()
         num_zj_events = data['zj0'].sumEntries()
+        print "++++Number of Entries, ZJ0: ", num_zj_events, " ----- ", data['zj0'].numEntries()
     global fsr_purity
     fsr_purity = 100 * num_fsr_events / (num_fsr_events + num_zj_events)
 ## End of calculate_mc_true_purity()
@@ -1117,6 +1123,8 @@ def process_real_data_single_dataset(label):
         title_prefix = label
     
     get_real_data(label)
+    var1 = 'phoScale'
+    var2 = 'phoRes'
     w.saveSnapshot('_'.join(['mc_truth', label]),
                    ROOT.RooArgSet(phoScaleTrue, phoResTrue))
     components_combinations = [''] + 'B E EB S SB SE SEB'.split()
@@ -1124,7 +1132,23 @@ def process_real_data_single_dataset(label):
     pvalue_combo_map = {}
     for components in components_combinations:
         process_real_data_for_label_and_components(label, components)
+        ####(Cristian) Reject crazy errors
+        fit_r = '_'.join(['fitresult', label, components])
+        print fit_r
+        err1_c = 10.
+        err2_c = 10.
+        if fit_r == 'fitresult_data_S' or fit_r == 'fitresult_data_SB' or fit_r == 'fitresult_data_SE' or fit_r == 'fitresult_data_SEB':        
+            err1_c = w.obj(fit_r).floatParsFinal().find(var1).getError()
+            err2_c = w.obj(fit_r).floatParsFinal().find(var2).getError()
+
+            print 'errScale: ', err1_c, ' errRes: ', err2_c
+        #val1_c = w.obj('_'.join(['fitresult', label, components])).floatParsFinal().find(var1).getVal()
+        #val2_c = w.obj('_'.join(['fitresult', label, components])).floatParsFinal().find(var2).getVal()
+        if err1_c > 5. or err2_c > 5. :
+            continue
+
         pvalue_combo_map[w.var('pvalue').getVal()] = components
+        
     remove_fit_components_from_name()
     plot_combo_summaries(label, components_combinations)
     ## Load the combo with the best pvalue.

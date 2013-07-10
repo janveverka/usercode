@@ -48,7 +48,7 @@ def main():
         #   print 'OPT: ', opt, 'ARG: ', arg
         
         if opt in ('-c', '--cfg_file'):
-            cfg_file = arg
+	    cfg_file = arg
 	    continue
         elif opt in ('-o', '--output'):
             Globals.outputfile = arg
@@ -87,7 +87,7 @@ def main():
             ptlow1 = arg
             if debug:
                 print '===CUTS===', Globals.cuts
-            continue
+	    continue
         elif opt == '--PtHigh':
             Globals.cuts.append('phoPt < %s' % arg)
             pthigh = '_PtHigh_%s' % arg
@@ -100,7 +100,7 @@ def main():
             r9low = '_R9Low_%s' % arg
             if debug:
                 print '===CUTS===', Globals.cuts
-            continue
+	    continue
         elif opt == '--R9High':
 	    Globals.cuts.append('phoR9 < %s' % arg)
             r9high = '_R9high_%s' % arg
@@ -108,7 +108,7 @@ def main():
                 print '===CUTS===', Globals.cuts
             continue
 	elif opt in ('-h','--help'):
-            print '========================HERE THE HELP WILL BE PUT!!! HAHA========================================'
+            print '================HERE THE HELP WILL BE PUT!!! HAHA===================='
             sys.exit(2)
 
     if debug:
@@ -126,9 +126,12 @@ def main():
 
 	Globals.cuts.append('mmMass + mmgMass < 180')
         Globals.cuts.append('minDeltaR < 1.5')
+	#Globals.cuts.append('minDeltaR > 0.1')##New (mu,Gamma)separation cut (Remove for Zgamma)
 	Globals.cuts.append('mmgMass > 52')
 	Globals.cuts.append('mu1Pt > 15')
 	Globals.cuts.append('mu2Pt > 10')
+	#Globals.cuts.append('NV > 18')
+	#Globals.cuts.append('NV <= 18')
         
         if debug:
             print 'COMMAND Line CONFIGURATION ------>:'
@@ -165,9 +168,12 @@ def main():
 
         Globals.cuts.append('mmMass + mmgMass < 180')
         Globals.cuts.append('minDeltaR < 1.5')
+	#Globals.cuts.append('minDeltaR > 0.1')##New (mu,Gamma)separation cut (Remove for Zgamma) 
 	Globals.cuts.append('mmgMass > 52')
 	Globals.cuts.append('mu1Pt > 15')
 	Globals.cuts.append('mu2Pt > 10')
+	#Globals.cuts.append('NV > 18')
+	#Globals.cuts.append('NV <= 18')
         
         if debug:
             print 'Calling Parse Configuration File Function------>:'
