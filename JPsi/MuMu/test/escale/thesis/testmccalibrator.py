@@ -74,7 +74,7 @@ for x, t, u in zip([mmgMass, mmMass, phoERes, mmgMassPeak, mmgMassWidth,
                     phoScale, phoRes],
                    ['m_{#mu#mu#gamma}', 'm_{#mu#mu}',
                     'x = E^{#gamma}/E_{true}^{#gamma} - 1', 'm_{peak}',
-                    '#sigma(m_{#mu#mu#gamma})', '#gamma scale',
+                    '#sigma_{eff}/m_{Z}', '#gamma scale',
                     '#gamma resolution'],
                    ['GeV', 'GeV', '%', 'GeV', 'GeV', '%', '%']):
     x.SetTitle(t)
@@ -225,9 +225,9 @@ def plot_mmgmass_with_fit_for_multiple_smearings(name, stargets, rtargets,
                                                  colors, plotrange=(60, 105)):
     """Plot the smeared mmg mass for a number of different smearings."""
     canvases.next(name).SetGrid()
-    plot = mmgMass.frame(roo.Range(*plotrange))
-    plot.SetTitle("m(#mu#mu#gamma) MC with paremetrized fit for multiple "
-                  "smearing scenarious")
+    mmgMass.setRange('plot', *plotrange)
+    plot = mmgMass.frame(roo.Range('plot'))
+    plot.SetTitle("")
     slabels = []
     rlabels = []
     ## Loop over the various smearings.
@@ -241,17 +241,18 @@ def plot_mmgmass_with_fit_for_multiple_smearings(name, stargets, rtargets,
         model.fitTo(mydata, roo.PrintLevel(-1), roo.Range(60, 120),
                     roo.SumW2Error(False))
         mydata.plotOn(plot, roo.LineColor(color), roo.MarkerColor(color))
-        model.plotOn(plot, roo.LineColor(color))
+        model.plotOn(plot, roo.LineColor(color), roo.Range('plot'),
+                     roo.NormRange('plot'))
         slabels.append([
-            's_{target}: %.1f %%, ' % starget +
-            '#Delta m_{#mu#mu#gamma}: %.2f #pm %.2f %%' % (
+            's\' = % 3.f %%,  ' % starget +
+            '#Delta m_{#mu#mu#gamma} = %.2f #pm %.2f %%' % (
                 100 * (mmgMassSmearPeak.getVal() / 91.2 - 1.),
                 100 * mmgMassSmearPeak.getError() / 91.2
                 ),
             ])
         rlabels.append([
-            'r_{target}: %.1f %%, ' % rtarget +
-            '#sigma_{eff}(m_{#mu#mu#gamma}): %.2f #pm %.2f %%' % (
+            'r\' = %.1f %%,  ' % rtarget +
+            '#sigma_{eff}/#mu(m_{\mu\mu\gamma}) = % .2f #pm %.2f %%' % (
                 100 * mmgMassSmearWidth.getVal() / mmgMassSmearPeak.getVal(),
                 100 * mmgMassSmearWidth.getError() / mmgMassSmearPeak.getVal(),
                 ),
@@ -259,12 +260,12 @@ def plot_mmgmass_with_fit_for_multiple_smearings(name, stargets, rtargets,
     ## End of loop over the various smearings.
     plot.Draw()
     for i, (labels, color) in enumerate(zip(slabels, colors)):
-        latex = Latex(labels, position=(0.2, 0.85 - i*0.055))
+        latex = Latex(labels, position=(0.18, 0.85 - i*0.055))
         latex.SetTextColor(color)
         latex.draw()
     for i, (labels, color) in enumerate(zip(rlabels, colors)):
         latex = Latex(labels,
-                      position=(0.2, 0.85 - len(slabels) * 0.055 - i*0.055))
+                      position=(0.18, 0.85 - (len(slabels)+1) * 0.055 - i*0.055))
         latex.SetTextColor(color)
         latex.draw()
 ## end of plot_mmgmass_with_fit_for_multiple_smearings
@@ -345,34 +346,37 @@ def main():
     #canvases.wheight = 600
     #canvases.wwidth = 600
     ROOT.gStyle.SetPadLeftMargin(0.15)
-    phoERes.setBins(140)
-    plot_phoeres_with_fit_for_multiple_smearings(
-        "PhoEResScaleScan",
-        stargets = [-10, -5, 0, 5, 10][:],
-        rtargets = [2,] * 5,
-        colors = colors,
-        plotrange = (-50, 20)
-        )
-    #plot_mmgmass_with_fit_for_multiple_smearings(
-        #"MmgMassScaleScan",
-        #stargets = [-10, -5, 0, 5, 10],
+    #phoERes.setBins(140)
+    #plot_phoeres_with_fit_for_multiple_smearings(
+        #"PhoEResScaleScan",
+        #stargets = [-10, -5, 0, 5, 10][:],
         #rtargets = [2,] * 5,
         #colors = colors,
+        #plotrange = (-50, 20)
         #)
-    phoERes.setBins(60)
-    plot_phoeres_with_fit_for_multiple_smearings(
-        "PhoEResResolutionScan",
+    mmgMass.setBins(90)
+    plot_mmgmass_with_fit_for_multiple_smearings(
+        "MmgMassScaleScan",
+        stargets = [-10, -5, 0, 5, 10],
+        rtargets = [2,] * 5,
+        colors = colors,
+        )
+    #phoERes.setBins(60)
+    #plot_phoeres_with_fit_for_multiple_smearings(
+        #"PhoEResResolutionScan",
+        #stargets = [0] * 5,
+        #rtargets = [1, 1.5, 2, 3, 5],
+        #colors = colors,
+        #plotrange = (-10, 5)
+        #)
+    mmgMass.setBins(40)
+    plot_mmgmass_with_fit_for_multiple_smearings(
+        "MmgMassResolutionScan",
         stargets = [0] * 5,
         rtargets = [1, 1.5, 2, 3, 5],
         colors = colors,
-        plotrange = (-10, 5)
+        plotrange = (75, 95),
         )
-    #plot_mmgmass_with_fit_for_multiple_smearings(
-        #"MMGMassResolutionScan",
-        #stargets = [0] * 5,
-        #rtargets = [1, 2, 3, 5, 10],
-        #colors = colors,
-        #)
     canvases.update()
 ## end of main
 
