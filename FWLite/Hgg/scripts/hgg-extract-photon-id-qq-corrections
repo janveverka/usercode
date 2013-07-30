@@ -1,0 +1,13 @@
+#! /usr/bin/env sh
+## hgg-extract-photon-id-qq-corrections
+## ------------------------------------
+## Wrapper around the hgg_extract_photon_id_qq_corrections.sh script.
+##
+## Usage: hgg-extract-photon-id-qq-corrections
+## 
+## Jan Veverka, MIT, 6 March 2012
+## Extract the photon ID Q-Q corrections
+
+DIR=$CMSSW_BASE/src/FWLite/Hgg/python/scripts
+NAME=hgg_extract_photon_id_qq_corrections.py
+env python $DIR/$NAME $@
