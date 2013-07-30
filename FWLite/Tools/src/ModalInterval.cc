@@ -4,6 +4,7 @@
 #include "TTree.h"
 #include "RooArgSet.h"
 #include "RooAbsArg.h"
+#include "RooRealVar.h"
 
 #include "FWLite/Tools/interface/ModalInterval.h"
 
@@ -55,16 +56,15 @@ ModalInterval::ModalInterval(std::vector<double> const& data, double fraction) :
 
 
 ///----------------------------------------------------------------------------
-/*
-ModalInterval::ModalInterval(RooAbsReal& x, RooDataSet const& data, 
+ModalInterval::ModalInterval(RooDataSet& data, 
 			     double fraction) :
   fraction_(fraction),
   updatedIntervalBounds_(false),
   x_(0)
 {
-  readData(x, data);
+  readData(data);
 }
-*/
+
 
 ///----------------------------------------------------------------------------
 ModalInterval::~ModalInterval(){}
@@ -193,29 +193,65 @@ ModalInterval::readData(std::vector<double> const& data) {
 
 
 ///----------------------------------------------------------------------------
-/*
+/// Returns the Half-sample Mode
+/// http://www.biomedcentral.com/1471-2105/4/31
+double
+ModalInterval::halfSampleMode() {
+  std::vector<double>::const_iterator first = x_.begin();
+  std::vector<double>::const_iterator last = x_.end();
+  while(halfSample(first, last)) {
+    /*pass*/;
+  }
+  return 0.5 * (*first + *(first+1));
+}
+
+
+///----------------------------------------------------------------------------
+/// Finds the shortest half-sample. Returns false if
+/// sample contains less than 3 entries.
+bool 
+ModalInterval::halfSample(std::vector<double>::const_iterator &first,
+			  std::vector<double>::const_iterator &last) {
+  if (first + 2 >= last) return false;
+  bool updated = false;
+  unsigned half = 0.5 * (last - first);
+  double size = *(last - 1) - *first;
+  std::vector<double>::const_iterator newFirst = first;
+  for (; first + half < last; ++first) {
+    if (*(first + half) - *first < size) {
+      size = *(first + half) - *first;
+      newFirst = first;
+      updated = true;
+    }
+  }
+  first = newFirst;
+  last = newFirst + half + 1;
+  return updated;
+}
+
+
+///----------------------------------------------------------------------------
 void
-ModalInterval::readData(RooAbsReal& x, RooDataSet const& data) {
+ModalInterval::readData(RooDataSet& data) {
   updatedIntervalBounds_ = false;
 
   /// Make sure this is a univariate dataset.
   assert(data.get()->getSize() == 1);
 
-  const Long64_t nentries = data.tree()->GetEntries();
+  const Long64_t nentries = data.numEntries();
   x_.clear();
   x_.reserve(nentries);
 
   /// Loop over all the entries and fill the values in the internal cache
   for (Int_t i=0; i < nentries; ++i) {
-    // RooAbsReal *xx = (RooAbsReal*)data.get(i)->first();
-    data.get(i);
-    x_.push_back(x.getVal());
+    RooAbsReal *xx = (RooAbsReal*)data.get(i)->first();
+    // data.get(i);
+    x_.push_back(xx->getVal());
   }
   
   /// Sort the data
   std::sort(x_.begin(), x_.end());
 }
-*/
 
 ///----------------------------------------------------------------------------
 void

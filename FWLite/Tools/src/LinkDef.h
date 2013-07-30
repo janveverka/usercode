@@ -8,6 +8,7 @@
 #include "FWLite/Tools/interface/RooChi2Calculator.h"
 #include "FWLite/Tools/interface/RooRelativisticBreitWigner.h"
 #include "FWLite/Tools/interface/RooRhoKeysPdf.h"
+#include "FWLite/Tools/interface/RooNumInverse.h"
 #include "FWLite/Tools/interface/tools.h"
 
 #ifdef __CINT__
@@ -25,6 +26,7 @@
 #pragma link C++ class RooChi2Calculator;
 #pragma link C++ class RooRelativisticBreitWigner;
 #pragma link C++ class RooRhoKeysPdf;
+#pragma link C++ class RooNumInverse;
 
 #pragma link C++ global gROOT;
 #pragma link C++ global gEnv;

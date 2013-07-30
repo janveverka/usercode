@@ -2,7 +2,7 @@
 Test the extraction of the mode and effective sigma
 using parametrized KEYS PDF.
 
-1. Create a mohter PDF of known location and width
+1. Create a mother PDF of known location and width
 2. Draw a toy sample of the mother PDF
 3. Use parametrized KEYS PDF to extract the mode and effective sigma
 4. Compare the estimate with the true

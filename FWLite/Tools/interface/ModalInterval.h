@@ -29,7 +29,7 @@
                   double fraction = 1.);
     ModalInterval(size_t n, double* first, double fraction = 1.);
     ModalInterval(std::vector<double> const& data, double fraction = 1.);
-    // ModalInterval(RooAbsReal& x, RooDataSet const& data, double fraction = 1.);
+    ModalInterval(RooDataSet& data, double fraction = 1.);
     virtual ~ModalInterval();
 
     void                getBounds(double& lower, double& upper);
@@ -37,6 +37,7 @@
     double              lowerBound();
     double              upperBound();
     std::vector<double> bounds();
+    double              halfSampleMode();
 
     ///------------------------------------------------------------------------
     template<typename T>
@@ -67,7 +68,7 @@
 
     void readData(size_t n, double* first);
     void readData(std::vector<double> const& data);
-    // void readData(RooAbsReal& x, RooDataSet const& data);
+    void readData(RooDataSet& data);
     void setFraction(double fraction);
     void setSigmaLevel(double nsigma);
     void setNumberOfEntriesToCover(size_t entries);
@@ -77,6 +78,9 @@
     virtual void updateIntervalBounds();
     /// Sets the interval bounds to the left most interval.
     void initBounds();
+    /// Finds the shortest half-sample. Returns true if successful.
+    bool halfSample(std::vector<double>::const_iterator &first,
+		    std::vector<double>::const_iterator &last);
 
     /// Interval contains at least fraction_ of the total entries.
     double fraction_;

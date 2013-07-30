@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Project: RooFit                                                           *
  * Package: RooFitModels                                                     *
- * @(#)root/roofit:$Id: RooRhoKeysPdf.cxx,v 1.2 2012/05/20 12:15:38 veverka Exp $
+ * @(#)root/roofit:$Id: RooRhoKeysPdf.cxx,v 1.3 2012/05/20 12:45:54 veverka Exp $
  * Authors:                                                                  *
  *   GR, Gerhard Raven,   UC San Diego,        raven@slac.stanford.edu       *
  *   DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu                 *
@@ -108,7 +108,7 @@ RooRhoKeysPdf::RooRhoKeysPdf(const RooRhoKeysPdf& other, const char* name):
   _binWidth = other._binWidth;
 
   // copy over data and weights... not necessary, commented out for speed
-  // in fact, necessary to introduce dependence or rho ... (JV)
+  // in fact, necessary to introduce dependence on rho ... (JV)
    _dataPts = new Double_t[_nEvents];
    _weights = new Double_t[_nEvents];  
    for (Int_t i= 0; i<_nEvents; i++) {
@@ -214,6 +214,10 @@ void RooRhoKeysPdf::calculateLookupTable() const {
 
 //_____________________________________________________________________________
 Double_t RooRhoKeysPdf::evaluate() const {
+  // if (*_rhoSnapshot != _rho) {
+  //   cout << "Updating lookup table" << endl;
+  //   calculateLookupTable();
+  // }
   Int_t i = (Int_t)floor((Double_t(_x)-_lo)/_binWidth);
   if (i<0) {
     cerr << "got point below lower bound:"

@@ -1,5 +1,4 @@
-"""
-Utility to extract RooDataSet from a TTree.
+"""Utility to extract RooDataSet from a TTree.
 
 Data:
   - tree: source TTree
@@ -33,10 +32,9 @@ This module has several design flaws and should be rewritten along these lines:
 import os
 import sys
 import ROOT
-import FWLite.Tools.roofit as roo
 
-## from JPsi.MuMu.common.basicRoot import *
-## from JPsi.MuMu.common.roofit import *
+from JPsi.MuMu.common.basicRoot import *
+from JPsi.MuMu.common.roofit import *
 
 ## Configuration
 ## tree = TTree()
@@ -53,7 +51,7 @@ def init():
 
     ## Default values
     variables = []
-    weight = ROOT.RooRealVar( 'w', '1', 1 )
+    weight = RooRealVar( 'w', '1', 1 )
     name, title = 'data', 'data'
 
     ## Default/example categories
@@ -62,7 +60,7 @@ def init():
     cuts = []
     
     global dataset
-    dataset = ROOT.RooDataSet()
+    dataset = RooDataSet()
 ## End of init_globals().
     
 
@@ -110,11 +108,10 @@ def get(**kwargs):
     ## Initialize
     set(**kwargs)
     # print '+++ DEBUG before varSet ctor:', str(variables + categories + [weight])
-    varSet = ROOT.RooArgSet(*(variables + categories + [weight]))
+    varSet = RooArgSet(*(variables + categories + [weight]))
     # print '+++ DEBUG after varSet ctor: ', 
-    varSet.Print()
-    dataset = ROOT.RooDataSet(name, title, varSet, 
-                              roo.WeightVar(weight.GetName()))
+    # varSet.Print()
+    dataset = RooDataSet(name, title, varSet, WeightVar( weight.GetName() ) )
     #dataset.setWeightVar( weight )
     #dataset = RooDataSet('data', 'data', varSet )
 
@@ -176,7 +173,7 @@ def main():
 
     #gROOT.Set
 
-    w = ROOT.RooWorkspace('w', 'w')
+    w = RooWorkspace('w', 'w')
     #s = w.factory('s[-5,5]')
     kRatio = w.factory('kRatio[-20,20]')
     mmgMass = w.factory('mmgMass[40,140]')
@@ -192,7 +189,7 @@ def main():
     canvases.append( TCanvas('mmMass', 'mmMass') )
     plot(mmMass)
 
-    ## get( variable = ROOT.RooRealVar('k', 'kRatio', 0.5, 1.5) )
+    ## get( variable = RooRealVar('k', 'kRatio', 0.5, 1.5) )
     ## canvases.append( TCanvas('k_noweights', 'k_noweights') )
     ## frame = plot()
     ## dataset.plotOn( frame, Cut('subdet==subdet::Barrel'), MarkerColor(kBlue),
@@ -204,12 +201,12 @@ def main():
     ## canvases.append( TCanvas('k_withweights', 'k_withweights') )
     ## frame = plot()
     ## dataset.plotOn( frame, Cut('subdet==subdet::Barrel'), MarkerColor(kBlue),
-    ##                 LineColor(kBlue), DataError(ROOT.RooAbsData.SumW2) )
+    ##                 LineColor(kBlue), DataError(RooAbsData.SumW2) )
     ## dataset.plotOn( frame, Cut('subdet==subdet::Endcaps'), MarkerColor(kRed),
     ##                 LineColor(kRed) )
     ## frame.Draw()
 
-    ## get( variable = ROOT.RooRealVar('logik', '-log(kRatio)', -0.5, 0.5) )
+    ## get( variable = RooRealVar('logik', '-log(kRatio)', -0.5, 0.5) )
     ## canvases.append( TCanvas() )
     ## frame = plot()
     ## dataset.plotOn( frame, Cut('r9==r9::High'), MarkerColor(kBlue),
@@ -222,4 +219,3 @@ def main():
 if __name__ == "__main__":
     main()
     import user
-
