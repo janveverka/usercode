@@ -7,7 +7,10 @@ Test usage: python -i resampler.py
 import math
 import random
 import ROOT
+#import FWLite.Tools.tools as tools
 import FWLite.Tools.roofit as roo
+
+vault = []
 
 class Resampler():
     '''
@@ -16,6 +19,8 @@ class Resampler():
     #__________________________________________________________________________
     def __init__(self, data):
         self.data = data.Clone()
+        self.data.SetName(data.GetName())
+        self.data.SetTitle(data.GetTitle())
     ## End of __init__
     
     
@@ -99,6 +104,43 @@ class Resampler():
         return resampled_data
     ## End of bootstrap(..)
     
+    #__________________________________________________________________________
+    def downsample(self, max_entries, mode='equidistant'):
+        '''
+        Reduces the size of data by averaging over neighboring events.
+        Produces fine-grained histogram and then replaces the original
+        with bin centers and contents.
+        '''
+        if self.data.get().getSize() > 1:
+            raise RuntimeError, (__name__ + ' Resampler.downsample: not'
+                                 'implemented for multidimensional data!')
+        row = self.data.get()
+        xvar = row.first()
+        num_hist = 0
+        while ROOT.gDirectory.Get('hdown%d' % num_hist):
+            num_hist += 1
+        hname = 'hdown%d' % num_hist
+        expression = "%s>>%s(%d,%f,%f)" % (xvar.GetName(), hname, max_entries,
+                                           xvar.getMin(), xvar.getMax())
+        self.data.tree().Draw(expression, '', 'goff')
+        histogram = ROOT.gDirectory.Get(hname)
+        weight = ROOT.RooRealVar('weight', 'weight', 1.)
+        row.add(weight)        
+        resampled_data = ROOT.RooDataSet(self.data.GetName(),
+                                         self.data.GetTitle(), 
+                                         row, 'weight')
+                                         
+        for xbin in range(1, max_entries + 1):
+            ibin = histogram.GetBin(xbin)
+            xvar.setVal(histogram.GetBinCenter(ibin))
+            histogram.GetBinContent(ibin)
+            if histogram.GetBinContent(ibin) > 0:
+                resampled_data.addFast(row, histogram.GetBinContent(ibin))
+
+        return resampled_data
+    ## End of downsample(..)
+        
+        
 ## End of Resampler
 
 
@@ -163,6 +205,39 @@ def test_bootstrapping():
 
 
 #______________________________________________________________________________
+def test_downsampling():
+    '''
+    Tests the downsampling.
+    '''
+    import FWLite.Tools.canvases as canvases
+    print '== Downsampling Test =='
+    big_data = get_toy_data(1000)
+    resampler = Resampler(big_data)
+    small_data = resampler.downsample(50)
+    keep(big_data, small_data)
+    big_data.Print()
+    small_data.Print()
+
+    xvar = big_data.get()['x']
+    xvar.setBins(20)
+    plot = xvar.frame()
+    big_data.plotOn(plot, roo.MarkerColor(ROOT.kRed), roo.LineColor(ROOT.kRed))
+    small_data.plotOn(plot, roo.MarkerStyle(24))
+    canvases.next('downsampling_test')
+    plot.Draw()
+    keep(plot)
+## End of test_downsampling()
+
+
+#______________________________________________________________________________
+def keep(*args):
+    '''
+    Keeps a reference to something to prevent its garbage collection.
+    '''
+    vault.extend(args)
+## End of keep
+
+#______________________________________________________________________________
 def get_toy_data(size=100):
     '''
     Create a toy dataset of the given size.
@@ -179,8 +254,9 @@ def test():
     '''
     Tests the Resampler class.
     '''
-    test_prescaling()
-    test_bootstrapping()
+    #test_prescaling()
+    #test_bootstrapping()
+    test_downsampling()
 ## End of test()
 
 

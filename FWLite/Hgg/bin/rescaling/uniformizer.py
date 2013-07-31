@@ -8,7 +8,7 @@ import FWLite.Tools.roofit as roo
 import FWLite.Tools.canvases as canvases
 import FWLite.Tools.tools as tools
 
-from qqcorrector import QQCorrector
+from FWLite.Tools.qqcorrector import QQCorrector
 
 class Uniformizer:
     '''

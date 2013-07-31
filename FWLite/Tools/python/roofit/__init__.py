@@ -25,3 +25,27 @@ for method in dir(ROOT.RooFit):
         else:
             setattr(sys.modules[__name__], method, getattr(ROOT.RooFit, method))
 
+#______________________________________________________________________________
+def silence():
+    '''
+    Turns of RooFit messages.
+    '''
+    msgservice = ROOT.RooMsgService.instance()
+    roo = ROOT.RooFit
+    msgservice.setSilentMode(True)
+    msgservice.getStream(0).removeTopic(roo.Caching)
+    msgservice.getStream(1).removeTopic(roo.Caching)
+    msgservice.getStream(0).removeTopic(roo.Minimization)
+    msgservice.getStream(1).removeTopic(roo.Minimization)
+    msgservice.getStream(0).removeTopic(roo.Plotting)
+    msgservice.getStream(1).removeTopic(roo.Plotting)
+    msgservice.getStream(0).removeTopic(roo.Fitting)
+    msgservice.getStream(1).removeTopic(roo.Fitting)
+    msgservice.getStream(0).removeTopic(roo.Eval)
+    msgservice.getStream(1).removeTopic(roo.Eval)
+    msgservice.getStream(0).removeTopic(roo.Integration)
+    msgservice.getStream(1).removeTopic(roo.Integration)
+
+    msgservice.setStreamStatus(0, False)
+    msgservice.setStreamStatus(1, False)
+## End of silence()  

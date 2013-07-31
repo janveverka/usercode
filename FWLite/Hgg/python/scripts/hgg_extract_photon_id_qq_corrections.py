@@ -8,8 +8,8 @@ Jan Veverka, MIT, jan.veverka@cern.ch
 varnames = 'r9b sieieb setab'.split()
 raw_name = 's12-zllm50-v7n'
 target_name = 'r12a-pho-j22-v1'
-#option = 'skim10k'
-option = 'noskim'
+option = 'skim10k'
+#option = 'noskim'
 max_entries = 1000
 outdir = 'qqplots'
 batch_mode = 'yes'
