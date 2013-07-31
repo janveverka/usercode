@@ -143,7 +143,7 @@ class QQCorrector(ROOT.RooNumInverse):
         plot.SetTitle(self.GetTitle())
         plot.GetXaxis().SetTitle('Raw ' + self.xvar.GetTitle())
         plot.GetYaxis().SetTitle('(Corrected - Raw) #times 100')
-        adifference = ROOT.RooFormulaVar('adiff', '@0 - @1', 
+        adifference = ROOT.RooFormulaVar('adiff', '100 * (@0 - @1)', 
                                          ROOT.RooArgList(self, self.xvar))
         adifference.plotOn(plot, *args)
         return plot
@@ -155,7 +155,7 @@ class QQCorrector(ROOT.RooNumInverse):
         plot.SetTitle(self.GetTitle())
         plot.GetXaxis().SetTitle('Raw ' + self.xvar.GetTitle())
         plot.GetYaxis().SetTitle('(Corrected / Raw - 1) #times 100')
-        rdifference = ROOT.RooFormulaVar('adiff', '@0 / @1 - 1', 
+        rdifference = ROOT.RooFormulaVar('adiff', '100 * (@0 / @1 - 1)', 
                                          ROOT.RooArgList(self, self.xvar))
         rdifference.plotOn(plot, *args)
         return plot
