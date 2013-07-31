@@ -134,12 +134,12 @@ class DataSource:
         datasets = []
         ## Get a dataset for each expression-selection pair
         for expr, cuts in zip(cfg.expressions, cfg.selections):
-            if hasattr(cfg, 'binning') and len(cfg.binning.split(',')) == 3:
-                nbins, varmin, varmax = map(float, cfg.binning.split(','))
+            if hasattr(cfg, 'qqbinning') and len(cfg.qqbinning.split(',')) == 3:
+                nbins, varmin, varmax = map(float, cfg.qqbinning.split(','))
                 variable = ROOT.RooRealVar(cfg.name, expr, varmin, varmax)
                 variable.setBins(int(nbins))
             else:
-                variable = ROOT.RooRealVar(cfg.name, expr)
+                variable = ROOT.RooRealVar(cfg.name, expr, 0.)
             cuts = [cuts]
             if max_entries > 0:
                 cuts.append('Entry$ < %d/2' % max_entries)
@@ -172,7 +172,8 @@ def main(varnames = 'r9b sieieb setab'.split()[:1],
          raw_name = 's12-zllm50-v7n',
          target_name = 'r12a-pho-j22-v1',
          option = 'skim10k',
-         max_entries = 50000):
+         max_entries = 50000,
+         rhow=0.8):
     '''
     Main entry point of execution.
     '''
@@ -187,7 +188,7 @@ def main(varnames = 'r9b sieieb setab'.split()[:1],
     for varname in varnames:
         print 'Q-Q Extractor: Processing', varname, '...'
         extractor = QQExtractor(varname, raw_name, target_name, option, 
-                                max_entries)
+                                max_entries, rhow)
         extractors.append(extractor)
         extractor.make_plots()
         canvases.update()

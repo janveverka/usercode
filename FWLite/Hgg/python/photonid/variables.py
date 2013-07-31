@@ -70,73 +70,85 @@ configs = [
            title       = 'Barrel Electron r_{9}',
            expressions = epair('r9'),
            binning     = '110,0.1,1.2',
-           selections  = bcuts),
+           selections  = bcuts,
+           qqbinning   = '70,0.29,0.99',),
            
     Config(name        = 'r9e',
            title       = 'Endcap Electron r_{9}',
            expressions = epair('r9'),
            binning     = '110,0.1,1.2',
-           selections  = ecuts),
+           selections  = ecuts,
+           qqbinning   = '60,0.4,1.0',),
            
     Config(name        = 'setab',
-           title       = 'Barrel SC #sigma_{#eta}',
-           expressions = epair('scetawidth'),
+           title       = 'Barrel SC #sigma_{#eta} #times 1000',
+           expressions = epair('scetawidth * 1000'),
            binning     = '100,0.,0.03',
-           selections  = bcuts),
+           selections  = bcuts,
+           qqbinning   = '50,6,16',),
            
     Config(name        = 'setae',
-           title       = 'Endcap SC #sigma_{#eta}',
-           expressions = epair('scetawidth'),
+           title       = 'Endcap SC #sigma_{#eta} #times 1000',
+           expressions = epair('scetawidth * 1000'),
            binning     = '100,0.,0.05',
-           selections  = ecuts),
+           selections  = ecuts,
+           qqbinning   = '50,10,35',),
            
     Config(name        = 'sphib',
-           title       = 'Barrel SC #sigma_{#phi}',
-           expressions = epair('scphiwidth'),
+           title       = 'Barrel SC #sigma_{#phi} #times 1000',
+           expressions = epair('scphiwidth * 1000'),
            binning     = '100,0.,0.2',
-           selections  = bcuts),
+           selections  = bcuts,
+           qqbinning   = '50,6,106',),
            
     Config(name        = 'sphie',
-           title       = 'Endcap SC #sigma_{#phi}',
-           expressions = epair('scphiwidth'),
+           title       = 'Endcap SC #sigma_{#phi} #times 1000',
+           expressions = epair('scphiwidth * 1000'),
            binning     = '100,0.,0.2',
-           selections  = ecuts),
+           selections  = ecuts,
+           qqbinning   = '50,6,106',),
            
     Config(name        = 'sieieb',
-           title       = 'Barrel SC #sigma_{i#etai#eta}',
-           expressions = epair('sigietaieta'),
+           title       = 'Barrel SC #sigma_{i#etai#eta} #times 1000',
+           expressions = epair('sigietaieta * 1000'),
            binning     = '130,0.001,0.014',
-           selections  = bcuts),
+           selections  = bcuts,
+           qqbinning   = '60,6,12',),
            
     Config(name        = 'sieiee',
-           title       = 'Endcap SC #sigma_{i#etai#eta}',
-           expressions = epair('sigietaieta'),
+           title       = 'Endcap SC #sigma_{i#etai#eta} #times 1000',
+           expressions = epair('sigietaieta * 1000'),
            binning     = '100,0.01,0.035',
-           selections  = ecuts),
+           selections  = ecuts,
+           qqbinning   = '60,19,34',),
            
     Config(name        = 'cieipb',
            title       = 'Barrel SC cov(i#eta,i#phi) #times 10^{4}',
            expressions = epair('idmva_CoviEtaiPhi * 1e4'),
            binning     = '200,-2.5,2.5',
-           selections  = bcuts),
+           selections  = bcuts,
+           qqbinning   = '50,-1,1',),
            
     Config(name        = 'cieipe',
            title       = 'Endcap SC cov(i#eta,i#phi) #times 10^{4}',
            expressions = epair('idmva_CoviEtaiPhi * 1e4'),
            binning     = '100,-10,10',
-           selections  = ecuts),
+           selections  = ecuts,
+           qqbinning   = '50,-6,4',),
            
     Config(name        = 's4ratiob',
            title       = 'Barrel S_{4} Ratio',
            expressions = epair('idmva_s4ratio'),
            binning     = '160,0.3,1.1',
-           selections  = bcuts),
+           selections  = bcuts,
+           qqbinning   = '50,0.45,0.95',),
            
     Config(name        = 's4ratioe',
            title       = 'Endcap S_{4} Ratio',
            expressions = epair('idmva_s4ratio'),
            binning     = '160,0.3,1.1',
-           selections  = ecuts),
+           selections  = ecuts,
+           qqbinning   = '50,0.45,0.95',),
            
 ]
 
@@ -145,10 +157,14 @@ configs = [
 this_module = sys.modules[__name__]
 config_map = {}
 for cfg in configs:
+    ## Fill in defaults
     if not hasattr(cfg, 'unit'):
         cfg.unit = ''
     if not hasattr(cfg, 'selections'):
         cfg.selections = [''] * len(cfg.expressions)
+    if not hasattr(cfg, 'qqbinning'):
+        cfg.qqbinning = cfg.binning        
+    ## Attach to the module and to a dictionary
     setattr(this_module, cfg.name, cfg)
     config_map[cfg.name] = cfg
   
