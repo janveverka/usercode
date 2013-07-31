@@ -135,7 +135,31 @@ class QQCorrector(ROOT.RooNumInverse):
         plot.GetYaxis().SetTitle('Corrected ' + self.xvar.GetTitle())
         self.plotOn(plot, *args)
         return plot
-    ## End of get_correction_plot(..)      
+    ## End of get_correction_plot(..)
+    
+    #___________________________________________________________________________
+    def get_absolute_difference_plot(self, *args):
+        plot = self.xvar.frame()
+        plot.SetTitle(self.GetTitle())
+        plot.GetXaxis().SetTitle('Raw ' + self.xvar.GetTitle())
+        plot.GetYaxis().SetTitle('(Corrected - Raw) #times 100')
+        adifference = ROOT.RooFormulaVar('adiff', '@0 - @1', 
+                                         ROOT.RooArgList(self, self.xvar))
+        adifference.plotOn(plot, *args)
+        return plot
+    ## End of get_absolute_difference_plot(..)
+    
+    #___________________________________________________________________________
+    def get_relative_difference_plot(self, *args):
+        plot = self.xvar.frame()
+        plot.SetTitle(self.GetTitle())
+        plot.GetXaxis().SetTitle('Raw ' + self.xvar.GetTitle())
+        plot.GetYaxis().SetTitle('(Corrected / Raw - 1) #times 100')
+        rdifference = ROOT.RooFormulaVar('adiff', '@0 / @1 - 1', 
+                                         ROOT.RooArgList(self, self.xvar))
+        rdifference.plotOn(plot, *args)
+        return plot
+    ## End of get_relative_difference_plot(..)
     
 ## End of class QQCorrector
 
