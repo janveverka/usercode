@@ -15,48 +15,6 @@ from FWLite.Hgg.photonid.variables import config_map
 from FWLite.Hgg.photonid.corrector import PhotonIdCorrector
 
 #______________________________________________________________________________
-class DataSource:
-    '''
-    Holds data related to a given data source.
-    '''
-    #__________________________________________________________________________
-    def __init__(self, name, varname, option, max_entries):
-        self.name = name
-        self.varname = varname
-        #self.max_entries = max_entries
-        #self.option = self.option
-        tree = trees.get(name, option)
-        cfg = config_map[varname]
-        datasets = []
-        ## Get a dataset for each expression-selection pair
-        for expr, cuts in zip(cfg.expressions, cfg.selections):
-            if hasattr(cfg, 'binning') and len(cfg.binning.split(',')) == 3:
-                nbins, varmin, varmax = map(float, cfg.binning.split(','))
-                variable = ROOT.RooRealVar(cfg.name, expr, varmin, varmax)
-                variable.setBins(int(nbins))
-            else:
-                variable = ROOT.RooRealVar(cfg.name, expr)
-            cuts = [cuts]
-            if max_entries > 0:
-                cuts.append('Entry$ < %d' % max_entries)
-            dataset = datasetly.get(tree=tree, variable=variable, cuts=cuts)
-            variable = dataset.get().first()
-            variable.SetTitle(cfg.title)
-            variable.setUnit(cfg.unit)
-            datasets.append(dataset)
-        ## End of loop over expressions and selections
-        dataset = datasets[0]
-        for further_dataset in datasets[1:]:
-            dataset.append(further_dataset)
-        dataset.SetTitle('Raw ' + name.split('-')[0].capitalize())
-        dataset.SetName('raw_' + name.split('-')[0])
-        self.data = dataset
-        self.xvar = dataset.get().first()
-    ## End of DataSource.__init__(..)
-## End of class DataSource
-  
-
-#______________________________________________________________________________
 class QQExtractor:
     '''
     Extracts the Q-Q corrections for photon ID variables.
@@ -141,7 +99,57 @@ class QQExtractor:
 
 
 #______________________________________________________________________________
-def main(varnames = 'r9b sieieb setab'.split(),
+class DataSource:
+    '''
+    Holds data related to a given data source.
+    '''
+    #__________________________________________________________________________
+    def __init__(self, name, varname, option, max_entries):
+        print 'DEBUG', self.__class__.__name__, '__init__' 
+        self.name = name
+        self.varname = varname
+        #self.max_entries = max_entries
+        #self.option = self.option
+        tree = trees.get(name, option)
+        cfg = config_map[varname]
+        datasets = []
+        ## Get a dataset for each expression-selection pair
+        for expr, cuts in zip(cfg.expressions, cfg.selections):
+            if hasattr(cfg, 'binning') and len(cfg.binning.split(',')) == 3:
+                nbins, varmin, varmax = map(float, cfg.binning.split(','))
+                variable = ROOT.RooRealVar(cfg.name, expr, varmin, varmax)
+                variable.setBins(int(nbins))
+            else:
+                variable = ROOT.RooRealVar(cfg.name, expr)
+            cuts = [cuts]
+            if max_entries > 0:
+                cuts.append('Entry$ < %d' % max_entries)
+            dataset = datasetly.get(tree=tree, variable=variable, cuts=cuts)
+            variable = dataset.get().first()
+            variable.SetTitle(cfg.title)
+            variable.setUnit(cfg.unit)
+            datasets.append(dataset)
+        ## End of loop over expressions and selections
+        dataset = datasets[0]
+        for further_dataset in datasets[1:]:
+            dataset.append(further_dataset)
+        dataset.SetTitle('Raw ' + name.split('-')[0].capitalize())
+        dataset.SetName('raw_' + name.split('-')[0])
+        print 'max_entries, numEntries', max_entries, dataset.numEntries()
+        #if max_entries > 0 and dataset.numEntries() > max_entries:
+            ### Downsample to reduce the size of data
+            #dataset.Print()
+            #print 'QQ DEBUG: Downsampling to', max_entries
+            #dataset = Resampler(dataset).downsample(max_entries)
+            #dataset.Print()
+        self.data = dataset
+        self.xvar = dataset.get().first()
+    ## End of DataSource.__init__(..)
+## End of class DataSource
+  
+
+#______________________________________________________________________________
+def main(varnames = 'r9b sieieb setab'.split()[:1],
          raw_name = 's12-zllm50-v7n',
          target_name = 'r12a-pho-j22-v1',
          option = 'skim10k',

@@ -10,7 +10,7 @@ raw_name = 's12-zllm50-v7n'
 target_name = 'r12a-pho-j22-v1'
 #option = 'skim10k'
 option = 'noskim'
-max_entries = 5000
+max_entries = 50000
 outdir = 'qqplots'
 batch_mode = 'yes'
 
