@@ -11,9 +11,50 @@ import FWLite.Tools.canvases as canvases
 import FWLite.Tools.dataset as datasetly
 import FWLite.Hgg.trees as trees
 
-from FWLite.Tools.resampler import Resampler
 from FWLite.Hgg.photonid.variables import config_map
 from FWLite.Hgg.photonid.corrector import PhotonIdCorrector
+
+#______________________________________________________________________________
+class DataSource:
+    '''
+    Holds data related to a given data source.
+    '''
+    #__________________________________________________________________________
+    def __init__(self, name, varname, option, max_entries):
+        self.name = name
+        self.varname = varname
+        #self.max_entries = max_entries
+        #self.option = self.option
+        tree = trees.get(name, option)
+        cfg = config_map[varname]
+        datasets = []
+        ## Get a dataset for each expression-selection pair
+        for expr, cuts in zip(cfg.expressions, cfg.selections):
+            if hasattr(cfg, 'binning') and len(cfg.binning.split(',')) == 3:
+                nbins, varmin, varmax = map(float, cfg.binning.split(','))
+                variable = ROOT.RooRealVar(cfg.name, expr, varmin, varmax)
+                variable.setBins(int(nbins))
+            else:
+                variable = ROOT.RooRealVar(cfg.name, expr)
+            cuts = [cuts]
+            if max_entries > 0:
+                cuts.append('Entry$ < %d' % max_entries)
+            dataset = datasetly.get(tree=tree, variable=variable, cuts=cuts)
+            variable = dataset.get().first()
+            variable.SetTitle(cfg.title)
+            variable.setUnit(cfg.unit)
+            datasets.append(dataset)
+        ## End of loop over expressions and selections
+        dataset = datasets[0]
+        for further_dataset in datasets[1:]:
+            dataset.append(further_dataset)
+        dataset.SetTitle('Raw ' + name.split('-')[0].capitalize())
+        dataset.SetName('raw_' + name.split('-')[0])
+        self.data = dataset
+        self.xvar = dataset.get().first()
+    ## End of DataSource.__init__(..)
+## End of class DataSource
+  
 
 #______________________________________________________________________________
 class QQExtractor:
@@ -23,10 +64,15 @@ class QQExtractor:
     #__________________________________________________________________________
     def __init__(self, varname, raw_name, target_name, option='noskim',
                  max_entries=-1, rho=0.7):
+        #print 'DEBUG', self.__class__.__name__, '__init__' 
+        print 'DEBUG', self.__class__.__name__, 'get raw DataSource' 
         self.raw    = DataSource(raw_name   , varname, option, max_entries)
+        print 'DEBUG', self.__class__.__name__, 'get target DataSource'         
         self.target = DataSource(target_name, varname, option, max_entries)
+        print 'DEBUG', self.__class__.__name__, 'get the corrector'         
         self.corrector = PhotonIdCorrector(self.raw.data, self.target.data, 
                                            rho)
+        print 'DEBUG', self.__class__.__name__, 'postprocess_corrector'         
         self.postprocess_corrector()
     ## End of QQExtractor.__init__(..)
     
@@ -36,9 +82,7 @@ class QQExtractor:
         Customizes corrector name and title and updetes raw and target sources
         with corrector pdfs.
         '''
-        name = '_'.join([self.raw.xvar.GetName(),
-                         self.raw.name.split('-')[0], 'to',
-                         self.target.name.split('-')[0], 'qqcorrector'])
+        name = '_'.join([self.raw.xvar.GetName(), 'qq'])
         title = ' '.join([self.raw.xvar.GetTitle(),
                           self.raw   .name.split('-')[0].capitalize(), 'to',
                           self.target.name.split('-')[0].capitalize(),
@@ -82,65 +126,26 @@ class QQExtractor:
         self.plots.append(plot)
     ## End of QQExtractor.draw_and_append(plot)
     
+    #__________________________________________________________________________
+    def write_corrector_to_file(self, file_name):
+        self.corrector.write_to_file(file_name, False)
+        ## Also as an interpolation graph
+        graph = self.corrector.get_interpolation_graph()
+        out_file = ROOT.TFile.Open(file_name, "update")
+        graph.Write()
+        #out_file.Write()
+        out_file.Close()      
+    ## End of QQExtractor.write_to_file(..)
+    
 ## End of class QQExtractor
 
 
 #______________________________________________________________________________
-class DataSource:
-    '''
-    Holds data related to a given data source.
-    '''
-    #__________________________________________________________________________
-    def __init__(self, name, varname, option, max_entries):
-        print 'DEBUG', self.__class__.__name__, '__init__' 
-        self.name = name
-        self.varname = varname
-        #self.max_entries = max_entries
-        #self.option = self.option
-        tree = trees.get(name, option)
-        cfg = config_map[varname]
-        datasets = []
-        ## Get a dataset for each expression-selection pair
-        for expr, cuts in zip(cfg.expressions, cfg.selections):
-            if hasattr(cfg, 'binning') and len(cfg.binning.split(',')) == 3:
-                nbins, varmin, varmax = map(float, cfg.binning.split(','))
-                variable = ROOT.RooRealVar(cfg.name, expr, varmin, varmax)
-                variable.setBins(int(nbins))
-            else:
-                variable = ROOT.RooRealVar(cfg.name, expr)
-            cuts = [cuts]
-            #if max_entries > 0:
-                #cuts.append('Entry$ < %d' % max_entries)
-            dataset = datasetly.get(tree=tree, variable=variable, cuts=cuts)
-            variable = dataset.get().first()
-            variable.SetTitle(cfg.title)
-            variable.setUnit(cfg.unit)
-            datasets.append(dataset)
-        ## End of loop over expressions and selections
-        dataset = datasets[0]
-        for further_dataset in datasets[1:]:
-            dataset.append(further_dataset)
-        dataset.SetTitle('Raw ' + name.split('-')[0].capitalize())
-        dataset.SetName('raw_' + name.split('-')[0])
-        print 'max_entries, numEntries', max_entries, dataset.numEntries()
-        if max_entries > 0 and dataset.numEntries() > max_entries:
-            ## Downsample to reduce the size of data
-            dataset.Print()
-            print 'QQ DEBUG: Downsampling to', max_entries
-            dataset = Resampler(dataset).downsample(max_entries)
-            dataset.Print()
-        self.data = dataset
-        self.xvar = dataset.get().first()
-    ## End of DataSource.__init__(..)
-## End of class DataSource
-  
-
-#______________________________________________________________________________
-def main(varnames = 'r9b sieieb setab'.split()[:1],
+def main(varnames = 'r9b sieieb setab'.split(),
          raw_name = 's12-zllm50-v7n',
          target_name = 'r12a-pho-j22-v1',
          option = 'skim10k',
-         max_entries = 14000):
+         max_entries = 1000):
     '''
     Main entry point of execution.
     '''
@@ -153,29 +158,41 @@ def main(varnames = 'r9b sieieb setab'.split()[:1],
     if os.path.isfile(out_file_name):
         os.remove(out_file_name)
     for varname in varnames:
-        print 'QQ QQ QQ Processing', varname, '...'
+        print 'Q-Q Extractor: Processing', varname, '...'
         extractor = QQExtractor(varname, raw_name, target_name, option, 
                                 max_entries)
+        extractors.append(extractor)
         extractor.make_plots()
         canvases.update()
-        corr = extractor.corrector
-        corr.SetName(corr.GetName().replace(name, 'qq'))
-        corr.write_to_file(out_file_name, False)
-        graph = corr.get_interpolation_graph()
-        out_file = ROOT.TFile.Open(out_file_name, "update")
-        graph.Write()
-        out_file.Write()
-        extractors.append(extractor)
-        out_file.Close()
+        #corr = extractor.corrector
+        #corr.SetName(corr.GetName().replace(name, 'qq'))
+        #corr.write_to_file(out_file_name, False)
+        #graph = corr.get_interpolation_graph()
+        #out_file = ROOT.TFile.Open(out_file_name, "update")
+        #graph.Write()
+        #out_file.Write()
+        #out_file.Close()
 ## End of main()
 
 
 #______________________________________________________________________________
-def save_and_cleanup(outdir = 'plots'):    
+def save_and_cleanup(outdir = 'plots'):
+    ## Save plots
     if not os.path.exists(outdir):
         print "Creating folder `%s'" % outdir
         os.mkdir(outdir)
+    else:
+        ## TODO: remove outdir
+        pass
+    canvases.make_plots(['png'], outdir)
     canvases.make_pdf_from_eps(outdir)
+    ## Store corrections
+    for extractor in extractors:
+        raw    = extractor.raw   .name.split('-')[0]
+        target = extractor.target.name.split('-')[0]
+        out_file_name = '_'.join([raw, 'to', target, 'qqcorrections.root'])
+        extractor.write_corrector_to_file(outdir + '/' + out_file_name)
+    ## Cleanup
     trees.close_files()
 ## End of save_and_cleanup()
 

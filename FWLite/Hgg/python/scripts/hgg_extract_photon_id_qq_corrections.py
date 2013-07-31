@@ -5,12 +5,12 @@ Jan Veverka, MIT, jan.veverka@cern.ch
 '''
 
 ## Defaults
-varnames = 'r9b sieieb setab'.split()
+varnames = 'r9b sieieb setab'.split()[:1]
 raw_name = 's12-zllm50-v7n'
 target_name = 'r12a-pho-j22-v1'
-option = 'skim10k'
-#option = 'noskim'
-max_entries = 1000
+#option = 'skim10k'
+option = 'noskim'
+max_entries = 5000
 outdir = 'qqplots'
 batch_mode = 'yes'
 
@@ -19,9 +19,11 @@ import ROOT
 if batch_mode == 'yes':
     ROOT.gROOT.SetBatch(True)
 
+import FWLite.Tools.roofit as roo
 import FWLite.Hgg.photonid.qqextractor as extractor
 
 ## Run!
+roo.silence()
 extractor.main(varnames, raw_name, target_name, option, max_entries)
 extractor.save_and_cleanup(outdir)
 
