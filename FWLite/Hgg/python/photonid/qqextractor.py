@@ -11,6 +11,7 @@ import FWLite.Tools.canvases as canvases
 import FWLite.Tools.dataset as datasetly
 import FWLite.Hgg.trees as trees
 
+from FWLite.Tools.resampler import Resampler
 from FWLite.Hgg.photonid.variables import config_map
 from FWLite.Hgg.photonid.corrector import PhotonIdCorrector
 
@@ -58,14 +59,32 @@ class QQExtractor:
         and the corrected data.
         '''
         for src in [self.raw, self.target]:
+            plot = self.get_plot_of_source(src)
             canvases.next(src.varname + '_' + src.data.GetName()).SetGrid()
-            self.draw_and_append(self.get_plot_of_source(src))
+            self.draw_and_append(plot)
+            ## Also with log scale on y-axis
+            c = canvases.next(src.varname + '_' + src.data.GetName() + '_logy')
+            c.SetGrid()
+            c.SetLogy()
+            plot.Draw()
         
         canvases.next(self.corrector.GetName()).SetGrid()
         self.draw_and_append(self.corrector.get_correction_plot())
         
-        canvases.next(self.corrector.GetName() + '_validation').SetGrid()
-        self.draw_and_append(self.corrector.get_validation_plot())
+        canvases.next(self.corrector.GetName() + '_adiff').SetGrid()
+        self.draw_and_append(self.corrector.get_absolute_difference_plot())
+        
+        canvases.next(self.corrector.GetName() + '_rdiff').SetGrid()
+        self.draw_and_append(self.corrector.get_relative_difference_plot())
+        
+        plot = self.corrector.get_validation_plot()
+        cname = self.corrector.GetName() + '_validation'
+        canvases.next(cname).SetGrid()
+        self.draw_and_append(plot)
+        ## Also y-axis log-scale
+        canvases.next(cname + '_logy').SetGrid()
+        canvases.canvases[-1].SetLogy()
+        plot.Draw()
     ## End of QQExtractor.make_plots(..)
     
     #__________________________________________________________________________
@@ -91,7 +110,7 @@ class QQExtractor:
         graph = self.corrector.get_interpolation_graph()
         out_file = ROOT.TFile.Open(file_name, "update")
         graph.Write()
-        #out_file.Write()
+        out_file.Write()
         out_file.Close()      
     ## End of QQExtractor.write_to_file(..)
     
@@ -123,7 +142,7 @@ class DataSource:
                 variable = ROOT.RooRealVar(cfg.name, expr)
             cuts = [cuts]
             if max_entries > 0:
-                cuts.append('Entry$ < %d' % max_entries)
+                cuts.append('Entry$ < %d/2' % max_entries)
             dataset = datasetly.get(tree=tree, variable=variable, cuts=cuts)
             variable = dataset.get().first()
             variable.SetTitle(cfg.title)
@@ -153,7 +172,7 @@ def main(varnames = 'r9b sieieb setab'.split()[:1],
          raw_name = 's12-zllm50-v7n',
          target_name = 'r12a-pho-j22-v1',
          option = 'skim10k',
-         max_entries = 1000):
+         max_entries = 50000):
     '''
     Main entry point of execution.
     '''
@@ -192,7 +211,7 @@ def save_and_cleanup(outdir = 'plots'):
     else:
         ## TODO: remove outdir
         pass
-    canvases.make_plots(['png'], outdir)
+    canvases.make_plots(['png', 'root'], outdir)
     canvases.make_pdf_from_eps(outdir)
     ## Store corrections
     for extractor in extractors:
