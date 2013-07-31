@@ -45,8 +45,8 @@
                       size_t minBinContent = 10, size_t maxBinContent = 100);
     DataDrivenBinning(std::vector<double> const & data,
                       size_t minBinContent = 10, size_t maxBinContent = 100);
-    // DataDrivenBinning(RooAbsReal& x, RooDataSet const& data,
-    //                  size_t minBinContent = 10, size_t maxBinContent = 100);
+    DataDrivenBinning(RooDataSet& data,
+                      size_t minBinContent = 10, size_t maxBinContent = 100);
     virtual ~DataDrivenBinning();
 
     std::vector<double> const & binBoundaries();
