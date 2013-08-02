@@ -5,7 +5,7 @@
 
 #include "FWLite/Tools/interface/DataDrivenBinning.h"
 #include "FWLite/Tools/interface/DummyRootClass.h"
-// #include "FWLite/Tools/interface/GraphInterpolationFunctor.h"
+#include "FWLite/Tools/interface/GraphInterpolationFunctor.h"
 #include "FWLite/Tools/interface/ModalInterval.h"
 #include "FWLite/Tools/interface/RooChi2Calculator.h"
 #include "FWLite/Tools/interface/RooRelativisticBreitWigner.h"
@@ -25,7 +25,7 @@
 
 #pragma link C++ class DataDrivenBinning;
 #pragma link C++ class DummyRootClass;
-// #pragma link C++ class GraphInterpolationFunctor;
+#pragma link C++ class GraphInterpolationFunctor;
 #pragma link C++ class ModalInterval;
 #pragma link C++ class RooChi2Calculator;
 #pragma link C++ class RooRelativisticBreitWigner;
