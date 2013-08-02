@@ -4,23 +4,33 @@ Jan Veverka, MIT, jan.veverka@cern.ch
 29 July 2013
 '''
 
-## Defaults
-varnames = 'r9b sieieb setab'.split()[:1]
-raw_name = 's12-zllm50-v7n'
-target_name = 'r12a-pho-j22-v1'
-#option = 'skim10k'
-option = 'noskim'
-max_entries = 50000
-outdir = 'qqplots'
-batch_mode = 'yes'
-
 import ROOT
 
+batch_mode = 'yes'
 if batch_mode == 'yes':
     ROOT.gROOT.SetBatch(True)
 
 import FWLite.Tools.roofit as roo
 import FWLite.Hgg.photonid.qqextractor as extractor
+import FWLite.Hgg.photonid.variables as variables
+
+## Defaults
+varnames =  [
+    'r9b', #'r9e',
+    'setab', #'setae',
+    'sphib', 'sphie',
+    'sieieb', #'sieiee',
+    #'cieipb', #'cieipe',
+    #'s4ratiob', #'s4ratioe',
+    ][:]
+
+raw_name = 's12-zllm50-v7n'
+target_name = 'r12a-pho-j22-v1'
+#option = 'skim10k'
+option = 'noskim'
+max_entries = 100000
+outdir = '13-07-31/100k'
+
 
 ## Run!
 roo.silence()
