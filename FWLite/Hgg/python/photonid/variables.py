@@ -150,14 +150,14 @@ configs = [
            selections  = ecuts,
            qqbinning   = '50,0.45,0.95',),
            
-    Config(name        = 'idmva',
+    Config(name        = 'idmvab',
            title       = 'Barrel ID MVA',
            expressions = epair('idmva'),
            binning     = '100,-2,2',
            selections  = bcuts,
            qqbinning   = '50,-1,1',),
            
-    Config(name        = 'idmva',
+    Config(name        = 'idmvae',
            title       = 'Endcap ID MVA',
            expressions = epair('idmva'),
            binning     = '100,-2,2',
