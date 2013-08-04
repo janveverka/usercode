@@ -1,0 +1,8 @@
+<use name="FWCore/PythonParameterSet"/>
+<use name="PhysicsTools/FWLite"/>
+<use name="FWLite/Hgg" />
+<use name="FWLite/Tools" />
+<use name="root" />
+<environment>
+  <bin file="rescaling/applyCorrections.cc" name="hgg-apply-corrections"/>
+</environment>

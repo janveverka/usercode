@@ -1,0 +1,13 @@
+<use   name="FWCore/PluginManager"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/PythonParameterSet"/>
+<use   name="FWCore/Common"/>
+<use   name="CommonTools/Utils"/>
+<use   name="PhysicsTools/FWLite"/>
+<use   name="root"/>
+<use   name="rootcintex"/>
+<use   name="rootrflx"/>
+<use   name="boost"/>
+<export>
+  <lib   name="1"/>
+</export>
