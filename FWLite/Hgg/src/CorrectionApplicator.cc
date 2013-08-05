@@ -15,7 +15,7 @@ using mit::hgg::CorrectionApplicator;
  * Constructor
  */
 CorrectionApplicator::CorrectionApplicator(PSetPtr cfg) :
-  cfg_(cfg)
+  cfg_(new Configuration(cfg))
 {
   initialize();
 } // Constructor
@@ -27,6 +27,7 @@ CorrectionApplicator::CorrectionApplicator(PSetPtr cfg) :
  */
 CorrectionApplicator::~CorrectionApplicator()
 {
+  delete cfg_;
 } // Destructor
 
 
@@ -47,7 +48,7 @@ CorrectionApplicator::run()
 //_____________________________________________________________________________
 /**
  * Initializes data members.
- * Parses configuration, opens input file, retreives the input tree,
+ * Parses configuration, opens input file, retrieves the input tree,
  * defines variables to be read, sets their addresses, creates the 
  * output file and tree, initializes corrections.
  */

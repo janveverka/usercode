@@ -16,13 +16,25 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #define FWLite_Hgg_CorrectionApplicator_h
 
+
+
 //_____________________________________________________________________
 namespace mit {
   namespace hgg {
-    class CorrectionApplicator {
-    public:
+    namespace correction_applicator {
+      /// Forward declarations
+      class Configuration;
+      // typedef boost::shared_ptr<Configuration> ConfigPtr;
       typedef edm::ParameterSet PSet;
       typedef boost::shared_ptr<PSet> PSetPtr;
+    } // namespace correction_applicator
+
+    using correction_applicator::Configuration;
+    using correction_applicator::PSetPtr;
+    
+    //_________________________________________________________________
+    class CorrectionApplicator {
+    public:
       CorrectionApplicator(PSetPtr);
       ~CorrectionApplicator();
       void run();
@@ -31,8 +43,19 @@ namespace mit {
       void beginRun();
       void loopOverEvents();
       void endRun();
-      PSetPtr cfg_;
-    }; // class CorrectionApplicator    
+      Configuration *cfg_;
+    }; // class CorrectionApplicator
+
+    //_______________________________________________________________
+    class correction_applicator::Configuration {
+    public:
+      Configuration(PSetPtr cfg) {source_ = cfg;}
+      ~Configuration() {}
+      PSetPtr getSource() {return source_;};
+    private:
+      PSetPtr source_;
+    }; // class correction_applicator::Configuration
+
   } // namespace hgg
 } // namespace mit
 
