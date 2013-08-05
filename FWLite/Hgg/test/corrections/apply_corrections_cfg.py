@@ -4,11 +4,47 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('HggCorrectionsApplication')
 
+photon_pair = lambda variable: return ('ph1.' + variable, 'ph2.' + variable)
+
+#______________________________________________________________________________
+def correction_pset(raw_variable, corrected_variable
+                    correction_graph_barrel, correction_graph_endcaps):
+    '''
+    Helps to more briefly define the correction configuration.
+    Returns the cms.PSet describing it given the four strings.
+    '''
+    return cms.PSet(
+        rawVariable            = cms.string(raw_variable),
+        correctedVariable      = cms.string(corrected_variable),
+        correctionGraphBarrel  = cms.string(correction_graph_barrel),
+        correctionGraphEndcaps = cms.string(correction_graph_endcaps),
+        )
+## End of correction_pset
+
+
+#______________________________________________________________________________
+def correction_pset_pair(raw_variable):
+    return (correction_pset('ph1.' + raw_variable,
+                            'ph1.' + raw_variable + '_corr',
+                            raw_variable + 'b_qq_2',
+                            raw_variable + 'e_qq_2'),
+            correction_pset('ph2.' + raw_variable,
+                            'ph2.' + raw_variable + '_corr',
+                            raw_variable + 'b_qq_2',
+                            raw_variable + 'e_qq_2'),)
+## End of correction_pset_pair
+
+
 #______________________________________________________________________________
 process.inputs = cms.PSet(
     fileNames = cms.vstring(),
     treeName = cms.string('hPhotonTree'),
     version = cms.string('031'),
+    variables = cms.vstring('mass/F',
+                            *photon_pair('pt/F'),
+                            *photon_pair('eta/F'),
+                            *photon_pair('r9/F'),
+                            *photon_pair('sigietaieta/F'),)
     # activeBranches = copy.deepcopy(activeBranchesMC),
     )
 
@@ -30,7 +66,15 @@ output_filename = os.path.join(
     'hgg-2013Final8TeV_ID_s12-zllm50-v7n_skim10k.root'
     )
 process.outputs = cms.PSet(
-    outputName = cms.string(output_filename)
+    fileName = cms.string(output_filename),
+    treeName = cms.string('hPhotonTree'),
+    variables = copy(process.inputs.variables),
+    corrections = cms.VPset(
+        correction_pset('ph1.sigietaieta', 'ph1.sigietaieta_corr', 
+                        'sieieb_qq_2', 'sieiee_qq_2'),
+        correction_pset('ph2.sigietaieta', 'ph2.sigietaieta_corr', 
+                        'sieieb_qq_2', 'sieiee_qq_2'),
+        *correction_pset_pair('r9'),
     )
     
 #______________________________________________________________________________

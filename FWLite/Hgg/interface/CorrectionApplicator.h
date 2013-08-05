@@ -27,6 +27,10 @@ namespace mit {
       ~CorrectionApplicator();
       void run();
     protected:
+      void initialize();
+      void beginRun();
+      void loopOverEvents();
+      void endRun();
       PSetPtr cfg_;
     }; // class CorrectionApplicator    
   } // namespace hgg
