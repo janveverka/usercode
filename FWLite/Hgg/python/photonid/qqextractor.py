@@ -173,7 +173,7 @@ def main(varnames = 'r9b sieieb setab'.split()[:1],
          target_name = 'r12a-pho-j22-v1',
          option = 'skim10k',
          max_entries = 50000,
-         rhow=0.8):
+         rho=0.8):
     '''
     Main entry point of execution.
     '''
@@ -188,7 +188,7 @@ def main(varnames = 'r9b sieieb setab'.split()[:1],
     for varname in varnames:
         print 'Q-Q Extractor: Processing', varname, '...'
         extractor = QQExtractor(varname, raw_name, target_name, option, 
-                                max_entries, rhow)
+                                max_entries, rho)
         extractors.append(extractor)
         extractor.make_plots()
         canvases.update()
