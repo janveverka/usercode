@@ -2,7 +2,9 @@
  * Definition of \class Stopwatch inherited from
  * TStopwatch to extend the functionality with conversion of the
  * time to human readable format.
- * 
+ *
+ * TODO: Add reporting on the event processing? (or in a new class)
+ *
  * Jan Veverka, MIT, jan.veverka@cern.ch
  * 05 August 2013.
  */
