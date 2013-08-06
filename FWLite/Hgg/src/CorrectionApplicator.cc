@@ -23,7 +23,8 @@ typedef cms::Exception Bad;
  */
 CorrectionApplicator::CorrectionApplicator(PSetPtr cfg) :
   process_(new Configuration(cfg)),
-  ichain_(new TChain("CorrectionApplicatorInputChain"))
+  ichain_(new TChain("CorrectionApplicatorInputChain")),
+  input_(cfg->getParameter<PSet>("inputs"))
 {
   initialize();
 } // Constructor
@@ -65,7 +66,8 @@ CorrectionApplicator::run()
 void
 CorrectionApplicator::loopOverEntries()
 {
-  Long64_t entriesToProcess = ichain_->GetEntries();
+  // Long64_t entriesToProcess = ichain_->GetEntries();
+  Long64_t entriesToProcess = input_.chain().GetEntries();
   Long64_t maxEntries = process_->maxEntries()->toProcess();
   
   if (maxEntries > 0 && maxEntries < entriesToProcess) {
@@ -73,7 +75,8 @@ CorrectionApplicator::loopOverEntries()
   }
   
   for (Long64_t ientry = 0; ientry < entriesToProcess; ++ientry) {
-    if (ichain_->LoadTree(ientry) < 0) break;
+    // if (ichain_->LoadTree(ientry) < 0) break;
+    if (input_.chain().LoadTree(ientry) < 0) break;
     reportEntry(ientry, entriesToProcess);
     processEntry();
   }

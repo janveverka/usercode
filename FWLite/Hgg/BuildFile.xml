@@ -4,6 +4,7 @@
 <use   name="FWCore/Common"/>
 <use   name="CommonTools/Utils"/>
 <use   name="PhysicsTools/FWLite"/>
+<use   name="FWLite/Tools"/>
 <use   name="root"/>
 <use   name="rootcintex"/>
 <use   name="rootrflx"/>

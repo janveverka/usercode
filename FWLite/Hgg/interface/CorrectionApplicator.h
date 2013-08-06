@@ -23,6 +23,7 @@
 #include <boost/shared_ptr.hpp>
 #include "TChain.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWLite/Tools/interface/FlatSource.h"
 
 
 
@@ -44,7 +45,8 @@ namespace mit {
     //__________________________________________________________________________
     class CorrectionApplicator {
     public:
-      typedef boost::shared_ptr<edm::ParameterSet> PSetPtr;
+      typedef edm::ParameterSet PSet;
+      typedef boost::shared_ptr<PSet> PSetPtr;
       typedef correction_applicator::Configuration Configuration;
       /// 1st-level decomposition
       CorrectionApplicator(PSetPtr);
@@ -65,8 +67,8 @@ namespace mit {
       void processEntry();
       /// Data members
       boost::shared_ptr<Configuration> process_;
-      /// the input chain
       boost::shared_ptr<TChain> ichain_;
+      fwlite::tools::FlatSource input_;
     }; // class CorrectionApplicator
 
 
