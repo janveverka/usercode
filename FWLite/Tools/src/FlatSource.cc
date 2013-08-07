@@ -5,7 +5,7 @@
  * \brief Implementation of the class
  *
  * \author Jan Veverka, MIT, jan.veverka@cern.ch
- * \date 6 August 2013
+ * \date 7 August 2013
  */
 
 #include <boost/algorithm/string.hpp>

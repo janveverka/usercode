@@ -1,6 +1,6 @@
 /**
  * \file  FWLite/Tools/interface/FlatSource.h
- * \class FlatSource definition
+ * \class fwlite::tools::FlatSource definition
  *
  * \brief Provides a chain of trees configurable from Python.
  *        Mandatory parameters:
@@ -10,7 +10,7 @@
  *            variables = cms.vstring('i/I', x/F', 'y/F')
  *
  * \author Jan Veverka, MIT, jan.veverka@cern.ch
- * \date 6 August 2013
+ * \date 7 August 2013
  */
 
 #ifndef FWLite_Tools_FlatSource_h
@@ -77,4 +77,4 @@ namespace fwlite {
   } // namespace tools
 } // namespace fwlite
 
-#endif // FWLite_Tools_FlatSource_h
+#endif // ifndef FWLite_Tools_FlatSource_h
