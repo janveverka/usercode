@@ -1,0 +1,12 @@
+<!--Boost.Test-->
+<bin name="test-fwlite-tools-boost" file="hello.cc">
+ <use name="boost"/>
+ <lib name="boost_unit_test_framework"/>
+</bin>
+
+<!--CppUnit -->
+<bin name="test-fwlite-tools-cppunit"
+     file="TestDriver.cc,HelloTest.cc">
+  <use name="FWLite/Tools"/>
+  <use name="cppunit"/>
+</bin>
