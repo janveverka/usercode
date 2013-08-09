@@ -1,12 +1,19 @@
-<!--Boost.Test-->
-<bin name="test-fwlite-tools-boost" file="hello.cc">
- <use name="boost"/>
- <lib name="boost_unit_test_framework"/>
+<!--CppUnit -->
+<bin name="test-fwlite-tools"
+     file="TestDriver.cc,ChainSourceTest.cc,FlatChainSourceTest.cc">
+  <use name="FWLite/Tools"/>
+  <use name="cppunit"/>
 </bin>
 
-<!--CppUnit -->
-<bin name="test-fwlite-tools-cppunit"
+<bin name="test-fwlite-tools-cppunit-hello"
      file="TestDriver.cc,HelloTest.cc">
   <use name="FWLite/Tools"/>
   <use name="cppunit"/>
 </bin>
+
+<!--Boost.Test-->
+<bin name="test-fwlite-tools-boost-hello" file="hello.cc">
+ <use name="boost"/>
+ <lib name="boost_unit_test_framework"/>
+</bin>
+
