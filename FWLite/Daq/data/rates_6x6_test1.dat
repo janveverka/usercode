@@ -1,0 +1,30 @@
+## Results of the first test from 12 August 2013
+## 
+## Colmuns:
+## 0 - item number
+## 1 - time
+## 2 - Inbound Cluster Throuput (Gb/s)
+## 3 - Outbound Cluster Throuput (Gb/s)
+## 4 - CPU usage (%)
+##
+## Merger times (hh:mm:ss)
+## Run  Started     Finished
+## 11   14:22:44    15:03:16
+## 12   14:22:37    15:02:42
+## 21   14:22:49    15:06:35
+## 22   14:22:58    15:07:05
+## 31   14:23:06    15:03:24
+## 32   14:23:15    15:03:55
+##
+## All running at 14:25
+##
+0   14:25   3.88    2.38    71
+1   14:30   3.56    1.21    73
+2   14:35   3.82    1.79    72
+3   14:40   3.78    3.02    73
+4   14:45   3.63    1.93    72
+5   14:50   3.26    2.84    70
+6   14:55   4.02    1.93    72
+7   15:00   3.90    1.33    72
+
+
