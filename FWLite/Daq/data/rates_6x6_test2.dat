@@ -1,0 +1,34 @@
+## rates_6x6_test2.dat - Results of the second Isilon test
+##
+## Data was read off the OneFS Storage Administration > Dashboard > Cluster
+## overview at https://10.176.81.92:8080 on the cms network
+##
+## Jan Veverka, MIT, jan.veverka@cern.ch
+## 12 August 2013, 16:37 -
+##
+## Hosts (x in srv-c2e41-19-0x) and merger times (hh:mm:ss)
+## Run   Maker   Merger  Started     Finished
+## 1121  1       2
+## 1122  1       2
+## 1231  2       3
+## 1232  2       3
+## 1311  3       1
+## 1312  3       1
+##
+## All running at 16:37:12
+## All finished at 17:24
+##
+## Colmuns:
+## 0 - entry
+## 1 - time
+## 2 - Inbound Cluster Throughput (Gb/s)
+## 3 - Outbound Cluster Throughput (Gb/s)
+## 4 - CPU usage (%)
+##
+2   16:50   4.27    1.50    70
+3   16:55   3.49    1.22    71
+4   17:00   3.20    1.71    70
+5   17:05   3.76    1.80    70
+6   17:10   4.49    1.88    70
+7   17:15   3.79    2.31    70
+
