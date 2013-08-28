@@ -3,7 +3,7 @@
  * \class fwlite::tools::FlatChainSource definition
  *
  * \brief Provides a chain of trees configurable from Python.
- *        Mandatory parameters:
+ *        Mandatory configuration parameters:
  *            treeName = cms.string('my_tree')
  *            fileNames = cms.vstring('file1', 'file2', ...)
  *            variables = cms.vstring('i/I', x/F', 'y/F', ...)
