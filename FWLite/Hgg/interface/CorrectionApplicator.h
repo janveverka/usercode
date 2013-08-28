@@ -23,7 +23,7 @@
 #include <boost/shared_ptr.hpp>
 #include "TChain.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWLite/Tools/interface/FlatSource.h"
+#include "FWLite/Tools/interface/FlatChainSource.h"
 
 
 
@@ -68,7 +68,7 @@ namespace mit {
       /// Data members
       boost::shared_ptr<Configuration> process_;
       boost::shared_ptr<TChain> ichain_;
-      fwlite::tools::FlatSource input_;
+      fwlite::tools::FlatChainSource input_;
     }; // class CorrectionApplicator
 
 
