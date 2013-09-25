@@ -1,4 +1,5 @@
 <use name="FWLite/Tools" />
 <environment>
   <bin file="skim.cc" name="skim"/>
+  <bin file="hello.cc" name="hello"/>
 </environment>
