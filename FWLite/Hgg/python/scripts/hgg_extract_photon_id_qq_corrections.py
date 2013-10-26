@@ -6,6 +6,7 @@ Jan Veverka, MIT, jan.veverka@cern.ch
 #batch_mode = 'yes'
 batch_mode = 'no'
 
+import socket
 import sys
 
 if batch_mode == 'yes':
@@ -28,14 +29,22 @@ varnames = [
 raw_name = 's12-zllm50-v7n'
 #target_name = 'r12a-pho-j22-v1'
 target_name = 'r12a-pho-j22-v1'
-## Use on MacBook
-option = 'skim10k'
-#option = 'noskim'
-max_entries = -1
+max_entries = 1000
 prescale = 1
 prescale_phase = 0
 rho = 0.9
 outdir = 'prescale_%dof%d' % (prescale_phase, prescale)
+
+## Choose the option automatically based on the hostname
+option_for_host = {
+    'Jan-Veverkas-MacBook-Pro.local': 'skim10k',
+    't3btch000.mit.edu'             : 'noskim',
+    }
+host = socket.gethostname()
+if 't3btch' in host:
+    host = 't3btch000.mit.edu'
+option = option_for_host[host]
+
 
 ## Run!
 roo.silence()
