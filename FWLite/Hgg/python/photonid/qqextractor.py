@@ -22,16 +22,13 @@ class QQExtractor:
     '''
     #__________________________________________________________________________
     def __init__(self, varname, raw_name, target_name, option='noskim',
-                 max_entries=-1, rho=0.7):
+                 max_entries=-1, prescale=1, prescale_phase=0, rho=0.7):
         #print 'DEBUG', self.__class__.__name__, '__init__' 
-        print 'DEBUG', self.__class__.__name__, 'get raw DataSource' 
-        self.raw    = DataSource(raw_name   , varname, option, max_entries)
-        print 'DEBUG', self.__class__.__name__, 'get target DataSource'         
-        self.target = DataSource(target_name, varname, option, max_entries)
-        print 'DEBUG', self.__class__.__name__, 'get the corrector'         
-        self.corrector = PhotonIdCorrector(self.raw.data, self.target.data, 
-                                           rho)
-        print 'DEBUG', self.__class__.__name__, 'postprocess_corrector'         
+        common_args = [varname, option, max_entries, prescale, prescale_phase]
+        self.raw    = DataSource(raw_name   , *common_args)
+        self.target = DataSource(target_name, *common_args)
+        self.corrector = PhotonIdCorrector(self.raw.data, 
+                                           self.target.data, rho)
         self.postprocess_corrector()
     ## End of QQExtractor.__init__(..)
     
@@ -123,7 +120,8 @@ class DataSource:
     Holds data related to a given data source.
     '''
     #__________________________________________________________________________
-    def __init__(self, name, varname, option, max_entries):
+    def __init__(self, name, varname, option, max_entries, prescale,
+                 prescale_phase=0):
         print 'DEBUG', self.__class__.__name__, '__init__' 
         self.name = name
         self.varname = varname
@@ -142,7 +140,15 @@ class DataSource:
                 variable = ROOT.RooRealVar(cfg.name, expr, 0.)
             cuts = [cuts]
             if max_entries > 0:
-                cuts.append('Entry$ < %d/2' % max_entries)
+                if prescale > 1:
+                    raise RuntimeError, 'Illegal arguments'
+                ## Adds an appropriate prescale
+                all_entries = float(tree.GetEntries())
+                prescale = ROOT.TMath.CeilNint(all_entries / max_entries)
+            if prescale > 1:
+                cut = 'Entry$ %% %d == %d' % (prescale, prescale_phase)
+                print 'Prescaling:', cut
+                cuts.append(cut)
             dataset = datasetly.get(tree=tree, variable=variable, cuts=cuts)
             variable = dataset.get().first()
             variable.SetTitle(cfg.title)
@@ -173,6 +179,8 @@ def main(varnames = 'r9b sieieb setab'.split()[:1],
          target_name = 'r12a-pho-j22-v1',
          option = 'skim10k',
          max_entries = 50000,
+         prescale = 1,
+         prescale_phase = 0,
          rho=0.8):
     '''
     Main entry point of execution.
@@ -188,18 +196,10 @@ def main(varnames = 'r9b sieieb setab'.split()[:1],
     for varname in varnames:
         print 'Q-Q Extractor: Processing', varname, '...'
         extractor = QQExtractor(varname, raw_name, target_name, option, 
-                                max_entries, rho)
+                                max_entries, prescale, prescale_phase, rho)
         extractors.append(extractor)
         extractor.make_plots()
         canvases.update()
-        #corr = extractor.corrector
-        #corr.SetName(corr.GetName().replace(name, 'qq'))
-        #corr.write_to_file(out_file_name, False)
-        #graph = corr.get_interpolation_graph()
-        #out_file = ROOT.TFile.Open(out_file_name, "update")
-        #graph.Write()
-        #out_file.Write()
-        #out_file.Close()
 ## End of main()
 
 
