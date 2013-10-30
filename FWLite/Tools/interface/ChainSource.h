@@ -33,7 +33,7 @@ namespace fwlite {
       typedef edm::ParameterSet PSet;
       typedef chain_source::Configuration Configuration;
       ChainSource(PSet const& cfg);
-      ~ChainSource(){}
+      virtual ~ChainSource(){}
       TChain& chain() {return *chain_;}
       Configuration const& config() const {return *cfg_;}
     protected:

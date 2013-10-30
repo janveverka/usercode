@@ -95,8 +95,8 @@ int copyEvents(ArgParser & parser)
   if (parser.shortFlagPres('v')) 
     verbosity = 1;
   
-//   if (verbosity > 0)
-//       parser.printOptions("skim");
+  if (verbosity > 0)
+    parser.printOptions("skim");
   
   // Open the input file and get input tree
 //   TFile* InFile = new TFile(InFileName, "read");

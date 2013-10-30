@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Project: RooFit                                                           *
  * Package: RooFitModels                                                     *
- *    File: $Id: RooRhoKeysPdf.h,v 1.2 2012/05/20 12:15:37 veverka Exp $
+ *    File: $Id: RooRhoKeysPdf.h,v 1.3 2012/05/20 12:45:54 veverka Exp $
  * Authors:                                                                  *
  *   GR, Gerhard Raven,   UC San Diego,        raven@slac.stanford.edu       *
  *   DK, David Kirkby,    UC Irvine,         dkirkby@uci.edu                 *
@@ -63,7 +63,7 @@ private:
   
   enum { _nPoints = 1000 };
   // Double_t *_lookupTable[_nPoints+1];
-  Double_t *_lookupTable;
+  Double_t *_lookupTable; //[_nPoints+1]
   
   Double_t g(Double_t x,Double_t sigma) const;
 
@@ -73,7 +73,7 @@ private:
   // cached info on variable
   Char_t _varName[128];
   Double_t _lo, _hi, _binWidth;
-  Double_t *_rhoSnapshot;
+  Double_t *_rhoSnapshot; //!
   
   ClassDef(RooRhoKeysPdf,1) // One-dimensional non-parametric kernel estimation p.d.f.
 };

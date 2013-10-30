@@ -39,7 +39,7 @@ namespace fwlite {
       typedef std::vector<std::string> vstring;
       typedef flat_chain_source::Configuration Configuration;
       FlatChainSource(PSet const& cfg);
-      ~FlatChainSource() {}
+      virtual ~FlatChainSource() {}
       template <typename T> T& get(std::string const& name);
       Float_t& getF(std::string const& name){return floats_[name];}
       Int_t  & getI(std::string const& name){return ints_  [name];}
