@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 '''
 Command-line interface to the extractor of the photon ID Q-Q Corrections.
 Jan Veverka, MIT, jan.veverka@cern.ch
 29 July 2013
 '''
-#batch_mode = 'yes'
-batch_mode = 'no'
+batch_mode = 'yes'
+#batch_mode = 'no'
 
 import socket
 import sys
@@ -27,8 +28,12 @@ varnames = [
     ][:]
 
 raw_name = 's12-zllm50-v7n'
-#target_name = 'r12a-pho-j22-v1'
-target_name = 'r12a-pho-j22-v1'
+target_name = 'r12b-dph-j22-v1'
+#raw_names = ['s12-zllm50-v7n']
+#target_names = [
+    #'r12a-pho-j22-v1',
+    #'r12b-dph-j22-v1',
+    #]
 max_entries = 1000
 prescale = 1
 prescale_phase = 0
@@ -49,13 +54,13 @@ option = option_for_host[host]
 ## Run!
 roo.silence()
 extractor.main(
-	varnames=varnames, 
-	raw_name=raw_name, 
-	target_name=target_name, 
-	option=option, 
-	max_entries=max_entries, 
-	prescale=prescale,
-	prescale_phase=prescale_phase,
-	rho=rho)
+      varnames=varnames,
+      raw_name=raw_name,
+      target_name=target_name,
+      option=option,
+      max_entries=max_entries,
+      prescale=prescale,
+      prescale_phase=prescale_phase,
+      rho=rho)
 extractor.save_and_cleanup(outdir)
 

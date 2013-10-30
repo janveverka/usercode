@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Implements the QQExtractor class.
 Jan Veverka, MIT, jan.veverka@cern.ch
@@ -123,6 +124,10 @@ class DataSource:
     def __init__(self, name, varname, option, max_entries, prescale,
                  prescale_phase=0):
         print 'DEBUG', self.__class__.__name__, '__init__' 
+        if prescale > 1:
+            msg = ', '.join(['max_entries=%d' % max_entries,
+                              'prescale=%d' % prescale])
+            raise RuntimeError, 'Illegal arguments ' + msg
         self.name = name
         self.varname = varname
         #self.max_entries = max_entries
@@ -139,15 +144,13 @@ class DataSource:
             else:
                 variable = ROOT.RooRealVar(cfg.name, expr, 0.)
             cuts = [cuts]
-            if max_entries > 0:
-                if prescale > 1:
-                    raise RuntimeError, 'Illegal arguments'
                 ## Adds an appropriate prescale
+            if max_entries > 0:
                 all_entries = float(tree.GetEntries())
                 prescale = ROOT.TMath.CeilNint(all_entries / max_entries)
             if prescale > 1:
                 cut = 'Entry$ %% %d == %d' % (prescale, prescale_phase)
-                print 'Prescaling:', cut
+                print 'Prescaling %s: %s' % (name, cut)
                 cuts.append(cut)
             dataset = datasetly.get(tree=tree, variable=variable, cuts=cuts)
             variable = dataset.get().first()
