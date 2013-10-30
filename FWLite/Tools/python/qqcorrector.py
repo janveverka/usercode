@@ -125,6 +125,8 @@ class QQCorrector(ROOT.RooNumInverse):
     def import_into(self, workspace):
         workspace.Import(self.get_hist_func())
         workspace.Import(self.data)
+        workspace.Import(self.xpdf)
+        workspace.Import(self.ypdf)
     ## End of importInto(..)
     
     #___________________________________________________________________________
