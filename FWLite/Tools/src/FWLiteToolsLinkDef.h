@@ -37,14 +37,17 @@ namespace fwlite {
 
 #pragma link C++ class DataDrivenBinning;
 #pragma link C++ class DummyRootClass;
-#pragma link C++ class fwlite::DummyRootClassTemplate<Int_t>+;
-#pragma link C++ class fwlite::DummyRootClassTemplate<Float_t>+;
+#pragma link C++ class fwlite::DummyRootClassTemplate<Int_t>;
+#pragma link C++ class fwlite::DummyRootClassTemplate<Float_t>;
+#pragma link C++ class fwlite::DummyRootClassTemplate<Double_t>;
+
 /** The line below causes the following error (bug in ROOT?):
  *  Syntax error /home/veverka/cms/cmssw/031/CMSSW_5_3_10_patch1/src/FWLite/Tools/interface/DummyRootClassTemplate.h:16:
  *  Error: Symbol unsignedint fData is not defined in current scope  /home/veverka/cms/cmssw/031/CMSSW_5_3_10_patch1/src/FWLite/Tools/interface/DummyRootClassTemplate.h:23:
  *  Syntax error /home/veverka/cms/cmssw/031/CMSSW_5_3_10_patch1/src/FWLite/Tools/interface/DummyRootClassTemplate.tpp:19:
  */
-//#pragma link C++ class fwlite::DummyRootClassTemplate<UInt_t>+;
+//#pragma link C++ class fwlite::DummyRootClassTemplate<UInt_t>;
+
 #pragma link C++ class fwlite::DummyIntRootClass;
 #pragma link C++ class fwlite::DummyIntRootClass2;
 #pragma link C++ class fwlite::DummyIntRootClass3;
