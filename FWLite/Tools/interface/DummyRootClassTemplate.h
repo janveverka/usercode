@@ -9,21 +9,22 @@
   * Jan Veverka, MIT,  18 November 2013
   */
 
-template <class T>
-class DummyRootClassTemplate : public TObject {
+namespace fwlite {
+  template <class T>
+  class DummyRootClassTemplate : public TObject {
   public:
-    DummyRootClassTemplate(T const & iData);
+    DummyRootClassTemplate(T iData);
     virtual ~DummyRootClassTemplate();
 
     /// Print info about this class.
-    void print();
-    
+    void printData();
+
   private:
     T fData;
 
     /// Make this a ROOT class.
     /// Use 1 as the 2nd arg to store class in a ROOT file.
     ClassDef(DummyRootClassTemplate,0)
-};  /// DummyRootClassTemplate
-
+  };  /// DummyRootClassTemplate
+} /// fwlite
 #endif // FWLite_Tools_DummyRootClassTemplate_h

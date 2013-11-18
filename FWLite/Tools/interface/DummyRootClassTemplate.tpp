@@ -1,33 +1,39 @@
+#ifndef FWLite_Tools_DummyRootClassTemplate_tpp
+#define FWLite_Tools_DummyRootClassTemplate_tpp
+
 #include "FWLite/Tools/interface/DummyRootClassTemplate.h"
 /**
   * Implementation of \class DummyRootClassTemplate
   * Jan Veverka, MIT, 18 November 2008
   */
 
-#include <iostream>
+#include <iostream>       // std::cout and std::endl
+#include <typeinfo>       // operator typeid
 
 /// Make this a ROOT class
-templateClassImp(DummyRootClassTemplate)
+templateClassImp(fwlite::DummyRootClassTemplate)
 
 
 ///----------------------------------------------------------------------------
 template <class T>
-DummyRootClassTemplate<T>::DummyRootClassTemplate(T const & iData) :
+fwlite::DummyRootClassTemplate<T>::DummyRootClassTemplate(T iData) :
   fData(iData)
 {}
 
 
 ///----------------------------------------------------------------------------
 template <class T>
-DummyRootClassTemplate<T>::~DummyRootClassTemplate()
+fwlite::DummyRootClassTemplate<T>::~DummyRootClassTemplate()
 {}
 
 
 ///----------------------------------------------------------------------------
 template <class T>
 void
-DummyRootClassTemplate<T>::print()
+fwlite::DummyRootClassTemplate<T>::printData()
 {
-  std::cout << "DummyRootClassTemplate<T>::print(): data: "
-            << fData << std::endl;
+  std::cout << "fwlite::DummyRootClassTemplate<" << typeid(T).name()
+            << ">::printData(): data: " << fData << std::endl;
 }
+
+#endif

@@ -10,11 +10,9 @@ Impoorts the custom ROOT class DummyRootClass in PyROOT.
 """
 
 import ROOT
-## The order of the following two lines matters!
 import FWLite.Tools
-# ROOT.gROOT.ProcessLine('#include "FWLite/Tools/interface/DummyRootClass.h"')
 
-DummyRootClassTemplate = ROOT.DummyRootClassTemplate
+DummyRootClassTemplate = ROOT.fwlite.DummyRootClassTemplate
 
 #______________________________________________________________________________
 def test():
