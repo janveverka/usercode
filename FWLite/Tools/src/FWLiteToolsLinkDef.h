@@ -1,10 +1,12 @@
 #ifndef FWLITE_TOOLS_LINKDEF_H
 #define FWLITE_TOOLS_LINKDEF_H
-//needed to get rid of pesky "deprecated conversion from string constant to char *" compilation error
+// needed to get rid of pesky "deprecated conversion from
+// string constant to char *" compilation error
 #pragma GCC diagnostic ignored "-Wwrite-strings" 
 
 #include "FWLite/Tools/interface/DataDrivenBinning.h"
 #include "FWLite/Tools/interface/DummyRootClass.h"
+#include "FWLite/Tools/interface/DummyRootClassTemplate.tpp"
 #include "FWLite/Tools/interface/Double32IOEmulator.h"
 #include "FWLite/Tools/interface/GraphInterpolationFunctor.h"
 #include "FWLite/Tools/interface/ModalInterval.h"
@@ -23,9 +25,13 @@
 //#pragma GCC diagnostic ignored "-Wformat"
 // #pragma GCC diagnostic warning "-Wwrite-strings"
 
-
 #pragma link C++ class DataDrivenBinning;
 #pragma link C++ class DummyRootClass;
+#pragma link C++ class DummyRootClassTemplate<Char_t>+;
+#pragma link C++ class DummyRootClassTemplate<UChar_t>+;
+#pragma link C++ class DummyRootClassTemplate<Int_t>+;
+#pragma link C++ class DummyRootClassTemplate<UInt_t>+;
+#pragma link C++ class DummyRootClassTemplate<Float_t>+;
 #pragma link C++ class Double32IOEmulator;
 #pragma link C++ class GraphInterpolationFunctor;
 #pragma link C++ class ModalInterval;
