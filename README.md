@@ -29,6 +29,8 @@ See also [5].  The file with the cvs2git options is stored at [6].
 - [2] http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/JanVeverka
 - [3] http://cvs.web.cern.ch/cvs/cgi-bin/viewcvs.cgi/UserCode/JanVeverka/
 - [4] https://github.com/mhagger/cvs2svn/commit/b0ae0c98b0d5bf4b42425799814a9712d66c0073
+   - b0ae0c98b0d5bf4b42425799814a9712d66c0073
+   - mhagger@b0ae0c98b0d5bf4b42425799814a9712d66c0073
    - mhagger/cvs2svn@b0ae0c98b0d5bf4b42425799814a9712d66c0073
 - [5] http://cms-sw.github.io/cmssw/usercode-faq.html#how_do_i_migrate_to_github
 - [6] https://github.com/janveverka/usercode/cvs2git-usercode.options
