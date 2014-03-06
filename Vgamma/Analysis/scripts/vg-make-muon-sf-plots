@@ -1,7 +1,0 @@
-#!/bin/bash
-## Produces plots of muon data/efficiency scale factors in 
-## the current location in the pdf format.
-## USAGE: vg-make-muon-sf-plots
-PYTHON_SCRIPT=$CMSSW_BASE/src/Vgamma/Analysis/python/plotting/muonsf.py
-python -i $PYTHON_SCRIPT
-
